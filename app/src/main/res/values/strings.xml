@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Noti Sender</string>
+    <string name="title_activity_settings">Noti Sender</string>
+
+    <string name="account">account</string>
+    <string name="Login">Log in to Google</string>
+    <string name="Logout">Log out to Google</string>
+    <string name="UID_default">Not logined into Google</string>
+
+    <string name="reception">reception</string>
+    <string name="receptionSwitch">reception on/off</string>
+
+    <string name="send">send</string>
+    <string name="sendSwitch">send on/off</string>
+    <string name="blacklist">Blacklist</string>
+    <string name="blacklist_des">Apps that will not send noti</string>
+
+    <string name="App_info">App info</string>
+    <string name="App_info_des">infos about this app</string>
+
+    <string name="gotogit">Go to git repo</string>
+</resources>

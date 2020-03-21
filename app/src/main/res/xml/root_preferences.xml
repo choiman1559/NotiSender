@@ -1,0 +1,36 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/account">
+    <Preference
+        android:key="Login"
+        android:title="@string/Login"
+        android:summary="@string/UID_default"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="reception">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="reception"
+            android:title="@string/receptionSwitch"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="send">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="send"
+            android:title="@string/sendSwitch" />
+        <Preference
+            android:key="blacklist"
+            android:title="@string/blacklist"
+            android:summary="@string/blacklist_des"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="others">
+        <Preference
+            android:key="AppInfo"
+            android:title="@string/App_info"
+            android:summary="@string/App_info_des" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

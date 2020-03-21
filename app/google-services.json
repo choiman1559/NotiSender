@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "799908929421",
+    "firebase_url": "https://notisender-41c1b.firebaseio.com",
+    "project_id": "notisender-41c1b",
+    "storage_bucket": "notisender-41c1b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799908929421:android:701fceed71f00ef42827c4",
+        "android_client_info": {
+          "package_name": "com.noti.sender"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799908929421-5lvk8e22mmh4i0j0gfgmad4kdnqdrini.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noti.sender",
+            "certificate_hash": "36475f49ce2dbccbb85930e38617856c78cf8653"
+          }
+        },
+        {
+          "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW8agOEJ1V_XPhTCQozFW9ogXbm336czg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
