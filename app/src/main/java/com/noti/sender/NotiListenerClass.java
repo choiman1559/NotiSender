@@ -7,6 +7,8 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -20,15 +22,31 @@ import java.util.Map;
 import java.util.Objects;
 
 public class NotiListenerClass extends NotificationListenerService {
+
+    @Nullable
+    String toString(Boolean boo) { return BuildConfig.DEBUG ? (boo ? "true" : "false") : null ; }
+
+    void Log(String message) {
+        if(BuildConfig.DEBUG) Log.d("debug",message);
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        if (NotiListenerClass.this.getSharedPreferences("SettingActivity", MODE_PRIVATE).getBoolean("send", true) &&
-                !getSharedPreferences("SettingActivity",MODE_PRIVATE).getString("UID","").equals("")) {
+
+        Log("onNotificationPosted");
+        Log(getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service",""));
+        Log("uid : " + getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID",""));
+        Log("if : " + toString(getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","").equals("")));
+
+        if (NotiListenerClass.this.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("send") &&
+                !getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","").equals("") &&
+                getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) ) {
+
             Notification notification = sbn.getNotification();
             Bundle extra = notification.extras;
 
-            String TOPIC = "/topics/" + getSharedPreferences("SettingActivity", MODE_PRIVATE).getString("UID", "");
+            String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "");
             String TITLE = extra.getString(Notification.EXTRA_TITLE);
             String TEXT = Objects.requireNonNull(extra.getCharSequence(Notification.EXTRA_TEXT)).toString();
             String Package = "" + sbn.getPackageName();
@@ -45,6 +63,7 @@ public class NotiListenerClass extends NotificationListenerService {
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage());
             }
+            Log(notificationHead.toString());
             sendNotification(notificationHead);
         }
     }

@@ -14,22 +14,27 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="reception">
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="reception"
-            android:title="@string/receptionSwitch" />
-    </PreferenceCategory>
+    <PreferenceCategory app:title="service">
 
-    <PreferenceCategory app:title="send">
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="false"
-            android:key="send"
-            android:title="@string/sendSwitch" />
+            android:enabled="false"
+            android:key="serviceToggle"
+            android:title="service on/off" />
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/services"
+            android:entryValues="@array/services"
+            android:key="service"
+            android:title="Select service"
+            android:summary="Now : reception"/>
+
         <Preference
             android:key="blacklist"
-            android:summary="@string/blacklist_des"
-            android:title="@string/blacklist" />
+            android:summary="select apps that you won't send notification"
+            android:title="Edit blacklist" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="others">

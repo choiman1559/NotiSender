@@ -1,7 +1,6 @@
 package com.noti.sender;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
@@ -14,18 +13,19 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        SharedPreferences prefs = getSharedPreferences("SettingActivity",MODE_PRIVATE);
 
-        if (prefs.getBoolean("reception", true) && !prefs.getString("UID","").equals(""))
-            sendNotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"),remoteMessage.getData().get("package"));
+        if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("reception")
+                && getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
+                !getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
+            sendNotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"), remoteMessage.getData().get("package"));
     }
 
-    private void sendNotification(String title, String content,String Package) {
+    private void sendNotification(String title, String content, String Package) {
         Notify.create(FirebaseMessageService.this)
                 .setTitle(title)
                 .setContent(content)
                 .circleLargeIcon()
-                .setAction(new Intent(FirebaseMessageService.this,MessageSendClass.class).putExtra("package",Package))
+                .setAction(new Intent(FirebaseMessageService.this, MessageSendClass.class).putExtra("package", Package))
                 .setImportance(Notify.NotificationImportance.MAX)
                 .enableVibration(true)
                 .setAutoCancel(true)
@@ -35,7 +35,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        if(!getSharedPreferences("SettingActivity", MODE_PRIVATE).getString("UID", "").equals(""))
-            FirebaseMessaging.getInstance().subscribeToTopic(getSharedPreferences("SettingActivity", MODE_PRIVATE).getString("UID", ""));
+        if (!getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
+            FirebaseMessaging.getInstance().subscribeToTopic(getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", ""));
     }
 }

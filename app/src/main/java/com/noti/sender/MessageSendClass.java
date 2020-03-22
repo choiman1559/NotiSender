@@ -21,7 +21,7 @@ public class MessageSendClass extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String TOPIC = "/topics/" + getSharedPreferences("SettingActivity",MODE_PRIVATE).getString("UID","") + "_receiver";
+        String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","") + "_receiver";
         String Package = getIntent().getStringExtra("package");
 
         JSONObject notificationHead = new JSONObject();

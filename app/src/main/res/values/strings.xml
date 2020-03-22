@@ -9,13 +9,7 @@
     <string name="Logout">Log out to Google</string>
     <string name="UID_default">Not logined</string>
 
-    <string name="reception">reception</string>
-    <string name="receptionSwitch">reception on/off</string>
-
-    <string name="send">send</string>
-    <string name="sendSwitch">send on/off</string>
-    <string name="blacklist">Blacklist</string>
-    <string name="blacklist_des">Apps that will not send noti</string>
+    <string name="serviceToggle">Service on/off</string>
 
     <string name="App_info">App info</string>
     <string name="App_info_des">infos about this app</string>

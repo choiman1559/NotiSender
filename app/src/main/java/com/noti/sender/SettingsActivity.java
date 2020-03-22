@@ -30,6 +30,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Objects;
 import java.util.Set;
@@ -119,9 +120,6 @@ public class SettingsActivity extends AppCompatActivity {
             Preference login = findPreference("Login");
             Preference uid = findPreference("UID");
 
-            Preference rece = findPreference("reception");
-            Preference send = findPreference("send");
-
             if (!prefs.getString("UID", "").equals("")) {
                 assert login != null;
                 assert uid != null;
@@ -129,26 +127,35 @@ public class SettingsActivity extends AppCompatActivity {
                 uid.setSummary("UID : " + prefs.getString("UID", ""));
                 login.setSummary("Logined");
                 login.setTitle(R.string.Logout);
+                findPreference("serviceToggle").setEnabled(true);
             } else {
-                assert rece != null;
-                assert send != null;
-
-                rece.setEnabled(false);
-                send.setEnabled(false);
-
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putBoolean("reception", false);
-                edit.putBoolean("send", false);
-                edit.apply();
+                findPreference("serviceToggle").setEnabled(false);
             }
+            findPreference("service").setSummary("Now : " +  mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service",""));
         }
 
         @Override
         public boolean onPreferenceTreeClick(Preference preference) {
-            if (preference.getKey().equals("AppInfo"))
-                startActivity(new Intent(mcontext, AppinfoActiity.class));
+                if (preference.getKey().equals("AppInfo"))
+                    startActivity(new Intent(mcontext, AppinfoActiity.class));
+                if (preference.getKey().equals("blacklist")) ;
+
             if (preference.getKey().equals("Login")) accountTask();
-            if (preference.getKey().equals("blacklist")) ;
+
+            if(preference.getKey().equals("service")) {
+                if(mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service","").equals("send")) {
+                    if(!mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
+                        FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "") + "_receive");
+                }
+
+                if(mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service","").equals("reception")) {
+                    if(!mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
+                        FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", ""));
+                }
+                preference.setSummary("Now : " +  mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service",""));
+            }
+
+            //Toast.makeText(mcontext,"need internet to use this app",Toast.LENGTH_SHORT).show();
             return super.onPreferenceTreeClick(preference);
         }
 
@@ -162,8 +169,7 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences.Editor edit = prefs.edit();
 
                 edit.putString("UID", "");
-                edit.putBoolean("reception", false);
-                edit.putBoolean("send", false);
+                findPreference("serviceToggle").setEnabled(false);
 
                 edit.apply();
                 recreate();
@@ -188,9 +194,9 @@ public class SettingsActivity extends AppCompatActivity {
             mAuth.signInWithCredential(credential)
                     .addOnCompleteListener(mcontext, task -> {
                         if (!task.isSuccessful()) {
-                            Toast.makeText(mcontext, "인증 실패", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mcontext, "failed to login Google", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(mcontext, "구글 로그인 인증 성공", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mcontext, "Success to login Google", Toast.LENGTH_SHORT).show();
                             prefs.edit().putString("UID", mAuth.getUid()).apply();
                             recreate();
                         }
@@ -204,7 +210,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+            Toast.makeText(mcontext,"Faild to login",Toast.LENGTH_SHORT).show();
         }
     }
 }
