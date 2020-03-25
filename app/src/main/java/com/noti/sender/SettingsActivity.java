@@ -27,6 +27,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -92,6 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         Activity mcontext;
         private static final int RC_SIGN_IN = 100;
+        private static final int REQUEST_PACKAGE = 103;
         private FirebaseAuth mAuth;
         private GoogleApiClient mGoogleApiClient;
         SharedPreferences prefs;
@@ -138,7 +140,8 @@ public class SettingsActivity extends AppCompatActivity {
         public boolean onPreferenceTreeClick(Preference preference) {
                 if (preference.getKey().equals("AppInfo"))
                     startActivity(new Intent(mcontext, AppinfoActiity.class));
-                if (preference.getKey().equals("blacklist")) ;
+                if (preference.getKey().equals("blacklist"))
+                    startActivity(new Intent(mcontext, BlacklistActivity.class));
 
             if (preference.getKey().equals("Login")) accountTask();
 
@@ -155,14 +158,16 @@ public class SettingsActivity extends AppCompatActivity {
                 preference.setSummary("Now : " +  mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service",""));
             }
 
-            //Toast.makeText(mcontext,"need internet to use this app",Toast.LENGTH_SHORT).show();
             return super.onPreferenceTreeClick(preference);
         }
 
         private void accountTask() {
             if (prefs.getString("UID", "").equals("")) {
-                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                if(AppStatus.getInstance(mcontext).isOnline()) {
+                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                    startActivityForResult(signInIntent, RC_SIGN_IN);
+                } else Snackbar.make(mcontext.findViewById(R.id.setting_activity), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
             } else {
                 mAuth.signOut();
                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);

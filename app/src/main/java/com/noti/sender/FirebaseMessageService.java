@@ -1,6 +1,7 @@
 package com.noti.sender;
 
 import android.content.Intent;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -16,8 +17,24 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("reception")
                 && getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
-                !getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
-            sendNotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"), remoteMessage.getData().get("package"));
+                !getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("")) {
+
+            if(Build.VERSION.SDK_INT > 25) sendNotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"), remoteMessage.getData().get("package"), remoteMessage.getData().get("cid"));
+            else sendNotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"), remoteMessage.getData().get("package"));
+        }
+    }
+
+    private void sendNotification(String title, String content, String Package,String Cid) {
+        Notify.create(FirebaseMessageService.this)
+                .setTitle(title)
+                .setContent(content)
+                .circleLargeIcon()
+                .setChannelId("" + Cid)
+                .setAction(new Intent(FirebaseMessageService.this, MessageSendClass.class).putExtra("package", Package))
+                .setImportance(Notify.NotificationImportance.MAX)
+                .enableVibration(true)
+                .setAutoCancel(true)
+                .show();
     }
 
     private void sendNotification(String title, String content, String Package) {

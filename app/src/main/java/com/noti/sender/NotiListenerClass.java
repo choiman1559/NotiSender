@@ -1,6 +1,7 @@
 package com.noti.sender;
 
 import android.app.Notification;
+import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -9,9 +10,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
@@ -34,14 +32,24 @@ public class NotiListenerClass extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
 
-        Log("onNotificationPosted");
-        Log(getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service",""));
-        Log("uid : " + getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID",""));
-        Log("if : " + toString(getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","").equals("")));
+        if(BuildConfig.DEBUG) {
+            Log("                                      ");
+            Log("***onNotificationPosted debug info***");
+            Log("uid : " + getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", ""));
+            Log("package : " + sbn.getPackageName());
+            Log("service type : " + getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", ""));
+            Log("if uid is blank : " + toString(getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("")));
+            Log("if service Enabled : " + toString(getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false)));
+            Log("if include blacklist : " + toString(getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false)));
+            Log("**************************************");
+            Log("                                       ");
+        }
 
         if (NotiListenerClass.this.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("send") &&
                 !getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","").equals("") &&
-                getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) ) {
+                getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
+        !getSharedPreferences("Blacklist",MODE_PRIVATE).getBoolean(sbn.getPackageName(),false) &&
+        !sbn.getPackageName().equals(getPackageName())) {
 
             Notification notification = sbn.getNotification();
             Bundle extra = notification.extras;
@@ -57,6 +65,8 @@ public class NotiListenerClass extends NotificationListenerService {
                 notifcationBody.put("title", TITLE);
                 notifcationBody.put("message", TEXT);
                 notifcationBody.put("package", Package);
+                if(Build.VERSION.SDK_INT > 25)
+                    notifcationBody.put("cid", extra.getString(Notification.EXTRA_CHANNEL_ID));
 
                 notificationHead.put("to", TOPIC);
                 notificationHead.put("data", notifcationBody);
@@ -64,32 +74,24 @@ public class NotiListenerClass extends NotificationListenerService {
                 Log.e("Noti", "onCreate: " + e.getMessage());
             }
             Log(notificationHead.toString());
-            sendNotification(notificationHead);
+            sendNotification(notificationHead,sbn);
         }
     }
 
-    private void sendNotification(JSONObject notification) {
+    private void sendNotification(JSONObject notification,StatusBarNotification sbn) {
         final String FCM_API = "https://fcm.googleapis.com/fcm/send";
         final String serverKey = "key=" + getString(R.string.serverKey);
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API, notification,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.i(TAG, "onResponse: " + response.toString());
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(NotiListenerClass.this, "알람 전송 실패! 인터넷 환경을 확인해주세요!", Toast.LENGTH_LONG).show();
-                        Log.i(TAG, "onErrorResponse: Didn't work");
-                    }
+                response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + sbn.getPackageName()),
+                error -> {
+                    Toast.makeText(NotiListenerClass.this, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "onErrorResponse: Didn't work" + " ,package: " + sbn.getPackageName());
                 }) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 Map<String, String> params = new HashMap<>();
                 params.put("Authorization", serverKey);
                 params.put("Content-Type", contentType);
