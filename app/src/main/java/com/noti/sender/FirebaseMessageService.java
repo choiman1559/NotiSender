@@ -38,13 +38,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
     }
 
-    private Bitmap getJpegToPng(Bitmap bitmapPicture) {
-        ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-        bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
-        byte[] b = byteArrayBitmapStream.toByteArray();
-        return BitmapFactory.decodeByteArray(b,0,b.length);
-    }
-
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
 
