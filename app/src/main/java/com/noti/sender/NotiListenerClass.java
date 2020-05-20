@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -15,8 +16,6 @@ import android.service.notification.StatusBarNotification;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
-
-import androidx.annotation.RequiresApi;
 
 import com.android.volley.toolbox.JsonObjectRequest;
 
@@ -59,10 +58,24 @@ public class NotiListenerClass extends NotificationListenerService {
     private String getStringFromBitmap(Bitmap bitmapPicture) {
         String encodedImage;
         ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-        bitmapPicture.compress(Bitmap.CompressFormat.WEBP, 0, byteArrayBitmapStream);
+        bitmapPicture.compress(Bitmap.CompressFormat.PNG, 5, byteArrayBitmapStream);
         byte[] b = byteArrayBitmapStream.toByteArray();
         encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
         return encodedImage;
+    }
+
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
     }
 
     private Bitmap getBitmapFromDrawable(Drawable drawable) {
@@ -110,6 +123,8 @@ public class NotiListenerClass extends NotificationListenerService {
                 !sbn.getPackageName().equals(getPackageName())) {
 
             Bitmap ICON = Build.VERSION.SDK_INT > 22 ? getBitmapFromDrawable(sbn.getNotification().getSmallIcon().loadDrawable(NotiListenerClass.this)) : null;
+            if(ICON != null) ICON.setHasAlpha(true);
+            String ICONS = CompressStringUtil.compressString(getStringFromBitmap(getResizedBitmap(ICON,52,52)));
             String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "");
             String TITLE = extra.getString(Notification.EXTRA_TITLE);
             String TEXT = extra.getString(Notification.EXTRA_TEXT);
@@ -130,7 +145,7 @@ public class NotiListenerClass extends NotificationListenerService {
                 notifcationBody.put("message", TEXT != null ? TEXT : "notification arrived.");
                 notifcationBody.put("package", Package);
                 notifcationBody.put("appname", APPNAME);
-                notifcationBody.put("icon",Build.VERSION.SDK_INT > 22 ? getStringFromBitmap(ICON).length() < 2000 ? getStringFromBitmap(ICON) : "none" : "none");
+                notifcationBody.put("icon",Build.VERSION.SDK_INT > 22 ? ICONS : "none");
                 if (Build.VERSION.SDK_INT > 25)
                     notifcationBody.put("cid", extra.getString(Notification.EXTRA_CHANNEL_ID));
 

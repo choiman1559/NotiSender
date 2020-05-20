@@ -8,12 +8,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
-import android.view.WindowManager;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
@@ -21,6 +21,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -37,6 +38,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
     }
 
+    private Bitmap getJpegToPng(Bitmap bitmapPicture) {
+        ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+        bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
+        byte[] b = byteArrayBitmapStream.toByteArray();
+        return BitmapFactory.decodeByteArray(b,0,b.length);
+    }
+
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
 
@@ -45,8 +53,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 !getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("") && remoteMessage.getData().get("type").equals("send")) {
 
             Map<String, String> map = remoteMessage.getData();
-            Bitmap icon = StringToBitmap(map.get("icon"));
-            sendNotification(map.get("title"), map.get("message"), map.get("package"), map.get("appname"), Build.VERSION.SDK_INT > 22 && !"none".equals(map.get("icon")) ? icon : null);
+            Bitmap icon = StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
+            Bitmap iconw = Bitmap.createBitmap(icon.getWidth(),icon.getHeight(),icon.getConfig());
+            Canvas canvas = new Canvas(iconw);
+            canvas.drawColor(Color.WHITE);
+            canvas.drawBitmap(icon, 0, 0, null);
+
+            sendNotification(map.get("title"), map.get("message"), map.get("package"), map.get("appname"), Build.VERSION.SDK_INT > 22 && !"none".equals(map.get("icon")) ? iconw : null);
         }
 
         if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("send")
