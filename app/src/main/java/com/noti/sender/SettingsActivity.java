@@ -1,8 +1,13 @@
 package com.noti.sender;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +22,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -33,7 +39,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.util.Objects;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -89,13 +94,13 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat implements GoogleApiClient.OnConnectionFailedListener {
+    public static class SettingsFragment extends PreferenceFragmentCompat implements GoogleApiClient.OnConnectionFailedListener, Preference.OnPreferenceChangeListener {
 
         Activity mcontext;
         private static final int RC_SIGN_IN = 100;
-        private static final int REQUEST_PACKAGE = 103;
         private FirebaseAuth mAuth;
         private GoogleApiClient mGoogleApiClient;
+        private int UIDClickCount = 6;
         SharedPreferences prefs;
 
         SettingsFragment(Activity mcontext) {
@@ -133,41 +138,71 @@ public class SettingsActivity extends AppCompatActivity {
             } else {
                 findPreference("serviceToggle").setEnabled(false);
             }
-            findPreference("service").setSummary("Now : " +  mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service",""));
+            findPreference("service").setSummary("Now : " + mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "not selected"));
+            findPreference("debugInfo").setVisible(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getBoolean("debugInfoVisible", false));
+
+            findPreference("service").setOnPreferenceChangeListener((preference, newValue) -> {
+                preference.setSummary("Now : " + newValue.toString());
+                return true;
+            });
         }
 
         @Override
         public boolean onPreferenceTreeClick(Preference preference) {
-                if (preference.getKey().equals("AppInfo"))
-                    startActivity(new Intent(mcontext, AppinfoActiity.class));
-                if (preference.getKey().equals("blacklist"))
-                    startActivity(new Intent(mcontext, BlacklistActivity.class));
+            if (preference.getKey().equals("AppInfo"))
+                startActivity(new Intent(mcontext, AppinfoActiity.class));
+            if (preference.getKey().equals("blacklist"))
+                startActivity(new Intent(mcontext, BlacklistActivity.class));
 
             if (preference.getKey().equals("Login")) accountTask();
 
-            if(preference.getKey().equals("service")) {
-                if(mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service","").equals("send")) {
-                    if(!mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
-                        FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "") + "_receive");
-                }
-
-                if(mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service","").equals("reception")) {
-                    if(!mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
-                        FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", ""));
-                }
-                preference.setSummary("Now : " +  mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("service",""));
+            if (preference.getKey().equals("service") && !mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("")) {
+                FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", ""));
             }
 
+            if (preference.getKey().equals("UID")) {
+                if (mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getBoolean("debugInfoVisible", false))
+                    Toast.makeText(mcontext, "debugMode is already Enabled", Toast.LENGTH_SHORT).show();
+                else {
+                    UIDClickCount -= 1;
+                    if (UIDClickCount == 0) {
+                        Toast.makeText(mcontext, "debugMode Enabled", Toast.LENGTH_SHORT).show();
+                        mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).edit().putBoolean("debugInfoVisible", true).apply();
+                        recreate();
+                    } else
+                        Toast.makeText(mcontext, UIDClickCount + " clicks to Enable debugMode", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            if (preference.getKey().equals("debugInfo")) {
+                CheckBoxPreference cb = findPreference("debugInfo");
+                if (cb.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (mcontext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                            || mcontext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                            Toast.makeText(mcontext, "require storage permission!", Toast.LENGTH_SHORT).show();
+                            cb.setChecked(false);
+                        }
+                        requestPermissions(new String[]
+                                        {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                                2);
+                    } else cb.setChecked(true);
+                }
+            }
             return super.onPreferenceTreeClick(preference);
         }
 
         private void accountTask() {
             if (prefs.getString("UID", "").equals("")) {
-                if(AppStatus.getInstance(mcontext).isOnline()) {
+                ConnectivityManager cm = (ConnectivityManager) mcontext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+                if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
                     Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                     startActivityForResult(signInIntent, RC_SIGN_IN);
-                } else Snackbar.make(mcontext.findViewById(R.id.setting_activity), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
+                } else
+                    Snackbar.make(mcontext.findViewById(R.id.setting_activity), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
             } else {
                 mAuth.signOut();
                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
@@ -210,12 +245,15 @@ public class SettingsActivity extends AppCompatActivity {
 
         private void recreate() {
             startActivity(new Intent(mcontext, SettingsActivity.class));
-            Objects.requireNonNull(getActivity()).finish();
+            getActivity().finish();
         }
 
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Toast.makeText(mcontext,"Faild to login",Toast.LENGTH_SHORT).show();
+            Toast.makeText(mcontext, "Faild to login", Toast.LENGTH_SHORT).show();
         }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) { return true; }
     }
 }

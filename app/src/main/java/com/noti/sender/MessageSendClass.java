@@ -21,14 +21,14 @@ public class MessageSendClass extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","") + "_receiver";
+        String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","");
         String Package = getIntent().getStringExtra("package");
 
         JSONObject notificationHead = new JSONObject();
         JSONObject notifcationBody = new JSONObject();
         try {
-            notifcationBody.put("Package", Package);
-
+            notifcationBody.put("package", Package);
+            notifcationBody.put("type","response");
             notificationHead.put("to", TOPIC);
             notificationHead.put("data", notifcationBody);
         } catch (JSONException e) {
