@@ -22,4 +22,7 @@
     <string name="notify_channel_id">NotiSender</string>
     <string name="notify_channel_name">Noti Sender</string>
     <string name="notify_channel_description">Send notification to another device</string>
+
+    <string name="notiDetail_ok">Remote run</string>
+    <string name="notiDetail_cancel">Close</string>
 </resources>

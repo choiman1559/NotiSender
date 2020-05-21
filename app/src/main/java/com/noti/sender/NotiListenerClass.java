@@ -3,17 +3,14 @@ package com.noti.sender;
 import android.app.Notification;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,12 +19,15 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.net.NetworkInterface;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -46,22 +46,13 @@ public class NotiListenerClass extends NotificationListenerService {
                     if (!txt.exists()) txt.createNewFile();
                     RandomAccessFile raf = new RandomAccessFile(txt, "rw");
                     raf.seek(raf.length());
-                    raf.writeBytes(message + "\n");
+                    raf.writeBytes(new String(message.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + "\n");
                     raf.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
-    }
-
-    private String getStringFromBitmap(Bitmap bitmapPicture) {
-        String encodedImage;
-        ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-        bitmapPicture.compress(Bitmap.CompressFormat.PNG, 5, byteArrayBitmapStream);
-        byte[] b = byteArrayBitmapStream.toByteArray();
-        encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-        return encodedImage;
     }
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
@@ -88,6 +79,24 @@ public class NotiListenerClass extends NotificationListenerService {
             return bitmap;
         } catch (OutOfMemoryError ignored) { }
         return null;
+    }
+
+    static String getMACAddress() {
+        String interfaceName = "wlan0";
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                if (!intf.getName().equalsIgnoreCase(interfaceName)) continue;
+                byte[] mac = intf.getHardwareAddress();
+                if (mac==null) return "";
+                StringBuilder buf = new StringBuilder();
+                for (int idx=0; idx<mac.length; idx++)
+                    buf.append(String.format("%02X:", mac[idx]));
+                if (buf.length()>0) buf.deleteCharAt(buf.length()-1);
+                return buf.toString();
+            }
+        } catch (Exception ignored) { }
+        return "";
     }
 
     @Override
@@ -124,10 +133,13 @@ public class NotiListenerClass extends NotificationListenerService {
 
             Bitmap ICON = Build.VERSION.SDK_INT > 22 ? getBitmapFromDrawable(sbn.getNotification().getSmallIcon().loadDrawable(NotiListenerClass.this)) : null;
             if(ICON != null) ICON.setHasAlpha(true);
-            String ICONS = CompressStringUtil.compressString(getStringFromBitmap(getResizedBitmap(ICON,52,52)));
+            String DEVICE_NAME = Build.MANUFACTURER  + " " + Build.MODEL;
+            String DEVICE_ID = getMACAddress();
+            String ICONS = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON,52,52)));
             String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "");
             String TITLE = extra.getString(Notification.EXTRA_TITLE);
             String TEXT = extra.getString(Notification.EXTRA_TEXT);
+            String DATE =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
             String Package = "" + sbn.getPackageName();
             String APPNAME = null;
             try {
@@ -137,6 +149,7 @@ public class NotiListenerClass extends NotificationListenerService {
                 Log.d("Error", "Package not found : " + Package);
             }
 
+            Log.d("length", String.valueOf(ICONS.length()));
             JSONObject notificationHead = new JSONObject();
             JSONObject notifcationBody = new JSONObject();
             try {
@@ -145,12 +158,16 @@ public class NotiListenerClass extends NotificationListenerService {
                 notifcationBody.put("message", TEXT != null ? TEXT : "notification arrived.");
                 notifcationBody.put("package", Package);
                 notifcationBody.put("appname", APPNAME);
+                notifcationBody.put("device_name",DEVICE_NAME);
+                notifcationBody.put("device_id",DEVICE_ID);
+                notifcationBody.put("date",DATE);
                 notifcationBody.put("icon",Build.VERSION.SDK_INT > 22 ? ICONS : "none");
                 if (Build.VERSION.SDK_INT > 25)
                     notifcationBody.put("cid", extra.getString(Notification.EXTRA_CHANNEL_ID));
 
                 notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notifcationBody);
+                notificationHead.put("data",
+                        notifcationBody.toString().length() < 4000 ? notifcationBody : notifcationBody.put("icon","none"));
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage());
             }

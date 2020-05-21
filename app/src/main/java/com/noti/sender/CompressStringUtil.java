@@ -1,22 +1,26 @@
 package com.noti.sender;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-;import java.util.zip.DeflaterOutputStream;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-public class CompressStringUtil {
+class CompressStringUtil {
     private static final String charsetName = "UTF-8";
 
-    public synchronized static String compressString(String string) {
+    synchronized static String compressString(String string) {
         return byteToString(compress(string));
     }
 
-    public synchronized static String decompressString(String compressed) {
+    synchronized static String decompressString(String compressed) {
         return decompress(hexToByteArray(compressed));
     }
 
@@ -70,5 +74,24 @@ public class CompressStringUtil {
             bytes[(int) Math.floor(i / 2)] = value;
         }
         return bytes;
+    }
+
+    static Bitmap StringToBitmap(String encodedString) {
+        try {
+            byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+        } catch (Exception e) {
+            e.getMessage();
+            return null;
+        }
+    }
+
+    static String getStringFromBitmap(Bitmap bitmapPicture) {
+        String encodedImage;
+        ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+        bitmapPicture.compress(Bitmap.CompressFormat.PNG, 2, byteArrayBitmapStream);
+        byte[] b = byteArrayBitmapStream.toByteArray();
+        encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+        return encodedImage;
     }
 }

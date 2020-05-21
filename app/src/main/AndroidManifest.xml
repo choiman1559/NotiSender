@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
@@ -21,7 +22,8 @@
 
         <activity android:name=".BlacklistActivity" />
         <activity android:name=".AppinfoActiity" />
-        <activity android:name=".MessageSendClass" />
+        <activity android:name=".MessageSendClass"
+            android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings">
