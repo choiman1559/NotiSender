@@ -3,4 +3,10 @@
         <item>reception</item>
         <item>send</item>
     </string-array>
+
+    <string-array name="importance">
+        <item>High</item>
+        <item>Default</item>
+        <item>Low</item>
+    </string-array>
 </resources>

@@ -36,7 +36,7 @@ public class MessageSendClass extends Activity {
         setContentView(R.layout.activity_notidetail);
 
         Intent i = getIntent();
-        String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity",MODE_PRIVATE).getString("UID","");
+        String TOPIC = "/topics/" + getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("UID","");
         String Package = i.getStringExtra("package");
         Bitmap icon = i.getStringExtra("icon") != null ? CompressStringUtil.StringToBitmap(i.getStringExtra("icon")) : null;
 
@@ -56,6 +56,7 @@ public class MessageSendClass extends Activity {
         detail += "Posted Time : " + DATE + "\n";
 
         if(icon != null) ICON.setImageBitmap(icon);
+        else ICON.setImageResource(R.drawable.ic_broken_image);
         DETAIL.setText(detail);
 
         OK.setOnClickListener(v -> {

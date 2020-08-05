@@ -21,6 +21,7 @@
         android:theme="@style/Theme.AppCompat.Light">
 
         <activity android:name=".BlacklistActivity" />
+        <activity android:name=".DeviceListActivity"/>
         <activity android:name=".AppinfoActiity" />
         <activity android:name=".MessageSendClass"
             android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>

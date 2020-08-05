@@ -1,6 +1,7 @@
 package com.noti.sender;
 
 import android.app.Notification;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class NotiListenerClass extends NotificationListenerService {
 
@@ -77,8 +79,9 @@ public class NotiListenerClass extends NotificationListenerService {
             drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             drawable.draw(canvas);
             return bitmap;
-        } catch (OutOfMemoryError ignored) { }
-        return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     static String getMACAddress() {
@@ -90,8 +93,7 @@ public class NotiListenerClass extends NotificationListenerService {
                 byte[] mac = intf.getHardwareAddress();
                 if (mac==null) return "";
                 StringBuilder buf = new StringBuilder();
-                for (int idx=0; idx<mac.length; idx++)
-                    buf.append(String.format("%02X:", mac[idx]));
+                for (byte b : mac) buf.append(String.format("%02X:", b));
                 if (buf.length()>0) buf.deleteCharAt(buf.length()-1);
                 return buf.toString();
             }
@@ -111,10 +113,10 @@ public class NotiListenerClass extends NotificationListenerService {
             str += "\n";
             str += "***onNotificationPosted debug info***\n";
             str += "date : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime()) + "\n";
-            str += "uid : " + getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "") + "\n";
+            str += "uid : " + getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "") + "\n";
             str += "package : " + sbn.getPackageName() + "\n";
             str += "service type : " + getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "") + "\n";
-            str += "if uid is blank : " + toString(getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("")) + "\n";
+            str += "if uid is blank : " + toString(Objects.equals(getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""), "")) + "\n";
             str += "if service Enabled : " + toString(getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false)) + "\n";
             str += "if include blacklist : " + toString(getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false)) + "\n";
             str += "EXTRA_TITLE : " + extra.getString(Notification.EXTRA_TITLE) + "\n";
@@ -126,20 +128,24 @@ public class NotiListenerClass extends NotificationListenerService {
         }
 
         if (NotiListenerClass.this.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("send") &&
-                !getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("") &&
+                !getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("") &&
                 getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
                 !getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false) &&
                 !sbn.getPackageName().equals(getPackageName())) {
 
-            Bitmap ICON = Build.VERSION.SDK_INT > 22 ? getBitmapFromDrawable(sbn.getNotification().getSmallIcon().loadDrawable(NotiListenerClass.this)) : null;
-            if(ICON != null) ICON.setHasAlpha(true);
+            Bitmap ICON = Build.VERSION.SDK_INT > 22 ? getBitmapFromDrawable(sbn.getNotification().getSmallIcon().loadDrawable(NotiListenerClass.this)) : extra.getParcelable(Notification.EXTRA_SMALL_ICON);
+            String ICONS;
+            if(ICON != null) {
+                ICON.setHasAlpha(true);
+                ICONS = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON,52,52)));
+            } else ICONS = "none";
+
             String DEVICE_NAME = Build.MANUFACTURER  + " " + Build.MODEL;
             String DEVICE_ID = getMACAddress();
-            String ICONS = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON,52,52)));
-            String TOPIC = "/topics/" + getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "");
+            String TOPIC = "/topics/" + getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "");
             String TITLE = extra.getString(Notification.EXTRA_TITLE);
             String TEXT = extra.getString(Notification.EXTRA_TEXT);
-            String DATE =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+            String DATE =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(sbn.getPostTime());
             String Package = "" + sbn.getPackageName();
             String APPNAME = null;
             try {
@@ -161,7 +167,7 @@ public class NotiListenerClass extends NotificationListenerService {
                 notifcationBody.put("device_name",DEVICE_NAME);
                 notifcationBody.put("device_id",DEVICE_ID);
                 notifcationBody.put("date",DATE);
-                notifcationBody.put("icon",Build.VERSION.SDK_INT > 22 ? ICONS : "none");
+                notifcationBody.put("icon",ICONS);
                 if (Build.VERSION.SDK_INT > 25)
                     notifcationBody.put("cid", extra.getString(Notification.EXTRA_CHANNEL_ID));
 

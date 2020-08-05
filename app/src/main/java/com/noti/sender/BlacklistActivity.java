@@ -34,7 +34,6 @@ public class BlacklistActivity extends Activity {
         pm = getPackageManager();
         packageListView = findViewById(R.id.package_list);
         ThreadProxy.getInstance().execute(new Runnable() {
-
             private ShowPackageAdapter showPackageAdapter;
 
             @Override

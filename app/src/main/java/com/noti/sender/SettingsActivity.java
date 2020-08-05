@@ -39,6 +39,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -123,7 +124,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .build();
             mAuth = FirebaseAuth.getInstance();
 
-            prefs = mcontext.getPreferences(MODE_PRIVATE);
+            prefs = mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE);
             Preference login = findPreference("Login");
             Preference uid = findPreference("UID");
 
@@ -139,12 +140,26 @@ public class SettingsActivity extends AppCompatActivity {
                 findPreference("serviceToggle").setEnabled(false);
             }
             findPreference("service").setSummary("Now : " + mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "not selected"));
-            findPreference("debugInfo").setVisible(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getBoolean("debugInfoVisible", false));
+            findPreference("debugInfo").setVisible(mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("debugInfoVisible", false));
 
+            Boolean ifUIDBlank = getPreferenceManager().getSharedPreferences().getString("UID","").equals("");
+            if(getPreferenceManager().getSharedPreferences().getString("service","").equals("") || ifUIDBlank) findPreference("serviceToggle").setEnabled(false);
             findPreference("service").setOnPreferenceChangeListener((preference, newValue) -> {
+                findPreference("serviceToggle").setEnabled(!ifUIDBlank);
                 preference.setSummary("Now : " + newValue.toString());
                 return true;
             });
+
+            if(Build.VERSION.SDK_INT >= 26) {
+                findPreference("importance").setSummary("Now : " + getPreferenceManager().getSharedPreferences().getString("importance", ""));
+                findPreference("importance").setOnPreferenceChangeListener(((preference, newValue) -> {
+                    findPreference("importance").setSummary("Now : " + newValue);
+                    return true;
+                }));
+            } else {
+                findPreference("importance").setEnabled(false);
+                findPreference("importance").setSummary("Not for Android N or lower.");
+            }
         }
 
         @Override
@@ -156,18 +171,18 @@ public class SettingsActivity extends AppCompatActivity {
 
             if (preference.getKey().equals("Login")) accountTask();
 
-            if (preference.getKey().equals("service") && !mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("")) {
-                FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", ""));
+            if (preference.getKey().equals("service") && !mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("")) {
+                FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""));
             }
 
             if (preference.getKey().equals("UID")) {
-                if (mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).getBoolean("debugInfoVisible", false))
+                if (mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("debugInfoVisible", false))
                     Toast.makeText(mcontext, "debugMode is already Enabled", Toast.LENGTH_SHORT).show();
                 else {
                     UIDClickCount -= 1;
                     if (UIDClickCount == 0) {
                         Toast.makeText(mcontext, "debugMode Enabled", Toast.LENGTH_SHORT).show();
-                        mcontext.getSharedPreferences("SettingsActivity", MODE_PRIVATE).edit().putBoolean("debugInfoVisible", true).apply();
+                        mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).edit().putBoolean("debugInfoVisible", true).apply();
                         recreate();
                     } else
                         Toast.makeText(mcontext, UIDClickCount + " clicks to Enable debugMode", Toast.LENGTH_SHORT).show();

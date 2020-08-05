@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -30,11 +31,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-
         Map<String, String> map = remoteMessage.getData();
         if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("reception")
                 && getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
-                !getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("") && map.get("type").equals("send")) {
+                !getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("") && map.get("type").equals("send")) {
 
             Bitmap icon = null;
             Bitmap iconw = null;
@@ -45,12 +45,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 canvas.drawColor(Color.WHITE);
                 canvas.drawBitmap(icon, 0, 0, null);
             }
-            sendNotification(map.get("title"), map.get("message"), map.get("package"), map.get("appname"),map.get("device_name"),map.get("device_id"),map.get("date"),Build.VERSION.SDK_INT > 22 && icon != null ? iconw : null);
+            sendNotification(map.get("title"), map.get("message"), map.get("package"), map.get("appname"),map.get("device_name"),map.get("device_id"),map.get("date"),icon != null ? iconw : null);
         }
 
         if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("send")
                 && getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
-                !getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals("") && map.get("type").equals("reception")) {
+                !getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("") && map.get("type").equals("reception")) {
             if(map.get("send_device_name").equals(Build.MANUFACTURER  + " " + Build.MODEL) && map.get("send_device_id").equals(NotiListenerClass.getMACAddress())) {
                 new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
                 startNewActivity(map.get("package"));
@@ -91,7 +91,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             builder.setSmallIcon(R.drawable.ic_notification);
             CharSequence channelName = getString(R.string.notify_channel_name);
             String description = getString(R.string.notify_channel_description);
-            int importance = NotificationManager.IMPORTANCE_HIGH;
+            int importance = getImportance();
             NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, importance);
             channel.setDescription(description);
             assert notificationManager != null;
@@ -102,10 +102,25 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationManager.notify(1234, builder.build());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private int getImportance() {
+        String value = getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("importance","Default");
+        switch (value) {
+            case "Default":
+                return NotificationManager.IMPORTANCE_DEFAULT;
+            case "Low":
+                return NotificationManager.IMPORTANCE_LOW;
+            case "High":
+                return NotificationManager.IMPORTANCE_HIGH;
+            default:
+                return NotificationManager.IMPORTANCE_UNSPECIFIED;
+        }
+    }
+
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        if (!getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", "").equals(""))
-            FirebaseMessaging.getInstance().subscribeToTopic(getSharedPreferences("SettingsActivity", MODE_PRIVATE).getString("UID", ""));
+        if (!getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals(""))
+            FirebaseMessaging.getInstance().subscribeToTopic(getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""));
     }
 }

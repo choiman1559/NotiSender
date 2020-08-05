@@ -98,6 +98,9 @@
     <versions from="9.0.1" />
     <versions from="9.0.0" />
   </library>
+  <library  groupId="com.google.firebase" artifactId="firebase-messaging" recommended-version="20.1.2" >
+    <versions from="20.1.1" status="deprecated" description="Bug affecting app stability" url="https://firebase.google.com/support/release-notes/android#messaging_v20-1-1" />
+  </library>
   <library  groupId="com.google.dagger" artifactId="dagger-android" recommended-version="2.15" >
     <versions from="2.15" />
     <versions from="2.14.1" status="deprecated" description="Bug affecting SDK performance" url="https://github.com/google/dagger/releases/tag/2.15" />
@@ -140,4 +143,3 @@
     <versions from="20140825" status="insecure" version-literal="&quot;Android20140825&quot;, &quot;control.kochava.com&quot;" description="Moderate security vulnerability" />
   </library>
 </sdk_metadata>
-

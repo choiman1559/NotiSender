@@ -31,6 +31,14 @@
             android:title="Select service"
             android:summary="Now : reception"/>
 
+        <ListPreference
+            android:defaultValue="Default"
+            android:entries="@array/importance"
+            android:entryValues="@array/importance"
+            android:key="importance"
+            android:title="Notification Importance"
+            android:summary="Now : Default"/>
+
         <Preference
             android:key="blacklist"
             android:summary="select apps that you won't send notification"
