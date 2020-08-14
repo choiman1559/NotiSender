@@ -2,7 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/account">
+    <PreferenceCategory app:title="Account">
         <Preference
             android:key="Login"
             android:summary="@string/UID_default"
@@ -15,7 +15,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="service">
+    <PreferenceCategory app:title="General Settings">
 
         <SwitchPreference
             android:defaultValue="false"
@@ -31,23 +31,51 @@
             android:title="Select service"
             android:summary="Now : reception"/>
 
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Customizing">
+        <Preference
+            android:key="blacklist"
+            android:summary="select apps that you won't send notification"
+            android:title="Edit blacklist" />
         <ListPreference
             android:defaultValue="Default"
             android:entries="@array/importance"
             android:entryValues="@array/importance"
             android:key="importance"
-            android:title="Notification Importance"
-            android:summary="Now : Default"/>
-
+            android:summary="Now : Default"
+            android:title="Notification Importance" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="SendIcon"
+            android:summary="Send Noti's Icon with Notification together"
+            android:title="Send Icon" />
+        <ListPreference
+            android:defaultValue="52 x 52 (Default)"
+            android:entries="@array/resolution"
+            android:entryValues="@array/resolution"
+            android:key="IconRes"
+            android:summary="Now : 52 x 52 (Default)"
+            android:title="Resolution of icon" />
         <Preference
-            android:key="blacklist"
-            android:summary="select apps that you won't send notification"
-            android:title="Edit blacklist" />
-
+            android:key="IconWaring"
+            android:summary="If icon's file size is too big, icon may not sent or sending notification may fail."
+            android:icon="@drawable/ic_info_outline_black_24dp" />
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="others">
+        android:title="Others">
+
+        <Preference
+            android:key="testNoti"
+            android:summary="set service to 'send' before use this"
+            android:title="Test Notification" />
+
+        <Preference
+            android:key="forWear"
+            android:summary="Receive Notification in Wear OS"
+            android:title="Noti Sender For Wear OS" />
+
         <Preference
             android:key="AppInfo"
             android:summary="@string/App_info_des"
@@ -56,9 +84,9 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="debugInfo"
-            android:title="Show Debug Logs"
+            android:title="Show/Save Debug Logs"
+            android:summary="See Logcat or NotiSenderLog.txt to check log"
             android:visibility="gone"
             tools:visibility="gone" />
     </PreferenceCategory>
-
 </PreferenceScreen>

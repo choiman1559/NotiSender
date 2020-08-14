@@ -26,6 +26,7 @@ import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.application.isradeleon.notify.Notify;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -112,7 +113,6 @@ public class SettingsActivity extends AppCompatActivity {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
-            Log.d("debug", "init fregment");
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestEmail()
@@ -139,19 +139,21 @@ public class SettingsActivity extends AppCompatActivity {
             } else {
                 findPreference("serviceToggle").setEnabled(false);
             }
-            findPreference("service").setSummary("Now : " + mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "not selected"));
-            findPreference("debugInfo").setVisible(mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("debugInfoVisible", false));
+            findPreference("service").setSummary("Now : " + prefs.getString("service", "not selected"));
+            findPreference("debugInfo").setVisible(prefs.getBoolean("debugInfoVisible", false));
 
-            Boolean ifUIDBlank = getPreferenceManager().getSharedPreferences().getString("UID","").equals("");
-            if(getPreferenceManager().getSharedPreferences().getString("service","").equals("") || ifUIDBlank) findPreference("serviceToggle").setEnabled(false);
+            Boolean ifUIDBlank = prefs.getString("UID","").equals("");
+            if(prefs.equals("") || ifUIDBlank) findPreference("serviceToggle").setEnabled(false);
+            findPreference("testNoti").setEnabled(prefs.getString("service","").equals("send"));
             findPreference("service").setOnPreferenceChangeListener((preference, newValue) -> {
                 findPreference("serviceToggle").setEnabled(!ifUIDBlank);
                 preference.setSummary("Now : " + newValue.toString());
+                findPreference("testNoti").setEnabled(!prefs.getString("service","").equals("send"));
                 return true;
             });
 
             if(Build.VERSION.SDK_INT >= 26) {
-                findPreference("importance").setSummary("Now : " + getPreferenceManager().getSharedPreferences().getString("importance", ""));
+                findPreference("importance").setSummary("Now : " + prefs.getString("importance", ""));
                 findPreference("importance").setOnPreferenceChangeListener(((preference, newValue) -> {
                     findPreference("importance").setSummary("Now : " + newValue);
                     return true;
@@ -159,6 +161,25 @@ public class SettingsActivity extends AppCompatActivity {
             } else {
                 findPreference("importance").setEnabled(false);
                 findPreference("importance").setSummary("Not for Android N or lower.");
+            }
+
+            Preference IconEnable = findPreference("SendIcon");
+            findPreference("IconRes").setVisible(prefs.getBoolean("SendIcon",false));
+            findPreference("IconWaring").setVisible(prefs.getBoolean("SendIcon",false));
+            IconEnable.setOnPreferenceChangeListener((preference,newValue) -> {
+                findPreference("IconRes").setVisible(!prefs.getBoolean("SendIcon",false));
+                findPreference("IconWaring").setVisible(!prefs.getBoolean("SendIcon",false));
+                return true;
+            });
+            findPreference("IconRes").setOnPreferenceChangeListener(((preference, newValue) -> {
+                findPreference("IconRes").setSummary("Now : " + newValue);
+                return true;
+            }));
+
+            try {
+                mcontext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                findPreference("forWear").setVisible(false);
             }
         }
 
@@ -175,18 +196,21 @@ public class SettingsActivity extends AppCompatActivity {
                 FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""));
             }
 
-            if (preference.getKey().equals("UID")) {
-                if (mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("debugInfoVisible", false))
-                    Toast.makeText(mcontext, "debugMode is already Enabled", Toast.LENGTH_SHORT).show();
-                else {
-                    UIDClickCount -= 1;
-                    if (UIDClickCount == 0) {
-                        Toast.makeText(mcontext, "debugMode Enabled", Toast.LENGTH_SHORT).show();
-                        mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).edit().putBoolean("debugInfoVisible", true).apply();
-                        recreate();
-                    } else
-                        Toast.makeText(mcontext, UIDClickCount + " clicks to Enable debugMode", Toast.LENGTH_SHORT).show();
-                }
+            if(preference.getKey().equals("testNoti")) {
+                Notify.create(mcontext)
+                        .setTitle("test")
+                        .setContent("messageTest")
+                        .setLargeIcon(R.drawable.ic_launcher_foreground)
+                        .circleLargeIcon()
+                        .setSmallIcon(R.drawable.ic_broken_image)
+                        .setImportance(Notify.NotificationImportance.HIGH)
+                        .enableVibration(true)
+                        .setAutoCancel(true)
+                        .show();
+            }
+
+            if(preference.getKey().equals("forWear")){
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id=com.noti.sender.wear")));
             }
 
             if (preference.getKey().equals("debugInfo")) {
