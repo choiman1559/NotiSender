@@ -2,20 +2,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="Account">
+    <PreferenceCategory app:title="General Settings">
+
         <Preference
             android:key="Login"
             android:summary="@string/UID_default"
             android:title="@string/Login" />
-
-        <Preference
-            android:key="UID"
-            android:summary="UID : UNKNOWN"
-            android:icon="@drawable/ic_info_outline_black_24dp" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="General Settings">
 
         <SwitchPreference
             android:defaultValue="false"
@@ -76,17 +68,17 @@
             android:summary="Receive Notification in Wear OS"
             android:title="Noti Sender For Wear OS" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="debugInfo"
+            android:summary="See Logcat or NotiSenderLog.txt to check log"
+            android:title="Show/Save Debug Logs"
+            android:visibility="gone"
+            tools:visibility="gone" />
         <Preference
             android:key="AppInfo"
             android:summary="@string/App_info_des"
             android:title="@string/App_info" />
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="debugInfo"
-            android:title="Show/Save Debug Logs"
-            android:summary="See Logcat or NotiSenderLog.txt to check log"
-            android:visibility="gone"
-            tools:visibility="gone" />
     </PreferenceCategory>
 </PreferenceScreen>

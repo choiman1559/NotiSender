@@ -3,6 +3,7 @@ package com.noti.sender;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -12,27 +13,24 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.fragment.app.FragmentActivity;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.application.isradeleon.notify.Notify;
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
@@ -40,7 +38,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.util.Objects;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -96,17 +93,16 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat implements GoogleApiClient.OnConnectionFailedListener, Preference.OnPreferenceChangeListener {
+    public static class SettingsFragment extends PreferenceFragmentCompat  {
 
-        Activity mcontext;
+        Activity mContext;
         private static final int RC_SIGN_IN = 100;
         private FirebaseAuth mAuth;
-        private GoogleApiClient mGoogleApiClient;
-        private int UIDClickCount = 6;
+        private GoogleSignInClient mGoogleSignInClient;
         SharedPreferences prefs;
 
-        SettingsFragment(Activity mcontext) {
-            this.mcontext = mcontext;
+        SettingsFragment(Activity mContext) {
+            this.mContext = mContext;
         }
 
         @Override
@@ -118,29 +114,23 @@ public class SettingsActivity extends AppCompatActivity {
                     .requestEmail()
                     .build();
 
-            mGoogleApiClient = new GoogleApiClient.Builder(mcontext)
-                    .enableAutoManage((FragmentActivity) mcontext, this)
-                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                    .build();
+            mGoogleSignInClient = GoogleSignIn.getClient(mContext,gso);
             mAuth = FirebaseAuth.getInstance();
 
-            prefs = mcontext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE);
+            prefs = mContext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE);
             Preference login = findPreference("Login");
-            Preference uid = findPreference("UID");
 
             if (!prefs.getString("UID", "").equals("")) {
                 assert login != null;
-                assert uid != null;
 
-                uid.setSummary("UID : " + prefs.getString("UID", ""));
-                login.setSummary("Logined");
+                login.setSummary("Logined as " + prefs.getString("Email", ""));
                 login.setTitle(R.string.Logout);
                 findPreference("serviceToggle").setEnabled(true);
+                if(prefs.getString("Email","").equals("")) prefs.edit().putString("Email",mAuth.getCurrentUser().getEmail()).apply();
             } else {
                 findPreference("serviceToggle").setEnabled(false);
             }
             findPreference("service").setSummary("Now : " + prefs.getString("service", "not selected"));
-            findPreference("debugInfo").setVisible(prefs.getBoolean("debugInfoVisible", false));
 
             Boolean ifUIDBlank = prefs.getString("UID","").equals("");
             if(prefs.equals("") || ifUIDBlank) findPreference("serviceToggle").setEnabled(false);
@@ -177,7 +167,7 @@ public class SettingsActivity extends AppCompatActivity {
             }));
 
             try {
-                mcontext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
+                mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
             } catch (PackageManager.NameNotFoundException e) {
                 findPreference("forWear").setVisible(false);
             }
@@ -186,18 +176,18 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public boolean onPreferenceTreeClick(Preference preference) {
             if (preference.getKey().equals("AppInfo"))
-                startActivity(new Intent(mcontext, AppinfoActiity.class));
+                startActivity(new Intent(mContext, AppinfoActiity.class));
             if (preference.getKey().equals("blacklist"))
-                startActivity(new Intent(mcontext, BlacklistActivity.class));
+                startActivity(new Intent(mContext, BlacklistActivity.class));
 
             if (preference.getKey().equals("Login")) accountTask();
 
-            if (preference.getKey().equals("service") && !mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("")) {
-                FirebaseMessaging.getInstance().subscribeToTopic(mcontext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""));
+            if (preference.getKey().equals("service") && !mContext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("")) {
+                FirebaseMessaging.getInstance().subscribeToTopic(mContext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""));
             }
 
             if(preference.getKey().equals("testNoti")) {
-                Notify.create(mcontext)
+                Notify.create(mContext)
                         .setTitle("test")
                         .setContent("messageTest")
                         .setLargeIcon(R.drawable.ic_launcher_foreground)
@@ -216,10 +206,10 @@ public class SettingsActivity extends AppCompatActivity {
             if (preference.getKey().equals("debugInfo")) {
                 CheckBoxPreference cb = findPreference("debugInfo");
                 if (cb.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (mcontext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                            || mcontext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                            || mContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                            Toast.makeText(mcontext, "require storage permission!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "require storage permission!", Toast.LENGTH_SHORT).show();
                             cb.setChecked(false);
                         }
                         requestPermissions(new String[]
@@ -233,25 +223,32 @@ public class SettingsActivity extends AppCompatActivity {
 
         private void accountTask() {
             if (prefs.getString("UID", "").equals("")) {
-                ConnectivityManager cm = (ConnectivityManager) mcontext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
                 if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
-                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                    Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                     startActivityForResult(signInIntent, RC_SIGN_IN);
                 } else
-                    Snackbar.make(mcontext.findViewById(R.id.setting_activity), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(mContext.findViewById(R.id.setting_activity), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
             } else {
-                mAuth.signOut();
-                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-                SharedPreferences.Editor edit = prefs.edit();
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle("Confirm").setMessage("Are you sure to Log out?");
+                builder.setPositiveButton("Yes", (dialog, which) -> {
+                    mAuth.signOut();
+                    mGoogleSignInClient.signOut();
+                    SharedPreferences.Editor edit = prefs.edit();
 
-                edit.putString("UID", "");
-                findPreference("serviceToggle").setEnabled(false);
+                    edit.remove("UID");
+                    edit.remove("Email");
+                    findPreference("serviceToggle").setEnabled(false);
 
-                edit.apply();
-                recreate();
+                    edit.apply();
+                    recreate();
+                });
+               builder.setNegativeButton("No",((dialog, which) -> {}));
+               builder.show();
             }
         }
 
@@ -271,28 +268,21 @@ public class SettingsActivity extends AppCompatActivity {
         private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
             AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
             mAuth.signInWithCredential(credential)
-                    .addOnCompleteListener(mcontext, task -> {
+                    .addOnCompleteListener(mContext, task -> {
                         if (!task.isSuccessful()) {
-                            Toast.makeText(mcontext, "failed to login Google", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "failed to login Google", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(mcontext, "Success to login Google", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "Success to login Google", Toast.LENGTH_SHORT).show();
                             prefs.edit().putString("UID", mAuth.getUid()).apply();
+                            prefs.edit().putString("Email",mAuth.getCurrentUser().getEmail()).apply();
                             recreate();
                         }
                     });
         }
 
         private void recreate() {
-            startActivity(new Intent(mcontext, SettingsActivity.class));
+            startActivity(new Intent(mContext, SettingsActivity.class));
             getActivity().finish();
         }
-
-        @Override
-        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Toast.makeText(mcontext, "Faild to login", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) { return true; }
     }
 }

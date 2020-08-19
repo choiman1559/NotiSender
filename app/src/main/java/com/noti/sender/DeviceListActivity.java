@@ -10,11 +10,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.google.gson.JsonObject;
 
 import java.util.List;
 
+@VisibleForTesting
 public class DeviceListActivity extends Activity {
     private ListView deviceListView;
     private List<JsonObject> deviceShowInfo;
