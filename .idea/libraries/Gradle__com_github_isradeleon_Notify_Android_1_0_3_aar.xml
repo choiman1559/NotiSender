@@ -4,6 +4,9 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/014d751a2021a0529d1f7502d8d1aa80/jetified-Notify-Android-1.0.3/AndroidManifest.xml" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/014d751a2021a0529d1f7502d8d1aa80/jetified-Notify-Android-1.0.3/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/014d751a2021a0529d1f7502d8d1aa80/jetified-Notify-Android-1.0.3/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/dcd2f0d582159a35afcb65b80d7b3f13/jetified-Notify-Android-1.0.3/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/dcd2f0d582159a35afcb65b80d7b3f13/jetified-Notify-Android-1.0.3/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/dcd2f0d582159a35afcb65b80d7b3f13/jetified-Notify-Android-1.0.3/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

@@ -1,7 +1,6 @@
 package com.noti.sender;
 
 import android.app.Notification;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -14,11 +13,11 @@ import android.os.Environment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.JsonObjectRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,20 +40,19 @@ public class NotiListenerClass extends NotificationListenerService {
         return boo ? "true" : "false";
     }
 
-    void Log(String message,Boolean isSaveFile) {
+    void Log(String message, String time) {
         if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("debugInfo", false)) {
             Log.d("debug", message);
-            if(isSaveFile) {
-                File txt = new File(Environment.getExternalStorageDirectory(), "NotiSenderLog.txt");
-                try {
-                    if (!txt.exists()) txt.createNewFile();
-                    RandomAccessFile raf = new RandomAccessFile(txt, "rw");
-                    raf.seek(raf.length());
-                    raf.writeBytes(new String(message.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + "\n");
-                    raf.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            File txt = new File(Environment.getExternalStorageDirectory() + "/NotiSender_Logs", time + ".txt");
+            try {
+                if(!txt.getParentFile().exists()) txt.getParentFile().mkdirs();
+                if (!txt.exists()) txt.createNewFile();
+                RandomAccessFile raf = new RandomAccessFile(txt, "rw");
+                raf.seek(raf.length());
+                raf.writeBytes(new String(message.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + "\n");
+                raf.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -93,13 +91,14 @@ public class NotiListenerClass extends NotificationListenerService {
             for (NetworkInterface intf : interfaces) {
                 if (!intf.getName().equalsIgnoreCase(interfaceName)) continue;
                 byte[] mac = intf.getHardwareAddress();
-                if (mac==null) return "";
+                if (mac == null) return "";
                 StringBuilder buf = new StringBuilder();
                 for (byte b : mac) buf.append(String.format("%02X:", b));
-                if (buf.length()>0) buf.deleteCharAt(buf.length()-1);
+                if (buf.length() > 0) buf.deleteCharAt(buf.length() - 1);
                 return buf.toString();
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
         return "";
     }
 
@@ -110,12 +109,13 @@ public class NotiListenerClass extends NotificationListenerService {
         Notification notification = sbn.getNotification();
         Bundle extra = notification.extras;
         SharedPreferences prefs = getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE);
+        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
 
         if (BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false)) {
             String str = "";
             str += "\n";
             str += "***onNotificationPosted debug info***\n";
-            str += "date : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime()) + "\n";
+            str += "date : " + time + "\n";
             str += "uid : " + prefs.getString("UID", "") + "\n";
             str += "package : " + sbn.getPackageName() + "\n";
             str += "service type : " + prefs.getString("service", "") + "\n";
@@ -126,19 +126,34 @@ public class NotiListenerClass extends NotificationListenerService {
             str += "EXTRA_TEXT : " + extra.getString(Notification.EXTRA_TEXT) + "\n";
             str += "**************************************\n";
             str += "\n";
-
-            Log(str,true);
+            Log(str, time);
         }
 
         if (prefs.getString("service", "").equals("send") && !prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false) &&
                 !getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false)) {
 
+            try {
+                JSONArray array = new JSONArray();
+                JSONObject object = new JSONObject();
+                String originString = prefs.getString("sendLogs", "");
+
+                if (!originString.equals("")) array = new JSONArray(originString);
+                object.put("date", time);
+                object.put("package", sbn.getPackageName());
+                object.put("title", extra.getString(Notification.EXTRA_TITLE));
+                object.put("text", extra.getString(Notification.EXTRA_TEXT));
+                array.put(object);
+                prefs.edit().putString("sendLogs", array.toString()).apply();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             Bitmap ICON = Build.VERSION.SDK_INT > 22 ? getBitmapFromDrawable(sbn.getNotification().getSmallIcon().loadDrawable(NotiListenerClass.this)) : extra.getParcelable(Notification.EXTRA_SMALL_ICON);
             String ICONS;
-            if(ICON != null && prefs.getBoolean("SendIcon",false)) {
+            if (ICON != null && prefs.getBoolean("SendIcon", false)) {
                 ICON.setHasAlpha(true);
                 int res;
-                switch(prefs.getString("IconRes","")) {
+                switch (prefs.getString("IconRes", "")) {
                     case "68 x 68 (Not Recommend)":
                         res = 68;
                         break;
@@ -155,15 +170,15 @@ public class NotiListenerClass extends NotificationListenerService {
                         res = 0;
                         break;
                 }
-                ICONS = res != 0 ? CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON,res,res))) : "none";
+                ICONS = res != 0 ? CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))) : "none";
             } else ICONS = "none";
 
-            String DEVICE_NAME = Build.MANUFACTURER  + " " + Build.MODEL;
+            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getMACAddress();
             String TOPIC = "/topics/" + prefs.getString("UID", "");
             String TITLE = extra.getString(Notification.EXTRA_TITLE);
             String TEXT = extra.getString(Notification.EXTRA_TEXT);
-            String DATE =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(sbn.getPostTime());
+            String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(sbn.getPostTime());
             String Package = "" + sbn.getPackageName();
             String APPNAME = null;
             try {
@@ -177,25 +192,24 @@ public class NotiListenerClass extends NotificationListenerService {
             JSONObject notificationHead = new JSONObject();
             JSONObject notifcationBody = new JSONObject();
             try {
-                notifcationBody.put("type","send");
+                notifcationBody.put("type", "send");
                 notifcationBody.put("title", TITLE != null ? TITLE : "New notification");
                 notifcationBody.put("message", TEXT != null ? TEXT : "notification arrived.");
                 notifcationBody.put("package", Package);
                 notifcationBody.put("appname", APPNAME);
-                notifcationBody.put("device_name",DEVICE_NAME);
-                notifcationBody.put("device_id",DEVICE_ID);
-                notifcationBody.put("date",DATE);
-                notifcationBody.put("icon",ICONS);
+                notifcationBody.put("device_name", DEVICE_NAME);
+                notifcationBody.put("device_id", DEVICE_ID);
+                notifcationBody.put("date", DATE);
+                notifcationBody.put("icon", ICONS);
                 if (Build.VERSION.SDK_INT > 25)
                     notifcationBody.put("cid", extra.getString(Notification.EXTRA_CHANNEL_ID));
 
                 notificationHead.put("to", TOPIC);
                 notificationHead.put("data",
-                        notifcationBody.toString().length() < 4000 ? notifcationBody : notifcationBody.put("icon","none"));
+                        notifcationBody.toString().length() < 4000 ? notifcationBody : notifcationBody.put("icon", "none"));
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage());
             }
-            Log(notificationHead.toString(),false);
             sendNotification(notificationHead, sbn);
         }
     }

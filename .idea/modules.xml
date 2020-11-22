@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/NotiSender.iml" filepath="$PROJECT_DIR$/NotiSender.iml" group="NotiSender" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="NotiSender/app" />
+      <module fileurl="file://$PROJECT_DIR$/NotiSender.iml" filepath="$PROJECT_DIR$/NotiSender.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/NotiSender.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/NotiSender.app.iml" />
     </modules>
   </component>
 </project>

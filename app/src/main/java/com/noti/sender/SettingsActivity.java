@@ -3,7 +3,6 @@ package com.noti.sender;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -20,6 +19,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -93,13 +93,24 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat  {
+    public static class SettingsFragment extends PreferenceFragmentCompat {
 
         Activity mContext;
         private static final int RC_SIGN_IN = 100;
         private FirebaseAuth mAuth;
         private GoogleSignInClient mGoogleSignInClient;
         SharedPreferences prefs;
+
+        Preference Login;
+        Preference Service;
+        Preference ServiceToggle;
+        Preference TestRun;
+        Preference SetImportance;
+        Preference IconResolution;
+        Preference IconEnabled;
+        Preference IconWarning;
+        Preference DebugLogEnable;
+        Preference ForWearOS;
 
         SettingsFragment(Activity mContext) {
             this.mContext = mContext;
@@ -114,109 +125,129 @@ public class SettingsActivity extends AppCompatActivity {
                     .requestEmail()
                     .build();
 
-            mGoogleSignInClient = GoogleSignIn.getClient(mContext,gso);
+            mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
             mAuth = FirebaseAuth.getInstance();
+            prefs = mContext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE);
 
-            prefs = mContext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE);
-            Preference login = findPreference("Login");
+            Login = findPreference("Login");
+            TestRun = findPreference("testNoti");
+            Service = findPreference("service");
+            ServiceToggle = findPreference("serviceToggle");
+            SetImportance = findPreference("importance");
+            IconResolution = findPreference("IconRes");
+            IconEnabled = findPreference("SendIcon");
+            IconWarning = findPreference("IconWaring");
+            DebugLogEnable = findPreference("debugInfo");
+            ForWearOS = findPreference("forWear");
 
-            if (!prefs.getString("UID", "").equals("")) {
-                assert login != null;
+            boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
-                login.setSummary("Logined as " + prefs.getString("Email", ""));
-                login.setTitle(R.string.Logout);
-                findPreference("serviceToggle").setEnabled(true);
-                if(prefs.getString("Email","").equals("")) prefs.edit().putString("Email",mAuth.getCurrentUser().getEmail()).apply();
+            if (!ifUIDBlank) {
+                Login.setSummary("Logined as " + prefs.getString("Email", ""));
+                Login.setTitle(R.string.Logout);
+                ServiceToggle.setEnabled(true);
+                if (prefs.getString("Email", "").equals(""))
+                    prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
             } else {
-                findPreference("serviceToggle").setEnabled(false);
+                ServiceToggle.setEnabled(false);
             }
-            findPreference("service").setSummary("Now : " + prefs.getString("service", "not selected"));
 
-            Boolean ifUIDBlank = prefs.getString("UID","").equals("");
-            if(prefs.equals("") || ifUIDBlank) findPreference("serviceToggle").setEnabled(false);
-            findPreference("testNoti").setEnabled(prefs.getString("service","").equals("send"));
-            findPreference("service").setOnPreferenceChangeListener((preference, newValue) -> {
-                findPreference("serviceToggle").setEnabled(!ifUIDBlank);
+            Service.setSummary("Now : " + prefs.getString("service", "not selected"));
+            TestRun.setEnabled(prefs.getString("service", "").equals("send"));
+
+            Service.setOnPreferenceChangeListener((preference, newValue) -> {
+                ServiceToggle.setEnabled(!ifUIDBlank);
                 preference.setSummary("Now : " + newValue.toString());
-                findPreference("testNoti").setEnabled(!prefs.getString("service","").equals("send"));
+                TestRun.setEnabled(!prefs.getString("service", "").equals("send"));
                 return true;
             });
 
-            if(Build.VERSION.SDK_INT >= 26) {
-                findPreference("importance").setSummary("Now : " + prefs.getString("importance", ""));
-                findPreference("importance").setOnPreferenceChangeListener(((preference, newValue) -> {
-                    findPreference("importance").setSummary("Now : " + newValue);
+            if (Build.VERSION.SDK_INT >= 26) {
+                SetImportance.setSummary("Now : " + prefs.getString("importance", ""));
+                SetImportance.setOnPreferenceChangeListener(((preference, newValue) -> {
+                    SetImportance.setSummary("Now : " + newValue);
                     return true;
                 }));
             } else {
-                findPreference("importance").setEnabled(false);
-                findPreference("importance").setSummary("Not for Android N or lower.");
+                SetImportance.setEnabled(false);
+                SetImportance.setSummary("Not for Android N or lower.");
             }
 
-            Preference IconEnable = findPreference("SendIcon");
-            findPreference("IconRes").setVisible(prefs.getBoolean("SendIcon",false));
-            findPreference("IconWaring").setVisible(prefs.getBoolean("SendIcon",false));
-            IconEnable.setOnPreferenceChangeListener((preference,newValue) -> {
-                findPreference("IconRes").setVisible(!prefs.getBoolean("SendIcon",false));
-                findPreference("IconWaring").setVisible(!prefs.getBoolean("SendIcon",false));
+            boolean isSendIconEnabled = prefs.getBoolean("SendIcon", false);
+            IconResolution.setVisible(isSendIconEnabled);
+            IconWarning.setVisible(isSendIconEnabled);
+            IconEnabled.setOnPreferenceChangeListener((preference, newValue) -> {
+                IconResolution.setVisible((boolean) newValue);
+                IconWarning.setVisible((boolean) newValue);
                 return true;
             });
-            findPreference("IconRes").setOnPreferenceChangeListener(((preference, newValue) -> {
-                findPreference("IconRes").setSummary("Now : " + newValue);
+            IconResolution.setOnPreferenceChangeListener(((preference, newValue) -> {
+                IconResolution.setSummary("Now : " + newValue);
                 return true;
             }));
 
             try {
                 mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
             } catch (PackageManager.NameNotFoundException e) {
-                findPreference("forWear").setVisible(false);
+                ForWearOS.setVisible(false);
             }
         }
 
         @Override
         public boolean onPreferenceTreeClick(Preference preference) {
-            if (preference.getKey().equals("AppInfo"))
-                startActivity(new Intent(mContext, AppinfoActiity.class));
-            if (preference.getKey().equals("blacklist"))
-                startActivity(new Intent(mContext, BlacklistActivity.class));
+            switch (preference.getKey()) {
+                case "AppInfo":
+                    startActivity(new Intent(mContext, AppinfoActiity.class));
+                    break;
 
-            if (preference.getKey().equals("Login")) accountTask();
+                case "blacklist":
+                    startActivity(new Intent(mContext, BlacklistActivity.class));
+                    break;
 
-            if (preference.getKey().equals("service") && !mContext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("")) {
-                FirebaseMessaging.getInstance().subscribeToTopic(mContext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""));
-            }
+                case "Login":
+                    accountTask();
+                    break;
 
-            if(preference.getKey().equals("testNoti")) {
-                Notify.create(mContext)
-                        .setTitle("test")
-                        .setContent("messageTest")
-                        .setLargeIcon(R.drawable.ic_launcher_foreground)
-                        .circleLargeIcon()
-                        .setSmallIcon(R.drawable.ic_broken_image)
-                        .setImportance(Notify.NotificationImportance.HIGH)
-                        .enableVibration(true)
-                        .setAutoCancel(true)
-                        .show();
-            }
+                case "service":
+                    String UID = prefs.getString("UID", "");
+                    if (!UID.equals(""))
+                        FirebaseMessaging.getInstance().subscribeToTopic(UID);
+                    break;
 
-            if(preference.getKey().equals("forWear")){
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id=com.noti.sender.wear")));
-            }
+                case "testNoti":
+                    Notify.create(mContext)
+                            .setTitle("test")
+                            .setContent("messageTest")
+                            .setLargeIcon(R.drawable.ic_launcher_foreground)
+                            .circleLargeIcon()
+                            .setSmallIcon(R.drawable.ic_broken_image)
+                            .setImportance(Notify.NotificationImportance.HIGH)
+                            .enableVibration(true)
+                            .setAutoCancel(true)
+                            .show();
+                    break;
 
-            if (preference.getKey().equals("debugInfo")) {
-                CheckBoxPreference cb = findPreference("debugInfo");
-                if (cb.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                            || mContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                            Toast.makeText(mContext, "require storage permission!", Toast.LENGTH_SHORT).show();
-                            cb.setChecked(false);
-                        }
-                        requestPermissions(new String[]
-                                        {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                                2);
-                    } else cb.setChecked(true);
-                }
+                case "forWear":
+                    startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id=com.noti.sender.wear")));
+                    break;
+
+                case "debugInfo":
+                    CheckBoxPreference DebugMod = (CheckBoxPreference) DebugLogEnable;
+                    if (DebugMod.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                                || mContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                                Toast.makeText(mContext, "require storage permission!", Toast.LENGTH_SHORT).show();
+                                DebugMod.setChecked(false);
+                            }
+                            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
+                        } else DebugMod.setChecked(true);
+                    }
+                    break;
+
+                case "NotiLog":
+                    startActivity(new Intent(mContext,HistoryActivity.class));
+                    break;
             }
             return super.onPreferenceTreeClick(preference);
         }
@@ -236,32 +267,30 @@ public class SettingsActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 builder.setTitle("Confirm").setMessage("Are you sure to Log out?");
                 builder.setPositiveButton("Yes", (dialog, which) -> {
+                    ServiceToggle.setEnabled(false);
                     mAuth.signOut();
                     mGoogleSignInClient.signOut();
-                    SharedPreferences.Editor edit = prefs.edit();
 
+                    SharedPreferences.Editor edit = prefs.edit();
                     edit.remove("UID");
                     edit.remove("Email");
-                    findPreference("serviceToggle").setEnabled(false);
-
                     edit.apply();
                     recreate();
                 });
-               builder.setNegativeButton("No",((dialog, which) -> {}));
-               builder.show();
+                builder.setNegativeButton("No", ((dialog, which) -> {
+                }));
+                builder.show();
             }
         }
 
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             super.onActivityResult(requestCode, resultCode, data);
-            if (requestCode == RC_SIGN_IN) {
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-                if (result.isSuccess()) {
-                    GoogleSignInAccount account = result.getSignInAccount();
-                    assert account != null;
-                    firebaseAuthWithGoogle(account);
-                }
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (requestCode == RC_SIGN_IN && result != null && result.isSuccess()) {
+                GoogleSignInAccount account = result.getSignInAccount();
+                assert account != null;
+                firebaseAuthWithGoogle(account);
             }
         }
 
@@ -274,15 +303,18 @@ public class SettingsActivity extends AppCompatActivity {
                         } else {
                             Toast.makeText(mContext, "Success to login Google", Toast.LENGTH_SHORT).show();
                             prefs.edit().putString("UID", mAuth.getUid()).apply();
-                            prefs.edit().putString("Email",mAuth.getCurrentUser().getEmail()).apply();
+                            prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
                             recreate();
                         }
                     });
         }
 
         private void recreate() {
-            startActivity(new Intent(mContext, SettingsActivity.class));
-            getActivity().finish();
+            FragmentActivity activity = getActivity();
+            if(activity != null) activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.settings, new SettingsFragment(mContext))
+                    .commit();
         }
     }
 }

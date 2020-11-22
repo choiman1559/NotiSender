@@ -55,8 +55,8 @@ public class MessageSendClass extends Activity {
         detail += "Device : " + DEVICE_NAME + "\n";
         detail += "Posted Time : " + DATE + "\n";
 
+        ICON.setImageResource(R.drawable.ic_broken_image);
         if(icon != null) ICON.setImageBitmap(icon);
-        else ICON.setImageResource(R.drawable.ic_broken_image);
         DETAIL.setText(detail);
 
         OK.setOnClickListener(v -> {

@@ -41,7 +41,7 @@
             android:defaultValue="false"
             android:key="SendIcon"
             android:summary="Send Noti's Icon with Notification together"
-            android:title="Send Icon" />
+            android:title="Send Icon (Beta)" />
         <ListPreference
             android:defaultValue="52 x 52 (Default)"
             android:entries="@array/resolution"
@@ -59,6 +59,11 @@
         android:title="Others">
 
         <Preference
+            android:key="NotiLog"
+            android:summary="Previous notification history"
+            android:title="Notification History" />
+
+        <Preference
             android:key="testNoti"
             android:summary="set service to 'send' before use this"
             android:title="Test Notification" />
@@ -71,7 +76,7 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="debugInfo"
-            android:summary="See Logcat or NotiSenderLog.txt to check log"
+            android:summary="Check out Logcat or /NotiSender_Logs folder for Log"
             android:title="Show/Save Debug Logs"
             android:visibility="gone"
             tools:visibility="gone" />

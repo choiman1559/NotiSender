@@ -1,16 +1,19 @@
 package com.noti.sender;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
@@ -23,18 +26,32 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 public class FirebaseMessageService extends FirebaseMessagingService {
 
+    SharedPreferences prefs;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        prefs = getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE);
+    }
+
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Map<String, String> map = remoteMessage.getData();
-        if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("reception")
-                && getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
-                !getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("") && map.get("type").equals("send")) {
+        if (prefs.getString("service", "").equals("reception") && prefs.getBoolean("serviceToggle", false) &&
+                !prefs.getString("UID", "").equals("") && map.get("type").equals("send")) {
 
             Bitmap icon = null;
             Bitmap iconw = null;
@@ -45,12 +62,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 canvas.drawColor(Color.WHITE);
                 canvas.drawBitmap(icon, 0, 0, null);
             }
-            sendNotification(map.get("title"), map.get("message"), map.get("package"), map.get("appname"),map.get("device_name"),map.get("device_id"),map.get("date"),icon != null ? iconw : null);
+            sendNotification(map, icon != null ? iconw : null);
         }
 
-        if (getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("service", "").equals("send")
-                && getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getBoolean("serviceToggle", false) &&
-                !getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals("") && map.get("type").equals("reception")) {
+        if (prefs.getString("service", "").equals("send") && prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("") && map.get("type").equals("reception")) {
             if(map.get("send_device_name").equals(Build.MANUFACTURER  + " " + Build.MODEL) && map.get("send_device_id").equals(NotiListenerClass.getMACAddress())) {
                 new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
                 startNewActivity(map.get("package"));
@@ -69,11 +84,41 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
     }
 
-    public void sendNotification(String title, String content, String Package, String AppName,String Device_name,String Device_id,String Date, @Nullable Bitmap icon) {
+    private void sendNotification(Map<String, String> map, @Nullable Bitmap Icon) {
+        String title = map.get("title");
+        String content = map.get("message");
+        String Package = map.get("package");
+        String AppName =  map.get("appname");
+        String Device_name = map.get("device_name");
+        String Device_id = map.get("device_id");
+        String Date = map.get("date");
+
+        try {
+            JSONArray array = new JSONArray();
+            JSONObject object = new JSONObject();
+            String originString = prefs.getString("receivedLogs","");
+
+            if(!originString.equals("")) array = new JSONArray(originString);
+            object.put("date",Date);
+            object.put("package",Package);
+            object.put("title",title);
+            object.put("text",content);
+            object.put("device",Device_name);
+            array.put(object);
+            prefs.edit().putString("receivedLogs",array.toString()).apply();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent notificationIntent = new Intent(FirebaseMessageService.this, MessageSendClass.class)
-                .putExtra("package", Package).putExtra("icon",icon != null ? CompressStringUtil.getStringFromBitmap(icon) : null).putExtra("device_id",Device_id)
-                .putExtra("appname",AppName).putExtra("title",title).putExtra("device_name",Device_name).putExtra("date",Date);
+        Intent notificationIntent = new Intent(FirebaseMessageService.this, MessageSendClass.class);
+        notificationIntent.putExtra("package", Package);
+        notificationIntent.putExtra("icon",Icon != null ? CompressStringUtil.getStringFromBitmap(Icon) : null);
+        notificationIntent.putExtra("device_id",Device_id);
+        notificationIntent.putExtra("appname",AppName);
+        notificationIntent.putExtra("title",title);
+        notificationIntent.putExtra("device_name",Device_name);
+        notificationIntent.putExtra("date",Date);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -85,7 +130,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
-        if(icon != null) builder.setLargeIcon(icon);
+        if(Icon != null) builder.setLargeIcon(Icon);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setSmallIcon(R.drawable.ic_notification);
@@ -120,7 +165,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        if (!getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", "").equals(""))
-            FirebaseMessaging.getInstance().subscribeToTopic(getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE).getString("UID", ""));
+        if (!prefs.getString("UID", "").equals(""))
+            FirebaseMessaging.getInstance().subscribeToTopic(prefs.getString("UID", ""));
     }
 }

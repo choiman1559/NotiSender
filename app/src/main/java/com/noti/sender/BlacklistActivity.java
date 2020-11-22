@@ -12,6 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -71,12 +72,11 @@ public class BlacklistActivity extends Activity {
 
         @Override
         public Object getItem(int position) {
-            return null;
+            return packageShowInfo.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-
             return position;
         }
 
@@ -117,7 +117,7 @@ public class BlacklistActivity extends Activity {
             return convertView;
         }
 
-        class Holder {
+        private class Holder {
             TextView appName;
             ImageView icon;
             View baseView;
