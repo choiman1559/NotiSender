@@ -23,6 +23,7 @@
   <androidx.collection/>
   <androidx.compose/>
   <androidx.compose.animation/>
+  <androidx.compose.compiler/>
   <androidx.compose.foundation/>
   <androidx.compose.material/>
   <androidx.compose.runtime/>
@@ -35,6 +36,7 @@
   <androidx.cursoradapter/>
   <androidx.customview/>
   <androidx.databinding/>
+  <androidx.datastore/>
   <androidx.documentfile/>
   <androidx.drawerlayout/>
   <androidx.dynamicanimation/>
@@ -96,11 +98,17 @@
   <androidx.window/>
   <androidx.work/>
   <com.android/>
+  <com.android.application/>
+  <com.android.asset-pack/>
   <com.android.billingclient/>
   <com.android.databinding/>
+  <com.android.dynamic-feature/>
   <com.android.installreferrer/>
   <com.android.java.tools.build/>
+  <com.android.library/>
+  <com.android.lint/>
   <com.android.ndk.thirdparty/>
+  <com.android.reporting/>
   <com.android.support/>
   <com.android.support.constraint/>
   <com.android.support.test/>
@@ -109,6 +117,7 @@
   <com.android.support.test.janktesthelper/>
   <com.android.support.test.services/>
   <com.android.support.test.uiautomator/>
+  <com.android.test/>
   <com.android.tools/>
   <com.android.tools.analytics-library/>
   <com.android.tools.apkparser/>
@@ -122,6 +131,7 @@
   <com.android.tools.internal.build.test/>
   <com.android.tools.layoutlib/>
   <com.android.tools.lint/>
+  <com.android.tools.metalava/>
   <com.android.tools.pixelprobe/>
   <com.crashlytics.sdk.android/>
   <com.google.ads.afsn/>
@@ -129,9 +139,11 @@
   <com.google.android.ads/>
   <com.google.android.ads.consent/>
   <com.google.android.datatransport/>
+  <com.google.android.games/>
   <com.google.android.gms/>
   <com.google.android.instantapps/>
   <com.google.android.instantapps.thirdpartycompat/>
+  <com.google.android.libraries.car/>
   <com.google.android.libraries.maps/>
   <com.google.android.libraries.places/>
   <com.google.android.material/>
@@ -144,6 +156,8 @@
   <com.google.ar/>
   <com.google.ar.sceneform/>
   <com.google.ar.sceneform.ux/>
+  <com.google.devtools.ksp/>
+  <com.google.fhir/>
   <com.google.firebase/>
   <com.google.gms/>
   <com.google.mlkit/>

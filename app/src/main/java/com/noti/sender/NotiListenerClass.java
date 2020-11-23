@@ -148,7 +148,13 @@ public class NotiListenerClass extends NotificationListenerService {
                 e.printStackTrace();
             }
 
-            Bitmap ICON = Build.VERSION.SDK_INT > 22 ? getBitmapFromDrawable(sbn.getNotification().getSmallIcon().loadDrawable(NotiListenerClass.this)) : extra.getParcelable(Notification.EXTRA_SMALL_ICON);
+            Bitmap ICON = null;
+            try {
+                ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(sbn.getPackageName()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             String ICONS;
             if (ICON != null && prefs.getBoolean("SendIcon", false)) {
                 ICON.setHasAlpha(true);
@@ -200,8 +206,6 @@ public class NotiListenerClass extends NotificationListenerService {
                 notifcationBody.put("device_id", DEVICE_ID);
                 notifcationBody.put("date", DATE);
                 notifcationBody.put("icon", ICONS);
-                if (Build.VERSION.SDK_INT > 25)
-                    notifcationBody.put("cid", extra.getString(Notification.EXTRA_CHANNEL_ID));
 
                 int dataLimit = prefs.getInt("DataLimit", 4096);
                 notificationHead.put("to", TOPIC);

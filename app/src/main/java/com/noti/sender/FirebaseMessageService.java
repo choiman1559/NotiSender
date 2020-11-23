@@ -47,26 +47,27 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Map<String, String> map = remoteMessage.getData();
-        if (prefs.getString("service", "").equals("reception") && prefs.getBoolean("serviceToggle", false) &&
-                !prefs.getString("UID", "").equals("") && map.get("type").equals("send")) {
+        if(prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
 
-            Bitmap icon = null;
-            Bitmap iconw = null;
-            if(BuildConfig.DEBUG) Log.d("icon",map.get("icon"));
-            if(!map.get("icon").equals("none")) {
-                icon = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
-                iconw = Bitmap.createBitmap(icon.getWidth(),icon.getHeight(),icon.getConfig());
-                Canvas canvas = new Canvas(iconw);
-                canvas.drawColor(Color.WHITE);
-                canvas.drawBitmap(icon, 0, 0, null);
+            if (prefs.getString("service", "").equals("reception") && map.get("type").equals("send")) {
+                Bitmap icon = null;
+                Bitmap iconw = null;
+                if (BuildConfig.DEBUG) Log.d("icon", map.get("icon"));
+                if (!map.get("icon").equals("none")) {
+                    icon = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
+                    iconw = Bitmap.createBitmap(icon.getWidth(), icon.getHeight(), icon.getConfig());
+                    Canvas canvas = new Canvas(iconw);
+                    canvas.drawColor(Color.WHITE);
+                    canvas.drawBitmap(icon, 0, 0, null);
+                }
+                sendNotification(map, icon != null ? iconw : null);
             }
-            sendNotification(map, icon != null ? iconw : null);
-        }
 
-        if (prefs.getString("service", "").equals("send") && prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("") && map.get("type").equals("reception")) {
-            if(map.get("send_device_name").equals(Build.MANUFACTURER  + " " + Build.MODEL) && map.get("send_device_id").equals(NotiListenerClass.getMACAddress())) {
-                new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
-                startNewActivity(map.get("package"));
+            if (prefs.getString("service", "").equals("send") && map.get("type").equals("reception")) {
+                if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(NotiListenerClass.getMACAddress())) {
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+                    startNewActivity(map.get("package"));
+                }
             }
         }
     }
@@ -149,7 +150,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getImportance() {
-        String value = getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE).getString("importance","Default");
+        String value = prefs.getString("importance","Default");
         switch (value) {
             case "Default":
                 return NotificationManager.IMPORTANCE_DEFAULT;

@@ -24,7 +24,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
     Activity mContext;
     int mode;
 
-    HistoryViewAdapter(JSONArray list,int mode,Activity mContext) {
+    HistoryViewAdapter(JSONArray list, int mode, Activity mContext) {
         this.list = list;
         this.mode = mode;
         this.mContext = mContext;
@@ -41,24 +41,36 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull HistoryViewHolder holder, int position) {
+        String Package = "null";
+        String date = "1900.01.01 00:00:00";
+        String title = "Can't find Title";
+        String content = "Can't find content";
+        String device = "null";
+
         try {
             JSONObject obj = list.getJSONObject(position);
             PackageManager pm = mContext.getPackageManager();
 
-            String Package = obj.getString("package");
-            String date = obj.getString("date");
-            String title = obj.getString("title");
-            String content = obj.getString("text");
-            String device = mode == 1 ? obj.getString("device") : "";
+            Package = obj.getString("package");
+            date = obj.getString("date");
+            device = mode == 1 ? obj.getString("device") : "";
+            title = obj.getString("title");
+            content = obj.getString("text");
 
             holder.title.setSelected(true);
             holder.title.setText(title.equals("") ? "No Title" : title);
             holder.information.setSelected(true);
             holder.information.setText(String.format("%s (%s) %s", pm.getApplicationLabel(pm.getApplicationInfo(Package, PackageManager.GET_META_DATA)), Package, date));
 
+            final String finalPackage = Package;
+            final String finalDate = date;
+            final String finalTitle = title;
+            final String finalContent = content;
+            final String finalDevice = device;
+
             ThreadProxy.getInstance().execute(() -> {
                 try {
-                    Drawable icon = pm.getApplicationIcon(Package);
+                    Drawable icon = pm.getApplicationIcon(finalPackage);
                     mContext.runOnUiThread(() -> holder.icon.setImageDrawable(icon));
                 } catch (PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
@@ -69,12 +81,12 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             holder.setOnViewClickListener(() -> {
                 try {
                     String message = "";
-                    message += "App Name : " + pm.getApplicationLabel(pm.getApplicationInfo(Package, PackageManager.GET_META_DATA)) + "\n";
-                    message += "App Package : " + Package + "\n";
-                    message += "Time : " + date + "\n";
-                    message += "Title : " + title + "\n";
-                    message += "Content : " + content + "\n";
-                    if(mode == 1) message += "From : " + device + "\n";
+                    message += "App Name : " + pm.getApplicationLabel(pm.getApplicationInfo(finalPackage, PackageManager.GET_META_DATA)) + "\n";
+                    message += "App Package : " + finalPackage + "\n";
+                    message += "Time : " + finalDate + "\n";
+                    message += "Title : " + finalTitle + "\n";
+                    message += "Content : " + finalContent + "\n";
+                    if (mode == 1) message += "From : " + finalDevice + "\n";
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     builder.setTitle("Notification Details");
@@ -88,9 +100,31 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
 
         } catch (JSONException | PackageManager.NameNotFoundException e) {
             e.printStackTrace();
-            holder.title.setText("Error!");
+            holder.title.setText(String.format("Error : %s", Package));
             holder.information.setText(String.format("cause : %s", e.toString()));
             holder.icon.setImageDrawable(defaultDrawable);
+
+            final String finalPackage = Package;
+            final String finalDate = date;
+            final String finalTitle = title;
+            final String finalContent = content;
+            final String finalDevice = device;
+
+            holder.setOnViewClickListener(() -> {
+                String message = "";
+                message += "App Package : " + finalPackage + "\n";
+                message += "Time : " + finalDate + "\n";
+                message += "Title : " + finalTitle + "\n";
+                message += "Content : " + finalContent + "\n";
+                if (mode == 1) message += "From : " + finalDevice + "\n";
+                message += "Error Cause : " + e.toString() + "\n";
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle("Error Details");
+                builder.setMessage(message);
+                builder.setPositiveButton("Close", (dialog, which) -> { });
+                builder.show();
+            });
         }
     }
 
@@ -110,7 +144,9 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             icon = view.findViewById(R.id.icon);
             title = view.findViewById(R.id.title);
             information = view.findViewById(R.id.information);
-            view.setOnClickListener(v -> mListener.onViewClick());
+            view.setOnClickListener(v -> {
+                if(mListener!= null) mListener.onViewClick();
+            });
         }
 
         public interface OnViewClickListener {
@@ -118,7 +154,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         }
 
         public void setOnViewClickListener(OnViewClickListener listener) {
-            this.mListener = listener;
+            if(listener != null) this.mListener = listener;
         }
     }
 }

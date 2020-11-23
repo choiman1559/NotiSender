@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.InputType;
+import android.view.Gravity;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -262,17 +263,18 @@ public class SettingsActivity extends AppCompatActivity {
                     AlertDialog.Builder ad = new AlertDialog.Builder(mContext);
                     ad.setCancelable(false);
                     ad.setTitle("Input Data Limit");
+                    ad.setMessage("If data size is bigger than 4kb (4096 bytes), then data may not send.");
 
                     EditText et = new EditText(mContext);
                     et.setInputType(InputType.TYPE_CLASS_NUMBER);
                     et.setHint("Input Limit Value");
-
+                    et.setGravity(Gravity.CENTER);
                     et.setText(String.valueOf(prefs.getInt("DataLimit",4096)));
 
                     LinearLayout parentLayout = new LinearLayout(mContext);
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.MATCH_PARENT);
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
                     layoutParams.setMargins(30, 16, 30, 16);
                     et.setLayoutParams(layoutParams);
                     parentLayout.addView(et);
