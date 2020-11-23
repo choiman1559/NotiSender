@@ -41,7 +41,7 @@
             android:defaultValue="false"
             android:key="SendIcon"
             android:summary="Send Noti's Icon with Notification together"
-            android:title="Send Icon (Beta)" />
+            android:title="Send Icon (Unstable)" />
         <ListPreference
             android:defaultValue="52 x 52 (Default)"
             android:entries="@array/resolution"
@@ -53,6 +53,10 @@
             android:key="IconWaring"
             android:summary="If icon's file size is too big, icon may not sent or sending notification may fail."
             android:icon="@drawable/ic_info_outline_black_24dp" />
+        <Preference
+            android:key="DataLimit"
+            android:title="Data length limit (for debug)"
+            android:summary="Now : 4000 bytes" />
     </PreferenceCategory>
 
     <PreferenceCategory

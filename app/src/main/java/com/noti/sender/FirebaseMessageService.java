@@ -1,6 +1,5 @@
 package com.noti.sender;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,9 +12,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,9 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
+import java.util.Date;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -55,6 +52,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
             Bitmap icon = null;
             Bitmap iconw = null;
+            if(BuildConfig.DEBUG) Log.d("icon",map.get("icon"));
             if(!map.get("icon").equals("none")) {
                 icon = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
                 iconw = Bitmap.createBitmap(icon.getWidth(),icon.getHeight(),icon.getConfig());
@@ -128,6 +126,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setContentText(content)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
+                .setGroupSummary(true)
+                .setGroup(getPackageName() + ".NOTIFICATION")
                 .setAutoCancel(true);
 
         if(Icon != null) builder.setLargeIcon(Icon);
@@ -144,7 +144,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         } else builder.setSmallIcon(R.mipmap.ic_notification);
 
         assert notificationManager != null;
-        notificationManager.notify(1234, builder.build());
+        notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -156,7 +156,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             case "Low":
                 return NotificationManager.IMPORTANCE_LOW;
             case "High":
-                return NotificationManager.IMPORTANCE_HIGH;
+                return NotificationManager.IMPORTANCE_MAX;
             default:
                 return NotificationManager.IMPORTANCE_UNSPECIFIED;
         }

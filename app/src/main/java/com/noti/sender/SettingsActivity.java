@@ -12,6 +12,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.InputType;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -111,6 +114,7 @@ public class SettingsActivity extends AppCompatActivity {
         Preference IconWarning;
         Preference DebugLogEnable;
         Preference ForWearOS;
+        Preference DataLimit;
 
         SettingsFragment(Activity mContext) {
             this.mContext = mContext;
@@ -139,6 +143,7 @@ public class SettingsActivity extends AppCompatActivity {
             IconWarning = findPreference("IconWaring");
             DebugLogEnable = findPreference("debugInfo");
             ForWearOS = findPreference("forWear");
+            DataLimit = findPreference("DataLimit");
 
             boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
@@ -176,6 +181,7 @@ public class SettingsActivity extends AppCompatActivity {
             boolean isSendIconEnabled = prefs.getBoolean("SendIcon", false);
             IconResolution.setVisible(isSendIconEnabled);
             IconWarning.setVisible(isSendIconEnabled);
+            IconResolution.setSummary("Now : " + prefs.getString("IconRes","52 x 52 (Default)"));
             IconEnabled.setOnPreferenceChangeListener((preference, newValue) -> {
                 IconResolution.setVisible((boolean) newValue);
                 IconWarning.setVisible((boolean) newValue);
@@ -185,6 +191,9 @@ public class SettingsActivity extends AppCompatActivity {
                 IconResolution.setSummary("Now : " + newValue);
                 return true;
             }));
+
+            int dataLimit = prefs.getInt("DataLimit",4096);
+            DataLimit.setSummary("Now : " + dataLimit + " Bytes" + (dataLimit == 4096 ? " (Default)" : ""));
 
             try {
                 mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
@@ -247,6 +256,51 @@ public class SettingsActivity extends AppCompatActivity {
 
                 case "NotiLog":
                     startActivity(new Intent(mContext,HistoryActivity.class));
+                    break;
+
+                case "DataLimit":
+                    AlertDialog.Builder ad = new AlertDialog.Builder(mContext);
+                    ad.setCancelable(false);
+                    ad.setTitle("Input Data Limit");
+
+                    EditText et = new EditText(mContext);
+                    et.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    et.setHint("Input Limit Value");
+
+                    et.setText(String.valueOf(prefs.getInt("DataLimit",4096)));
+
+                    LinearLayout parentLayout = new LinearLayout(mContext);
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    et.setLayoutParams(layoutParams);
+                    parentLayout.addView(et);
+                    ad.setView(parentLayout);
+
+                    ad.setPositiveButton("Apply", (dialog, which) -> {
+                        String value = et.getText().toString();
+                        if(value.equals(""))  {
+                            Toast.makeText(mContext,"Please Input Value",Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            int IntValue = Integer.parseInt(value);
+                            if (IntValue < 1) {
+                                Toast.makeText(mContext, "Value must be higher than 0", Toast.LENGTH_SHORT).show();
+                            } else if(IntValue > 32768) {
+                                Toast.makeText(mContext, "Value must be lower than 32786", Toast.LENGTH_SHORT).show();
+                            } else {
+                                prefs.edit().putInt("DataLimit", IntValue).apply();
+                                DataLimit.setSummary("Now : " + IntValue + " Bytes");
+                            }
+                        }
+                    });
+                    ad.setNeutralButton("Reset Default", (dialog, which) -> {
+                        prefs.edit().putInt("DataLimit", 4096).apply();
+                        DataLimit.setSummary("Now : " + 4096 + " Bytes (Default)");
+                    });
+                    ad.setNegativeButton("Cancel", (dialog, which) -> {});
+                    ad.show();
                     break;
             }
             return super.onPreferenceTreeClick(preference);

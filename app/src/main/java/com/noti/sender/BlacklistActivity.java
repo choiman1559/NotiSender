@@ -1,6 +1,7 @@
 package com.noti.sender;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -12,11 +13,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class BlacklistActivity extends Activity {
             @Override
             public void run() {
                 packageShowInfo = PackageShowInfo.getPackageShowInfo(getApplicationContext());
-                showPackageAdapter = new ShowPackageAdapter();
+                showPackageAdapter = new ShowPackageAdapter(BlacklistActivity.this);
                 runOnUiThread(() -> {
                     packageListView.setAdapter(showPackageAdapter);
                     pg.setVisibility(View.GONE);
@@ -54,15 +55,14 @@ public class BlacklistActivity extends Activity {
             TextView textView = view.findViewById(R.id.app_name);
             textView.setTextColor(prefs.getBoolean(packageShowInfo.get(position).packageName, false) ? Color.RED : Color.BLACK);
         });
-
         findViewById(R.id.back).setOnClickListener(v -> finish());
     }
 
     class ShowPackageAdapter extends BaseAdapter {
         Drawable defaultDrawable;
 
-        ShowPackageAdapter() {
-            defaultDrawable = getResources().getDrawable(R.drawable.ic_launcher_background);
+        ShowPackageAdapter(Context context) {
+            defaultDrawable = ContextCompat.getDrawable(context, R.drawable.ic_launcher_background);
         }
 
         @Override

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,7 +26,6 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
 public class HistoryActivity extends AppCompatActivity {
     @Override
@@ -36,7 +36,7 @@ public class HistoryActivity extends AppCompatActivity {
         ImageView BackButton = findViewById(R.id.back);
         TabLayout TabLayout = findViewById(R.id.tabs);
         ViewPager2 viewPager = findViewById(R.id.viewpager);
-        FragmentStateAdapter adapter = new TabsPagerAdapter(this,getSupportFragmentManager(),getLifecycle());
+        FragmentStateAdapter adapter = new TabsPagerAdapter(this, getSupportFragmentManager(), getLifecycle());
 
         viewPager.setAdapter(adapter);
         new TabLayoutMediator(TabLayout, viewPager, (tab, position) -> {
@@ -61,15 +61,15 @@ public class HistoryActivity extends AppCompatActivity {
     public static class TabsPagerAdapter extends FragmentStateAdapter {
         private final Activity mContext;
 
-        public TabsPagerAdapter(Activity context, FragmentManager fm,Lifecycle lifecycle) {
-            super(fm,lifecycle);
+        public TabsPagerAdapter(Activity context, FragmentManager fm, Lifecycle lifecycle) {
+            super(fm, lifecycle);
             mContext = context;
         }
 
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return new HistoryFragment(mContext,position);
+            return new HistoryFragment(mContext, position);
         }
 
         @Override
@@ -91,25 +91,32 @@ public class HistoryActivity extends AppCompatActivity {
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-
-            SharedPreferences prefs = mContext.getSharedPreferences("com.noti.sender_preferences",MODE_PRIVATE);
+            SharedPreferences prefs = mContext.getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE);
+            ProgressBar progress = mContext.findViewById(R.id.progress);
             RecyclerView listView = view.findViewById(R.id.listView);
             LinearLayout layout = view.findViewById(R.id.noneLayout);
-            HistoryViewAdapter adapter;
 
-            String list_data = prefs.getString(mode == 0 ? "sendLogs" : "receivedLogs","");
-            if(!list_data.equals("")) {
-                listView.setVisibility(View.VISIBLE);
+            String list_data = prefs.getString(mode == 0 ? "sendLogs" : "receivedLogs", "");
+            if (!list_data.equals("")) {
+                progress.setVisibility(View.VISIBLE);
+                listView.setVisibility(View.GONE);
                 layout.setVisibility(View.GONE);
-                try {
-                    adapter = new HistoryViewAdapter(new JSONArray(list_data),mode,mContext);
-                    listView.setAdapter(adapter);
-                    listView.setLayoutManager(new LinearLayoutManagerWrapper(mContext));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                ThreadProxy.getInstance().execute(() -> {
+                    try {
+                        HistoryViewAdapter adapter = new HistoryViewAdapter(new JSONArray(list_data), mode, mContext);
+                        mContext.runOnUiThread(() -> {
+                            listView.setAdapter(adapter);
+                            listView.setLayoutManager(new LinearLayoutManagerWrapper(mContext));
+                            listView.setVisibility(View.VISIBLE);
+                            progress.setVisibility(View.GONE);
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             } else {
                 listView.setVisibility(View.GONE);
+                progress.setVisibility(View.GONE);
                 layout.setVisibility(View.VISIBLE);
             }
         }
@@ -128,7 +135,7 @@ public class HistoryActivity extends AppCompatActivity {
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            return  inflater.inflate(R.layout.fragment_history, container, false);
+            return inflater.inflate(R.layout.fragment_history, container, false);
         }
     }
 }

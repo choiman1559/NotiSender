@@ -109,13 +109,13 @@ public class NotiListenerClass extends NotificationListenerService {
         Notification notification = sbn.getNotification();
         Bundle extra = notification.extras;
         SharedPreferences prefs = getSharedPreferences("com.noti.sender_preferences", MODE_PRIVATE);
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+        String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
 
         if (BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false)) {
             String str = "";
             str += "\n";
             str += "***onNotificationPosted debug info***\n";
-            str += "date : " + time + "\n";
+            str += "date : " + DATE + "\n";
             str += "uid : " + prefs.getString("UID", "") + "\n";
             str += "package : " + sbn.getPackageName() + "\n";
             str += "service type : " + prefs.getString("service", "") + "\n";
@@ -126,7 +126,7 @@ public class NotiListenerClass extends NotificationListenerService {
             str += "EXTRA_TEXT : " + extra.getString(Notification.EXTRA_TEXT) + "\n";
             str += "**************************************\n";
             str += "\n";
-            Log(str, time);
+            Log(str, DATE);
         }
 
         if (prefs.getString("service", "").equals("send") && !prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false) &&
@@ -138,7 +138,7 @@ public class NotiListenerClass extends NotificationListenerService {
                 String originString = prefs.getString("sendLogs", "");
 
                 if (!originString.equals("")) array = new JSONArray(originString);
-                object.put("date", time);
+                object.put("date", DATE);
                 object.put("package", sbn.getPackageName());
                 object.put("title", extra.getString(Notification.EXTRA_TITLE));
                 object.put("text", extra.getString(Notification.EXTRA_TEXT));
@@ -178,7 +178,6 @@ public class NotiListenerClass extends NotificationListenerService {
             String TOPIC = "/topics/" + prefs.getString("UID", "");
             String TITLE = extra.getString(Notification.EXTRA_TITLE);
             String TEXT = extra.getString(Notification.EXTRA_TEXT);
-            String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(sbn.getPostTime());
             String Package = "" + sbn.getPackageName();
             String APPNAME = null;
             try {
@@ -204,12 +203,13 @@ public class NotiListenerClass extends NotificationListenerService {
                 if (Build.VERSION.SDK_INT > 25)
                     notifcationBody.put("cid", extra.getString(Notification.EXTRA_CHANNEL_ID));
 
+                int dataLimit = prefs.getInt("DataLimit", 4096);
                 notificationHead.put("to", TOPIC);
-                notificationHead.put("data",
-                        notifcationBody.toString().length() < 4000 ? notifcationBody : notifcationBody.put("icon", "none"));
+                notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage());
             }
+            if(BuildConfig.DEBUG) Log.d("data",notificationHead.toString());
             sendNotification(notificationHead, sbn);
         }
     }
