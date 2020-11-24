@@ -11,7 +11,7 @@
 
     <string name="serviceToggle">Service on/off</string>
 
-    <string name="select_package">Select the app which you don\'t want send noti. </string>
+    <string name="select_package">Select the app which you (don\'t) want send noti. </string>
     <string name="all">send all notifications</string>
 
     <string name="device_list">Device List</string>

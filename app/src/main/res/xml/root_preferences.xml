@@ -30,6 +30,11 @@
             android:key="blacklist"
             android:summary="select apps that you won't send notification"
             android:title="Edit blacklist" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseWhite"
+            android:summary="you can use this option to select only apps to send notification."
+            android:title="Use Whitelist instead of Blacklist" />
         <ListPreference
             android:defaultValue="Default"
             android:entries="@array/importance"

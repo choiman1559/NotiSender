@@ -40,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Set;
@@ -51,6 +52,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
 
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
         if (Build.VERSION.SDK_INT > 28 && !Settings.canDrawOverlays(this)) {
             AlertDialog.Builder alert_confirm = new AlertDialog.Builder(this);
             alert_confirm.setMessage("You need to permit overlay permission to use this app")
@@ -76,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.settings, new SettingsFragment(SettingsActivity.this))
+                .replace(R.id.settings, new SettingsFragment(this))
                 .commit();
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -108,6 +110,8 @@ public class SettingsActivity extends AppCompatActivity {
         Preference Login;
         Preference Service;
         Preference ServiceToggle;
+        Preference Blacklist;
+        Preference UseWhiteList;
         Preference TestRun;
         Preference SetImportance;
         Preference IconResolution;
@@ -117,8 +121,8 @@ public class SettingsActivity extends AppCompatActivity {
         Preference ForWearOS;
         Preference DataLimit;
 
-        SettingsFragment(Activity mContext) {
-            this.mContext = mContext;
+        SettingsFragment(Activity activity) {
+            this.mContext = activity;
         }
 
         @Override
@@ -138,6 +142,8 @@ public class SettingsActivity extends AppCompatActivity {
             TestRun = findPreference("testNoti");
             Service = findPreference("service");
             ServiceToggle = findPreference("serviceToggle");
+            Blacklist = findPreference("blacklist");
+            UseWhiteList = findPreference("UseWhite");
             SetImportance = findPreference("importance");
             IconResolution = findPreference("IconRes");
             IconEnabled = findPreference("SendIcon");
@@ -195,6 +201,16 @@ public class SettingsActivity extends AppCompatActivity {
 
             int dataLimit = prefs.getInt("DataLimit",4096);
             DataLimit.setSummary("Now : " + dataLimit + " Bytes" + (dataLimit == 4096 ? " (Default)" : ""));
+
+            boolean isWhiteList = prefs.getBoolean("UseWhite",false);
+            Blacklist.setTitle("Edit " + (isWhiteList ? "whitelist" : "blacklist"));
+            Blacklist.setSummary("select apps that you " + (isWhiteList ? "want" : "won't") + " send notification");
+            UseWhiteList.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean isWhite = (boolean)newValue;
+                Blacklist.setTitle("Edit " + (isWhite ? "whitelist" : "blacklist"));
+                Blacklist.setSummary("select apps that you " + (isWhite ? "want" : "won't") + " send notification");
+                return true;
+            });
 
             try {
                 mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);

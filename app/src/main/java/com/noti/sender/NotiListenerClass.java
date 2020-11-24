@@ -129,92 +129,94 @@ public class NotiListenerClass extends NotificationListenerService {
             Log(str, DATE);
         }
 
-        if (prefs.getString("service", "").equals("send") && !prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false) &&
-                !getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false)) {
+        if (prefs.getString("service", "").equals("send") && !prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
+            boolean isWhitelist = prefs.getBoolean("UseWhite", false);
+            boolean isContain = getSharedPreferences(isWhitelist ? "Whitelist" : "Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false);
+            if ((isWhitelist && isContain) || (!isWhitelist && !isContain)) {
+                try {
+                    JSONArray array = new JSONArray();
+                    JSONObject object = new JSONObject();
+                    String originString = prefs.getString("sendLogs", "");
 
-            try {
-                JSONArray array = new JSONArray();
-                JSONObject object = new JSONObject();
-                String originString = prefs.getString("sendLogs", "");
-
-                if (!originString.equals("")) array = new JSONArray(originString);
-                object.put("date", DATE);
-                object.put("package", sbn.getPackageName());
-                object.put("title", extra.getString(Notification.EXTRA_TITLE));
-                object.put("text", extra.getString(Notification.EXTRA_TEXT));
-                array.put(object);
-                prefs.edit().putString("sendLogs", array.toString()).apply();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            Bitmap ICON = null;
-            try {
-                ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(sbn.getPackageName()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            String ICONS;
-            if (ICON != null && prefs.getBoolean("SendIcon", false)) {
-                ICON.setHasAlpha(true);
-                int res;
-                switch (prefs.getString("IconRes", "")) {
-                    case "68 x 68 (Not Recommend)":
-                        res = 68;
-                        break;
-
-                    case "52 x 52 (Default)":
-                        res = 52;
-                        break;
-
-                    case "36 x 36":
-                        res = 36;
-                        break;
-
-                    default:
-                        res = 0;
-                        break;
+                    if (!originString.equals("")) array = new JSONArray(originString);
+                    object.put("date", DATE);
+                    object.put("package", sbn.getPackageName());
+                    object.put("title", extra.getString(Notification.EXTRA_TITLE));
+                    object.put("text", extra.getString(Notification.EXTRA_TEXT));
+                    array.put(object);
+                    prefs.edit().putString("sendLogs", array.toString()).apply();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                ICONS = res != 0 ? CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))) : "none";
-            } else ICONS = "none";
 
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-            String DEVICE_ID = getMACAddress();
-            String TOPIC = "/topics/" + prefs.getString("UID", "");
-            String TITLE = extra.getString(Notification.EXTRA_TITLE);
-            String TEXT = extra.getString(Notification.EXTRA_TEXT);
-            String Package = "" + sbn.getPackageName();
-            String APPNAME = null;
-            try {
-                APPNAME = "" + NotiListenerClass.this.getPackageManager().
-                        getApplicationLabel(NotiListenerClass.this.getPackageManager().getApplicationInfo(Package, PackageManager.GET_META_DATA));
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.d("Error", "Package not found : " + Package);
+                Bitmap ICON = null;
+                try {
+                    ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(sbn.getPackageName()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                String ICONS;
+                if (ICON != null && prefs.getBoolean("SendIcon", false)) {
+                    ICON.setHasAlpha(true);
+                    int res;
+                    switch (prefs.getString("IconRes", "")) {
+                        case "68 x 68 (Not Recommend)":
+                            res = 68;
+                            break;
+
+                        case "52 x 52 (Default)":
+                            res = 52;
+                            break;
+
+                        case "36 x 36":
+                            res = 36;
+                            break;
+
+                        default:
+                            res = 0;
+                            break;
+                    }
+                    ICONS = res != 0 ? CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))) : "none";
+                } else ICONS = "none";
+
+                String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+                String DEVICE_ID = getMACAddress();
+                String TOPIC = "/topics/" + prefs.getString("UID", "");
+                String TITLE = extra.getString(Notification.EXTRA_TITLE);
+                String TEXT = extra.getString(Notification.EXTRA_TEXT);
+                String Package = "" + sbn.getPackageName();
+                String APPNAME = null;
+                try {
+                    APPNAME = "" + NotiListenerClass.this.getPackageManager().
+                            getApplicationLabel(NotiListenerClass.this.getPackageManager().getApplicationInfo(Package, PackageManager.GET_META_DATA));
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.d("Error", "Package not found : " + Package);
+                }
+
+                Log.d("length", String.valueOf(ICONS.length()));
+                JSONObject notificationHead = new JSONObject();
+                JSONObject notifcationBody = new JSONObject();
+                try {
+                    notifcationBody.put("type", "send");
+                    notifcationBody.put("title", TITLE != null ? TITLE : "New notification");
+                    notifcationBody.put("message", TEXT != null ? TEXT : "notification arrived.");
+                    notifcationBody.put("package", Package);
+                    notifcationBody.put("appname", APPNAME);
+                    notifcationBody.put("device_name", DEVICE_NAME);
+                    notifcationBody.put("device_id", DEVICE_ID);
+                    notifcationBody.put("date", DATE);
+                    notifcationBody.put("icon", ICONS);
+
+                    int dataLimit = prefs.getInt("DataLimit", 4096);
+                    notificationHead.put("to", TOPIC);
+                    notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
+                } catch (JSONException e) {
+                    Log.e("Noti", "onCreate: " + e.getMessage());
+                }
+                if (BuildConfig.DEBUG) Log.d("data", notificationHead.toString());
+                sendNotification(notificationHead, sbn);
             }
-
-            Log.d("length", String.valueOf(ICONS.length()));
-            JSONObject notificationHead = new JSONObject();
-            JSONObject notifcationBody = new JSONObject();
-            try {
-                notifcationBody.put("type", "send");
-                notifcationBody.put("title", TITLE != null ? TITLE : "New notification");
-                notifcationBody.put("message", TEXT != null ? TEXT : "notification arrived.");
-                notifcationBody.put("package", Package);
-                notifcationBody.put("appname", APPNAME);
-                notifcationBody.put("device_name", DEVICE_NAME);
-                notifcationBody.put("device_id", DEVICE_ID);
-                notifcationBody.put("date", DATE);
-                notifcationBody.put("icon", ICONS);
-
-                int dataLimit = prefs.getInt("DataLimit", 4096);
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
-            } catch (JSONException e) {
-                Log.e("Noti", "onCreate: " + e.getMessage());
-            }
-            if(BuildConfig.DEBUG) Log.d("data",notificationHead.toString());
-            sendNotification(notificationHead, sbn);
         }
     }
 

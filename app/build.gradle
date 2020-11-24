@@ -15,8 +15,8 @@ android {
         applicationId "com.noti.sender"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1010301
-        versionName "1.3.1 Beta"
+        versionCode 1010302
+        versionName "1.3.2 Beta"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

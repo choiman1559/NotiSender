@@ -32,9 +32,9 @@ public class BlacklistActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blacklist);
         pg = findViewById(R.id.pg);
-
         pm = getPackageManager();
         packageListView = findViewById(R.id.package_list);
+
         ThreadProxy.getInstance().execute(new Runnable() {
             private ShowPackageAdapter showPackageAdapter;
 
@@ -50,12 +50,16 @@ public class BlacklistActivity extends Activity {
         });
 
         packageListView.setOnItemClickListener((parent, view, position, id) -> {
-            SharedPreferences prefs = getSharedPreferences("Blacklist", MODE_PRIVATE);
+            SharedPreferences prefs = getSharedPreferences(isWhite() ? "Whitelist" : "Blacklist", MODE_PRIVATE);
             prefs.edit().putBoolean(packageShowInfo.get(position).packageName, !prefs.getBoolean(packageShowInfo.get(position).packageName, false)).apply();
             TextView textView = view.findViewById(R.id.app_name);
-            textView.setTextColor(prefs.getBoolean(packageShowInfo.get(position).packageName, false) ? Color.RED : Color.BLACK);
+            textView.setTextColor(prefs.getBoolean(packageShowInfo.get(position).packageName, false) ? (isWhite() ? Color.BLUE : Color.RED) : Color.BLACK);
         });
         findViewById(R.id.back).setOnClickListener(v -> finish());
+    }
+
+    protected boolean isWhite() {
+        return getSharedPreferences(getPackageName() + "_preferences",MODE_PRIVATE).getBoolean("UseWhite",false);
     }
 
     class ShowPackageAdapter extends BaseAdapter {
@@ -97,7 +101,7 @@ public class BlacklistActivity extends Activity {
             } else {
                 holder.appName.setText(packageShowInfo.appName);
             }
-            holder.appName.setTextColor(getSharedPreferences("Blacklist",MODE_PRIVATE).getBoolean(packageShowInfo.packageName, false) ? Color.RED : Color.BLACK);
+            holder.appName.setTextColor(getSharedPreferences(isWhite() ? "Whitelist" : "Blacklist" ,MODE_PRIVATE).getBoolean(packageShowInfo.packageName, false) ? (isWhite() ? Color.BLUE : Color.RED) : Color.BLACK);
             holder.icon.setImageDrawable(defaultDrawable);
             final View alertIconView = convertView;
             ThreadProxy.getInstance().execute(() -> {

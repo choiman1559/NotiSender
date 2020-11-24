@@ -31,7 +31,6 @@
             android:textSize="18sp"
             android:textColor="#000000"
             tools:text="@string/app_name" />
-
     </RelativeLayout>
 
 </RelativeLayout>
