@@ -145,6 +145,14 @@ public class NotiListenerClass extends NotificationListenerService {
                     object.put("text", extra.getString(Notification.EXTRA_TEXT));
                     array.put(object);
                     prefs.edit().putString("sendLogs", array.toString()).apply();
+
+                    if(array.length() >= prefs.getInt("HistoryLimit",150)) {
+                        int a = array.length() - prefs.getInt("HistoryLimit",150);
+                        for(int i = 0;i < a;i++){
+                            array.remove(i);
+                        }
+                        prefs.edit().putString("sendLogs", array.toString()).apply();
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

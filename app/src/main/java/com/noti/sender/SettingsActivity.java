@@ -2,6 +2,7 @@ package com.noti.sender;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -120,6 +122,8 @@ public class SettingsActivity extends AppCompatActivity {
         Preference DebugLogEnable;
         Preference ForWearOS;
         Preference DataLimit;
+        Preference HistoryLimit;
+        Preference ResetList;
 
         SettingsFragment(Activity activity) {
             this.mContext = activity;
@@ -151,6 +155,8 @@ public class SettingsActivity extends AppCompatActivity {
             DebugLogEnable = findPreference("debugInfo");
             ForWearOS = findPreference("forWear");
             DataLimit = findPreference("DataLimit");
+            HistoryLimit = findPreference("HistoryLimit");
+            ResetList = findPreference("ResetList");
 
             boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
@@ -202,6 +208,9 @@ public class SettingsActivity extends AppCompatActivity {
             int dataLimit = prefs.getInt("DataLimit",4096);
             DataLimit.setSummary("Now : " + dataLimit + " Bytes" + (dataLimit == 4096 ? " (Default)" : ""));
 
+            int historyLimit = prefs.getInt("HistoryLimit",150);
+            HistoryLimit.setSummary("Now : " + historyLimit + " pcs" + (historyLimit == 150 ? " (Default)" : ""));
+
             boolean isWhiteList = prefs.getBoolean("UseWhite",false);
             Blacklist.setTitle("Edit " + (isWhiteList ? "whitelist" : "blacklist"));
             Blacklist.setSummary("select apps that you " + (isWhiteList ? "want" : "won't") + " send notification");
@@ -221,6 +230,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         @Override
         public boolean onPreferenceTreeClick(Preference preference) {
+            AlertDialog.Builder dialog;
+            EditText editText;
+            LinearLayout parentLayout;
+            LinearLayout.LayoutParams layoutParams;
+
             switch (preference.getKey()) {
                 case "AppInfo":
                     startActivity(new Intent(mContext, AppinfoActiity.class));
@@ -247,7 +261,7 @@ public class SettingsActivity extends AppCompatActivity {
                             .setLargeIcon(R.drawable.ic_launcher_foreground)
                             .circleLargeIcon()
                             .setSmallIcon(R.drawable.ic_broken_image)
-                            .setImportance(Notify.NotificationImportance.HIGH)
+                            .setImportance(getImportance())
                             .enableVibration(true)
                             .setAutoCancel(true)
                             .show();
@@ -276,28 +290,28 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
 
                 case "DataLimit":
-                    AlertDialog.Builder ad = new AlertDialog.Builder(mContext);
-                    ad.setCancelable(false);
-                    ad.setTitle("Input Data Limit");
-                    ad.setMessage("If data size is bigger than 4kb (4096 bytes), then data may not send.");
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input Data Limit");
+                    dialog.setMessage("If data size is bigger than 4kb (4096 bytes), then data may not send.");
 
-                    EditText et = new EditText(mContext);
-                    et.setInputType(InputType.TYPE_CLASS_NUMBER);
-                    et.setHint("Input Limit Value");
-                    et.setGravity(Gravity.CENTER);
-                    et.setText(String.valueOf(prefs.getInt("DataLimit",4096)));
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    editText.setHint("Input Limit Value");
+                    editText.setGravity(Gravity.CENTER);
+                    editText.setText(String.valueOf(prefs.getInt("DataLimit",4096)));
 
-                    LinearLayout parentLayout = new LinearLayout(mContext);
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT);
                     layoutParams.setMargins(30, 16, 30, 16);
-                    et.setLayoutParams(layoutParams);
-                    parentLayout.addView(et);
-                    ad.setView(parentLayout);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
 
-                    ad.setPositiveButton("Apply", (dialog, which) -> {
-                        String value = et.getText().toString();
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
                         if(value.equals(""))  {
                             Toast.makeText(mContext,"Please Input Value",Toast.LENGTH_SHORT).show();
                         }
@@ -305,7 +319,7 @@ public class SettingsActivity extends AppCompatActivity {
                             int IntValue = Integer.parseInt(value);
                             if (IntValue < 1) {
                                 Toast.makeText(mContext, "Value must be higher than 0", Toast.LENGTH_SHORT).show();
-                            } else if(IntValue > 32768) {
+                            } else if(IntValue > 32786) {
                                 Toast.makeText(mContext, "Value must be lower than 32786", Toast.LENGTH_SHORT).show();
                             } else {
                                 prefs.edit().putInt("DataLimit", IntValue).apply();
@@ -313,15 +327,86 @@ public class SettingsActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    ad.setNeutralButton("Reset Default", (dialog, which) -> {
+                    dialog.setNeutralButton("Reset Default", (d,w) -> {
                         prefs.edit().putInt("DataLimit", 4096).apply();
                         DataLimit.setSummary("Now : " + 4096 + " Bytes (Default)");
                     });
-                    ad.setNegativeButton("Cancel", (dialog, which) -> {});
-                    ad.show();
+                    dialog.setNegativeButton("Cancel", (d,w) -> {});
+                    dialog.show();
+                    break;
+
+                case "HistoryLimit":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input Data Limit");
+                    dialog.setMessage("The history data maximum limit is 65535 pcs.");
+
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    editText.setHint("Input Limit Value");
+                    editText.setGravity(Gravity.CENTER);
+                    editText.setText(String.valueOf(prefs.getInt("HistoryLimit",150)));
+
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
+                        if(value.equals(""))  {
+                            Toast.makeText(mContext,"Please Input Value",Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            int IntValue = Integer.parseInt(value);
+                            if(IntValue > 65535) {
+                                Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            } else {
+                                prefs.edit().putInt("HistoryLimit", IntValue).apply();
+                                HistoryLimit.setSummary("Now : " + IntValue + " pcs");
+                            }
+                        }
+                    });
+                    dialog.setNeutralButton("Reset Default", (d,w) -> {
+                        prefs.edit().putInt("HistoryLimit", 150).apply();
+                        HistoryLimit.setSummary("Now : " + 150 + " pcs (Default)");
+                    });
+                    dialog.setNegativeButton("Cancel", (d,w) -> {});
+                    dialog.show();
+                    break;
+
+                case "ResetList":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setTitle("Waring!");
+                    dialog.setMessage("Are you sure to reset your white/black list?\nThis operation cannot be undone.");
+                    dialog.setPositiveButton("Reset",(d,w) -> {
+                        mContext.getSharedPreferences("Whitelist",MODE_PRIVATE).edit().clear().apply();
+                        mContext.getSharedPreferences("Blacklist",MODE_PRIVATE).edit().clear().apply();
+                        Toast.makeText(mContext,"Task done!",Toast.LENGTH_SHORT).show();
+                    });
+                    dialog.setNegativeButton("Cancel",(d,w) -> {});
+                    dialog.show();
                     break;
             }
             return super.onPreferenceTreeClick(preference);
+        }
+
+        private Notify.NotificationImportance getImportance() {
+            String value = prefs.getString("importance","Default");
+            switch (value) {
+                case "Default":
+                    return Notify.NotificationImportance.MAX;
+                case "Low":
+                    return Notify.NotificationImportance.LOW;
+                case "High":
+                    return Notify.NotificationImportance.HIGH;
+                default:
+                    return Notify.NotificationImportance.MIN;
+            }
         }
 
         private void accountTask() {

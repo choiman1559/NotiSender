@@ -52,7 +52,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             if (prefs.getString("service", "").equals("reception") && map.get("type").equals("send")) {
                 Bitmap icon = null;
                 Bitmap iconw = null;
-                if (BuildConfig.DEBUG) Log.d("icon", map.get("icon"));
                 if (!map.get("icon").equals("none")) {
                     icon = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
                     iconw = Bitmap.createBitmap(icon.getWidth(), icon.getHeight(), icon.getConfig());
@@ -105,6 +104,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             object.put("device",Device_name);
             array.put(object);
             prefs.edit().putString("receivedLogs",array.toString()).apply();
+
+            if(array.length() >= prefs.getInt("HistoryLimit",150)) {
+                int a = array.length() - prefs.getInt("HistoryLimit",150);
+                for(int i = 0;i < a;i++){
+                    array.remove(i);
+                }
+                prefs.edit().putString("receivedLogs", array.toString()).apply();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
