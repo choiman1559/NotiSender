@@ -58,6 +58,16 @@
             android:key="IconWaring"
             android:summary="If icon's file size is too big, icon may not sent or sending notification may fail."
             android:icon="@drawable/ic_info_outline_black_24dp" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseReplySms"
+            android:summary="Works only in 'send' mode"
+            android:title="Reply to SMS from other devices" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseReceiveCall"
+            android:summary="Works only in 'send' mode"
+            android:title="Accept calls on other devices" />
         <Preference
             android:key="HistoryLimit"
             android:title="Maximum number of History"

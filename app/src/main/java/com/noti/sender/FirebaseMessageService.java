@@ -14,7 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+import android.telephony.SmsManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,25 +47,36 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Map<String, String> map = remoteMessage.getData();
-        if(prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
+        String type = map.get("type");
 
-            if (prefs.getString("service", "").equals("reception") && map.get("type").equals("send")) {
-                Bitmap icon = null;
-                Bitmap iconw = null;
-                if (!map.get("icon").equals("none")) {
-                    icon = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
-                    iconw = Bitmap.createBitmap(icon.getWidth(), icon.getHeight(), icon.getConfig());
-                    Canvas canvas = new Canvas(iconw);
-                    canvas.drawColor(Color.WHITE);
-                    canvas.drawBitmap(icon, 0, 0, null);
+        if(prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
+            if (prefs.getString("service", "").equals("reception")) {
+                if (type.equals("send|normal")) {
+                    Bitmap icon = null;
+                    Bitmap iconw = null;
+                    if (!map.get("icon").equals("none")) {
+                        icon = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
+                        iconw = Bitmap.createBitmap(icon.getWidth(), icon.getHeight(), icon.getConfig());
+                        Canvas canvas = new Canvas(iconw);
+                        canvas.drawColor(Color.WHITE);
+                        canvas.drawBitmap(icon, 0, 0, null);
+                    }
+                    sendNotification(map, icon != null ? iconw : null);
+                } else if(type.equals("send|sms")) {
+                    sendSmsNotification(map);
                 }
-                sendNotification(map, icon != null ? iconw : null);
             }
 
-            if (prefs.getString("service", "").equals("send") && map.get("type").equals("reception")) {
+            if (prefs.getString("service", "").equals("send") && type.contains("reception")) {
                 if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(NotiListenerClass.getMACAddress())) {
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
-                    startNewActivity(map.get("package"));
+                    if(type.equals("reception|normal")) {
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+                        startNewActivity(map.get("package"));
+                    } else if(type.equals("reception|sms")) {
+                        SmsManager smgr = SmsManager.getDefault();
+                        smgr.sendTextMessage(map.get("address"),null,map.get("message"),null,null);
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Reply message by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+                    }
                 }
             }
         }
@@ -80,6 +91,48 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
             startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
+    }
+
+    private void sendSmsNotification(Map<String, String> map) {
+        String address = map.get("address");
+        String message = map.get("message");
+        String Device_name = map.get("device_name");
+        String Device_id = map.get("device_id");
+        String Date = map.get("date");
+
+        Intent notificationIntent = new Intent(FirebaseMessageService.this, SmsViewActivity.class);
+        notificationIntent.putExtra("device_id",Device_id);
+        notificationIntent.putExtra("message",message);
+        notificationIntent.putExtra("address",address);
+        notificationIntent.putExtra("device_name",Device_name);
+        notificationIntent.putExtra("date",Date);
+
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))
+                .setContentTitle("New message from " + address)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setGroupSummary(true)
+                .setGroup(getPackageName() + ".NOTIFICATION")
+                .setAutoCancel(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setSmallIcon(R.drawable.ic_notification);
+            CharSequence channelName = getString(R.string.notify_channel_name);
+            String description = getString(R.string.notify_channel_description);
+            int importance = getImportance();
+            NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, importance);
+            channel.setDescription(description);
+            assert notificationManager != null;
+            notificationManager.createNotificationChannel(channel);
+        } else builder.setSmallIcon(R.mipmap.ic_notification);
+
+        assert notificationManager != null;
+        notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
     }
 
     private void sendNotification(Map<String, String> map, @Nullable Bitmap Icon) {
@@ -117,7 +170,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent notificationIntent = new Intent(FirebaseMessageService.this, MessageSendClass.class);
+        Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
         notificationIntent.putExtra("package", Package);
         notificationIntent.putExtra("icon",Icon != null ? CompressStringUtil.getStringFromBitmap(Icon) : null);
         notificationIntent.putExtra("device_id",Device_id);

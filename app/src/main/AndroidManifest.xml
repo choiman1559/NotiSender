@@ -4,6 +4,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -21,7 +23,9 @@
         <activity android:name=".AppinfoActiity" />
         <activity android:name=".HistoryActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-        <activity android:name=".MessageSendClass"
+        <activity android:name=".NotificationViewActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
+        <activity android:name=".SmsViewActivity"
             android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
         <activity
             android:name=".SettingsActivity"

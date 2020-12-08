@@ -2,7 +2,6 @@ package com.noti.sender;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +27,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreference;
 
 import com.application.isradeleon.notify.Notify;
 import com.google.android.gms.auth.api.Auth;
@@ -124,6 +123,8 @@ public class SettingsActivity extends AppCompatActivity {
         Preference DataLimit;
         Preference HistoryLimit;
         Preference ResetList;
+        Preference UseReplySms;
+        Preference UseReceiveCall;
 
         SettingsFragment(Activity activity) {
             this.mContext = activity;
@@ -157,6 +158,8 @@ public class SettingsActivity extends AppCompatActivity {
             DataLimit = findPreference("DataLimit");
             HistoryLimit = findPreference("HistoryLimit");
             ResetList = findPreference("ResetList");
+            UseReplySms = findPreference("UseReplySms");
+            UseReceiveCall = findPreference("UseReceiveCall");
 
             boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
@@ -221,6 +224,8 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
 
+            UseReceiveCall.setVisible(BuildConfig.DEBUG);
+
             try {
                 mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
             } catch (PackageManager.NameNotFoundException e) {
@@ -272,7 +277,7 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
 
                 case "debugInfo":
-                    CheckBoxPreference DebugMod = (CheckBoxPreference) DebugLogEnable;
+                    CheckBoxPreference DebugMod = (CheckBoxPreference)DebugLogEnable;
                     if (DebugMod.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                                 || mContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -390,6 +395,20 @@ public class SettingsActivity extends AppCompatActivity {
                     });
                     dialog.setNegativeButton("Cancel",(d,w) -> {});
                     dialog.show();
+                    break;
+
+                case "UseReplySms":
+                    SwitchPreference UseSms = (SwitchPreference) UseReplySms;
+                    if (UseSms.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (mContext.checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
+                                || mContext.checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                            if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                                Toast.makeText(mContext, "require storage permission!", Toast.LENGTH_SHORT).show();
+                                UseSms.setChecked(false);
+                            }
+                            requestPermissions(new String[]{Manifest.permission.READ_SMS, Manifest.permission.SEND_SMS}, 2);
+                        } else UseSms.setChecked(true);
+                    }
                     break;
             }
             return super.onPreferenceTreeClick(preference);
