@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,14 +13,14 @@ import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-class CompressStringUtil {
+public class CompressStringUtil {
     private static final String charsetName = "UTF-8";
 
-    synchronized static String compressString(String string) {
+    public synchronized static String compressString(String string) {
         return byteToString(compress(string));
     }
 
-    synchronized static String decompressString(String compressed) {
+    public synchronized static String decompressString(String compressed) {
         return decompress(hexToByteArray(compressed));
     }
 
@@ -76,7 +76,7 @@ class CompressStringUtil {
         return bytes;
     }
 
-    static Bitmap StringToBitmap(String encodedString) {
+    public static Bitmap StringToBitmap(String encodedString) {
         try {
             byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
             return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
@@ -86,7 +86,7 @@ class CompressStringUtil {
         }
     }
 
-    static String getStringFromBitmap(Bitmap bitmapPicture) {
+    public static String getStringFromBitmap(Bitmap bitmapPicture) {
         String encodedImage;
         ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
         bitmapPicture.compress(Bitmap.CompressFormat.PNG, 2, byteArrayBitmapStream);

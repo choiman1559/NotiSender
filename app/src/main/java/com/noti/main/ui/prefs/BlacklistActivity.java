@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.ui.prefs;
 
 import android.app.Activity;
 import android.content.Context;
@@ -18,6 +18,10 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+
+import com.noti.main.utils.PackageShowInfo;
+import com.noti.main.R;
+import com.noti.main.utils.ThreadProxy;
 
 import java.util.List;
 

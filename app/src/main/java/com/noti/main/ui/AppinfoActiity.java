@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.noti.main.R;
 
 public class AppinfoActiity extends AppCompatActivity {
 

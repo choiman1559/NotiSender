@@ -20,13 +20,13 @@
         android:allowBackup="true"
         android:fullBackupContent="true">
 
-        <activity android:name=".BlacklistActivity" />
-        <activity android:name=".AppinfoActiity" />
-        <activity android:name=".HistoryActivity"
+        <activity android:name=".ui.prefs.BlacklistActivity" />
+        <activity android:name=".ui.AppinfoActiity" />
+        <activity android:name=".ui.prefs.HistoryActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-        <activity android:name=".NotificationViewActivity"
+        <activity android:name=".ui.receive.NotificationViewActivity"
             android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
-        <activity android:name=".SmsViewActivity"
+        <activity android:name=".ui.receive.SmsViewActivity"
             android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
         <activity
             android:name=".SettingsActivity"
@@ -37,7 +37,7 @@
         </activity>
 
         <service
-            android:name=".NotiListenerService"
+            android:name=".service.NotiListenerService"
             android:label="Read notifications"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
@@ -45,7 +45,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".FirebaseMessageService"
+            android:name=".service.FirebaseMessageService"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

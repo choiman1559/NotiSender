@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.service;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -24,6 +24,10 @@ import androidx.core.app.NotificationCompat;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.noti.main.R;
+import com.noti.main.ui.receive.NotificationViewActivity;
+import com.noti.main.ui.receive.SmsViewActivity;
+import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.utils;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  *         Copyright © 2017年 Oceanwing. All rights reserved.
  */
 
-class ThreadProxy {
+public class ThreadProxy {
 
     private final Executor executor;
 
@@ -23,16 +23,16 @@ class ThreadProxy {
 
         executor = new ThreadPoolExecutor(1, 4,
                 10L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(1024), r -> {
+                new LinkedBlockingQueue<>(1024), r -> {
                     Thread thread = new Thread(r);
                     thread.setName("ThreadProxy");
                     return thread;
                 });
     }
-    void execute(Runnable run){
+    public void execute(Runnable run){
         executor.execute(run);
     }
-    static ThreadProxy getInstance(){
+    public static ThreadProxy getInstance(){
         return InnerClass.instance;
     }
 }

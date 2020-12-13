@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.ui.receive;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,6 +15,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.MySingleton;
+import com.noti.main.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.ui.prefs;
 
 import android.app.Activity;
 import android.content.Context;
@@ -24,6 +24,8 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.noti.main.R;
+import com.noti.main.utils.ThreadProxy;
 
 import org.json.JSONArray;
 

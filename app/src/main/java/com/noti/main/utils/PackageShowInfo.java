@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.utils;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -20,11 +20,11 @@ import java.util.List;
 
 public class PackageShowInfo implements Parcelable {
     private static final java.lang.String NO_APP_NAME = "COM.";
-    String appName;
-    String packageName;
-    ApplicationInfo applicationInfo;
+    public String appName;
+    public String packageName;
+    public ApplicationInfo applicationInfo;
 
-    static List<PackageShowInfo> getPackageShowInfo(Context context) {
+    public static List<PackageShowInfo> getPackageShowInfo(Context context) {
         ArrayList<PackageShowInfo> showInfos = new ArrayList<>();
         PackageManager packageManager = context.getPackageManager();
         List<PackageInfo> installedPackages = packageManager.getInstalledPackages(Build.VERSION.SDK_INT > 23 ? PackageManager.MATCH_UNINSTALLED_PACKAGES : PackageManager.GET_UNINSTALLED_PACKAGES);

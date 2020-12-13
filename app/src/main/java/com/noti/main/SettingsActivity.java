@@ -43,8 +43,12 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.crashlytics.internal.common.CrashlyticsCore;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.noti.main.BuildConfig;
+import com.noti.main.R;
+import com.noti.main.ui.AppinfoActiity;
+import com.noti.main.ui.prefs.BlacklistActivity;
+import com.noti.main.ui.prefs.HistoryActivity;
 
 import java.util.Set;
 
@@ -125,9 +129,8 @@ public class SettingsActivity extends AppCompatActivity {
         Preference DataLimit;
         Preference HistoryLimit;
         Preference ResetList;
-
-        public static Preference UseReplySms;
-        public static Preference UseReceiveCall;
+        Preference UseReplySms;
+        Preference UseReceiveCall;
 
         SettingsFragment(Activity activity) {
             this.mContext = activity;
@@ -292,7 +295,7 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
 
                 case "NotiLog":
-                    startActivity(new Intent(mContext,HistoryActivity.class));
+                    startActivity(new Intent(mContext, HistoryActivity.class));
                     break;
 
                 case "DataLimit":

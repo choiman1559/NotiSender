@@ -1,12 +1,14 @@
-package com.noti.main;
+package com.noti.main.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
-class MySingleton {
+public class MySingleton {
+    @SuppressLint("StaticFieldLeak")
     private  static MySingleton instance;
     private RequestQueue requestQueue;
     private Context ctx;

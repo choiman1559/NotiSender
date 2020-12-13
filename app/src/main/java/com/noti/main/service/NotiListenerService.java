@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.service;
 
 import android.app.Notification;
 import android.content.SharedPreferences;
@@ -19,6 +19,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.noti.main.BuildConfig;
+import com.noti.main.utils.MySingleton;
+import com.noti.main.R;
+import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;

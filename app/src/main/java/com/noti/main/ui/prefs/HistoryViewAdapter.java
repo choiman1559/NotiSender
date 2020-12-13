@@ -1,4 +1,4 @@
-package com.noti.main;
+package com.noti.main.ui.prefs;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,6 +13,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.noti.main.R;
+import com.noti.main.utils.ThreadProxy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
