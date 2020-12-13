@@ -27,6 +27,8 @@
 
     <PreferenceCategory android:title="Customizing">
         <Preference
+            android:summary="Send option" />
+        <Preference
             android:key="blacklist"
             android:summary="select apps that you won't send notification"
             android:title="Edit blacklist" />
@@ -35,13 +37,6 @@
             android:key="UseWhite"
             android:summary="you can use this option to select only apps to send notification."
             android:title="Use Whitelist instead of Blacklist" />
-        <ListPreference
-            android:defaultValue="Default"
-            android:entries="@array/importance"
-            android:entryValues="@array/importance"
-            android:key="importance"
-            android:summary="Now : Default"
-            android:title="Notification Importance" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="SendIcon"
@@ -61,13 +56,24 @@
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseReplySms"
-            android:summary="Works only in 'send' mode"
+            android:summary="need sms permission"
             android:title="Reply to SMS from other devices" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseReceiveCall"
-            android:summary="Works only in 'send' mode"
+            android:summary="need call permission"
             android:title="Accept calls on other devices" />
+        <Preference
+            android:summary="Reception option" />
+        <ListPreference
+            android:defaultValue="Default"
+            android:entries="@array/importance"
+            android:entryValues="@array/importance"
+            android:key="importance"
+            android:summary="Now : Default"
+            android:title="Notification Importance" />
+        <Preference
+            android:summary="Other option" />
         <Preference
             android:key="HistoryLimit"
             android:title="Maximum number of History"

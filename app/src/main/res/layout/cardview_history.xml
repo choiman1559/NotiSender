@@ -46,6 +46,6 @@
                 android:textSize="12sp"
                 android:ellipsize="marquee"
                 android:singleLine="true"
-                tools:text="Noti Sender (com.noti.sender) 2020/11/22 22:43:45" />
+                tools:text="Noti Sender (com.noti.main) 2020/11/22 22:43:45" />
         </LinearLayout>
 </RelativeLayout>

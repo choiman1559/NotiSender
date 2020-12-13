@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ossl">
-                \nUsed Open Sources In package \"com.noti.sender\"\n\n\n
+                \nUsed Open Sources In package \"com.noti.main\"\n\n\n
 
         Copyright © 2005-2013, Google LLC - The Android Open Source Project\n
    Licensed under the Apache License\nLicensed under the Apache License, Version 2.0 (the "License");

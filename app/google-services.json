@@ -8,6 +8,80 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:799908929421:android:6954b12c3885904a2827c4",
+        "android_client_info": {
+          "package_name": "com.google.firebase.nongmsauth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799908929421-42t9bgtfdp5e9q1qs1071ngn0vd2q2sh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.google.firebase.nongmsauth",
+            "certificate_hash": "36475f49ce2dbccbb85930e38617856c78cf8653"
+          }
+        },
+        {
+          "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW8agOEJ1V_XPhTCQozFW9ogXbm336czg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799908929421:android:87da57860957793e2827c4",
+        "android_client_info": {
+          "package_name": "com.noti.main"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799908929421-q0urejb8aiovo5tljns472q7coq41bna.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noti.main",
+            "certificate_hash": "36475f49ce2dbccbb85930e38617856c78cf8653"
+          }
+        },
+        {
+          "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW8agOEJ1V_XPhTCQozFW9ogXbm336czg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:799908929421:android:701fceed71f00ef42827c4",
         "android_client_info": {
           "package_name": "com.noti.sender"
@@ -19,6 +93,75 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.noti.sender",
+            "certificate_hash": "36475f49ce2dbccbb85930e38617856c78cf8653"
+          }
+        },
+        {
+          "client_id": "799908929421-5s6j703g4soimafnkdcst1dg9eckk8hq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noti.sender",
+            "certificate_hash": "98f27f79b3da805d4df88cb5998729d072f54096"
+          }
+        },
+        {
+          "client_id": "799908929421-j2ebrd61qg5ecpls5hr2juoir4co6297.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noti.sender",
+            "certificate_hash": "ea2666544600163cf9ba19f1dd9b9321db84b691"
+          }
+        },
+        {
+          "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW8agOEJ1V_XPhTCQozFW9ogXbm336czg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799908929421-4kap9mh7l5s27m9knav2kgqpe03lt0i8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799908929421:android:80293b44b6d8b9112827c4",
+        "android_client_info": {
+          "package_name": "com.noti.sender.wear"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799908929421-kpf273shhhkaumrabd5niqg4fg1irffs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noti.sender.wear",
+            "certificate_hash": "ea2666544600163cf9ba19f1dd9b9321db84b691"
+          }
+        },
+        {
+          "client_id": "799908929421-n467u2pe8lok16v0thde57um1cr343sq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noti.sender.wear",
+            "certificate_hash": "b793525fd707768628f151a208227069bfab2b31"
+          }
+        },
+        {
+          "client_id": "799908929421-vvl8t76rklji3uu1m3kcf4adj4e6orrd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noti.sender.wear",
             "certificate_hash": "36475f49ce2dbccbb85930e38617856c78cf8653"
           }
         },
