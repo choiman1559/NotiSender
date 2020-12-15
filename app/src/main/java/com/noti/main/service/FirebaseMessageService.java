@@ -71,7 +71,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 }
             }
 
-            if (prefs.getString("service", "").equals("send") && type.contains("reception")) {
+            else if (prefs.getString("service", "").equals("send") && type.contains("reception")) {
                 if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(NotiListenerService.getMACAddress())) {
                     if(type.equals("reception|normal")) {
                         new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);

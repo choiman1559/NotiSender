@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -44,8 +45,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.noti.main.BuildConfig;
-import com.noti.main.R;
 import com.noti.main.ui.AppinfoActiity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
@@ -108,11 +107,11 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
 
-        Activity mContext;
         private static final int RC_SIGN_IN = 100;
-        private FirebaseAuth mAuth;
         private GoogleSignInClient mGoogleSignInClient;
+        private FirebaseAuth mAuth;
         SharedPreferences prefs;
+        Activity mContext;
 
         Preference Login;
         Preference Service;
@@ -173,7 +172,7 @@ public class SettingsActivity extends AppCompatActivity {
                 Login.setSummary("Logined as " + prefs.getString("Email", ""));
                 Login.setTitle(R.string.Logout);
                 ServiceToggle.setEnabled(true);
-                if (prefs.getString("Email", "").equals(""))
+                if (prefs.getString("Email", "").equals("") && mAuth.getCurrentUser() != null)
                     prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
             } else {
                 ServiceToggle.setEnabled(false);
@@ -500,6 +499,7 @@ public class SettingsActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (requestCode == RC_SIGN_IN && result != null && result.isSuccess()) {
+                Log.d("Google log in","Result : " + (result.isSuccess() ? "success" : "failed") + " Status : " + result.getStatus().toString());
                 GoogleSignInAccount account = result.getSignInAccount();
                 assert account != null;
                 firebaseAuthWithGoogle(account);
@@ -512,7 +512,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .addOnCompleteListener(mContext, task -> {
                         if (!task.isSuccessful()) {
                             Toast.makeText(mContext, "failed to login Google", Toast.LENGTH_SHORT).show();
-                        } else {
+                        } else if(mAuth.getCurrentUser() != null){
                             Toast.makeText(mContext, "Success to login Google", Toast.LENGTH_SHORT).show();
                             prefs.edit().putString("UID", mAuth.getUid()).apply();
                             prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();

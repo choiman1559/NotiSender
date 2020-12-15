@@ -3,18 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="General Settings">
-
         <Preference
             android:key="Login"
             android:summary="@string/UID_default"
             android:title="@string/Login" />
-
         <SwitchPreference
             android:defaultValue="false"
             android:enabled="false"
             android:key="serviceToggle"
             android:title="service on/off" />
-
         <ListPreference
             android:defaultValue="not selected"
             android:entries="@array/services"
@@ -22,12 +19,12 @@
             android:key="service"
             android:title="Select service"
             android:summary="Now : reception"/>
-
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Customizing">
         <Preference
-            android:summary="Send option" />
+            android:summary="Send option"
+            android:enabled="false"/>
         <Preference
             android:key="blacklist"
             android:summary="select apps that you won't send notification"
@@ -64,7 +61,8 @@
             android:summary="need call permission"
             android:title="Accept calls on other devices" />
         <Preference
-            android:summary="Reception option" />
+            android:summary="Reception option"
+            android:enabled="false" />
         <ListPreference
             android:defaultValue="Default"
             android:entries="@array/importance"
@@ -73,7 +71,8 @@
             android:summary="Now : Default"
             android:title="Notification Importance" />
         <Preference
-            android:summary="Other option" />
+            android:summary="Other option"
+            android:enabled="false" />
         <Preference
             android:key="HistoryLimit"
             android:title="Maximum number of History"

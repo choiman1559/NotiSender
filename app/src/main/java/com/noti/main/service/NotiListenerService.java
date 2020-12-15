@@ -47,6 +47,7 @@ public class NotiListenerService extends NotificationListenerService {
     String toString(Boolean boo) {
         return boo ? "true" : "false";
     }
+
     volatile StatusBarNotification pastNotification = null;
 
     void Log(String message, String time) {
@@ -54,7 +55,7 @@ public class NotiListenerService extends NotificationListenerService {
             Log.d("debug", message);
             File txt = new File(Environment.getExternalStorageDirectory() + "/NotiSender_Logs", time + ".txt");
             try {
-                if(!txt.getParentFile().exists()) txt.getParentFile().mkdirs();
+                if (!txt.getParentFile().exists()) txt.getParentFile().mkdirs();
                 if (!txt.exists()) txt.createNewFile();
                 RandomAccessFile raf = new RandomAccessFile(txt, "rw");
                 raf.seek(raf.length());
@@ -114,33 +115,35 @@ public class NotiListenerService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        if(sbn.equals(pastNotification)) return;
+        if (sbn.equals(pastNotification)) return;
 
         Notification notification = sbn.getNotification();
         Bundle extra = notification.extras;
         SharedPreferences prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
 
-        if (BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false)) {
-            String str = "";
-            str += "\n";
-            str += "***onNotificationPosted debug info***\n";
-            str += "date : " + DATE + "\n";
-            str += "uid : " + prefs.getString("UID", "") + "\n";
-            str += "package : " + sbn.getPackageName() + "\n";
-            str += "service type : " + prefs.getString("service", "") + "\n";
-            str += "if uid is blank : " + toString(Objects.equals(prefs.getString("UID", ""), "")) + "\n";
-            str += "if service Enabled : " + toString(prefs.getBoolean("serviceToggle", false)) + "\n";
-            str += "if include blacklist : " + toString(getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false)) + "\n";
-            str += "EXTRA_TITLE : " + extra.getString(Notification.EXTRA_TITLE) + "\n";
-            str += "EXTRA_TEXT : " + extra.getString(Notification.EXTRA_TEXT) + "\n";
-            str += "**************************************\n";
-            str += "\n";
-            Log(str, DATE);
-        }
+        new Thread(() -> {
+            if (BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false)) {
+                String str = "";
+                str += "\n";
+                str += "***onNotificationPosted debug info***\n";
+                str += "date : " + DATE + "\n";
+                str += "uid : " + prefs.getString("UID", "") + "\n";
+                str += "package : " + sbn.getPackageName() + "\n";
+                str += "service type : " + prefs.getString("service", "") + "\n";
+                str += "if uid is blank : " + toString(Objects.equals(prefs.getString("UID", ""), "")) + "\n";
+                str += "if service Enabled : " + toString(prefs.getBoolean("serviceToggle", false)) + "\n";
+                str += "if include blacklist : " + toString(getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false)) + "\n";
+                str += "EXTRA_TITLE : " + extra.getString(Notification.EXTRA_TITLE) + "\n";
+                str += "EXTRA_TEXT : " + extra.getString(Notification.EXTRA_TEXT) + "\n";
+                str += "**************************************\n";
+                str += "\n";
+                Log(str, DATE);
+            }
+        }).start();
 
         if (prefs.getString("service", "").equals("send") && !prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
-            if(prefs.getBoolean("UseReplySms",false) && Telephony.Sms.getDefaultSmsPackage(this).equals(sbn.getPackageName())) {
+            if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(sbn.getPackageName())) {
                 Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
                 cursor.moveToFirst();
                 String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
@@ -156,8 +159,8 @@ public class NotiListenerService extends NotificationListenerService {
                 JSONObject notifcationBody = new JSONObject();
                 try {
                     notifcationBody.put("type", "send|sms");
-                    notifcationBody.put("message",message);
-                    notifcationBody.put("address",address);
+                    notifcationBody.put("message", message);
+                    notifcationBody.put("address", address);
                     notifcationBody.put("device_name", DEVICE_NAME);
                     notifcationBody.put("device_id", DEVICE_ID);
                     notifcationBody.put("date", date);
