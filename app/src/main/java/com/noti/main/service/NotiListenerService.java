@@ -33,6 +33,7 @@ import java.io.RandomAccessFile;
 import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -47,6 +48,7 @@ public class NotiListenerService extends NotificationListenerService {
     String toString(Boolean boo) {
         return boo ? "true" : "false";
     }
+    ArrayList<String[]> intervalQuery = new ArrayList<>();
 
     volatile StatusBarNotification pastNotification = null;
 

@@ -57,7 +57,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
-        
+
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
         if (Build.VERSION.SDK_INT > 28 && !Settings.canDrawOverlays(this)) {
             AlertDialog.Builder alert_confirm = new AlertDialog.Builder(this);
@@ -84,7 +84,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.settings, new SettingsFragment(this))
+                .replace(R.id.settings, newInstance())
                 .commit();
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -103,6 +103,13 @@ public class SettingsActivity extends AppCompatActivity {
             Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
             if (!sets.contains(getPackageName())) finish();
         }
+    }
+
+    public static SettingsFragment newInstance() {
+        SettingsFragment fragment = new SettingsFragment();
+        Bundle bundle = new Bundle(0);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -131,8 +138,13 @@ public class SettingsActivity extends AppCompatActivity {
         Preference UseReplySms;
         Preference UseReceiveCall;
 
-        SettingsFragment(Activity activity) {
-            this.mContext = activity;
+        SettingsFragment() { }
+
+        @Override
+        public void onAttach(@NonNull Context context) {
+            super.onAttach(context);
+            if(context instanceof Activity) mContext = (Activity) context;
+            else throw new RuntimeException("Can't get Activity instanceof Context!");
         }
 
         @Override
@@ -204,7 +216,7 @@ public class SettingsActivity extends AppCompatActivity {
             boolean isSendIconEnabled = prefs.getBoolean("SendIcon", false);
             IconResolution.setVisible(isSendIconEnabled);
             IconWarning.setVisible(isSendIconEnabled);
-            IconResolution.setSummary("Now : " + prefs.getString("IconRes","52 x 52 (Default)"));
+            IconResolution.setSummary("Now : " + prefs.getString("IconRes", "52 x 52 (Default)"));
             IconEnabled.setOnPreferenceChangeListener((preference, newValue) -> {
                 IconResolution.setVisible((boolean) newValue);
                 IconWarning.setVisible((boolean) newValue);
@@ -215,17 +227,17 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             }));
 
-            int dataLimit = prefs.getInt("DataLimit",4096);
+            int dataLimit = prefs.getInt("DataLimit", 4096);
             DataLimit.setSummary("Now : " + dataLimit + " Bytes" + (dataLimit == 4096 ? " (Default)" : ""));
 
-            int historyLimit = prefs.getInt("HistoryLimit",150);
+            int historyLimit = prefs.getInt("HistoryLimit", 150);
             HistoryLimit.setSummary("Now : " + historyLimit + " pcs" + (historyLimit == 150 ? " (Default)" : ""));
 
-            boolean isWhiteList = prefs.getBoolean("UseWhite",false);
+            boolean isWhiteList = prefs.getBoolean("UseWhite", false);
             Blacklist.setTitle("Edit " + (isWhiteList ? "whitelist" : "blacklist"));
             Blacklist.setSummary("select apps that you " + (isWhiteList ? "want" : "won't") + " send notification");
             UseWhiteList.setOnPreferenceChangeListener((preference, newValue) -> {
-                boolean isWhite = (boolean)newValue;
+                boolean isWhite = (boolean) newValue;
                 Blacklist.setTitle("Edit " + (isWhite ? "whitelist" : "blacklist"));
                 Blacklist.setSummary("select apps that you " + (isWhite ? "want" : "won't") + " send notification");
                 return true;
@@ -284,7 +296,7 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
 
                 case "debugInfo":
-                    CheckBoxPreference DebugMod = (CheckBoxPreference)DebugLogEnable;
+                    CheckBoxPreference DebugMod = (CheckBoxPreference) DebugLogEnable;
                     if (DebugMod.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                                 || mContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -307,7 +319,7 @@ public class SettingsActivity extends AppCompatActivity {
                     editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                     editText.setHint("Input Limit Value");
                     editText.setGravity(Gravity.CENTER);
-                    editText.setText(String.valueOf(prefs.getInt("DataLimit",4096)));
+                    editText.setText(String.valueOf(prefs.getInt("DataLimit", 4096)));
 
                     parentLayout = new LinearLayout(mContext);
                     layoutParams = new LinearLayout.LayoutParams(
@@ -320,14 +332,13 @@ public class SettingsActivity extends AppCompatActivity {
 
                     dialog.setPositiveButton("Apply", (d, w) -> {
                         String value = editText.getText().toString();
-                        if(value.equals(""))  {
-                            Toast.makeText(mContext,"Please Input Value",Toast.LENGTH_SHORT).show();
-                        }
-                        else {
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else {
                             int IntValue = Integer.parseInt(value);
                             if (IntValue < 1) {
                                 Toast.makeText(mContext, "Value must be higher than 0", Toast.LENGTH_SHORT).show();
-                            } else if(IntValue > 32786) {
+                            } else if (IntValue > 32786) {
                                 Toast.makeText(mContext, "Value must be lower than 32786", Toast.LENGTH_SHORT).show();
                             } else {
                                 prefs.edit().putInt("DataLimit", IntValue).apply();
@@ -335,11 +346,12 @@ public class SettingsActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    dialog.setNeutralButton("Reset Default", (d,w) -> {
+                    dialog.setNeutralButton("Reset Default", (d, w) -> {
                         prefs.edit().putInt("DataLimit", 4096).apply();
                         DataLimit.setSummary("Now : " + 4096 + " Bytes (Default)");
                     });
-                    dialog.setNegativeButton("Cancel", (d,w) -> {});
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -353,7 +365,7 @@ public class SettingsActivity extends AppCompatActivity {
                     editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                     editText.setHint("Input Limit Value");
                     editText.setGravity(Gravity.CENTER);
-                    editText.setText(String.valueOf(prefs.getInt("HistoryLimit",150)));
+                    editText.setText(String.valueOf(prefs.getInt("HistoryLimit", 150)));
 
                     parentLayout = new LinearLayout(mContext);
                     layoutParams = new LinearLayout.LayoutParams(
@@ -366,12 +378,11 @@ public class SettingsActivity extends AppCompatActivity {
 
                     dialog.setPositiveButton("Apply", (d, w) -> {
                         String value = editText.getText().toString();
-                        if(value.equals(""))  {
-                            Toast.makeText(mContext,"Please Input Value",Toast.LENGTH_SHORT).show();
-                        }
-                        else {
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else {
                             int IntValue = Integer.parseInt(value);
-                            if(IntValue > 65535) {
+                            if (IntValue > 65535) {
                                 Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
                             } else {
                                 prefs.edit().putInt("HistoryLimit", IntValue).apply();
@@ -379,11 +390,12 @@ public class SettingsActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    dialog.setNeutralButton("Reset Default", (d,w) -> {
+                    dialog.setNeutralButton("Reset Default", (d, w) -> {
                         prefs.edit().putInt("HistoryLimit", 150).apply();
                         HistoryLimit.setSummary("Now : " + 150 + " pcs (Default)");
                     });
-                    dialog.setNegativeButton("Cancel", (d,w) -> {});
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -391,12 +403,13 @@ public class SettingsActivity extends AppCompatActivity {
                     dialog = new AlertDialog.Builder(mContext);
                     dialog.setTitle("Waring!");
                     dialog.setMessage("Are you sure to reset your white/black list?\nThis operation cannot be undone.");
-                    dialog.setPositiveButton("Reset",(d,w) -> {
-                        mContext.getSharedPreferences("Whitelist",MODE_PRIVATE).edit().clear().apply();
-                        mContext.getSharedPreferences("Blacklist",MODE_PRIVATE).edit().clear().apply();
-                        Toast.makeText(mContext,"Task done!",Toast.LENGTH_SHORT).show();
+                    dialog.setPositiveButton("Reset", (d, w) -> {
+                        mContext.getSharedPreferences("Whitelist", MODE_PRIVATE).edit().clear().apply();
+                        mContext.getSharedPreferences("Blacklist", MODE_PRIVATE).edit().clear().apply();
+                        Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
                     });
-                    dialog.setNegativeButton("Cancel",(d,w) -> {});
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -409,7 +422,7 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }
                     break;
-                    
+
                 case "UseReceiveCall":
                     SwitchPreference UsePhone = (SwitchPreference) UseReceiveCall;
                     if (UsePhone.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -424,7 +437,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         private Notify.NotificationImportance getImportance() {
-            String value = prefs.getString("importance","Default");
+            String value = prefs.getString("importance", "Default");
             switch (value) {
                 case "Default":
                     return Notify.NotificationImportance.MAX;
@@ -476,17 +489,17 @@ public class SettingsActivity extends AppCompatActivity {
                     switch (requestCode) {
                         case 1:
                             Toast.makeText(mContext, "require storage permission!", Toast.LENGTH_SHORT).show();
-                            ((CheckBoxPreference)DebugLogEnable).setChecked(false);
+                            ((CheckBoxPreference) DebugLogEnable).setChecked(false);
                             break;
 
                         case 2:
                             Toast.makeText(mContext, "require sms permission!", Toast.LENGTH_SHORT).show();
-                            ((SwitchPreference)UseReplySms).setChecked(false);
+                            ((SwitchPreference) UseReplySms).setChecked(false);
                             break;
 
                         case 3:
                             Toast.makeText(mContext, "require call permission!", Toast.LENGTH_SHORT).show();
-                            ((SwitchPreference)UseReceiveCall).setChecked(false);
+                            ((SwitchPreference) UseReceiveCall).setChecked(false);
                             break;
                     }
                     return;
@@ -499,7 +512,7 @@ public class SettingsActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (requestCode == RC_SIGN_IN && result != null && result.isSuccess()) {
-                Log.d("Google log in","Result : " + (result.isSuccess() ? "success" : "failed") + " Status : " + result.getStatus().toString());
+                Log.d("Google log in", "Result : " + (result.isSuccess() ? "success" : "failed") + " Status : " + result.getStatus().toString());
                 GoogleSignInAccount account = result.getSignInAccount();
                 assert account != null;
                 firebaseAuthWithGoogle(account);
@@ -512,7 +525,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .addOnCompleteListener(mContext, task -> {
                         if (!task.isSuccessful()) {
                             Toast.makeText(mContext, "failed to login Google", Toast.LENGTH_SHORT).show();
-                        } else if(mAuth.getCurrentUser() != null){
+                        } else if (mAuth.getCurrentUser() != null) {
                             Toast.makeText(mContext, "Success to login Google", Toast.LENGTH_SHORT).show();
                             prefs.edit().putString("UID", mAuth.getUid()).apply();
                             prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
@@ -523,9 +536,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         private void recreate() {
             FragmentActivity activity = getActivity();
-            if(activity != null) activity.getSupportFragmentManager()
+            if (activity != null) activity.getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.settings, new SettingsFragment(mContext))
+                    .replace(R.id.settings, newInstance())
                     .commit();
         }
     }
