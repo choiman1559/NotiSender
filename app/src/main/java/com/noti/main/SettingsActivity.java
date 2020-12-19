@@ -137,6 +137,12 @@ public class SettingsActivity extends AppCompatActivity {
         Preference ResetList;
         Preference UseReplySms;
         Preference UseReceiveCall;
+        Preference UseInterval;
+        Preference IntervalTime;
+        Preference IntervalType;
+        Preference IntervalInfo;
+        Preference UseBannedOption;
+        Preference BannedWords;
 
         SettingsFragment() { }
 
@@ -177,6 +183,12 @@ public class SettingsActivity extends AppCompatActivity {
             ResetList = findPreference("ResetList");
             UseReplySms = findPreference("UseReplySms");
             UseReceiveCall = findPreference("UseReceiveCall");
+            UseInterval = findPreference("UseInterval");
+            IntervalTime = findPreference("IntervalTime");
+            IntervalType = findPreference("IntervalType");
+            IntervalInfo = findPreference("IntervalInfo");
+            UseBannedOption = findPreference("UseBannedOption");
+            BannedWords = findPreference("BannedWords");
 
             boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
@@ -193,9 +205,9 @@ public class SettingsActivity extends AppCompatActivity {
             Service.setSummary("Now : " + prefs.getString("service", "not selected"));
             TestRun.setEnabled(prefs.getString("service", "").equals("send"));
 
-            Service.setOnPreferenceChangeListener((preference, newValue) -> {
+            Service.setOnPreferenceChangeListener((p,n) -> {
                 ServiceToggle.setEnabled(!ifUIDBlank);
-                preference.setSummary("Now : " + newValue.toString());
+                p.setSummary("Now : " + n.toString());
 
                 boolean isSend = prefs.getString("service", "").equals("send");
                 TestRun.setEnabled(!isSend);
@@ -204,8 +216,8 @@ public class SettingsActivity extends AppCompatActivity {
 
             if (Build.VERSION.SDK_INT >= 26) {
                 SetImportance.setSummary("Now : " + prefs.getString("importance", ""));
-                SetImportance.setOnPreferenceChangeListener(((preference, newValue) -> {
-                    SetImportance.setSummary("Now : " + newValue);
+                SetImportance.setOnPreferenceChangeListener(((p,n) -> {
+                    SetImportance.setSummary("Now : " + n);
                     return true;
                 }));
             } else {
@@ -217,13 +229,13 @@ public class SettingsActivity extends AppCompatActivity {
             IconResolution.setVisible(isSendIconEnabled);
             IconWarning.setVisible(isSendIconEnabled);
             IconResolution.setSummary("Now : " + prefs.getString("IconRes", "52 x 52 (Default)"));
-            IconEnabled.setOnPreferenceChangeListener((preference, newValue) -> {
-                IconResolution.setVisible((boolean) newValue);
-                IconWarning.setVisible((boolean) newValue);
+            IconEnabled.setOnPreferenceChangeListener((p,n) -> {
+                IconResolution.setVisible((boolean) n);
+                IconWarning.setVisible((boolean) n);
                 return true;
             });
-            IconResolution.setOnPreferenceChangeListener(((preference, newValue) -> {
-                IconResolution.setSummary("Now : " + newValue);
+            IconResolution.setOnPreferenceChangeListener(((p,n) -> {
+                IconResolution.setSummary("Now : " + n);
                 return true;
             }));
 
@@ -236,10 +248,35 @@ public class SettingsActivity extends AppCompatActivity {
             boolean isWhiteList = prefs.getBoolean("UseWhite", false);
             Blacklist.setTitle("Edit " + (isWhiteList ? "whitelist" : "blacklist"));
             Blacklist.setSummary("select apps that you " + (isWhiteList ? "want" : "won't") + " send notification");
-            UseWhiteList.setOnPreferenceChangeListener((preference, newValue) -> {
-                boolean isWhite = (boolean) newValue;
+            UseWhiteList.setOnPreferenceChangeListener((p,n) -> {
+                boolean isWhite = (boolean) n;
                 Blacklist.setTitle("Edit " + (isWhite ? "whitelist" : "blacklist"));
                 Blacklist.setSummary("select apps that you " + (isWhite ? "want" : "won't") + " send notification");
+                return true;
+            });
+
+            int intervalTime = prefs.getInt("IntervalTime",150);
+            IntervalTime.setSummary("Now : " + intervalTime + (intervalTime == 150 ? " ms (Default)" : " ms"));
+            boolean useInterval = prefs.getBoolean("UseInterval",false);
+            IntervalInfo.setVisible(useInterval);
+            IntervalType.setVisible(useInterval);
+            IntervalTime.setVisible(useInterval);
+            UseInterval.setOnPreferenceChangeListener((p,n) -> {
+                boolean useIt = (boolean)n;
+                IntervalInfo.setVisible(useIt);
+                IntervalType.setVisible(useIt);
+                IntervalTime.setVisible(useIt);
+                return true;
+            });
+            IntervalType.setSummary("Now : " + prefs.getString("IntervalType","Entire app"));
+            IntervalType.setOnPreferenceChangeListener((p,n) -> {
+                IntervalType.setSummary("Now : " + n);
+                return true;
+            });
+
+            BannedWords.setVisible(prefs.getBoolean("UseBannedOption",false));
+            UseBannedOption.setOnPreferenceChangeListener((p,n) -> {
+                BannedWords.setVisible((boolean)n);
                 return true;
             });
 
@@ -342,7 +379,7 @@ public class SettingsActivity extends AppCompatActivity {
                                 Toast.makeText(mContext, "Value must be lower than 32786", Toast.LENGTH_SHORT).show();
                             } else {
                                 prefs.edit().putInt("DataLimit", IntValue).apply();
-                                DataLimit.setSummary("Now : " + IntValue + " Bytes");
+                                DataLimit.setSummary("Now : " + IntValue + (IntValue == 4096 ? " bytes (Default)" : " bytes"));
                             }
                         }
                     });
@@ -386,7 +423,7 @@ public class SettingsActivity extends AppCompatActivity {
                                 Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
                             } else {
                                 prefs.edit().putInt("HistoryLimit", IntValue).apply();
-                                HistoryLimit.setSummary("Now : " + IntValue + " pcs");
+                                HistoryLimit.setSummary("Now : " + IntValue + (IntValue == 150 ? " pcs (Default)" : " pcs"));
                             }
                         }
                     });
@@ -394,8 +431,90 @@ public class SettingsActivity extends AppCompatActivity {
                         prefs.edit().putInt("HistoryLimit", 150).apply();
                         HistoryLimit.setSummary("Now : " + 150 + " pcs (Default)");
                     });
-                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.show();
+                    break;
+
+                case "IntervalTime":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input Value");
+                    dialog.setMessage("The interval time maximum limit is 2147483647 ms.");
+
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    editText.setHint("Input Limit Value");
+                    editText.setGravity(Gravity.CENTER);
+                    editText.setText(String.valueOf(prefs.getInt("IntervalTime", 150)));
+
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else {
+                            int IntValue = Integer.parseInt(value);
+                            if (IntValue > 0x7FFFFFFF - 1) {
+                                Toast.makeText(mContext, "Value must be lower than 2147483647", Toast.LENGTH_SHORT).show();
+                            } else {
+                                prefs.edit().putInt("IntervalTime", IntValue).apply();
+                                IntervalTime.setSummary("Now : " + IntValue + (IntValue == 150 ? " ms (Default)" : " ms"));
+                            }
+                        }
                     });
+                    dialog.setNeutralButton("Reset Default", (d, w) -> {
+                        prefs.edit().putInt("IntervalTime", 150).apply();
+                        IntervalTime.setSummary("Now : " + 150 + " ms (Default)");
+                    });
+                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.show();
+                    break;
+
+                case "IntervalInfo":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setTitle("Interval details");
+                    dialog.setMessage(getString(R.string.Interval_information));
+                    dialog.setPositiveButton("Close", (d, w) -> { });
+                    dialog.show();
+                    break;
+
+                case "BannedWords":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input Value");
+                    dialog.setMessage("Each entry is separated by \"/\".");
+
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                    editText.setHint("Input Value");
+                    editText.setGravity(Gravity.START);
+                    editText.setText(prefs.getString("BannedWords", ""));
+
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else prefs.edit().putString("BannedWords", value).apply();
+                    });
+                    dialog.setNeutralButton("Clear", (d, w) -> prefs.edit().putString("BannedWords", "").apply());
+                    dialog.setNegativeButton("Cancel", (d, w) -> { });
                     dialog.show();
                     break;
 
@@ -408,8 +527,7 @@ public class SettingsActivity extends AppCompatActivity {
                         mContext.getSharedPreferences("Blacklist", MODE_PRIVATE).edit().clear().apply();
                         Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
                     });
-                    dialog.setNegativeButton("Cancel", (d, w) -> {
-                    });
+                    dialog.setNegativeButton("Cancel", (d, w) -> { });
                     dialog.show();
                     break;
 

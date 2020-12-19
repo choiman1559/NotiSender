@@ -60,6 +60,35 @@
             android:key="UseReceiveCall"
             android:summary="need call permission"
             android:title="Accept calls on other devices" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseInterval"
+            android:title="Use Interval"
+            android:summary="Use interval between notifications" />
+        <ListPreference
+            android:key="IntervalType"
+            android:title="Set Interval processing method"
+            android:summary="Now : Entire app"
+            android:entries="@array/interval"
+            android:entryValues="@array/interval"
+            android:defaultValue="Entire app" />
+        <Preference
+            android:key="IntervalTime"
+            android:title="Set interval time"
+            android:summary="Now : 100 ms (Default)"/>
+        <Preference
+            android:key="IntervalInfo"
+            android:summary="Click here to get more information about interval"
+            android:icon="@drawable/ic_info_outline_black_24dp" />
+        <SwitchPreference
+            android:key="UseBannedOption"
+            android:title="Use Banned words option"
+            android:summary="Use banned words customizing option"
+            android:defaultValue="false"/>
+        <Preference
+            android:key="BannedWords"
+            android:title="Customizing banned words"
+            android:summary="Click here to set banned words" />
         <Preference
             android:summary="Reception option"
             android:enabled="false" />
@@ -111,7 +140,6 @@
             android:key="forWear"
             android:summary="Receive Notification in Wear OS"
             android:title="Noti Sender For Wear OS" />
-
         <Preference
             android:key="AppInfo"
             android:summary="@string/App_info_des"

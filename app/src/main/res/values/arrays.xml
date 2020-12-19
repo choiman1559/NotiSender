@@ -1,18 +1,23 @@
 <resources>
-<string-array name="services">
-    <item>reception</item>
-    <item>send</item>
-</string-array>
+    <string-array name="services">
+        <item>reception</item>
+        <item>send</item>
+    </string-array>
 
-<string-array name="importance">
-    <item>High</item>
-    <item>Default</item>
-    <item>Low</item>
-</string-array>
+    <string-array name="importance">
+        <item>High</item>
+        <item>Default</item>
+        <item>Low</item>
+    </string-array>
 
-<string-array name="resolution">
-    <item>68 x 68 (Not Recommend)</item>
-    <item>52 x 52 (Default)</item>
-    <item>36 x 36</item>
-</string-array>
+    <string-array name="resolution">
+        <item>68 x 68 (Not Recommend)</item>
+        <item>52 x 52 (Default)</item>
+        <item>36 x 36</item>
+    </string-array>
+
+    <string-array name="interval">
+        <item>Entire app</item>
+        <item>Per app</item>
+    </string-array>
 </resources>

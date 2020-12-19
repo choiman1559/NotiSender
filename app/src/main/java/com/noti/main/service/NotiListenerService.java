@@ -48,8 +48,30 @@ public class NotiListenerService extends NotificationListenerService {
     String toString(Boolean boo) {
         return boo ? "true" : "false";
     }
-    ArrayList<String[]> intervalQuery = new ArrayList<>();
 
+    private static class Query {
+        private String Package;
+        private long Timestamp;
+
+        public String getPackage() {
+            return Package;
+        }
+
+        public void setPackage(String aPackage) {
+            Package = aPackage;
+        }
+
+        public void setTimestamp(long timestamp) {
+            Timestamp = timestamp;
+        }
+
+        public long getTimestamp() {
+            return Timestamp;
+        }
+    }
+
+    private volatile ArrayList<Query> intervalQuery = new ArrayList<>();
+    private volatile long intervalTimestamp = 0;
     volatile StatusBarNotification pastNotification = null;
 
     void Log(String message, String time) {
@@ -122,10 +144,12 @@ public class NotiListenerService extends NotificationListenerService {
         Notification notification = sbn.getNotification();
         Bundle extra = notification.extras;
         SharedPreferences prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
-        String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+        Date time = Calendar.getInstance().getTime();
+        String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
+        boolean isLogging = BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false);
 
         new Thread(() -> {
-            if (BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false)) {
+            if (isLogging) {
                 String str = "";
                 str += "\n";
                 str += "***onNotificationPosted debug info***\n";
@@ -171,14 +195,56 @@ public class NotiListenerService extends NotificationListenerService {
                     notificationHead.put("to", TOPIC);
                     notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
                 } catch (JSONException e) {
-                    Log.e("Noti", "onCreate: " + e.getMessage());
+                    if(isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
                 }
-                if (BuildConfig.DEBUG) Log.d("data", notificationHead.toString());
+                if (isLogging) Log.d("data", notificationHead.toString());
                 sendNotification(notificationHead, sbn);
             } else {
                 boolean isWhitelist = prefs.getBoolean("UseWhite", false);
                 boolean isContain = getSharedPreferences(isWhitelist ? "Whitelist" : "Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false);
                 if ((isWhitelist && isContain) || (!isWhitelist && !isContain)) {
+
+                    String TITLE = extra.getString(Notification.EXTRA_TITLE);
+                    String TEXT = extra.getString(Notification.EXTRA_TEXT);
+
+                    if(prefs.getBoolean("UseBannedOption",false)) {
+                        String word = prefs.getString("BannedWords","");
+                        if(!word.equals("")) {
+                            String[] words = word.split("/");
+                            for (String s : words) {
+                                if ((TEXT.contains(s) || TITLE.contains(s))) return;
+                            }
+                        }
+                    }
+
+                    if(prefs.getBoolean("UseInterval",false)) {
+                        String Type = prefs.getString("IntervalType","Entire app");
+                        int timeInterval = prefs.getInt("IntervalTime", 150);
+                        if(Type.equals("Entire app")) {
+                            if(isLogging) Log.d("IntervalCalculate","Package" + sbn.getPackageName() + "/CurrentTime:" + time.getTime() + "/LatestNotificationTime:" + intervalTimestamp + "/Calculated(ms):" + (time.getTime() - intervalTimestamp));
+                            if (intervalTimestamp != 0 && time.getTime() - intervalTimestamp <= timeInterval) {
+                                intervalTimestamp = time.getTime();
+                                return;
+                            } else intervalTimestamp = time.getTime();
+                        } else if(Type.equals("Per app")){
+                            int index = findIndex(sbn.getPackageName());
+                            Query newQuery = new Query();
+                            if(index != -1) {
+                                Query query = intervalQuery.get(index);
+                                if(time.getTime() - query.getTimestamp() <= timeInterval) {
+                                    newQuery.setTimestamp(time.getTime());
+                                    newQuery.setPackage(sbn.getPackageName());
+                                    intervalQuery.set(index,newQuery);
+                                    return;
+                                }
+                            } else {
+                                newQuery.setPackage(sbn.getPackageName());
+                                newQuery.setTimestamp(time.getTime());
+                                intervalQuery.add(newQuery);
+                            }
+                        }
+                    }
+
                     try {
                         JSONArray array = new JSONArray();
                         JSONObject object = new JSONObject();
@@ -237,18 +303,16 @@ public class NotiListenerService extends NotificationListenerService {
                     String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
                     String DEVICE_ID = getMACAddress();
                     String TOPIC = "/topics/" + prefs.getString("UID", "");
-                    String TITLE = extra.getString(Notification.EXTRA_TITLE);
-                    String TEXT = extra.getString(Notification.EXTRA_TEXT);
                     String Package = "" + sbn.getPackageName();
                     String APPNAME = null;
                     try {
                         APPNAME = "" + NotiListenerService.this.getPackageManager().
                                 getApplicationLabel(NotiListenerService.this.getPackageManager().getApplicationInfo(Package, PackageManager.GET_META_DATA));
                     } catch (PackageManager.NameNotFoundException e) {
-                        Log.d("Error", "Package not found : " + Package);
+                        if(isLogging) Log.d("Error", "Package not found : " + Package);
                     }
 
-                    Log.d("length", String.valueOf(ICONS.length()));
+                    if(isLogging) Log.d("length", String.valueOf(ICONS.length()));
                     JSONObject notificationHead = new JSONObject();
                     JSONObject notifcationBody = new JSONObject();
                     try {
@@ -266,14 +330,23 @@ public class NotiListenerService extends NotificationListenerService {
                         notificationHead.put("to", TOPIC);
                         notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
                     } catch (JSONException e) {
-                        Log.e("Noti", "onCreate: " + e.getMessage());
+                        if(isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
                     }
-                    if (BuildConfig.DEBUG) Log.d("data", notificationHead.toString());
+                    if (isLogging) Log.d("data", notificationHead.toString());
                     sendNotification(notificationHead, sbn);
                 }
             }
         }
-        pastNotification = sbn;
+        synchronized (sbn) {
+            pastNotification = sbn;
+        }
+    }
+
+    private int findIndex(String value) {
+        for(int i = 0;i < intervalQuery.size();i++) {
+            if(intervalQuery.get(i).getPackage().equals(value)) return i;
+        }
+        return -1;
     }
 
     private void sendNotification(JSONObject notification, StatusBarNotification sbn) {

@@ -1,7 +1,7 @@
 <resources>
     <string name="serverKey">AAAAuj5Jn40:APA91bHXGYXRyVLifav3nDAt0Zou9bwGlwXhp_hdbuxoEKDerIpznlS3AM_JaApNWOG7Zxpq_MimOMtY4sm9hTcFmmeNOlG1iMD0bDR7u9Ah_gBDY_hOYncS4np9qE4OlmDiwn1Z06bO</string>
 
-    <string name="app_name">Noti Sender</string>
+    <string name="app_name">Noti Sender (main)</string>
     <string name="title_activity_settings">Noti Sender</string>
 
     <string name="account">account</string>
@@ -27,4 +27,6 @@
 
     <string name="notiDetail_ok">Remote run</string>
     <string name="notiDetail_cancel">Close</string>
+
+    <string name="Interval_information">"Set the interval for notifications. For example, if an interval of 100ms is set and the notification 'A' appears, no other notification is sent and ignored for 100ms after the 'A' notification appears.\n\nOption details\nEntire app : Treats notifications from all apps as one app and applies intervals.\nPer app : Apply notification interval for each app.\n\n\nNote: This feature is not thread-safe and may cause bugs.</string>
 </resources>
