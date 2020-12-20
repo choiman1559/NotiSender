@@ -61,18 +61,17 @@ public class NotiListenerService extends NotificationListenerService {
             Package = aPackage;
         }
 
-        public void setTimestamp(long timestamp) {
-            Timestamp = timestamp;
-        }
-
         public long getTimestamp() {
             return Timestamp;
         }
+        public void setTimestamp(long timestamp) {
+            Timestamp = timestamp;
+        }
     }
 
-    private volatile ArrayList<Query> intervalQuery = new ArrayList<>();
     private volatile long intervalTimestamp = 0;
     volatile StatusBarNotification pastNotification = null;
+    private final ArrayList<Query> intervalQuery = new ArrayList<>();
 
     void Log(String message, String time) {
         if (getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("debugInfo", false)) {
@@ -221,7 +220,7 @@ public class NotiListenerService extends NotificationListenerService {
                         String Type = prefs.getString("IntervalType","Entire app");
                         int timeInterval = prefs.getInt("IntervalTime", 150);
                         if(Type.equals("Entire app")) {
-                            if(isLogging) Log.d("IntervalCalculate","Package" + sbn.getPackageName() + "/CurrentTime:" + time.getTime() + "/LatestNotificationTime:" + intervalTimestamp + "/Calculated(ms):" + (time.getTime() - intervalTimestamp));
+                            if(isLogging) Log.d("IntervalCalculate","Package" + sbn.getPackageName() + "/Calculated(ms):" + (time.getTime() - intervalTimestamp));
                             if (intervalTimestamp != 0 && time.getTime() - intervalTimestamp <= timeInterval) {
                                 intervalTimestamp = time.getTime();
                                 return;
@@ -229,18 +228,18 @@ public class NotiListenerService extends NotificationListenerService {
                         } else if(Type.equals("Per app")){
                             int index = findIndex(sbn.getPackageName());
                             Query newQuery = new Query();
-                            if(index != -1) {
-                                Query query = intervalQuery.get(index);
-                                if(time.getTime() - query.getTimestamp() <= timeInterval) {
+                            synchronized (intervalQuery) {
+                                if (index != -1) {
+                                    Query query = intervalQuery.get(index);
                                     newQuery.setTimestamp(time.getTime());
                                     newQuery.setPackage(sbn.getPackageName());
-                                    intervalQuery.set(index,newQuery);
-                                    return;
+                                    intervalQuery.set(index, newQuery);
+                                    if (time.getTime() - query.getTimestamp() <= timeInterval) return;
+                                } else {
+                                    newQuery.setPackage(sbn.getPackageName());
+                                    newQuery.setTimestamp(time.getTime());
+                                    intervalQuery.add(newQuery);
                                 }
-                            } else {
-                                newQuery.setPackage(sbn.getPackageName());
-                                newQuery.setTimestamp(time.getTime());
-                                intervalQuery.add(newQuery);
                             }
                         }
                     }

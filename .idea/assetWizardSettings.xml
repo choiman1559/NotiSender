@@ -181,7 +181,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="/tmp/baseline_broken_image_24.xml" />
+                                                <entry key="imagePath" value="/tmp/baseline_notification_important_24.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -192,7 +192,18 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/snap/android-studio/91/android-studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/broken_image/baseline_broken_image_24.xml" />
+                                                <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/notification_important/baseline_notification_important_24.xml" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="image">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -224,7 +235,7 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="outputName" value="ic_broken_image" />
+                                      <entry key="outputName" value="ic_notification_tile" />
                                     </map>
                                   </option>
                                 </PersistentState>

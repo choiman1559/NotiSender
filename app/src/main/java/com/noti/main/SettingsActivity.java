@@ -202,6 +202,12 @@ public class SettingsActivity extends AppCompatActivity {
                 ServiceToggle.setEnabled(false);
             }
 
+            prefs.registerOnSharedPreferenceChangeListener((p,k) ->{
+                if(k.equals("serviceToggle")) {
+                    ((SwitchPreference)ServiceToggle).setChecked(prefs.getBoolean("serviceToggle",false));
+                }
+            });
+
             Service.setSummary("Now : " + prefs.getString("service", "not selected"));
             TestRun.setEnabled(prefs.getString("service", "").equals("send"));
 
