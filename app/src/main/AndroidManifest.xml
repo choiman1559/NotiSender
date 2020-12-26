@@ -28,6 +28,7 @@
             android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
         <activity android:name=".ui.receive.SmsViewActivity"
             android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
+        <activity android:name=".ui.receive.ExitActivity"/>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings">

@@ -14,7 +14,7 @@
             android:title="service on/off" />
         <ListPreference
             android:defaultValue="not selected"
-            android:entries="@array/services"
+            android:entries="@array/services_shown"
             android:entryValues="@array/services"
             android:key="service"
             android:title="Select service"
@@ -120,7 +120,7 @@
             android:title="Notification History" />
         <Preference
             android:key="testNoti"
-            android:summary="set service to 'send' before use this"
+            android:summary="click this prefs to test notification"
             android:title="Test Notification" />
         <Preference
             android:key="ResetList"

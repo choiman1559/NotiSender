@@ -67,10 +67,10 @@ public class SmsViewActivity extends Activity {
                     Log.e("Noti", "onCreate: " + e.getMessage() );
                 }
                 sendNotification(notificationHead);
-                this.finish();
+                ExitActivity.exitApplication(this);
             }
         });
-        Cancel.setOnClickListener(v -> finish());
+        Cancel.setOnClickListener(v -> ExitActivity.exitApplication(this));
     }
 
     private void sendNotification(JSONObject notification) {

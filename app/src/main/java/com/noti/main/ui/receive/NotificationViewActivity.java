@@ -79,10 +79,10 @@ public class NotificationViewActivity extends Activity {
             }
             Log(notificationHead.toString());
             sendNotification(notificationHead);
-            NotificationViewActivity.this.finish();
+            ExitActivity.exitApplication(this);
         });
 
-        NO.setOnClickListener(v -> NotificationViewActivity.this.finish());
+        NO.setOnClickListener(v -> ExitActivity.exitApplication(this));
     }
 
     private void sendNotification(JSONObject notification) {

@@ -85,7 +85,7 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, newInstance())
-                .commit();
+                .commitNowAllowingStateLoss();
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
@@ -209,14 +209,8 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             Service.setSummary("Now : " + prefs.getString("service", "not selected"));
-            TestRun.setEnabled(prefs.getString("service", "").equals("send"));
-
             Service.setOnPreferenceChangeListener((p,n) -> {
-                ServiceToggle.setEnabled(!ifUIDBlank);
                 p.setSummary("Now : " + n.toString());
-
-                boolean isSend = prefs.getString("service", "").equals("send");
-                TestRun.setEnabled(!isSend);
                 return true;
             });
 
@@ -663,7 +657,7 @@ public class SettingsActivity extends AppCompatActivity {
             if (activity != null) activity.getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.settings, newInstance())
-                    .commit();
+                    .commitNowAllowingStateLoss();
         }
     }
 }

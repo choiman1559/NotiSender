@@ -21,9 +21,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.application.isradeleon.notify.Notify;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
 import com.noti.main.R;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
@@ -37,6 +39,8 @@ import java.util.Date;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+
+import static com.noti.main.service.NotiListenerService.getMACAddress;
 
 public class FirebaseMessageService extends FirebaseMessagingService {
 
@@ -52,9 +56,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Map<String, String> map = remoteMessage.getData();
         String type = map.get("type");
+        String mode = prefs.getString("service", "");
 
         if(prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
-            if (prefs.getString("service", "").equals("reception")) {
+            if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
+                if(mode.equals("hybrid") && isDeviceItself(map)) return;
                 if (type.equals("send|normal")) {
                     Bitmap icon = null;
                     Bitmap iconw = null;
@@ -71,8 +77,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 }
             }
 
-            else if (prefs.getString("service", "").equals("send") && type.contains("reception")) {
-                if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(NotiListenerService.getMACAddress())) {
+            else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
+                if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(getMACAddress())) {
                     if(type.equals("reception|normal")) {
                         new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
                         startNewActivity(map.get("package"));
@@ -84,6 +90,21 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 }
             }
         }
+    }
+
+    protected boolean isDeviceItself(Map<String, String> map) {
+        String Device_name = map.get("device_name");
+        String Device_id = map.get("device_id");
+
+        if(Device_id == null || Device_name == null) {
+            Device_id = map.get("send_device_id");
+            Device_name = map.get("send_device_name");
+        }
+
+        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_ID = getMACAddress();
+
+        return Device_name.equals(DEVICE_NAME) && Device_id.equals(DEVICE_ID);
     }
 
     private void startNewActivity(String Package){
@@ -189,20 +210,18 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))
                 .setContentTitle(title + " (" + AppName + ")")
                 .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(Build.VERSION.SDK_INT > 23 ? getPriority() : NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setGroupSummary(true)
                 .setGroup(getPackageName() + ".NOTIFICATION")
                 .setAutoCancel(true);
 
         if(Icon != null) builder.setLargeIcon(Icon);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setSmallIcon(R.drawable.ic_notification);
             CharSequence channelName = getString(R.string.notify_channel_name);
             String description = getString(R.string.notify_channel_description);
-            int importance = getImportance();
-            NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, importance);
+            NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
             channel.setDescription(description);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
@@ -224,6 +243,19 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 return NotificationManager.IMPORTANCE_MAX;
             default:
                 return NotificationManager.IMPORTANCE_UNSPECIFIED;
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private int getPriority() {
+        String value = prefs.getString("importance","Default");
+        switch (value) {
+            case "Low":
+                return NotificationCompat.PRIORITY_LOW;
+            case "High":
+                return NotificationCompat.PRIORITY_MAX;
+            default:
+                return NotificationCompat.PRIORITY_DEFAULT;
         }
     }
 

@@ -1,7 +1,14 @@
 <resources>
+    <string-array name="services_shown">
+        <item>reception</item>
+        <item>send</item>
+        <item>hybrid (Not Recommend)</item>
+    </string-array>
+
     <string-array name="services">
         <item>reception</item>
         <item>send</item>
+        <item>hybrid</item>
     </string-array>
 
     <string-array name="importance">
