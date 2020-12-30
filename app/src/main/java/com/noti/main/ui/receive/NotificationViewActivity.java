@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,7 +16,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.noti.main.utils.CompressStringUtil;
 import com.noti.main.utils.MySingleton;
 import com.noti.main.R;
 
@@ -39,22 +39,22 @@ public class NotificationViewActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notidetail);
 
-        Intent i = getIntent();
+        Intent intent = getIntent();
         String TOPIC = "/topics/" + getSharedPreferences("com.noti.main_preferences",MODE_PRIVATE).getString("UID","");
-        String Package = i.getStringExtra("package");
-        Bitmap icon = i.getStringExtra("icon") != null ? CompressStringUtil.StringToBitmap(i.getStringExtra("icon")) : null;
+        String Package = intent.getStringExtra("package");
+        Bitmap icon = intent.getParcelableExtra("icon");
 
         Button OK = findViewById(R.id.ok);
         Button NO = findViewById(R.id.cancel);
         ImageView ICON = findViewById(R.id.iconView);
         TextView DETAIL = findViewById(R.id.notiDetail);
 
-        String APPNAME = i.getStringExtra("appname");
-        String TITLE = i.getStringExtra("title");
-        String DEVICE_NAME = i.getStringExtra("device_name");
-        String DATE = i.getStringExtra("date");
+        String APP_NAME = intent.getStringExtra("appname");
+        String TITLE = intent.getStringExtra("title");
+        String DEVICE_NAME = intent.getStringExtra("device_name");
+        String DATE = intent.getStringExtra("date");
         String detail = "";
-        detail += "App Name : " + APPNAME + "\n";
+        detail += "App Name : " + APP_NAME + "\n";
         detail += "Noti Title : " + TITLE + "\n";
         detail += "Device : " + DEVICE_NAME + "\n";
         detail += "Posted Time : " + DATE + "\n";
@@ -71,7 +71,7 @@ public class NotificationViewActivity extends Activity {
                 notifcationBody.put("type","reception|normal");
                 notifcationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
                 notifcationBody.put("send_device_name",DEVICE_NAME);
-                notifcationBody.put("send_device_id",i.getStringExtra("device_id"));
+                notifcationBody.put("send_device_id",intent.getStringExtra("device_id"));
                 notificationHead.put("to", TOPIC);
                 notificationHead.put("data", notifcationBody);
             } catch (JSONException e) {

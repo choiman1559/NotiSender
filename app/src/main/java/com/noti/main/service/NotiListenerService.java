@@ -56,7 +56,6 @@ public class NotiListenerService extends NotificationListenerService {
         public String getPackage() {
             return Package;
         }
-
         public void setPackage(String aPackage) {
             Package = aPackage;
         }
@@ -251,29 +250,31 @@ public class NotiListenerService extends NotificationListenerService {
                             }
                         }
 
-                        try {
-                            JSONArray array = new JSONArray();
-                            JSONObject object = new JSONObject();
-                            String originString = prefs.getString("sendLogs", "");
+                        new Thread(() -> {
+                            try {
+                                JSONArray array = new JSONArray();
+                                JSONObject object = new JSONObject();
+                                String originString = prefs.getString("sendLogs", "");
 
-                            if (!originString.equals("")) array = new JSONArray(originString);
-                            object.put("date", DATE);
-                            object.put("package", sbn.getPackageName());
-                            object.put("title", extra.getString(Notification.EXTRA_TITLE));
-                            object.put("text", extra.getString(Notification.EXTRA_TEXT));
-                            array.put(object);
-                            prefs.edit().putString("sendLogs", array.toString()).apply();
-
-                            if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
-                                int a = array.length() - prefs.getInt("HistoryLimit", 150);
-                                for (int i = 0; i < a; i++) {
-                                    array.remove(i);
-                                }
+                                if (!originString.equals("")) array = new JSONArray(originString);
+                                object.put("date", DATE);
+                                object.put("package", sbn.getPackageName());
+                                object.put("title", extra.getString(Notification.EXTRA_TITLE));
+                                object.put("text", extra.getString(Notification.EXTRA_TEXT));
+                                array.put(object);
                                 prefs.edit().putString("sendLogs", array.toString()).apply();
+
+                                if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
+                                    int a = array.length() - prefs.getInt("HistoryLimit", 150);
+                                    for (int i = 0; i < a; i++) {
+                                        array.remove(i);
+                                    }
+                                    prefs.edit().putString("sendLogs", array.toString()).apply();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        }).start();
 
                         Bitmap ICON = null;
                         try {
