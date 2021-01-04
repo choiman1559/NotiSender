@@ -9,9 +9,9 @@ import com.android.volley.toolbox.Volley;
 
 public class MySingleton {
     @SuppressLint("StaticFieldLeak")
-    private  static MySingleton instance;
+    private static MySingleton instance;
     private RequestQueue requestQueue;
-    private Context ctx;
+    private final Context ctx;
 
     private MySingleton(Context context) {
         ctx = context;

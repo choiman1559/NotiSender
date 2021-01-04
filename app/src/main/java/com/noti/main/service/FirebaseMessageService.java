@@ -134,8 +134,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
-                .setGroupSummary(true)
                 .setGroup(getPackageName() + ".NOTIFICATION")
+                .setGroupSummary(true)
                 .setAutoCancel(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -203,6 +203,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
+        int uniqueCode = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
         notificationIntent.putExtra("package", Package);
         notificationIntent.putExtra("device_id",Device_id);
@@ -213,15 +214,15 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationIntent.putExtra("icon",Icon_original != null ? Icon : null);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))
                 .setContentTitle(title + " (" + AppName + ")")
                 .setContentText(content)
                 .setPriority(Build.VERSION.SDK_INT > 23 ? getPriority() : NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
-                .setGroupSummary(true)
                 .setGroup(getPackageName() + ".NOTIFICATION")
+                .setGroupSummary(true)
                 .setAutoCancel(true);
 
         if(Icon != null) builder.setLargeIcon(Icon);
@@ -234,7 +235,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
         } else builder.setSmallIcon(R.mipmap.ic_notification);
-        notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        notificationManager.notify(uniqueCode, builder.build());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

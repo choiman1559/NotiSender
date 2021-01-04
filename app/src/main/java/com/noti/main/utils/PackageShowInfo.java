@@ -79,8 +79,7 @@ public class PackageShowInfo implements Parcelable {
         dest.writeParcelable(this.applicationInfo, flags);
     }
 
-    private PackageShowInfo() {
-    }
+    private PackageShowInfo() { }
 
     private PackageShowInfo(Parcel in) {
         this.appName = in.readString();

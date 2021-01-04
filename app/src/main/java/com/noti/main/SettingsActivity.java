@@ -49,6 +49,7 @@ import com.noti.main.ui.AppinfoActiity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
 
+import java.util.Date;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -317,7 +318,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 case "testNoti":
                     Notify.create(mContext)
-                            .setTitle("test")
+                            .setTitle("test (" +  (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
                             .setContent("messageTest")
                             .setLargeIcon(R.drawable.ic_launcher_foreground)
                             .circleLargeIcon()
