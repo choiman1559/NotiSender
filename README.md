@@ -21,6 +21,6 @@ and mode "reception" is setting phone by client, get notifications from "send" m
  5. profit!
  
  ## ScreenShot
- ![s1](https://lh3.googleusercontent.com/TPVKQi_4pAbn-yVJvu7wPxY7TvX2DsasbaUrKKnm9mXXbut3ulsFF33ojA3c-40Tlg=w720-h310)
- ![s2](https://lh3.googleusercontent.com/o3JVjpFIbYtBDnAu3ixJXTy_rtA5Tfvzm26-566zFw8W6_K3HkNyCAuowL0abONGuLU=w720-h310)
- ![s3](https://lh3.googleusercontent.com/ea-iLgUGkDZe2y6XzTBmp4tGsovZLFEE-eScWq_1NONNZ2VhFs9DA1wsTvT9CvnrRG_9=w720-h310)
+ ![s1](https://play-lh.googleusercontent.com/EE7O4_oMJksDwdc5vovXGdxR9pnuKjJuGFGZaJpsOAYbaT3Sz1JH_pct9AfIohOHGc8=w720-h310)
+ ![s2](https://play-lh.googleusercontent.com/-0IQ61SszP_H0RZj2d85eVEBgJJXOibQgofhkhDU5OvSpfCerwfyNM6pk6fCNnJ0WpB4=w720-h310)
+ ![s3](https://play-lh.googleusercontent.com/-YknOH0aokrSuzvQJSA7SidUsbFo5O15Lhgz10GAYjDG7LU2i9tvy5b0QJVmrKqsdUE=w720-h310)
