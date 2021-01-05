@@ -25,6 +25,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
@@ -34,7 +35,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.noti.main.service.NotiListenerService.getMACAddress;
@@ -203,7 +207,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
-        int uniqueCode = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        int uniqueCode = 0;
+        try {
+            Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
+            uniqueCode = d == null ? 0 : (int)((d.getTime() / 1000L) % Integer.MAX_VALUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         notificationIntent.putExtra("package", Package);
         notificationIntent.putExtra("device_id",Device_id);

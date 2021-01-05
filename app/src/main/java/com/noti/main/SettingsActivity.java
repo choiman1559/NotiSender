@@ -48,6 +48,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.noti.main.ui.AppinfoActiity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
+import com.noti.main.utils.DetectAppSource;
+import com.noti.main.utils.GetVersionTask;
 
 import java.util.Date;
 import java.util.Set;
@@ -83,6 +85,11 @@ public class SettingsActivity extends AppCompatActivity {
             alert.show();
         }
 
+        int Source = DetectAppSource.detectSource(this);
+        if((Source == 1 || Source == 2) && isOnline()) {
+            new GetVersionTask(this).execute();
+        }
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, newInstance())
@@ -91,6 +98,16 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert cm != null;
+        if (cm.getActiveNetworkInfo() != null) {
+            NetworkInfo ni = cm.getActiveNetworkInfo();
+            return ni != null && ni.isConnected();
+        }
+        return false;
     }
 
     @Override
@@ -137,7 +154,6 @@ public class SettingsActivity extends AppCompatActivity {
         Preference HistoryLimit;
         Preference ResetList;
         Preference UseReplySms;
-        Preference UseReceiveCall;
         Preference UseInterval;
         Preference IntervalTime;
         Preference IntervalType;
@@ -183,7 +199,6 @@ public class SettingsActivity extends AppCompatActivity {
             HistoryLimit = findPreference("HistoryLimit");
             ResetList = findPreference("ResetList");
             UseReplySms = findPreference("UseReplySms");
-            UseReceiveCall = findPreference("UseReceiveCall");
             UseInterval = findPreference("UseInterval");
             IntervalTime = findPreference("IntervalTime");
             IntervalType = findPreference("IntervalType");
@@ -280,8 +295,6 @@ public class SettingsActivity extends AppCompatActivity {
                 BannedWords.setVisible((boolean)n);
                 return true;
             });
-
-            UseReceiveCall.setVisible(BuildConfig.DEBUG);
 
             try {
                 mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
@@ -541,16 +554,6 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }
                     break;
-
-                case "UseReceiveCall":
-                    SwitchPreference UsePhone = (SwitchPreference) UseReceiveCall;
-                    if (UsePhone.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (mContext.checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED
-                                || mContext.checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) != PackageManager.PERMISSION_GRANTED) {
-                            requestPermissions(new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.ANSWER_PHONE_CALLS}, 3);
-                        }
-                    }
-                    break;
             }
             return super.onPreferenceTreeClick(preference);
         }
@@ -612,18 +615,24 @@ public class SettingsActivity extends AppCompatActivity {
                             break;
 
                         case 2:
-                            Toast.makeText(mContext, "require sms permission!", Toast.LENGTH_SHORT).show();
+                            int SourceCode = DetectAppSource.detectSource(mContext);
+                            if(SourceCode == 1 || SourceCode == 2) {
+                                Toast.makeText(mContext, "require sms permission!", Toast.LENGTH_SHORT).show();
+                            } else if(SourceCode == 3) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
+                                builder.setPositiveButton("Go to github", (dialog, which) -> startActivity()).setNegativeButton("Close",(d, w) -> { }).show();
+                            } else Toast.makeText(mContext, "Error while getting SHA-1 hash!", Toast.LENGTH_SHORT).show();
                             ((SwitchPreference) UseReplySms).setChecked(false);
-                            break;
-
-                        case 3:
-                            Toast.makeText(mContext, "require call permission!", Toast.LENGTH_SHORT).show();
-                            ((SwitchPreference) UseReceiveCall).setChecked(false);
                             break;
                     }
                     return;
                 }
             }
+        }
+
+        void startActivity() {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest")));
         }
 
         @Override

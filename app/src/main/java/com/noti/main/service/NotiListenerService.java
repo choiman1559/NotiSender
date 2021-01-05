@@ -150,6 +150,7 @@ public class NotiListenerService extends NotificationListenerService {
         SharedPreferences prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         Date time = Calendar.getInstance().getTime();
         String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
+
         boolean isLogging = BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false);
 
         new Thread(() -> {

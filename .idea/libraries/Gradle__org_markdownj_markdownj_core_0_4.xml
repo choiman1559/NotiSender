@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: org.markdownj:markdownj-core:0.4">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.markdownj/markdownj-core/0.4/7dab17c3d4d492a2b776d25eb50e2320995de24c/markdownj-core-0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.markdownj/markdownj-core/0.4/1686f6216afb2193737a5e5d28cc324686c23c0d/markdownj-core-0.4-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.markdownj/markdownj-core/0.4/362301247251e0cde38bbe06f5888eb29157113c/markdownj-core-0.4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

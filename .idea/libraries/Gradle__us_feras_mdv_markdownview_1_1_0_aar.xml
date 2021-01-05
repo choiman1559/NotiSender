@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: us.feras.mdv:markdownview:1.1.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/364f45a9ff8587d767df9557d6c4833a/jetified-markdownview-1.1.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/364f45a9ff8587d767df9557d6c4833a/jetified-markdownview-1.1.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/364f45a9ff8587d767df9557d6c4833a/jetified-markdownview-1.1.0/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/us.feras.mdv/markdownview/1.1.0/9c9b79540182630e6505359ea5d15d02bb10f712/markdownview-1.1.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/us.feras.mdv/markdownview/1.1.0/126e0f203ec0e7b6d85b8c30a994d692658179f7/markdownview-1.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
