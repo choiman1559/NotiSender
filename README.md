@@ -6,7 +6,7 @@ Send notifications to other android devices easily
 ![Last](https://img.shields.io/github/last-commit/choiman1559/NotiSender)
 
 
-[![version](https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQKUUtefY6l9YGHF0GmQAijrUAUueZcJqwGIA&usqp=CAU)](https://play.google.com/store/apps/details?id=com.noti.sender)
+[![version](https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQKUUtefY6l9YGHF0GmQAijrUAUueZcJqwGIA&usqp=CAU)](https://play.google.com/store/apps/details?id=com.noti.main)
 
 ## How-To-Use 
 
