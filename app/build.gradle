@@ -16,8 +16,8 @@ android {
         minSdkVersion 21
         //noinspection OldTargetApi
         targetSdkVersion 29
-        versionCode 1010900
-        versionName "1.9.0 Beta"
+        versionCode 1010901
+        versionName "1.9.1 Beta"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -55,5 +55,4 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
 
     implementation 'com.github.isradeleon:Notify-Android:1.0.3'
-    implementation 'us.feras.mdv:markdownview:1.1.0'
 }

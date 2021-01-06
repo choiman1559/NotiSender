@@ -22,8 +22,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-import us.feras.mdv.MarkdownView;
-
 @SuppressLint("StaticFieldLeak")
 public class GetVersionTask extends AsyncTask<Void, Void, JSONArray> {
     private final Activity context;
@@ -75,16 +73,14 @@ public class GetVersionTask extends AsyncTask<Void, Void, JSONArray> {
                 Version v2 = new Version(localVersion);
 
                 if (v1.compareTo(v2) > 0) {
-                    MarkdownView md = new MarkdownView(context);
-                    md.loadMarkdown("##### Version : " + latestVersion + "\r\n" + obj.getString("body"));
-
                     new AlertDialog.Builder(context)
-                            .setCancelable(false)
+                            .setCancelable(true)
                             .setTitle(context.getString(R.string.dialog_update_title))
-                            .setMessage(context.getString(R.string.dialog_update_message))
+                            .setMessage("Version : " + latestVersion + "\n\n" + obj.getString("body"))
                             .setNegativeButton("Exit", (d, w) -> ExitActivity.exitApplication(context))
                             .setNeutralButton("No Thanks", (d, w) -> { })
-                            .setPositiveButton("Update", (d, w) -> context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest")))).setView(md).show();
+                            .setPositiveButton("Update", (d, w) -> context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))))
+                            .show();
                 }
             } catch (JSONException | PackageManager.NameNotFoundException ex) {
                 ex.printStackTrace();
