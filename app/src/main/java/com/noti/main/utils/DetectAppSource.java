@@ -19,7 +19,7 @@ public class DetectAppSource {
             case /* Debug build key */ "36:47:5f:49:ce:2d:bc:cb:b8:59:30:e3:86:17:85:6c:78:cf:86:53":
                 return 1; //You can change this value freely while you're testing
 
-            case /* Release key for Github */ "d5:5c:2e:6a:58:4c:3d:4f:4a:3a:08:cd:1c:7e:6a:eb:ee:ea:46:10":
+            case /* Release key for Github */ "ea:26:66:54:46:00:16:3c:f9:ba:19:f1:dd:9b:93:21:db:84:b6:91":
                 return 2;
 
             case /* Release key for Play Store */ "3b:84:65:62:d4:f5:21:87:95:e3:f8:7a:0a:87:52:8e:cd:26:1a:f0":
