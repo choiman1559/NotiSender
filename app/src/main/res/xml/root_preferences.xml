@@ -38,7 +38,7 @@
             android:defaultValue="false"
             android:key="SendIcon"
             android:summary="Send Noti's Icon with Notification together"
-            android:title="Send Icon (Unstable)" />
+            android:title="Send Icon" />
         <ListPreference
             android:defaultValue="52 x 52 (Default)"
             android:entries="@array/resolution"
@@ -46,6 +46,11 @@
             android:key="IconRes"
             android:summary="Now : 52 x 52 (Default)"
             android:title="Resolution of icon" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="IconUseNotification"
+            android:title="Send notification's icon instead of app icon (Unstable)"
+            android:summary="If notification icon isn't exists, app icon will be sent."/>
         <Preference
             android:key="IconWaring"
             android:summary="If icon's file size is too big, icon may not sent or sending notification may fail."

@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -210,7 +211,7 @@ public class NotiListenerService extends NotificationListenerService {
                             e.printStackTrace();
                         }
                     }).start();
-                    sendNormalNotification(prefs,PackageName,isLogging,DATE,TITLE,TEXT);
+                    sendNormalNotification(prefs,notification,PackageName,isLogging,DATE,TITLE,TEXT);
                 }
             }
         }
@@ -249,10 +250,19 @@ public class NotiListenerService extends NotificationListenerService {
         sendNotification(notificationHead, PackageName);
     }
 
-    private void sendNormalNotification(SharedPreferences prefs, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
+    private void sendNormalNotification(SharedPreferences prefs,Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
         Bitmap ICON = null;
         try {
-            ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
+            if(Build.VERSION.SDK_INT > 22 && prefs.getBoolean("IconUseNotification",false)) {
+                Icon LargeIcon = notification.getLargeIcon();
+                Icon SmallIcon = notification.getSmallIcon();
+
+                if(LargeIcon != null) ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(this));
+                else if(SmallIcon != null) ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(this));
+                else ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
+            } else {
+                ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

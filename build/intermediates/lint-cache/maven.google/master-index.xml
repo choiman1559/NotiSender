@@ -157,6 +157,7 @@
   <com.google.ar/>
   <com.google.ar.sceneform/>
   <com.google.ar.sceneform.ux/>
+  <com.google.assistant.suggestion/>
   <com.google.devtools.ksp/>
   <com.google.fhir/>
   <com.google.firebase/>

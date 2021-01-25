@@ -49,7 +49,6 @@ import com.noti.main.ui.AppinfoActiity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
 import com.noti.main.utils.DetectAppSource;
-import com.noti.main.utils.GetVersionTask;
 
 import java.util.Date;
 import java.util.Set;
@@ -85,11 +84,6 @@ public class SettingsActivity extends AppCompatActivity {
             alert.show();
         }
 
-        int Source = DetectAppSource.detectSource(this);
-        if((Source == 1 || Source == 2) && isOnline()) {
-            new GetVersionTask(this).execute();
-        }
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, newInstance())
@@ -98,16 +92,6 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
-    }
-
-    public boolean isOnline() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        assert cm != null;
-        if (cm.getActiveNetworkInfo() != null) {
-            NetworkInfo ni = cm.getActiveNetworkInfo();
-            return ni != null && ni.isConnected();
-        }
-        return false;
     }
 
     @Override
@@ -148,6 +132,7 @@ public class SettingsActivity extends AppCompatActivity {
         Preference IconResolution;
         Preference IconEnabled;
         Preference IconWarning;
+        Preference IconUseNotification;
         Preference DebugLogEnable;
         Preference ForWearOS;
         Preference DataLimit;
@@ -193,6 +178,7 @@ public class SettingsActivity extends AppCompatActivity {
             IconResolution = findPreference("IconRes");
             IconEnabled = findPreference("SendIcon");
             IconWarning = findPreference("IconWaring");
+            IconUseNotification = findPreference("IconUseNotification");
             DebugLogEnable = findPreference("debugInfo");
             ForWearOS = findPreference("forWear");
             DataLimit = findPreference("DataLimit");
@@ -241,13 +227,20 @@ public class SettingsActivity extends AppCompatActivity {
                 SetImportance.setSummary("Not for Android N or lower.");
             }
 
+            boolean isntUpOsM = Build.VERSION.SDK_INT < 22;
+            if(isntUpOsM) {
+                IconUseNotification.setEnabled(false);
+                IconUseNotification.setSummary("Works only on Android M and above!");
+            }
             boolean isSendIconEnabled = prefs.getBoolean("SendIcon", false);
             IconResolution.setVisible(isSendIconEnabled);
             IconWarning.setVisible(isSendIconEnabled);
+            IconUseNotification.setVisible(isSendIconEnabled);
             IconResolution.setSummary("Now : " + prefs.getString("IconRes", "52 x 52 (Default)"));
             IconEnabled.setOnPreferenceChangeListener((p,n) -> {
                 IconResolution.setVisible((boolean) n);
                 IconWarning.setVisible((boolean) n);
+                IconUseNotification.setVisible((boolean) n);
                 return true;
             });
             IconResolution.setOnPreferenceChangeListener(((p,n) -> {
@@ -333,7 +326,7 @@ public class SettingsActivity extends AppCompatActivity {
                     Notify.create(mContext)
                             .setTitle("test (" +  (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
                             .setContent("messageTest")
-                            .setLargeIcon(R.drawable.ic_launcher_foreground)
+                            .setLargeIcon(R.mipmap.ic_launcher)
                             .circleLargeIcon()
                             .setSmallIcon(R.drawable.ic_broken_image)
                             .setImportance(getImportance())

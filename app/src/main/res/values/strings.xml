@@ -33,4 +33,9 @@
 
     <string name="Interval_information">"Set the interval for notifications. For example, if an interval of 100ms is set and the notification 'A' appears, no other notification is sent and ignored for 100ms after the 'A' notification appears.\n\nOption details\nEntire app : Treats notifications from all apps as one app and applies intervals.\nPer app : Apply notification interval for each app.\n\n\nNote: This feature is not thread-safe and may cause bugs.</string>
     <string name="Dialog_rather_github">Due to the suppression of SMS read/send permission by Google Play policy, you need to download Noti Sender from Github rather than Play store to use this function.</string>
+
+    <string name="updater_loading">Loading… Please wait</string>
+    <string name="updater_checkupdate">Checking update…</string>
+    <string name="updater_manager_deprecated_title">Found deprecated app</string>
+    <string name="updater_manager_deprecated_message">Since the Manager and the main app have been reintegrated, Noti Sender Manager (com.noti.sender) is deprecated and no longer needed. \n\nYou can delete manager if you wish. Are you want to delete Manager?</string>
 </resources>
