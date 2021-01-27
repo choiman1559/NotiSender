@@ -27,4 +27,11 @@
         <item>Entire app</item>
         <item>Per app</item>
     </string-array>
+
+    <string-array name="updateChannel">
+        <item>Automatically specified</item>
+        <item>Github</item>
+        <item>Play Store</item>
+        <item>Do not check update</item>
+    </string-array>
 </resources>

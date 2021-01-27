@@ -126,6 +126,13 @@
             android:key="ResetList"
             android:title="Reset Black/White list"
             android:summary="Bang it!" />
+        <ListPreference
+            android:key="UpdateChannel"
+            android:title="Select update channel"
+            android:summary="Now : Automatically specified"
+            android:entries="@array/updateChannel"
+            android:entryValues="@array/updateChannel"
+            android:defaultValue="Automatically specified" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="debugInfo"

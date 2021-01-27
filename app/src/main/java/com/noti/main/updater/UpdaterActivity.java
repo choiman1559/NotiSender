@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -48,26 +49,44 @@ public class UpdaterActivity extends AppCompatActivity {
         if (isOnline()) {
             status1.setText(R.string.updater_checkupdate);
             status2.setIndeterminate(true);
-            int Source = DetectAppSource.detectSource(this);
-            switch (Source) {
-                case 1:
-                    Toast.makeText(this,"Run as debug build!", Toast.LENGTH_SHORT).show();
-                    startMainActivity(this);
-                    this.finish();
-                    break;
-
-                case 2:
+            SharedPreferences prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+            switch (prefs.getString("UpdateChannel","Automatically specified")) {
+                case "Github":
                     new GetGithubVersion(this).execute();
                     break;
 
-                case 3:
+                case "Play Store":
                     new GetPlayVersion(this).execute();
                     break;
 
-                default:
-                    Toast.makeText(this,"Unable to check SHA-1 Hash. skipping check update...", Toast.LENGTH_SHORT).show();
+                case "Do not check update":
                     startMainActivity(this);
                     this.finish();
+                    break;
+
+                default:
+                    int Source = DetectAppSource.detectSource(this);
+                    switch (Source) {
+                        case 1:
+                            Toast.makeText(this,"Run as debug build!", Toast.LENGTH_SHORT).show();
+                            startMainActivity(this);
+                            this.finish();
+                            break;
+
+                        case 2:
+                            new GetGithubVersion(this).execute();
+                            break;
+
+                        case 3:
+                            new GetPlayVersion(this).execute();
+                            break;
+
+                        default:
+                            Toast.makeText(this,"Unable to check SHA-1 Hash. skipping check update...", Toast.LENGTH_SHORT).show();
+                            startMainActivity(this);
+                            this.finish();
+                            break;
+                    }
                     break;
             }
         } else {

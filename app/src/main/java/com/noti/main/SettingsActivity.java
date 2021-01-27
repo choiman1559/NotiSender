@@ -145,6 +145,7 @@ public class SettingsActivity extends AppCompatActivity {
         Preference IntervalInfo;
         Preference UseBannedOption;
         Preference BannedWords;
+        Preference UpdateChannel;
 
         SettingsFragment() { }
 
@@ -191,6 +192,7 @@ public class SettingsActivity extends AppCompatActivity {
             IntervalInfo = findPreference("IntervalInfo");
             UseBannedOption = findPreference("UseBannedOption");
             BannedWords = findPreference("BannedWords");
+            UpdateChannel = findPreference("UpdateChannel");
 
             boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
@@ -286,6 +288,12 @@ public class SettingsActivity extends AppCompatActivity {
             BannedWords.setVisible(prefs.getBoolean("UseBannedOption",false));
             UseBannedOption.setOnPreferenceChangeListener((p,n) -> {
                 BannedWords.setVisible((boolean)n);
+                return true;
+            });
+
+            UpdateChannel.setSummary("Now : " + prefs.getString("UpdateChannel","Automatically specified"));
+            UpdateChannel.setOnPreferenceChangeListener((p, n) -> {
+                UpdateChannel.setSummary("Now : " + n);
                 return true;
             });
 

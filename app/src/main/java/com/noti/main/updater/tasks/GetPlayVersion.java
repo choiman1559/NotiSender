@@ -66,8 +66,11 @@ public class GetPlayVersion extends AsyncTask<Void, String, String> {
                             ExitActivity.exitApplication(context);
                         })
                         .show();
+            } else {
+                UpdaterActivity.startMainActivity(context);
+                context.finish();
             }
         }
-        Log.d("update", "Current version " + currentVersion + "playstore version " + onlineVersion);
+        Log.d("update", "Current version " + currentVersion + " playstore version " + onlineVersion);
     }
 }
