@@ -89,6 +89,19 @@
             android:key="BannedWords"
             android:title="Customizing banned words"
             android:summary="Click here to set banned words" />
+        <SwitchPreference
+            android:key="StrictStringNull"
+            android:title="Null string strict mode"
+            android:summary="Do not send notification if title or message string is null"
+            android:defaultValue="false"/>
+        <Preference
+            android:key="DefaultTitle"
+            android:title="Customizing default title string"
+            android:summary="Click here to set default title string" />
+        <Preference
+            android:key="DefaultMessage"
+            android:title="Customizing default message string"
+            android:summary="Click here to set default message string" />
         <Preference
             android:summary="Reception option"
             android:enabled="false" />
@@ -126,6 +139,10 @@
             android:key="ResetList"
             android:title="Reset Black/White list"
             android:summary="Bang it!" />
+        <Preference
+            android:key="DeleteHistory"
+            android:title="Delete notification history"
+            android:summary="Delete notification send/receive history." />
         <ListPreference
             android:key="UpdateChannel"
             android:title="Select update channel"

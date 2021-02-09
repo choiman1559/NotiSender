@@ -146,6 +146,9 @@ public class SettingsActivity extends AppCompatActivity {
         Preference UseBannedOption;
         Preference BannedWords;
         Preference UpdateChannel;
+        Preference UseNullStrict;
+        Preference DefaultTitle;
+        Preference DefaultMessage;
 
         SettingsFragment() { }
 
@@ -193,6 +196,9 @@ public class SettingsActivity extends AppCompatActivity {
             UseBannedOption = findPreference("UseBannedOption");
             BannedWords = findPreference("BannedWords");
             UpdateChannel = findPreference("UpdateChannel");
+            UseNullStrict = findPreference("StrictStringNull");
+            DefaultTitle = findPreference("DefaultTitle");
+            DefaultMessage = findPreference("DefaultMessage");
 
             boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
@@ -294,6 +300,16 @@ public class SettingsActivity extends AppCompatActivity {
             UpdateChannel.setSummary("Now : " + prefs.getString("UpdateChannel","Automatically specified"));
             UpdateChannel.setOnPreferenceChangeListener((p, n) -> {
                 UpdateChannel.setSummary("Now : " + n);
+                return true;
+            });
+
+            boolean isUseNullStrict = prefs.getBoolean("StrictStringNull",false);
+            DefaultTitle.setVisible(!isUseNullStrict);
+            DefaultMessage.setVisible(!isUseNullStrict);
+            UseNullStrict.setOnPreferenceChangeListener((p, n) -> {
+                boolean isUseNullStricts = (boolean)n;
+                DefaultTitle.setVisible(!isUseNullStricts);
+                DefaultMessage.setVisible(!isUseNullStricts);
                 return true;
             });
 
@@ -555,6 +571,82 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }
                     break;
+
+                case "DefaultTitle":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input Value");
+                    dialog.setMessage("Input default title string that used when notifications title string is null.");
+
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                    editText.setHint("Input Value");
+                    editText.setGravity(Gravity.START);
+                    editText.setText(prefs.getString("DefaultTitle", "New notification"));
+
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else prefs.edit().putString("DefaultTitle", value).apply();
+                    });
+                    dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().putString("DefaultTitle", "New notification").apply());
+                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.show();
+                    break;
+
+                case "DefaultMessage":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input Value");
+                    dialog.setMessage("Input default message string that used when notifications message string is null.");
+
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                    editText.setHint("Input Value");
+                    editText.setGravity(Gravity.START);
+                    editText.setText(prefs.getString("DefaultMessage", "notification arrived."));
+
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else prefs.edit().putString("DefaultMessage", value).apply();
+                    });
+                    dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().putString("DefaultMessage", "notification arrived.").apply());
+                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.show();
+                    break;
+
+                case "DeleteHistory":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setTitle("Waring!");
+                    dialog.setMessage("Are you sure to delete notification history?\nThis operation cannot be undone.");
+                    dialog.setPositiveButton("Delete", (d, w) -> {
+                        prefs.edit().putString("sendLogs", "").putString("receivedLogs","").apply();
+                        Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
+                    });
+                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.show();
+                    break;
             }
             return super.onPreferenceTreeClick(preference);
         }
@@ -582,7 +674,7 @@ public class SettingsActivity extends AppCompatActivity {
                     Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                     startActivityForResult(signInIntent, RC_SIGN_IN);
                 } else
-                    Snackbar.make(mContext.findViewById(R.id.setting_activity), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(mContext.findViewById(R.id.layout), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);

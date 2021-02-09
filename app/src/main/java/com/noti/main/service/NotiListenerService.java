@@ -185,6 +185,7 @@ public class NotiListenerService extends NotificationListenerService {
                 if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
                     sendSmsNotification(prefs, isLogging, PackageName);
                 } else if (isWhitelist(prefs, PackageName)) {
+                    if(prefs.getBoolean("StrictStringNull",false) && (TITLE == null || TEXT == null)) return;
                     if (isBannedWords(prefs, TEXT, TITLE) || isIntervalNotGaped(prefs, isLogging, PackageName, time)) return;
                     new Thread(() -> {
                         try {
@@ -307,8 +308,8 @@ public class NotiListenerService extends NotificationListenerService {
         JSONObject notifcationBody = new JSONObject();
         try {
             notifcationBody.put("type", "send|normal");
-            notifcationBody.put("title", TITLE != null ? TITLE : "New notification");
-            notifcationBody.put("message", TEXT != null ? TEXT : "notification arrived.");
+            notifcationBody.put("title", TITLE != null ? TITLE : prefs.getString("DefaultTitle","New notification"));
+            notifcationBody.put("message", TEXT != null ? TEXT : prefs.getString("DefaultMessage","notification arrived."));
             notifcationBody.put("package", PackageName);
             notifcationBody.put("appname", APPNAME);
             notifcationBody.put("device_name", DEVICE_NAME);
