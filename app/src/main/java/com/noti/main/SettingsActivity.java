@@ -1,6 +1,7 @@
 package com.noti.main;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -44,16 +46,25 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
+
 import com.noti.main.ui.AppinfoActiity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
+import com.noti.main.utils.BillingManager;
 import com.noti.main.utils.DetectAppSource;
 
 import java.util.Date;
 import java.util.Set;
 
+import me.pushy.sdk.Pushy;
+
 public class SettingsActivity extends AppCompatActivity {
+
+    @SuppressLint("StaticFieldLeak")
+    static BillingManager billingManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,16 +106,21 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        billingManager.Destroy();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 101) {
             if (Build.VERSION.SDK_INT > 28 && !Settings.canDrawOverlays(this)) finish();
-        }
-        if (requestCode == 102) {
+        } else if (requestCode == 102) {
             Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
             if (!sets.contains(getPackageName())) finish();
-        }
+        } else billingManager.handleActivityResult(requestCode, resultCode, data);
     }
 
     public static SettingsFragment newInstance() {
@@ -119,16 +135,21 @@ public class SettingsActivity extends AppCompatActivity {
         private static final int RC_SIGN_IN = 100;
         private GoogleSignInClient mGoogleSignInClient;
         private FirebaseAuth mAuth;
+        FirebaseFirestore mFirebaseFirestore;
         SharedPreferences prefs;
         Activity mContext;
 
         Preference Login;
         Preference Service;
         Preference ServiceToggle;
+        Preference Server;
+        Preference Subscribe;
+        Preference ServerInfo;
         Preference Blacklist;
         Preference UseWhiteList;
         Preference TestRun;
         Preference SetImportance;
+        Preference UseWiFiSleepPolicy;
         Preference IconResolution;
         Preference IconEnabled;
         Preference IconWarning;
@@ -170,15 +191,39 @@ public class SettingsActivity extends AppCompatActivity {
 
             mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
             mAuth = FirebaseAuth.getInstance();
+            mFirebaseFirestore = FirebaseFirestore.getInstance();
             prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+
+            mFirebaseFirestore.collection("ApiKey")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                prefs.edit()
+                                        .putString("ApiKey_FCM", "" + document.get("FCM"))
+                                        .putString("ApiKey_Pushy","" + document.get("Pushy"))
+                                        .apply();
+                            }
+                        } else {
+                            new AlertDialog.Builder(mContext)
+                                    .setTitle("Error occurred!")
+                                    .setMessage("Error occurred while initializing client token.\nplease check your internet connection and try again.")
+                                    .setPositiveButton("OK", (dialog, which) -> mContext.finishAndRemoveTask())
+                                    .setCancelable(false);
+                        }
+                    });
 
             Login = findPreference("Login");
             TestRun = findPreference("testNoti");
             Service = findPreference("service");
             ServiceToggle = findPreference("serviceToggle");
+            Server = findPreference("server");
+            Subscribe = findPreference("Subscribe");
+            ServerInfo = findPreference("ServerInfo");
             Blacklist = findPreference("blacklist");
             UseWhiteList = findPreference("UseWhite");
             SetImportance = findPreference("importance");
+            UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
             IconResolution = findPreference("IconRes");
             IconEnabled = findPreference("SendIcon");
             IconWarning = findPreference("IconWaring");
@@ -200,16 +245,53 @@ public class SettingsActivity extends AppCompatActivity {
             DefaultTitle = findPreference("DefaultTitle");
             DefaultMessage = findPreference("DefaultMessage");
 
+            billingManager = new BillingManager().initialize(new BillingManager.BillingCallback() {
+                @Override
+                public void onPurchased(String productId) {
+                    Toast.makeText(mContext, "Thanks for purchase!", Toast.LENGTH_SHORT).show();
+                    ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+                    ServiceToggle.setSummary("");
+                    Subscribe.setVisible(false);
+                    new RegisterForPushNotificationsAsync().execute();
+                }
+
+                @Override
+                public void onUpdatePrice(double price) {
+
+                }
+            }, mContext);
+
+            if(billingManager.isSubscribed()) {
+                new RegisterForPushNotificationsAsync().execute();
+            }
+
             boolean ifUIDBlank = prefs.getString("UID", "").equals("");
 
             if (!ifUIDBlank) {
                 Login.setSummary("Logined as " + prefs.getString("Email", ""));
                 Login.setTitle(R.string.Logout);
-                ServiceToggle.setEnabled(true);
                 if (prefs.getString("Email", "").equals("") && mAuth.getCurrentUser() != null)
                     prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
+                if(prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
+                    if(billingManager.isSubscribed()) {
+                        Subscribe.setVisible(false);
+                        ServiceToggle.setEnabled(true);
+                    }
+                    else {
+                        Subscribe.setVisible(true);
+                        ServiceToggle.setEnabled(false);
+                        ServiceToggle.setSummary("Needs subscribe to use Pushy server");
+                    }
+                } else {
+                    Subscribe.setVisible(false);
+                    ServiceToggle.setEnabled(true);
+                }
             } else {
                 ServiceToggle.setEnabled(false);
+                if(prefs.getString("server", "Firebase Cloud Message").equals("Pushy") && !billingManager.isSubscribed()) {
+                    Subscribe.setVisible(true);
+                    ServiceToggle.setSummary("Needs subscribe to use Pushy server");
+                } else  Subscribe.setVisible(false);
             }
 
             prefs.registerOnSharedPreferenceChangeListener((p,k) ->{
@@ -221,6 +303,24 @@ public class SettingsActivity extends AppCompatActivity {
             Service.setSummary("Now : " + prefs.getString("service", "not selected"));
             Service.setOnPreferenceChangeListener((p,n) -> {
                 p.setSummary("Now : " + n.toString());
+                return true;
+            });
+
+            Server.setSummary("Now : " + prefs.getString("server", "Firebase Cloud Message"));
+            Server.setOnPreferenceChangeListener((p,n) -> {
+                p.setSummary("Now : " + n.toString());
+                if(n.toString().equals("Pushy")) {
+                    if(billingManager.isSubscribed()) ServiceToggle.setEnabled(true);
+                    else {
+                        Subscribe.setVisible(true);
+                        ServiceToggle.setEnabled(false);
+                        ServiceToggle.setSummary("Needs subscribe to use Pushy server");
+                    }
+                } else {
+                    ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+                    ServiceToggle.setSummary("");
+                    Subscribe.setVisible(false);
+                }
                 return true;
             });
 
@@ -313,6 +413,11 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
 
+            UseWiFiSleepPolicy.setOnPreferenceChangeListener((p, n) -> {
+                Pushy.toggleWifiPolicyCompliance((boolean)n,mContext);
+                return true;
+            });
+
             try {
                 mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
             } catch (PackageManager.NameNotFoundException e) {
@@ -342,8 +447,28 @@ public class SettingsActivity extends AppCompatActivity {
 
                 case "service":
                     String UID = prefs.getString("UID", "");
-                    if (!UID.equals(""))
+                    if (!UID.equals("")){
                         FirebaseMessaging.getInstance().subscribeToTopic(UID);
+                        new Thread(() -> {
+                            try {
+                                Pushy.subscribe(UID, mContext);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+                    }
+                    break;
+
+                case "Subscribe":
+                    billingManager.Subscribe();
+                    break;
+
+                case "ServerInfo":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setTitle("Server details");
+                    dialog.setMessage(getString(R.string.Server_information));
+                    dialog.setPositiveButton("Close", (d, w) -> { });
+                    dialog.show();
                     break;
 
                 case "testNoti":
@@ -761,6 +886,24 @@ public class SettingsActivity extends AppCompatActivity {
                     .beginTransaction()
                     .replace(R.id.settings, newInstance())
                     .commitNowAllowingStateLoss();
+        }
+
+        @SuppressLint("StaticFieldLeak")
+        private class RegisterForPushNotificationsAsync extends AsyncTask<Void, Void, Void> {
+            protected Void doInBackground(Void... params) {
+                try {
+                    Pushy.register(mContext);
+                } catch (Exception exc) {
+                    exc.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Pushy.listen(mContext);
+            }
         }
     }
 }

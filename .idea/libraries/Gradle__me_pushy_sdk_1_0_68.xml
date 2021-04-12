@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: me.pushy:sdk:1.0.68">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/me.pushy/sdk/1.0.68/c90c448dc242ee758d1d661d8f83b959052bb40d/sdk-1.0.68.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/me.pushy/sdk/1.0.68/c5d0801c2e824b691b21fdc352d7613cc461c277/sdk-1.0.68-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/me.pushy/sdk/1.0.68/c5d0801c2e824b691b21fdc352d7613cc461c277/sdk-1.0.68-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

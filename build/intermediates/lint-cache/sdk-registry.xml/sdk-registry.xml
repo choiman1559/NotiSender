@@ -125,6 +125,10 @@
   <library  groupId="com.google.firebase" artifactId="firebase-messaging" recommended-version="20.1.2" >
     <versions from="20.1.1" status="deprecated" description="Bug affecting app stability" url="https://firebase.google.com/support/release-notes/android#messaging_v20-1-1" />
   </library>
+  <library  groupId="com.google.firebase" artifactId="firebase-ml-vision">
+    <versions from="15.0.0" to="24.1.0" status="deprecated" description="For more information, refer to documentation for specific features.&#13;&#10;Text recognition: https://firebase.google.com/docs/ml/android/recognize-text&#13;&#10;Image labeling: https://firebase.google.com/docs/ml/android/label-images&#13;&#10;Landmark recognition: https://firebase.google.com/docs/ml/android/recognize-landmarks " />
+</library>
+
   <library  groupId="com.google.dagger" artifactId="dagger-android" recommended-version="2.15" >
     <versions from="2.15" />
     <versions from="2.14.1" status="deprecated" description="Bug affecting SDK performance" url="https://github.com/google/dagger/releases/tag/2.15" />

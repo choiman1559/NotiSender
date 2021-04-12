@@ -19,6 +19,24 @@
             android:key="service"
             android:title="Select service"
             android:summary="Now : reception"/>
+
+        <ListPreference
+            android:key="server"
+            android:defaultValue="Firebase Cloud Message"
+            android:entries="@array/server_shown"
+            android:entryValues="@array/server"
+            android:title="Select server"
+            android:summary="Now : Firebase Cloud Message"/>
+
+        <Preference
+            android:key="Subscribe"
+            android:summary="To use Pushy's server, you have to pay 1.49$ per month."
+            android:title="Subscribe" />
+
+        <Preference
+            android:key="ServerInfo"
+            android:summary="Information about server differences"
+            android:icon="@drawable/ic_info_outline_black_24dp" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Customizing">
@@ -112,6 +130,11 @@
             android:key="importance"
             android:summary="Now : Default"
             android:title="Notification Importance" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseWiFiSleepPolicy"
+            android:title="WiFi sleep policy compliance (Pushy only)"
+            android:summary="Prevents wake lock by blocking the wifi sleep policy."/>
         <Preference
             android:summary="Other option"
             android:enabled="false" />

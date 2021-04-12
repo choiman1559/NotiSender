@@ -21,8 +21,7 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.noti.main.BuildConfig;
-import com.noti.main.utils.MySingleton;
-import com.noti.main.R;
+import com.noti.main.utils.JsonRequest;
 import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONArray;
@@ -45,6 +44,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class NotiListenerService extends NotificationListenerService {
+
+    SharedPreferences prefs;
 
     String toString(Boolean boo) {
         return boo ? "true" : "false";
@@ -76,7 +77,7 @@ public class NotiListenerService extends NotificationListenerService {
     private final ArrayList<Query> intervalQuery = new ArrayList<>();
 
     void Log(String message, String time) {
-        if (getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("debugInfo", false)) {
+        if (prefs.getBoolean("debugInfo", false)) {
             Log.d("debug", message);
             File txt = new File(Environment.getExternalStorageDirectory() + "/NotiSender_Logs", time + ".txt");
             try {
@@ -90,6 +91,12 @@ public class NotiListenerService extends NotificationListenerService {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
     }
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
@@ -148,7 +155,6 @@ public class NotiListenerService extends NotificationListenerService {
 
         Notification notification = sbn.getNotification();
         Bundle extra = notification.extras;
-        SharedPreferences prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         Date time = Calendar.getInstance().getTime();
         String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
 
@@ -181,12 +187,15 @@ public class NotiListenerService extends NotificationListenerService {
                 String TEXT = extra.getString(Notification.EXTRA_TEXT);
                 String PackageName = sbn.getPackageName();
 
-                if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main")))) return;
-                if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
-                    sendSmsNotification(prefs, isLogging, PackageName);
-                } else if (isWhitelist(prefs, PackageName)) {
-                    if(prefs.getBoolean("StrictStringNull",false) && (TITLE == null || TEXT == null)) return;
-                    if (isBannedWords(prefs, TEXT, TITLE) || isIntervalNotGaped(prefs, isLogging, PackageName, time)) return;
+                if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))))
+                    return;
+                else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
+                    sendSmsNotification(isLogging, PackageName);
+                } else if (isWhitelist(PackageName)) {
+                    if (prefs.getBoolean("StrictStringNull", false) && (TITLE == null || TEXT == null))
+                        return;
+                    if (isBannedWords(TEXT, TITLE) || isIntervalNotGaped(isLogging, PackageName, time))
+                        return;
                     new Thread(() -> {
                         try {
                             JSONArray array = new JSONArray();
@@ -212,14 +221,14 @@ public class NotiListenerService extends NotificationListenerService {
                             e.printStackTrace();
                         }
                     }).start();
-                    sendNormalNotification(prefs,notification,PackageName,isLogging,DATE,TITLE,TEXT);
+                    sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT);
                 }
             }
         }
         pastNotification = sbn;
     }
 
-    private void sendSmsNotification(SharedPreferences prefs, Boolean isLogging, String PackageName) {
+    private void sendSmsNotification(Boolean isLogging, String PackageName) {
         Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
         cursor.moveToFirst();
         String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
@@ -251,16 +260,18 @@ public class NotiListenerService extends NotificationListenerService {
         sendNotification(notificationHead, PackageName);
     }
 
-    private void sendNormalNotification(SharedPreferences prefs,Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
+    private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
         Bitmap ICON = null;
         try {
-            if(Build.VERSION.SDK_INT > 22 && prefs.getBoolean("IconUseNotification",false)) {
+            if (Build.VERSION.SDK_INT > 22 && prefs.getBoolean("IconUseNotification", false)) {
                 Icon LargeIcon = notification.getLargeIcon();
                 Icon SmallIcon = notification.getSmallIcon();
 
-                if(LargeIcon != null) ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(this));
-                else if(SmallIcon != null) ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(this));
-                else ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
+                if (LargeIcon != null) ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(this));
+                else if (SmallIcon != null)
+                    ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(this));
+                else
+                    ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
             } else {
                 ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
             }
@@ -308,8 +319,8 @@ public class NotiListenerService extends NotificationListenerService {
         JSONObject notifcationBody = new JSONObject();
         try {
             notifcationBody.put("type", "send|normal");
-            notifcationBody.put("title", TITLE != null ? TITLE : prefs.getString("DefaultTitle","New notification"));
-            notifcationBody.put("message", TEXT != null ? TEXT : prefs.getString("DefaultMessage","notification arrived."));
+            notifcationBody.put("title", TITLE != null ? TITLE : prefs.getString("DefaultTitle", "New notification"));
+            notifcationBody.put("message", TEXT != null ? TEXT : prefs.getString("DefaultMessage", "notification arrived."));
             notifcationBody.put("package", PackageName);
             notifcationBody.put("appname", APPNAME);
             notifcationBody.put("device_name", DEVICE_NAME);
@@ -327,7 +338,7 @@ public class NotiListenerService extends NotificationListenerService {
         sendNotification(notificationHead, PackageName);
     }
 
-    private boolean isBannedWords(SharedPreferences prefs, String TEXT, String TITLE) {
+    private boolean isBannedWords(String TEXT, String TITLE) {
         if (prefs.getBoolean("UseBannedOption", false)) {
             String word = prefs.getString("BannedWords", "");
             if (!word.equals("")) {
@@ -341,13 +352,13 @@ public class NotiListenerService extends NotificationListenerService {
         return false;
     }
 
-    private boolean isWhitelist(SharedPreferences prefs, String PackageName) {
+    private boolean isWhitelist(String PackageName) {
         boolean isWhitelist = prefs.getBoolean("UseWhite", false);
         boolean isContain = getSharedPreferences(isWhitelist ? "Whitelist" : "Blacklist", MODE_PRIVATE).getBoolean(PackageName, false);
         return isWhitelist == isContain;
     }
 
-    private boolean isIntervalNotGaped(SharedPreferences prefs, Boolean isLogging, String PackageName, Date time) {
+    private boolean isIntervalNotGaped(Boolean isLogging, String PackageName, Date time) {
         if (prefs.getBoolean("UseInterval", false)) {
             String Type = prefs.getString("IntervalType", "Entire app");
             int timeInterval = prefs.getInt("IntervalTime", 150);
@@ -388,8 +399,15 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private void sendNotification(JSONObject notification, String PackageName) {
+        SharedPreferences prefs = this.getSharedPreferences(getPackageName() + "_preferences", MODE_PRIVATE);
+        if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
+            if(!prefs.getString("AuthKey_Pushy", "").equals("")) sendPushyNotification(notification, PackageName);
+        } else sendFCMNotification(notification, PackageName);
+    }
+
+    private void sendFCMNotification(JSONObject notification, String PackageName) {
         final String FCM_API = "https://fcm.googleapis.com/fcm/send";
-        final String serverKey = "key=" + getString(R.string.serverKey);
+        final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
@@ -407,6 +425,25 @@ public class NotiListenerService extends NotificationListenerService {
                 return params;
             }
         };
-        MySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+        JsonRequest.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+    }
+
+    private void sendPushyNotification(JSONObject notification, String PackageName) {
+        final String URI = "https://api.pushy.me/push?api_key=" + prefs.getString("AuthKey_Pushy", "");
+        final String contentType = "application/json";
+        final String TAG = "NOTIFICATION TAG";
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(URI, notification, response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName), error -> {
+            Toast.makeText(NotiListenerService.this, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "onErrorResponse: Didn't work: " + new String(error.networkResponse.data, StandardCharsets.UTF_8) + ", package: " + PackageName);
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> params = new HashMap<>();
+                params.put("Content-Type", contentType);
+                return params;
+            }
+        };
+        JsonRequest.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
     }
 }

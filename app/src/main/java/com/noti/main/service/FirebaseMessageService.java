@@ -25,7 +25,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
@@ -35,7 +34,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -96,7 +94,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         return Device_name.equals(DEVICE_NAME) && Device_id.equals(DEVICE_ID);
     }
 
-    private void startNewRemoteActivity(Map<String, String> map) {
+    protected void startNewRemoteActivity(Map<String, String> map) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
         String Package = map.get("package");
         try{
@@ -109,13 +107,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
     }
 
-    private void startNewRemoteSms(Map<String, String> map) {
+    protected void startNewRemoteSms(Map<String, String> map) {
         SmsManager smgr = SmsManager.getDefault();
         smgr.sendTextMessage(map.get("address"),null,map.get("message"),null,null);
         new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Reply message by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
     }
 
-    private void sendSmsNotification(Map<String, String> map) {
+    protected void sendSmsNotification(Map<String, String> map) {
         String address = map.get("address");
         String message = map.get("message");
         String Device_name = map.get("device_name");
@@ -157,7 +155,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
     }
 
-    private void sendNotification(Map<String, String> map) {
+    protected void sendNotification(Map<String, String> map) {
         String title = map.get("title");
         String content = map.get("message");
         String Package = map.get("package");

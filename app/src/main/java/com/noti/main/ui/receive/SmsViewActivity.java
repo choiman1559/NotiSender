@@ -13,7 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.noti.main.utils.MySingleton;
+import com.noti.main.utils.JsonRequest;
 import com.noti.main.R;
 
 import org.json.JSONException;
@@ -75,7 +75,7 @@ public class SmsViewActivity extends Activity {
 
     private void sendNotification(JSONObject notification) {
         final String FCM_API = "https://fcm.googleapis.com/fcm/send";
-        final String serverKey = "key=" + getString(R.string.serverKey);
+        final String serverKey = "key=" + getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("ApiKey_FCM","");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
@@ -90,6 +90,6 @@ public class SmsViewActivity extends Activity {
                 return params;
             }
         };
-        MySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+        JsonRequest.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
     }
 }

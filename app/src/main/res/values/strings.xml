@@ -1,5 +1,5 @@
 <resources>
-    <string name="serverKey">AAAAuj5Jn40:APA91bHXGYXRyVLifav3nDAt0Zou9bwGlwXhp_hdbuxoEKDerIpznlS3AM_JaApNWOG7Zxpq_MimOMtY4sm9hTcFmmeNOlG1iMD0bDR7u9Ah_gBDY_hOYncS4np9qE4OlmDiwn1Z06bO</string>
+    <string name="play_purchase">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjvNH5dV7f2C6ff375Z47U8An1RHMKSwpn7mQelfDkzPenJJdai3tvxIKsjYKfOTu0hUHMoCMjTdFrlntUck2wq9vbKjZsW7NH5ftdafnxC0dACbF0t6OVc5U/O5O5zQja9L8Qn0M7mte+OcFch7S4v3q5HI+DSad0qIZIBop5c6USNPDWcsE1j6vkeJNYt6wjhE5uEiDMErIokwPx7TMic3z4lQm8KdLajyVfuZyy0WpMuFMQpiUw1DkBHBh+rrel8jS1IJmyEk9w4UGGWxBeeP/EJu9uIb00GSI9GYKRiSfXu48eog7REirgbBZrAtSzVK6oJaG3P5yN+rObVz5VQIDAQAB</string>
 
     <string name="app_name">Noti Sender</string>
     <string name="title_activity_settings">Noti Sender</string>
@@ -31,6 +31,7 @@
     <string name="dialog_update_title">Update exists</string>
     <string name="dialog_update_message">An update exists. Do you want to update?</string>
 
+    <string name="Server_information">FCM : Also known as Firebase Cloud Messaging, this is a free message push API provided by Google. It is stable and consumes less battery, but pushed messages may not come if pushed messages are delayed or if the device is in deep-sleep mode.\n\nPushy : This is a message push API provided by Pushy.org. It is faster than FCM and does not cause delays, but the performance and battery consumption of the device is high, and it is available only with a paid subscription.</string>
     <string name="Interval_information">"Set the interval for notifications. For example, if an interval of 100ms is set and the notification 'A' appears, no other notification is sent and ignored for 100ms after the 'A' notification appears.\n\nOption details\nEntire app : Treats notifications from all apps as one app and applies intervals.\nPer app : Apply notification interval for each app.\n\n\nNote: This feature is not thread-safe and may cause bugs.</string>
     <string name="Dialog_rather_github">Due to the suppression of SMS read/send permission by Google Play policy, you need to download Noti Sender from Github rather than Play store to use this function.</string>
 

@@ -19,6 +19,7 @@
                 android:id="@+id/IconView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 app:srcCompat="@mipmap/ic_launcher"
                 android:contentDescription="@string/App_info" />
 
