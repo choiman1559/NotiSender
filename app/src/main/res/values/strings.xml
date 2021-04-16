@@ -1,6 +1,4 @@
 <resources>
-    <string name="play_purchase">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjvNH5dV7f2C6ff375Z47U8An1RHMKSwpn7mQelfDkzPenJJdai3tvxIKsjYKfOTu0hUHMoCMjTdFrlntUck2wq9vbKjZsW7NH5ftdafnxC0dACbF0t6OVc5U/O5O5zQja9L8Qn0M7mte+OcFch7S4v3q5HI+DSad0qIZIBop5c6USNPDWcsE1j6vkeJNYt6wjhE5uEiDMErIokwPx7TMic3z4lQm8KdLajyVfuZyy0WpMuFMQpiUw1DkBHBh+rrel8jS1IJmyEk9w4UGGWxBeeP/EJu9uIb00GSI9GYKRiSfXu48eog7REirgbBZrAtSzVK6oJaG3P5yN+rObVz5VQIDAQAB</string>
-
     <string name="app_name">Noti Sender</string>
     <string name="title_activity_settings">Noti Sender</string>
 

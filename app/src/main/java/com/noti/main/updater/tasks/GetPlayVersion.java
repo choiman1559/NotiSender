@@ -5,12 +5,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.noti.main.R;
 import com.noti.main.ui.receive.ExitActivity;
 import com.noti.main.updater.UpdaterActivity;
+import com.noti.main.utils.AsyncTask;
 
 import org.jsoup.Jsoup;
 

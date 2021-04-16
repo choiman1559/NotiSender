@@ -8,19 +8,14 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.noti.main.utils.JsonRequest;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class SmsViewActivity extends Activity {
     @Override
@@ -34,6 +29,7 @@ public class SmsViewActivity extends Activity {
         String message = i.getStringExtra("message");
         String Device_name = i.getStringExtra("device_name");
         String Date = i.getStringExtra("date");
+        String Package = i.getStringExtra("package");
 
         Button Reply = findViewById(R.id.ok);
         Button Cancel = findViewById(R.id.cancel);
@@ -66,30 +62,10 @@ public class SmsViewActivity extends Activity {
                 } catch (JSONException e) {
                     Log.e("Noti", "onCreate: " + e.getMessage() );
                 }
-                sendNotification(notificationHead);
+                NotiListenerService.sendNotification(notificationHead, Package, this);
                 ExitActivity.exitApplication(this);
             }
         });
         Cancel.setOnClickListener(v -> ExitActivity.exitApplication(this));
-    }
-
-    private void sendNotification(JSONObject notification) {
-        final String FCM_API = "https://fcm.googleapis.com/fcm/send";
-        final String serverKey = "key=" + getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("ApiKey_FCM","");
-        final String contentType = "application/json";
-        final String TAG = "NOTIFICATION TAG";
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API, notification,
-                response -> Log.i(TAG, "onResponse: " + response.toString()),
-                error -> Toast.makeText(this, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show()){
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> params = new HashMap<>();
-                params.put("Authorization", serverKey);
-                params.put("Content-Type", contentType);
-                return params;
-            }
-        };
-        JsonRequest.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
     }
 }

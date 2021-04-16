@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.anjlab.android.iab.v3:library:1.1.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.anjlab.android.iab.v3/library/1.1.0/6ffd8a136eb748cc611d899c0642016f065ea747/library-1.1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.anjlab.android.iab.v3/library/1.1.0/1bc6a1950d435cba616b37bccd4c770a1baefa47/library-1.1.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.anjlab.android.iab.v3/library/1.1.0/a556a4f978e5db6bb3ea7986c752b4a73899d1ea/library-1.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

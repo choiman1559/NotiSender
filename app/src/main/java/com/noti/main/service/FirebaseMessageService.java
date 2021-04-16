@@ -116,6 +116,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     protected void sendSmsNotification(Map<String, String> map) {
         String address = map.get("address");
         String message = map.get("message");
+        String Package = map.get("package");
         String Device_name = map.get("device_name");
         String Device_id = map.get("device_id");
         String Date = map.get("date");
@@ -126,6 +127,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationIntent.putExtra("address",address);
         notificationIntent.putExtra("device_name",Device_name);
         notificationIntent.putExtra("date",Date);
+        notificationIntent.putExtra("package", Package);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);

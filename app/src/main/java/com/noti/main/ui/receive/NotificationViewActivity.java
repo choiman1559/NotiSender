@@ -10,20 +10,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.noti.main.utils.JsonRequest;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class NotificationViewActivity extends Activity {
 
@@ -77,30 +71,10 @@ public class NotificationViewActivity extends Activity {
                 Log.e("Noti", "onCreate: " + e.getMessage() );
             }
             Log(notificationHead.toString());
-            sendNotification(notificationHead);
+            NotiListenerService.sendNotification(notificationHead, Package, this);
             ExitActivity.exitApplication(this);
         });
 
         NO.setOnClickListener(v -> ExitActivity.exitApplication(this));
-    }
-
-    private void sendNotification(JSONObject notification) {
-        final String FCM_API = "https://fcm.googleapis.com/fcm/send";
-        final String serverKey = "key=" + getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("ApiKey_FCM","");
-        final String contentType = "application/json";
-        final String TAG = "NOTIFICATION TAG";
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API, notification,
-                response -> Log.i(TAG, "onResponse: " + response.toString()),
-                error -> Toast.makeText(NotificationViewActivity.this, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show()){
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> params = new HashMap<>();
-                params.put("Authorization", serverKey);
-                params.put("Content-Type", contentType);
-                return params;
-            }
-        };
-        JsonRequest.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
     }
 }

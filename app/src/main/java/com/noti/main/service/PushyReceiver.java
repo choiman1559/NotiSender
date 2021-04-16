@@ -43,27 +43,26 @@ public class PushyReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent map) {
-        if(prefs == null) prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        if (prefs == null)
+            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
 
         String type = map.getStringExtra("type");
         String mode = prefs.getString("service", "");
 
-        if(prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
+        if (prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
             if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
-                if(mode.equals("hybrid") && isDeviceItself(map)) return;
+                if (mode.equals("hybrid") && isDeviceItself(map)) return;
                 if (type.equals("send|normal")) {
-                    sendNotification(map,context);
-                } else if(type.equals("send|sms")) {
-                    sendSmsNotification(map,context);
+                    sendNotification(map, context);
+                } else if (type.equals("send|sms")) {
+                    sendSmsNotification(map, context);
                 }
-            }
-
-            else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
+            } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
                 if (map.getStringExtra("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.getStringExtra("send_device_id").equals(getMACAddress())) {
-                    if(type.equals("reception|normal")) {
-                        startNewRemoteActivity(map,context);
-                    } else if(type.equals("reception|sms")) {
-                        startNewRemoteSms(map,context);
+                    if (type.equals("reception|normal")) {
+                        startNewRemoteActivity(map, context);
+                    } else if (type.equals("reception|sms")) {
+                        startNewRemoteSms(map, context);
                     }
                 }
             }
@@ -74,7 +73,7 @@ public class PushyReceiver extends BroadcastReceiver {
         String Device_name = map.getStringExtra("device_name");
         String Device_id = map.getStringExtra("device_id");
 
-        if(Device_id == null || Device_name == null) {
+        if (Device_id == null || Device_name == null) {
             Device_id = map.getStringExtra("send_device_id");
             Device_name = map.getStringExtra("send_device_name");
         }
@@ -88,11 +87,11 @@ public class PushyReceiver extends BroadcastReceiver {
     protected void startNewRemoteActivity(Intent map, Context context) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(context, "Remote run by NotiSender\nfrom " + map.getStringExtra("device_name"), Toast.LENGTH_SHORT).show(), 0);
         String Package = map.getStringExtra("package");
-        try{
+        try {
             context.getPackageManager().getPackageInfo(Package, PackageManager.GET_ACTIVITIES);
             Intent intent = context.getPackageManager().getLaunchIntentForPackage(Package);
             context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        }catch (Exception e) {
+        } catch (Exception e) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
             context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
@@ -100,7 +99,7 @@ public class PushyReceiver extends BroadcastReceiver {
 
     protected void startNewRemoteSms(Intent map, Context context) {
         SmsManager smgr = SmsManager.getDefault();
-        smgr.sendTextMessage(map.getStringExtra("address"),null,map.getStringExtra("message"),null,null);
+        smgr.sendTextMessage(map.getStringExtra("address"), null, map.getStringExtra("message"), null, null);
         new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(context, "Reply message by NotiSender\nfrom " + map.getStringExtra("device_name"), Toast.LENGTH_SHORT).show(), 0);
     }
 
@@ -110,13 +109,15 @@ public class PushyReceiver extends BroadcastReceiver {
         String Device_name = map.getStringExtra("device_name");
         String Device_id = map.getStringExtra("device_id");
         String Date = map.getStringExtra("date");
+        String Package = map.getStringExtra("package");
 
         Intent notificationIntent = new Intent(context, SmsViewActivity.class);
-        notificationIntent.putExtra("device_id",Device_id);
-        notificationIntent.putExtra("message",message);
-        notificationIntent.putExtra("address",address);
-        notificationIntent.putExtra("device_name",Device_name);
-        notificationIntent.putExtra("date",Date);
+        notificationIntent.putExtra("device_id", Device_id);
+        notificationIntent.putExtra("message", message);
+        notificationIntent.putExtra("address", address);
+        notificationIntent.putExtra("device_name", Device_name);
+        notificationIntent.putExtra("date", Date);
+        notificationIntent.putExtra("package", Package);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -143,14 +144,14 @@ public class PushyReceiver extends BroadcastReceiver {
         } else builder.setSmallIcon(R.mipmap.ic_notification);
 
         assert notificationManager != null;
-        notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        notificationManager.notify((int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
     }
 
     protected void sendNotification(Intent map, Context context) {
         String title = map.getStringExtra("title");
         String content = map.getStringExtra("message");
         String Package = map.getStringExtra("package");
-        String AppName =  map.getStringExtra("appname");
+        String AppName = map.getStringExtra("appname");
         String Device_name = map.getStringExtra("device_name");
         String Device_id = map.getStringExtra("device_id");
         String Date = map.getStringExtra("date");
@@ -159,7 +160,7 @@ public class PushyReceiver extends BroadcastReceiver {
         Bitmap Icon = null;
         if (!map.getStringExtra("icon").equals("none")) {
             Icon_original = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.getStringExtra("icon")));
-            if(Icon_original != null) {
+            if (Icon_original != null) {
                 Icon = Bitmap.createBitmap(Icon_original.getWidth(), Icon_original.getHeight(), Icon_original.getConfig());
                 Canvas canvas = new Canvas(Icon);
                 canvas.drawColor(Color.WHITE);
@@ -171,20 +172,20 @@ public class PushyReceiver extends BroadcastReceiver {
             try {
                 JSONArray array = new JSONArray();
                 JSONObject object = new JSONObject();
-                String originString = prefs.getString("receivedLogs","");
+                String originString = prefs.getString("receivedLogs", "");
 
-                if(!originString.equals("")) array = new JSONArray(originString);
-                object.put("date",Date);
-                object.put("package",Package);
-                object.put("title",title);
-                object.put("text",content);
-                object.put("device",Device_name);
+                if (!originString.equals("")) array = new JSONArray(originString);
+                object.put("date", Date);
+                object.put("package", Package);
+                object.put("title", title);
+                object.put("text", content);
+                object.put("device", Device_name);
                 array.put(object);
-                prefs.edit().putString("receivedLogs",array.toString()).apply();
+                prefs.edit().putString("receivedLogs", array.toString()).apply();
 
-                if(array.length() >= prefs.getInt("HistoryLimit",150)) {
-                    int a = array.length() - prefs.getInt("HistoryLimit",150);
-                    for(int i = 0;i < a;i++){
+                if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
+                    int a = array.length() - prefs.getInt("HistoryLimit", 150);
+                    for (int i = 0; i < a; i++) {
                         array.remove(i);
                     }
                     prefs.edit().putString("receivedLogs", array.toString()).apply();
@@ -199,18 +200,18 @@ public class PushyReceiver extends BroadcastReceiver {
         int uniqueCode = 0;
         try {
             Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
-            uniqueCode = d == null ? 0 : (int)((d.getTime() / 1000L) % Integer.MAX_VALUE);
+            uniqueCode = d == null ? 0 : (int) ((d.getTime() / 1000L) % Integer.MAX_VALUE);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         notificationIntent.putExtra("package", Package);
-        notificationIntent.putExtra("device_id",Device_id);
-        notificationIntent.putExtra("appname",AppName);
-        notificationIntent.putExtra("title",title);
-        notificationIntent.putExtra("device_name",Device_name);
-        notificationIntent.putExtra("date",Date);
-        notificationIntent.putExtra("icon",Icon_original != null ? Icon : null);
+        notificationIntent.putExtra("device_id", Device_id);
+        notificationIntent.putExtra("appname", AppName);
+        notificationIntent.putExtra("title", title);
+        notificationIntent.putExtra("device_name", Device_name);
+        notificationIntent.putExtra("date", Date);
+        notificationIntent.putExtra("icon", Icon_original != null ? Icon : null);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, uniqueCode, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -224,7 +225,7 @@ public class PushyReceiver extends BroadcastReceiver {
                 .setGroupSummary(true)
                 .setAutoCancel(true);
 
-        if(Icon != null) builder.setLargeIcon(Icon);
+        if (Icon != null) builder.setLargeIcon(Icon);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setSmallIcon(R.drawable.ic_notification);
             CharSequence channelName = context.getString(R.string.notify_channel_name);
@@ -239,7 +240,7 @@ public class PushyReceiver extends BroadcastReceiver {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getImportance() {
-        String value = prefs.getString("importance","Default");
+        String value = prefs.getString("importance", "Default");
         switch (value) {
             case "Default":
                 return NotificationManager.IMPORTANCE_DEFAULT;
@@ -254,7 +255,7 @@ public class PushyReceiver extends BroadcastReceiver {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getPriority() {
-        String value = prefs.getString("importance","Default");
+        String value = prefs.getString("importance", "Default");
         switch (value) {
             case "Low":
                 return NotificationCompat.PRIORITY_LOW;

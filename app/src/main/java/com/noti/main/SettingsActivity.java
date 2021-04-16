@@ -10,9 +10,9 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
@@ -28,7 +28,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentActivity;
-import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
@@ -50,10 +49,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import com.noti.main.ui.AppinfoActiity;
+import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
-import com.noti.main.utils.BillingManager;
+import com.noti.main.utils.AsyncTask;
+import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.DetectAppSource;
 
 import java.util.Date;
@@ -64,8 +64,9 @@ import me.pushy.sdk.Pushy;
 public class SettingsActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
-    static BillingManager billingManager;
+    static BillingHelper mBillingHelper;
 
+    @SuppressLint("BatteryLife")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +96,18 @@ public class SettingsActivity extends AppCompatActivity {
             alert.show();
         }
 
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (Build.VERSION.SDK_INT > 22 && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
+            AlertDialog.Builder alert_confirm = new AlertDialog.Builder(this);
+            alert_confirm.setMessage("You need to permit ignore battery optimizations permission to use this app")
+                    .setCancelable(false).setPositiveButton("Bring me there",
+                    (dialog, which) -> startActivityForResult(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:" + getPackageName()))
+                            , 103)).setNegativeButton("Cancel",
+                    (dialog, which) -> finish());
+            AlertDialog alert = alert_confirm.create();
+            alert.show();
+        }
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, newInstance())
@@ -108,7 +121,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        billingManager.Destroy();
+        mBillingHelper.Destroy();
     }
 
     @Override
@@ -120,7 +133,12 @@ public class SettingsActivity extends AppCompatActivity {
         } else if (requestCode == 102) {
             Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
             if (!sets.contains(getPackageName())) finish();
-        } else billingManager.handleActivityResult(requestCode, resultCode, data);
+        } else if (requestCode == 103) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (Build.VERSION.SDK_INT > 22 && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
+                finish();
+            }
+        }
     }
 
     public static SettingsFragment newInstance() {
@@ -154,7 +172,6 @@ public class SettingsActivity extends AppCompatActivity {
         Preference IconEnabled;
         Preference IconWarning;
         Preference IconUseNotification;
-        Preference DebugLogEnable;
         Preference ForWearOS;
         Preference DataLimit;
         Preference HistoryLimit;
@@ -171,12 +188,13 @@ public class SettingsActivity extends AppCompatActivity {
         Preference DefaultTitle;
         Preference DefaultMessage;
 
-        SettingsFragment() { }
+        SettingsFragment() {
+        }
 
         @Override
         public void onAttach(@NonNull Context context) {
             super.onAttach(context);
-            if(context instanceof Activity) mContext = (Activity) context;
+            if (context instanceof Activity) mContext = (Activity) context;
             else throw new RuntimeException("Can't get Activity instanceof Context!");
         }
 
@@ -200,8 +218,9 @@ public class SettingsActivity extends AppCompatActivity {
                         if (task.isSuccessful() && task.getResult() != null) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 prefs.edit()
-                                        .putString("ApiKey_FCM", "" + document.get("FCM"))
-                                        .putString("ApiKey_Pushy","" + document.get("Pushy"))
+                                        .putString("ApiKey_FCM", document.getString("FCM"))
+                                        .putString("ApiKey_Pushy", document.getString("Pushy"))
+                                        .putString("ApiKey_Billing", document.getString("Billing"))
                                         .apply();
                             }
                         } else {
@@ -228,7 +247,6 @@ public class SettingsActivity extends AppCompatActivity {
             IconEnabled = findPreference("SendIcon");
             IconWarning = findPreference("IconWaring");
             IconUseNotification = findPreference("IconUseNotification");
-            DebugLogEnable = findPreference("debugInfo");
             ForWearOS = findPreference("forWear");
             DataLimit = findPreference("DataLimit");
             HistoryLimit = findPreference("HistoryLimit");
@@ -245,7 +263,7 @@ public class SettingsActivity extends AppCompatActivity {
             DefaultTitle = findPreference("DefaultTitle");
             DefaultMessage = findPreference("DefaultMessage");
 
-            billingManager = new BillingManager().initialize(new BillingManager.BillingCallback() {
+            mBillingHelper = BillingHelper.initialize(mContext, new BillingHelper.BillingCallback() {
                 @Override
                 public void onPurchased(String productId) {
                     Toast.makeText(mContext, "Thanks for purchase!", Toast.LENGTH_SHORT).show();
@@ -256,12 +274,12 @@ public class SettingsActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onUpdatePrice(double price) {
+                public void onUpdatePrice(Double priceValue) {
 
                 }
-            }, mContext);
+            });
 
-            if(billingManager.isSubscribed()) {
+            if (mBillingHelper.isSubscribed()) {
                 new RegisterForPushNotificationsAsync().execute();
             }
 
@@ -272,12 +290,11 @@ public class SettingsActivity extends AppCompatActivity {
                 Login.setTitle(R.string.Logout);
                 if (prefs.getString("Email", "").equals("") && mAuth.getCurrentUser() != null)
                     prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
-                if(prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
-                    if(billingManager.isSubscribed()) {
+                if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
+                    if (mBillingHelper.isSubscribed()) {
                         Subscribe.setVisible(false);
                         ServiceToggle.setEnabled(true);
-                    }
-                    else {
+                    } else {
                         Subscribe.setVisible(true);
                         ServiceToggle.setEnabled(false);
                         ServiceToggle.setSummary("Needs subscribe to use Pushy server");
@@ -288,29 +305,29 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             } else {
                 ServiceToggle.setEnabled(false);
-                if(prefs.getString("server", "Firebase Cloud Message").equals("Pushy") && !billingManager.isSubscribed()) {
+                if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy") && !mBillingHelper.isSubscribed()) {
                     Subscribe.setVisible(true);
                     ServiceToggle.setSummary("Needs subscribe to use Pushy server");
-                } else  Subscribe.setVisible(false);
+                } else Subscribe.setVisible(false);
             }
 
-            prefs.registerOnSharedPreferenceChangeListener((p,k) ->{
-                if(k.equals("serviceToggle")) {
-                    ((SwitchPreference)ServiceToggle).setChecked(prefs.getBoolean("serviceToggle",false));
+            prefs.registerOnSharedPreferenceChangeListener((p, k) -> {
+                if (k.equals("serviceToggle")) {
+                    ((SwitchPreference) ServiceToggle).setChecked(prefs.getBoolean("serviceToggle", false));
                 }
             });
 
             Service.setSummary("Now : " + prefs.getString("service", "not selected"));
-            Service.setOnPreferenceChangeListener((p,n) -> {
+            Service.setOnPreferenceChangeListener((p, n) -> {
                 p.setSummary("Now : " + n.toString());
                 return true;
             });
 
             Server.setSummary("Now : " + prefs.getString("server", "Firebase Cloud Message"));
-            Server.setOnPreferenceChangeListener((p,n) -> {
+            Server.setOnPreferenceChangeListener((p, n) -> {
                 p.setSummary("Now : " + n.toString());
-                if(n.toString().equals("Pushy")) {
-                    if(billingManager.isSubscribed()) ServiceToggle.setEnabled(true);
+                if (n.toString().equals("Pushy")) {
+                    if (mBillingHelper.isSubscribed()) ServiceToggle.setEnabled(true);
                     else {
                         Subscribe.setVisible(true);
                         ServiceToggle.setEnabled(false);
@@ -326,7 +343,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             if (Build.VERSION.SDK_INT >= 26) {
                 SetImportance.setSummary("Now : " + prefs.getString("importance", ""));
-                SetImportance.setOnPreferenceChangeListener(((p,n) -> {
+                SetImportance.setOnPreferenceChangeListener(((p, n) -> {
                     SetImportance.setSummary("Now : " + n);
                     return true;
                 }));
@@ -336,7 +353,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             boolean isntUpOsM = Build.VERSION.SDK_INT < 22;
-            if(isntUpOsM) {
+            if (isntUpOsM) {
                 IconUseNotification.setEnabled(false);
                 IconUseNotification.setSummary("Works only on Android M and above!");
             }
@@ -345,13 +362,13 @@ public class SettingsActivity extends AppCompatActivity {
             IconWarning.setVisible(isSendIconEnabled);
             IconUseNotification.setVisible(isSendIconEnabled);
             IconResolution.setSummary("Now : " + prefs.getString("IconRes", "52 x 52 (Default)"));
-            IconEnabled.setOnPreferenceChangeListener((p,n) -> {
+            IconEnabled.setOnPreferenceChangeListener((p, n) -> {
                 IconResolution.setVisible((boolean) n);
                 IconWarning.setVisible((boolean) n);
                 IconUseNotification.setVisible((boolean) n);
                 return true;
             });
-            IconResolution.setOnPreferenceChangeListener(((p,n) -> {
+            IconResolution.setOnPreferenceChangeListener(((p, n) -> {
                 IconResolution.setSummary("Now : " + n);
                 return true;
             }));
@@ -365,56 +382,56 @@ public class SettingsActivity extends AppCompatActivity {
             boolean isWhiteList = prefs.getBoolean("UseWhite", false);
             Blacklist.setTitle("Edit " + (isWhiteList ? "whitelist" : "blacklist"));
             Blacklist.setSummary("select apps that you " + (isWhiteList ? "want" : "won't") + " send notification");
-            UseWhiteList.setOnPreferenceChangeListener((p,n) -> {
+            UseWhiteList.setOnPreferenceChangeListener((p, n) -> {
                 boolean isWhite = (boolean) n;
                 Blacklist.setTitle("Edit " + (isWhite ? "whitelist" : "blacklist"));
                 Blacklist.setSummary("select apps that you " + (isWhite ? "want" : "won't") + " send notification");
                 return true;
             });
 
-            int intervalTime = prefs.getInt("IntervalTime",150);
+            int intervalTime = prefs.getInt("IntervalTime", 150);
             IntervalTime.setSummary("Now : " + intervalTime + (intervalTime == 150 ? " ms (Default)" : " ms"));
-            boolean useInterval = prefs.getBoolean("UseInterval",false);
+            boolean useInterval = prefs.getBoolean("UseInterval", false);
             IntervalInfo.setVisible(useInterval);
             IntervalType.setVisible(useInterval);
             IntervalTime.setVisible(useInterval);
-            UseInterval.setOnPreferenceChangeListener((p,n) -> {
-                boolean useIt = (boolean)n;
+            UseInterval.setOnPreferenceChangeListener((p, n) -> {
+                boolean useIt = (boolean) n;
                 IntervalInfo.setVisible(useIt);
                 IntervalType.setVisible(useIt);
                 IntervalTime.setVisible(useIt);
                 return true;
             });
-            IntervalType.setSummary("Now : " + prefs.getString("IntervalType","Entire app"));
-            IntervalType.setOnPreferenceChangeListener((p,n) -> {
+            IntervalType.setSummary("Now : " + prefs.getString("IntervalType", "Entire app"));
+            IntervalType.setOnPreferenceChangeListener((p, n) -> {
                 IntervalType.setSummary("Now : " + n);
                 return true;
             });
 
-            BannedWords.setVisible(prefs.getBoolean("UseBannedOption",false));
-            UseBannedOption.setOnPreferenceChangeListener((p,n) -> {
-                BannedWords.setVisible((boolean)n);
+            BannedWords.setVisible(prefs.getBoolean("UseBannedOption", false));
+            UseBannedOption.setOnPreferenceChangeListener((p, n) -> {
+                BannedWords.setVisible((boolean) n);
                 return true;
             });
 
-            UpdateChannel.setSummary("Now : " + prefs.getString("UpdateChannel","Automatically specified"));
+            UpdateChannel.setSummary("Now : " + prefs.getString("UpdateChannel", "Automatically specified"));
             UpdateChannel.setOnPreferenceChangeListener((p, n) -> {
                 UpdateChannel.setSummary("Now : " + n);
                 return true;
             });
 
-            boolean isUseNullStrict = prefs.getBoolean("StrictStringNull",false);
+            boolean isUseNullStrict = prefs.getBoolean("StrictStringNull", false);
             DefaultTitle.setVisible(!isUseNullStrict);
             DefaultMessage.setVisible(!isUseNullStrict);
             UseNullStrict.setOnPreferenceChangeListener((p, n) -> {
-                boolean isUseNullStricts = (boolean)n;
+                boolean isUseNullStricts = (boolean) n;
                 DefaultTitle.setVisible(!isUseNullStricts);
                 DefaultMessage.setVisible(!isUseNullStricts);
                 return true;
             });
 
             UseWiFiSleepPolicy.setOnPreferenceChangeListener((p, n) -> {
-                Pushy.toggleWifiPolicyCompliance((boolean)n,mContext);
+                Pushy.toggleWifiPolicyCompliance((boolean) n, mContext);
                 return true;
             });
 
@@ -434,7 +451,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             switch (preference.getKey()) {
                 case "AppInfo":
-                    startActivity(new Intent(mContext, AppinfoActiity.class));
+                    startActivity(new Intent(mContext, AppInfoActivity.class));
                     break;
 
                 case "blacklist":
@@ -447,7 +464,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 case "service":
                     String UID = prefs.getString("UID", "");
-                    if (!UID.equals("")){
+                    if (!UID.equals("")) {
                         FirebaseMessaging.getInstance().subscribeToTopic(UID);
                         new Thread(() -> {
                             try {
@@ -460,20 +477,21 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
 
                 case "Subscribe":
-                    billingManager.Subscribe();
+                    mBillingHelper.Subscribe();
                     break;
 
                 case "ServerInfo":
                     dialog = new AlertDialog.Builder(mContext);
                     dialog.setTitle("Server details");
                     dialog.setMessage(getString(R.string.Server_information));
-                    dialog.setPositiveButton("Close", (d, w) -> { });
+                    dialog.setPositiveButton("Close", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
                 case "testNoti":
                     Notify.create(mContext)
-                            .setTitle("test (" +  (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
+                            .setTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
                             .setContent("messageTest")
                             .setLargeIcon(R.mipmap.ic_launcher)
                             .circleLargeIcon()
@@ -486,16 +504,6 @@ public class SettingsActivity extends AppCompatActivity {
 
                 case "forWear":
                     startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id=com.noti.main.wear")));
-                    break;
-
-                case "debugInfo":
-                    CheckBoxPreference DebugMod = (CheckBoxPreference) DebugLogEnable;
-                    if (DebugMod.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (mContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                                || mContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-                        }
-                    }
                     break;
 
                 case "NotiLog":
@@ -587,7 +595,8 @@ public class SettingsActivity extends AppCompatActivity {
                         prefs.edit().putInt("HistoryLimit", 150).apply();
                         HistoryLimit.setSummary("Now : " + 150 + " pcs (Default)");
                     });
-                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -630,7 +639,8 @@ public class SettingsActivity extends AppCompatActivity {
                         prefs.edit().putInt("IntervalTime", 150).apply();
                         IntervalTime.setSummary("Now : " + 150 + " ms (Default)");
                     });
-                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -638,7 +648,8 @@ public class SettingsActivity extends AppCompatActivity {
                     dialog = new AlertDialog.Builder(mContext);
                     dialog.setTitle("Interval details");
                     dialog.setMessage(getString(R.string.Interval_information));
-                    dialog.setPositiveButton("Close", (d, w) -> { });
+                    dialog.setPositiveButton("Close", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -670,7 +681,8 @@ public class SettingsActivity extends AppCompatActivity {
                         } else prefs.edit().putString("BannedWords", value).apply();
                     });
                     dialog.setNeutralButton("Clear", (d, w) -> prefs.edit().putString("BannedWords", "").apply());
-                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -683,7 +695,8 @@ public class SettingsActivity extends AppCompatActivity {
                         mContext.getSharedPreferences("Blacklist", MODE_PRIVATE).edit().clear().apply();
                         Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
                     });
-                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -725,7 +738,8 @@ public class SettingsActivity extends AppCompatActivity {
                         } else prefs.edit().putString("DefaultTitle", value).apply();
                     });
                     dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().putString("DefaultTitle", "New notification").apply());
-                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -757,7 +771,8 @@ public class SettingsActivity extends AppCompatActivity {
                         } else prefs.edit().putString("DefaultMessage", value).apply();
                     });
                     dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().putString("DefaultMessage", "notification arrived.").apply());
-                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
 
@@ -766,10 +781,11 @@ public class SettingsActivity extends AppCompatActivity {
                     dialog.setTitle("Waring!");
                     dialog.setMessage("Are you sure to delete notification history?\nThis operation cannot be undone.");
                     dialog.setPositiveButton("Delete", (d, w) -> {
-                        prefs.edit().putString("sendLogs", "").putString("receivedLogs","").apply();
+                        prefs.edit().putString("sendLogs", "").putString("receivedLogs", "").apply();
                         Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
                     });
-                    dialog.setNegativeButton("Cancel", (d, w) -> { });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
                     dialog.show();
                     break;
             }
@@ -826,23 +842,18 @@ public class SettingsActivity extends AppCompatActivity {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             for (int grantResult : grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                    switch (requestCode) {
-                        case 1:
-                            Toast.makeText(mContext, "require storage permission!", Toast.LENGTH_SHORT).show();
-                            ((CheckBoxPreference) DebugLogEnable).setChecked(false);
-                            break;
-
-                        case 2:
-                            int SourceCode = DetectAppSource.detectSource(mContext);
-                            if(SourceCode == 1 || SourceCode == 2) {
-                                Toast.makeText(mContext, "require sms permission!", Toast.LENGTH_SHORT).show();
-                            } else if(SourceCode == 3) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
-                                builder.setPositiveButton("Go to github", (dialog, which) -> startActivity()).setNegativeButton("Close",(d, w) -> { }).show();
-                            } else Toast.makeText(mContext, "Error while getting SHA-1 hash!", Toast.LENGTH_SHORT).show();
-                            ((SwitchPreference) UseReplySms).setChecked(false);
-                            break;
+                    if (requestCode == 2) {
+                        int SourceCode = DetectAppSource.detectSource(mContext);
+                        if (SourceCode == 1 || SourceCode == 2) {
+                            Toast.makeText(mContext, "require sms permission!", Toast.LENGTH_SHORT).show();
+                        } else if (SourceCode == 3) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
+                            builder.setPositiveButton("Go to github", (dialog, which) -> startActivity()).setNegativeButton("Close", (d, w) -> {
+                            }).show();
+                        } else
+                            Toast.makeText(mContext, "Error while getting SHA-1 hash!", Toast.LENGTH_SHORT).show();
+                        ((SwitchPreference) UseReplySms).setChecked(false);
                     }
                     return;
                 }
@@ -862,7 +873,7 @@ public class SettingsActivity extends AppCompatActivity {
                 GoogleSignInAccount account = result.getSignInAccount();
                 assert account != null;
                 firebaseAuthWithGoogle(account);
-            }
+            } else mBillingHelper.handleActivityResult(requestCode, resultCode, data);
         }
 
         private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {

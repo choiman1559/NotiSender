@@ -1,6 +1,7 @@
 package com.noti.main.service;
 
 import android.app.Notification;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -12,7 +13,6 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.Telephony;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -28,8 +28,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.RandomAccessFile;
 import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -41,15 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 public class NotiListenerService extends NotificationListenerService {
-
-    SharedPreferences prefs;
-
-    String toString(Boolean boo) {
-        return boo ? "true" : "false";
-    }
 
     private static class Query {
         private String Package;
@@ -72,26 +63,10 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
+    private static SharedPreferences prefs;
     private volatile long intervalTimestamp = 0;
     private volatile StatusBarNotification pastNotification = null;
     private final ArrayList<Query> intervalQuery = new ArrayList<>();
-
-    void Log(String message, String time) {
-        if (prefs.getBoolean("debugInfo", false)) {
-            Log.d("debug", message);
-            File txt = new File(Environment.getExternalStorageDirectory() + "/NotiSender_Logs", time + ".txt");
-            try {
-                if (!txt.getParentFile().exists()) txt.getParentFile().mkdirs();
-                if (!txt.exists()) txt.createNewFile();
-                RandomAccessFile raf = new RandomAccessFile(txt, "rw");
-                raf.seek(raf.length());
-                raf.writeBytes(new String(message.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8) + "\n");
-                raf.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     @Override
     public void onCreate() {
@@ -158,27 +133,7 @@ public class NotiListenerService extends NotificationListenerService {
         Date time = Calendar.getInstance().getTime();
         String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
 
-        boolean isLogging = BuildConfig.DEBUG || prefs.getBoolean("debugInfo", false);
-
-        new Thread(() -> {
-            if (isLogging) {
-                String str = "";
-                str += "\n";
-                str += "***onNotificationPosted debug info***\n";
-                str += "date : " + DATE + "\n";
-                str += "uid : " + prefs.getString("UID", "") + "\n";
-                str += "package : " + sbn.getPackageName() + "\n";
-                str += "service type : " + prefs.getString("service", "") + "\n";
-                str += "if uid is blank : " + toString(Objects.equals(prefs.getString("UID", ""), "")) + "\n";
-                str += "if service Enabled : " + toString(prefs.getBoolean("serviceToggle", false)) + "\n";
-                str += "if include blacklist : " + toString(getSharedPreferences("Blacklist", MODE_PRIVATE).getBoolean(sbn.getPackageName(), false)) + "\n";
-                str += "EXTRA_TITLE : " + extra.getString(Notification.EXTRA_TITLE) + "\n";
-                str += "EXTRA_TEXT : " + extra.getString(Notification.EXTRA_TEXT) + "\n";
-                str += "**************************************\n";
-                str += "\n";
-                Log(str, DATE);
-            }
-        }).start();
+        boolean isLogging = BuildConfig.DEBUG;
 
         if (!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
             String mode = prefs.getString("service", "");
@@ -246,6 +201,7 @@ public class NotiListenerService extends NotificationListenerService {
             notifcationBody.put("type", "send|sms");
             notifcationBody.put("message", message);
             notifcationBody.put("address", address);
+            notifcationBody.put("package", PackageName);
             notifcationBody.put("device_name", DEVICE_NAME);
             notifcationBody.put("device_id", DEVICE_ID);
             notifcationBody.put("date", date);
@@ -257,7 +213,7 @@ public class NotiListenerService extends NotificationListenerService {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }
         if (isLogging) Log.d("data", notificationHead.toString());
-        sendNotification(notificationHead, PackageName);
+        sendNotification(notificationHead, PackageName, this);
     }
 
     private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
@@ -330,12 +286,14 @@ public class NotiListenerService extends NotificationListenerService {
 
             int dataLimit = prefs.getInt("DataLimit", 4096);
             notificationHead.put("to", TOPIC);
+            notificationHead.put("android", new JSONObject().put("priority", "high"));
+            notificationHead.put("priority", 10);
             notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }
         if (isLogging) Log.d("data", notificationHead.toString());
-        sendNotification(notificationHead, PackageName);
+        sendNotification(notificationHead, PackageName, this);
     }
 
     private boolean isBannedWords(String TEXT, String TITLE) {
@@ -398,14 +356,13 @@ public class NotiListenerService extends NotificationListenerService {
         return -1;
     }
 
-    private void sendNotification(JSONObject notification, String PackageName) {
-        SharedPreferences prefs = this.getSharedPreferences(getPackageName() + "_preferences", MODE_PRIVATE);
+    public static void sendNotification(JSONObject notification, String PackageName, Context context) {
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
-            if(!prefs.getString("AuthKey_Pushy", "").equals("")) sendPushyNotification(notification, PackageName);
-        } else sendFCMNotification(notification, PackageName);
+            if(!prefs.getString("AuthKey_Pushy", "").equals("")) sendPushyNotification(notification, PackageName, context);
+        } else sendFCMNotification(notification, PackageName, context);
     }
 
-    private void sendFCMNotification(JSONObject notification, String PackageName) {
+    private static void sendFCMNotification(JSONObject notification, String PackageName, Context context) {
         final String FCM_API = "https://fcm.googleapis.com/fcm/send";
         final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
         final String contentType = "application/json";
@@ -414,7 +371,7 @@ public class NotiListenerService extends NotificationListenerService {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API, notification,
                 response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName),
                 error -> {
-                    Toast.makeText(NotiListenerService.this, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
                     Log.i(TAG, "onErrorResponse: Didn't work" + " ,package: " + PackageName);
                 }) {
             @Override
@@ -425,16 +382,16 @@ public class NotiListenerService extends NotificationListenerService {
                 return params;
             }
         };
-        JsonRequest.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+        JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
     }
 
-    private void sendPushyNotification(JSONObject notification, String PackageName) {
+    private static void sendPushyNotification(JSONObject notification, String PackageName, Context context) {
         final String URI = "https://api.pushy.me/push?api_key=" + prefs.getString("AuthKey_Pushy", "");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(URI, notification, response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName), error -> {
-            Toast.makeText(NotiListenerService.this, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
             Log.i(TAG, "onErrorResponse: Didn't work: " + new String(error.networkResponse.data, StandardCharsets.UTF_8) + ", package: " + PackageName);
         }) {
             @Override
@@ -444,6 +401,6 @@ public class NotiListenerService extends NotificationListenerService {
                 return params;
             }
         };
-        JsonRequest.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+        JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
     }
 }

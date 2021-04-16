@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.google.android.gms:play-services-auth:19.0.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/acff3a60900d1c3e56bcbfd5077825db/transformed/jetified-play-services-auth-19.0.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/acff3a60900d1c3e56bcbfd5077825db/transformed/jetified-play-services-auth-19.0.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/acff3a60900d1c3e56bcbfd5077825db/transformed/jetified-play-services-auth-19.0.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/390599e0a4c55dca918595c7d4b3d09a/transformed/jetified-play-services-auth-19.0.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/390599e0a4c55dca918595c7d4b3d09a/transformed/jetified-play-services-auth-19.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/390599e0a4c55dca918595c7d4b3d09a/transformed/jetified-play-services-auth-19.0.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.android.gms/play-services-auth/19.0.0/3b59304365c13d789c43fe9eb65dfe174583aab6/play-services-auth-19.0.0-javadoc.jar!/" />
