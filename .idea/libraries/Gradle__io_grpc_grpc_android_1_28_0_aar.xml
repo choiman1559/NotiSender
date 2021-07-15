@@ -4,15 +4,16 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/93869c17f25f4ac869c69b5b051cd0d0/transformed/jetified-grpc-android-1.28.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/4cd3a0cadb4944e140c6bf6e69fd93f5/transformed/jetified-grpc-android-1.28.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/72a9e63a46a7c2052c54ec3f5a896a74/transformed/jetified-grpc-android-1.28.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/c2ac046290b5d2a6cf94c11cf8864ece/transformed/jetified-grpc-android-1.28.0/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/c2ac046290b5d2a6cf94c11cf8864ece/transformed/jetified-grpc-android-1.28.0/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/c2ac046290b5d2a6cf94c11cf8864ece/transformed/jetified-grpc-android-1.28.0/res" />
+      <root url="file://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/transforms-3/c2ac046290b5d2a6cf94c11cf8864ece/transformed/jetified-grpc-android-1.28.0/res" />
+      <root url="file://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/transforms-3/c2ac046290b5d2a6cf94c11cf8864ece/transformed/jetified-grpc-android-1.28.0/AndroidManifest.xml" />
+      <root url="jar://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/transforms-3/c2ac046290b5d2a6cf94c11cf8864ece/transformed/jetified-grpc-android-1.28.0/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-android/1.28.0/e7c3f4a90a5862818fc0ff52806ab2b2986bea67/grpc-android-1.28.0-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/modules-2/files-2.1/io.grpc/grpc-android/1.28.0/e7c3f4a90a5862818fc0ff52806ab2b2986bea67/grpc-android-1.28.0-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-android/1.28.0/64355636f33bb77e4e0677e3de8ba7a48d6a74d/grpc-android-1.28.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/modules-2/files-2.1/io.grpc/grpc-android/1.28.0/64355636f33bb77e4e0677e3de8ba7a48d6a74d/grpc-android-1.28.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

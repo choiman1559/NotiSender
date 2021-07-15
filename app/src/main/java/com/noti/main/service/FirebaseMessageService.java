@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
@@ -57,22 +59,22 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String type = map.get("type");
         String mode = prefs.getString("service", "");
 
-        if(prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
-            if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
-                if(mode.equals("hybrid") && isDeviceItself(map)) return;
-                if (type.equals("send|normal")) {
-                    sendNotification(map);
-                } else if(type.equals("send|sms")) {
-                    sendSmsNotification(map);
-                }
-            }
-
-            else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
-                if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(getMACAddress())) {
-                    if(type.equals("reception|normal")) {
-                        startNewRemoteActivity(map);
-                    } else if(type.equals("reception|sms")) {
-                        startNewRemoteSms(map);
+        if(type != null && mode != null) {
+            if (prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
+                if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
+                    if (mode.equals("hybrid") && isDeviceItself(map)) return;
+                    if (type.equals("send|normal")) {
+                        sendNotification(map);
+                    } else if (type.equals("send|sms")) {
+                        sendSmsNotification(map);
+                    }
+                } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
+                    if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(getMACAddress())) {
+                        if (type.equals("reception|normal")) {
+                            startNewRemoteActivity(map);
+                        } else if (type.equals("reception|sms")) {
+                            startNewRemoteSms(map);
+                        }
                     }
                 }
             }
@@ -121,6 +123,53 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Device_id = map.get("device_id");
         String Date = map.get("date");
 
+        String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
+        if(!DeadlineValue.equals("No deadline")) {
+            String[] foo = DeadlineValue.split(" ");
+            long numberToMultiply;
+            switch(foo[1]) {
+                case "min":
+                    numberToMultiply = 60000L;
+                    break;
+
+                case "hour":
+                    numberToMultiply = 3600000L;
+                    break;
+
+                case "day":
+                    numberToMultiply = 86400000L;
+                    break;
+
+                case "week":
+                    numberToMultiply = 604800000L;
+                    break;
+
+                case "month":
+                    numberToMultiply = 2419200000L;
+                    break;
+
+                case "year":
+                    numberToMultiply = 29030400000L;
+                    break;
+
+                default:
+                    numberToMultiply = 0L;
+                    break;
+            }
+
+            try {
+                if(Date != null) {
+                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
+                    if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         Intent notificationIntent = new Intent(FirebaseMessageService.this, SmsViewActivity.class);
         notificationIntent.putExtra("device_id",Device_id);
         notificationIntent.putExtra("message",message);
@@ -166,6 +215,57 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Device_id = map.get("device_id");
         String Date = map.get("date");
 
+        String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
+        if(!DeadlineValue.equals("No deadline")) {
+            String[] foo = DeadlineValue.split(" ");
+            long numberToMultiply;
+            switch(foo[1]) {
+                case "min":
+                    numberToMultiply = 60000L;
+                    break;
+
+                case "hour":
+                    numberToMultiply = 3600000L;
+                    break;
+
+                case "day":
+                    numberToMultiply = 86400000L;
+                    break;
+
+                case "week":
+                    numberToMultiply = 604800000L;
+                    break;
+
+                case "month":
+                    numberToMultiply = 2419200000L;
+                    break;
+
+                case "year":
+                    numberToMultiply = 29030400000L;
+                    break;
+
+                    default:
+                        numberToMultiply = 0L;
+                        break;
+            }
+
+            try {
+                if(Date != null) {
+                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
+                    if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
+                        if(BuildConfig.DEBUG) {
+                            Toast.makeText(getApplicationContext(), "App " + Package + " received but not proceed 'cause deadline! Elapsed time : " + (System.currentTimeMillis() - ReceivedDate.getTime()), Toast.LENGTH_SHORT).show();
+                            Log.d(getClass().getSimpleName(), "App " + Package + " received but not proceed 'cause deadline! Elapsed time : " + (System.currentTimeMillis() - ReceivedDate.getTime()));
+                        }
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         Bitmap Icon_original = null;
         Bitmap Icon = null;
         if (!map.get("icon").equals("none")) {
@@ -209,8 +309,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
         int uniqueCode = 0;
         try {
-            Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
-            uniqueCode = d == null ? 0 : (int)((d.getTime() / 1000L) % Integer.MAX_VALUE);
+            if(Date != null) {
+                Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
+                uniqueCode = d == null ? 0 : (int) ((d.getTime() / 1000L) % Integer.MAX_VALUE);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

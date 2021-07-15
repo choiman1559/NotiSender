@@ -17,6 +17,26 @@
         <item>Low</item>
     </string-array>
 
+    <string-array name="receive_deadline">
+        <item>No deadline</item>
+        <item>1 min</item>
+        <item>10 min</item>
+        <item>30 min</item>
+        <item>1 hour</item>
+        <item>3 hour</item>
+        <item>6 hour</item>
+        <item>9 hour</item>
+        <item>1 day</item>
+        <item>3 day</item>
+        <item>5 day</item>
+        <item>1 week</item>
+        <item>3 week</item>
+        <item>1 month</item>
+        <item>3 month</item>
+        <item>6 month</item>
+        <item>1 year</item>
+    </string-array>
+
     <string-array name="resolution">
         <item>68 x 68 (Not Recommend)</item>
         <item>52 x 52 (Default)</item>

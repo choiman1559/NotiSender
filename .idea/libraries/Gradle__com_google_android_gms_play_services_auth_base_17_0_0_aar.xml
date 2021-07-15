@@ -4,9 +4,10 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/fa61419e4436d29b4a75354628b2b544/transformed/jetified-play-services-auth-base-17.0.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/69c03a22ded5a7d35dcd2e781359f53f/transformed/jetified-play-services-auth-base-17.0.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/98f61b8730c93b62fc8cceda16c29ef8/transformed/jetified-play-services-auth-base-17.0.0/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/243e9d635698485ad15ba462bc19e1d9/transformed/jetified-play-services-auth-base-17.0.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/243e9d635698485ad15ba462bc19e1d9/transformed/jetified-play-services-auth-base-17.0.0/AndroidManifest.xml" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/243e9d635698485ad15ba462bc19e1d9/transformed/jetified-play-services-auth-base-17.0.0/res" />
+      <root url="file://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/transforms-3/243e9d635698485ad15ba462bc19e1d9/transformed/jetified-play-services-auth-base-17.0.0/res" />
+      <root url="jar://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/transforms-3/243e9d635698485ad15ba462bc19e1d9/transformed/jetified-play-services-auth-base-17.0.0/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../girlsfrontline-resources-extract-android/gradle/caches/transforms-3/243e9d635698485ad15ba462bc19e1d9/transformed/jetified-play-services-auth-base-17.0.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

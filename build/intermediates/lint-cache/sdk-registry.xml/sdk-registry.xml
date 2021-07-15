@@ -127,9 +127,16 @@
   </library>
   <library  groupId="com.google.firebase" artifactId="firebase-ml-vision">
     <versions from="15.0.0" to="24.1.0" status="deprecated" description="For more information, refer to documentation for specific features.&#13;&#10;Text recognition: https://firebase.google.com/docs/ml/android/recognize-text&#13;&#10;Image labeling: https://firebase.google.com/docs/ml/android/label-images&#13;&#10;Landmark recognition: https://firebase.google.com/docs/ml/android/recognize-landmarks " />
+  </library>
+  <library  groupId="com.google.firebase" artifactId="firebase-ml-model-interpreter">
+    <versions from="15.0.0" to="22.0.4" status="deprecated" description="The Firebase ML Model Interpreter library is deprecated in favor of the Firebase ML Model Downloader library. For more information, visit https://firebase.google.com/docs/ml/android/use-custom-models" />
+  </library>
+
+  <library  groupId="com.google.firebase" artifactId="firebase-perf">
+    <versions to="16.2.1" status="deprecated" description="This version will soon be deprecated. Update to version 19.0.10 or higher to get real time performance data. For more information, visit https://firebase.google.com/docs/perf-mon/troubleshooting" url="https://firebase.google.com/docs/perf-mon/troubleshooting?platform=android#faq-real-time-data"/>
 </library>
 
-  <library  groupId="com.google.dagger" artifactId="dagger-android" recommended-version="2.15" >
+  <library  groupId="com.google.dagger" artifactId="dagger-android" recommended-version="2.35.1" >
     <versions from="2.15" />
     <versions from="2.14.1" status="deprecated" description="Bug affecting SDK performance" url="https://github.com/google/dagger/releases/tag/2.15" />
     <versions from="2.14" status="deprecated" description="Bug affecting SDK performance" url="https://github.com/google/dagger/releases/tag/2.15" />

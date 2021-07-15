@@ -130,6 +130,13 @@
             android:key="importance"
             android:summary="Now : Default"
             android:title="Notification Importance" />
+        <ListPreference
+            android:defaultValue="No deadline"
+            android:entries="@array/receive_deadline"
+            android:entryValues="@array/receive_deadline"
+            android:key="ReceiveDeadline"
+            android:summary="Now : No deadline (Default)"
+            android:title="Notification Receive Deadline" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseWiFiSleepPolicy"

@@ -145,6 +145,7 @@ public class SettingsActivity extends AppCompatActivity {
         SettingsFragment fragment = new SettingsFragment();
         Bundle bundle = new Bundle(0);
         fragment.setArguments(bundle);
+        fragment.setRetainInstance(true);
         return fragment;
     }
 
@@ -167,6 +168,7 @@ public class SettingsActivity extends AppCompatActivity {
         Preference UseWhiteList;
         Preference TestRun;
         Preference SetImportance;
+        Preference ReceiveDeadline;
         Preference UseWiFiSleepPolicy;
         Preference IconResolution;
         Preference IconEnabled;
@@ -188,8 +190,7 @@ public class SettingsActivity extends AppCompatActivity {
         Preference DefaultTitle;
         Preference DefaultMessage;
 
-        SettingsFragment() {
-        }
+        SettingsFragment() { }
 
         @Override
         public void onAttach(@NonNull Context context) {
@@ -242,6 +243,7 @@ public class SettingsActivity extends AppCompatActivity {
             Blacklist = findPreference("blacklist");
             UseWhiteList = findPreference("UseWhite");
             SetImportance = findPreference("importance");
+            ReceiveDeadline = findPreference("ReceiveDeadline");
             UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
             IconResolution = findPreference("IconRes");
             IconEnabled = findPreference("SendIcon");
@@ -427,6 +429,13 @@ public class SettingsActivity extends AppCompatActivity {
                 boolean isUseNullStricts = (boolean) n;
                 DefaultTitle.setVisible(!isUseNullStricts);
                 DefaultMessage.setVisible(!isUseNullStricts);
+                return true;
+            });
+
+            String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
+            ReceiveDeadline.setSummary("Now : " + DeadlineValue + (DeadlineValue.equals("No deadline") ? " (Default)" : ""));
+            ReceiveDeadline.setOnPreferenceChangeListener((p, n) -> {
+                ReceiveDeadline.setSummary("Now : " + (String)n + (((String)n).equals("No deadline") ? " (Default)" : ""));
                 return true;
             });
 

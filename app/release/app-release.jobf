@@ -6,7 +6,7 @@ c com.google.firebase.crashlytics.internal.model.AutoValue_CrashlyticsReport_Ses
 c com.google.firebase.crashlytics.internal.model.AutoValue_CrashlyticsReport_Session_Event_Application_Execution_Signal = C0005x7c929f5b
 c com.google.firebase.crashlytics.internal.model.AutoValue_CrashlyticsReport_Session_Event_Application_Execution_Thread = C0006x7e3e3ebd
 c com.google.firebase.crashlytics.internal.model.AutoValue_CrashlyticsReport_Session_Event_Application_Execution_Thread_Frame = C0007xce3d994b
-c com.noti.main.-$$Lambda$SettingsActivity$QtLJMBXCtzrJd5dhdR2d-TBb3po = lambda
+c com.noti.main.-$$Lambda$SettingsActivity$2dqCHO1uJwdZ8Xy65sA1dlrPshA = lambda
 c com.noti.main.-$$Lambda$SettingsActivity$SettingsFragment$-NJm62vinbD0WFpQAb8gNmPL91k = DialogInterface$OnClickListenerC0008xca44f56
 c com.noti.main.-$$Lambda$SettingsActivity$SettingsFragment$-TIJXf8z1Q393xujSqFwTuggllU = DialogInterface$OnClickListenerC0009xb74850fe
 c com.noti.main.-$$Lambda$SettingsActivity$SettingsFragment$0CrSzVm9mMSGXs7BhSagqXxzVqY = DialogInterface$OnClickListenerC0010x3b03101f

@@ -111,6 +111,53 @@ public class PushyReceiver extends BroadcastReceiver {
         String Date = map.getStringExtra("date");
         String Package = map.getStringExtra("package");
 
+        String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
+        if(!DeadlineValue.equals("No deadline")) {
+            String[] foo = DeadlineValue.split(" ");
+            long numberToMultiply;
+            switch(foo[1]) {
+                case "min":
+                    numberToMultiply = 60000L;
+                    break;
+
+                case "hour":
+                    numberToMultiply = 3600000L;
+                    break;
+
+                case "day":
+                    numberToMultiply = 86400000L;
+                    break;
+
+                case "week":
+                    numberToMultiply = 604800000L;
+                    break;
+
+                case "month":
+                    numberToMultiply = 2419200000L;
+                    break;
+
+                case "year":
+                    numberToMultiply = 29030400000L;
+                    break;
+
+                default:
+                    numberToMultiply = 0L;
+                    break;
+            }
+
+            try {
+                if(Date != null) {
+                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
+                    if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         Intent notificationIntent = new Intent(context, SmsViewActivity.class);
         notificationIntent.putExtra("device_id", Device_id);
         notificationIntent.putExtra("message", message);
@@ -155,6 +202,53 @@ public class PushyReceiver extends BroadcastReceiver {
         String Device_name = map.getStringExtra("device_name");
         String Device_id = map.getStringExtra("device_id");
         String Date = map.getStringExtra("date");
+
+        String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
+        if(!DeadlineValue.equals("No deadline")) {
+            String[] foo = DeadlineValue.split(" ");
+            long numberToMultiply;
+            switch(foo[1]) {
+                case "min":
+                    numberToMultiply = 60000L;
+                    break;
+
+                case "hour":
+                    numberToMultiply = 3600000L;
+                    break;
+
+                case "day":
+                    numberToMultiply = 86400000L;
+                    break;
+
+                case "week":
+                    numberToMultiply = 604800000L;
+                    break;
+
+                case "month":
+                    numberToMultiply = 2419200000L;
+                    break;
+
+                case "year":
+                    numberToMultiply = 29030400000L;
+                    break;
+
+                default:
+                    numberToMultiply = 0L;
+                    break;
+            }
+
+            try {
+                if(Date != null) {
+                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
+                    if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         Bitmap Icon_original = null;
         Bitmap Icon = null;
