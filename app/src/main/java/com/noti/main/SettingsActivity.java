@@ -17,6 +17,8 @@ import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -41,6 +43,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -52,6 +56,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
+import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.AsyncTask;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.DetectAppSource;
@@ -169,6 +174,7 @@ public class SettingsActivity extends AppCompatActivity {
         Preference TestRun;
         Preference SetImportance;
         Preference ReceiveDeadline;
+        Preference ReceiveCustomDeadline;
         Preference UseWiFiSleepPolicy;
         Preference IconResolution;
         Preference IconEnabled;
@@ -189,6 +195,9 @@ public class SettingsActivity extends AppCompatActivity {
         Preference UseNullStrict;
         Preference DefaultTitle;
         Preference DefaultMessage;
+        Preference UseDataEncryption;
+        Preference UseDataEncryptionPassword;
+        Preference EncryptionInfo;
 
         SettingsFragment() { }
 
@@ -244,6 +253,7 @@ public class SettingsActivity extends AppCompatActivity {
             UseWhiteList = findPreference("UseWhite");
             SetImportance = findPreference("importance");
             ReceiveDeadline = findPreference("ReceiveDeadline");
+            ReceiveCustomDeadline = findPreference("ReceiveCustomDeadline");
             UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
             IconResolution = findPreference("IconRes");
             IconEnabled = findPreference("SendIcon");
@@ -264,6 +274,9 @@ public class SettingsActivity extends AppCompatActivity {
             UseNullStrict = findPreference("StrictStringNull");
             DefaultTitle = findPreference("DefaultTitle");
             DefaultMessage = findPreference("DefaultMessage");
+            UseDataEncryption = findPreference("UseDataEncryption");
+            UseDataEncryptionPassword = findPreference("UseDataEncryptionPassword");
+            EncryptionInfo = findPreference("EncryptionInfo");
 
             mBillingHelper = BillingHelper.initialize(mContext, new BillingHelper.BillingCallback() {
                 @Override
@@ -433,9 +446,13 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
+            String CustomDeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
+            ReceiveCustomDeadline.setVisible(DeadlineValue.equals("Custom…"));
+            ReceiveCustomDeadline.setSummary("Now : " + CustomDeadlineValue + (CustomDeadlineValue.equals("5 min") ? " (Default)" : ""));
             ReceiveDeadline.setSummary("Now : " + DeadlineValue + (DeadlineValue.equals("No deadline") ? " (Default)" : ""));
             ReceiveDeadline.setOnPreferenceChangeListener((p, n) -> {
-                ReceiveDeadline.setSummary("Now : " + (String)n + (((String)n).equals("No deadline") ? " (Default)" : ""));
+                ReceiveDeadline.setSummary("Now : " + n + (n.equals("No deadline") ? " (Default)" : ""));
+                ReceiveCustomDeadline.setVisible(n.equals("Custom…"));
                 return true;
             });
 
@@ -443,6 +460,24 @@ public class SettingsActivity extends AppCompatActivity {
                 Pushy.toggleWifiPolicyCompliance((boolean) n, mContext);
                 return true;
             });
+
+            if(ifUIDBlank) {
+                ((SwitchPreference)UseDataEncryption).setChecked(false);
+                UseDataEncryption.setEnabled(false);
+                UseDataEncryption.setSummary("You should login first to use this feature");
+                UseDataEncryptionPassword.setVisible(false);
+                EncryptionInfo.setVisible(false);
+            } else {
+                boolean usesDataEncryption = prefs.getBoolean("UseDataEncryption", false);
+                UseDataEncryptionPassword.setVisible(usesDataEncryption);
+                EncryptionInfo.setVisible(usesDataEncryption);
+                UseDataEncryption.setOnPreferenceChangeListener((preference, newValue) -> {
+                    boolean foo = (boolean) newValue;
+                    UseDataEncryptionPassword.setVisible(foo);
+                    EncryptionInfo.setVisible(foo);
+                    return true;
+                });
+            }
 
             try {
                 mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
@@ -797,6 +832,113 @@ public class SettingsActivity extends AppCompatActivity {
                     });
                     dialog.show();
                     break;
+
+                case "UseDataEncryptionPassword":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input password");
+                    dialog.setMessage("Enter the password to be used for encryption.\nPassword is limited to a maximum of 20 characters.");
+
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                    editText.setHint("Input password");
+                    editText.setGravity(Gravity.START);
+
+                    String rawPassword = prefs.getString("EncryptionPassword", "");
+                    if(rawPassword.equals("")) editText.setText("");
+                    else {
+                        String uid = mAuth.getUid();
+                        if(uid != null) {
+                            try {
+                                editText.setText(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
+                            } catch (Exception e) {
+                                Toast.makeText(mContext, "Error while processing crypto", Toast.LENGTH_SHORT).show();
+                                if(BuildConfig.DEBUG) e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input password", Toast.LENGTH_SHORT).show();
+                        } else if(value.length() > 20) {
+                            Toast.makeText(mContext, "Password too long! maximum 20 chars.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            try {
+                                String uid = mAuth.getUid();
+                                if(uid != null) prefs.edit().putString("EncryptionPassword", AESCrypto.encrypt(value, AESCrypto.parseAESToken(uid))).apply();
+                            } catch (Exception e) {
+                                Toast.makeText(mContext, "Error while processing crypto", Toast.LENGTH_SHORT).show();
+                                if(BuildConfig.DEBUG) e.printStackTrace();
+                            }
+                        }
+                    });
+                    dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().remove("EncryptionPassword").apply());
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
+                    dialog.show();
+                    break;
+
+                case "EncryptionInfo":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setTitle("Encryption Info");
+                    dialog.setMessage(getString(R.string.Encryption_information));
+                    dialog.setPositiveButton("Close", (d, w) -> {
+                    });
+                    dialog.show();
+                    break;
+
+                case "ReceiveCustomDeadline":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input value");
+                    dialog.setMessage("input receive deadline value. max is 65535.");
+
+                    View view = getLayoutInflater().inflate(R.layout.dialog_receive_deadline, null);
+                    TextInputEditText editValue = view.findViewById(R.id.editValue);
+                    MaterialAutoCompleteTextView unitSpinner = view.findViewById(R.id.unitSpinner);
+
+                    String[] rawValues = prefs.getString("DeadlineCustomValue", "5 min").split(" ");
+                    editValue.setText(rawValues[0]);
+                    unitSpinner.setText(rawValues[1]);
+                    unitSpinner.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.deadline_units)));
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editValue.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else {
+                            int IntValue = Integer.parseInt(value);
+                            if (IntValue > 65535) {
+                                Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            } else {
+                                final String finalValue = value + " " + unitSpinner.getText().toString();
+                                prefs.edit().putString("DeadlineCustomValue", finalValue).apply();
+                                ReceiveCustomDeadline.setSummary("Now : " + finalValue + (finalValue.equals("5 min") ? " (Default)" : ""));
+                            }
+                        }
+                    });
+
+                    dialog.setNeutralButton("Reset Default", (d, w) -> {
+                        prefs.edit().putString("DeadlineCustomValue", "5 min").apply();
+                        ReceiveCustomDeadline.setSummary("Now : 5 min (Default)");
+                    });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
+                    dialog.setView(view);
+                    dialog.show();
+                    break;
+
             }
             return super.onPreferenceTreeClick(preference);
         }

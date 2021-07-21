@@ -17,8 +17,18 @@
         <item>Low</item>
     </string-array>
 
+    <string-array name="deadline_units">
+        <item>min</item>
+        <item>hour</item>
+        <item>day</item>
+        <item>week</item>
+        <item>month</item>
+        <item>year</item>
+    </string-array>
+
     <string-array name="receive_deadline">
         <item>No deadline</item>
+        <item>Custom…</item>
         <item>1 min</item>
         <item>10 min</item>
         <item>30 min</item>

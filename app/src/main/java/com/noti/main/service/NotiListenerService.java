@@ -20,7 +20,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.firebase.auth.FirebaseAuth;
 import com.noti.main.BuildConfig;
+import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.JsonRequest;
 import com.noti.main.utils.CompressStringUtil;
 
@@ -288,7 +290,7 @@ public class NotiListenerService extends NotificationListenerService {
             notificationHead.put("to", TOPIC);
             notificationHead.put("android", new JSONObject().put("priority", "high"));
             notificationHead.put("priority", 10);
-            notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
+            notificationHead.put("data", notifcationBody.toString().length() < dataLimit - 20 ? notifcationBody : notifcationBody.put("icon", "none"));
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }
@@ -367,6 +369,27 @@ public class NotiListenerService extends NotificationListenerService {
         final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
+
+        try {
+            String rawPassword = prefs.getString("EncryptionPassword", "");
+            JSONObject data = notification.getJSONObject("data");
+            if (prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
+                String uid = FirebaseAuth.getInstance().getUid();
+                if (uid != null) {
+                    String encryptedData = AESCrypto.encrypt(notification.getJSONObject("data").toString(), AESCrypto.parseAESToken(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid))));
+
+                    JSONObject newData = new JSONObject();
+                    newData.put("encrypted", "true");
+                    newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
+                    notification.put("data", newData);
+                }
+            } else {
+                data.put("encrypted", "false");
+                notification.put("data", data);
+            }
+        } catch(Exception e) {
+            if(BuildConfig.DEBUG) e.printStackTrace();
+        }
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API, notification,
                 response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName),

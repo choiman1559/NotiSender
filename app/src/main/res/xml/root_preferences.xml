@@ -120,6 +120,19 @@
             android:key="DefaultMessage"
             android:title="Customizing default message string"
             android:summary="Click here to set default message string" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseDataEncryption"
+            android:title="Encrypt sending data"
+            android:summary="Encrypt your notification data using AES algorithm"/>
+        <Preference
+            android:key="UseDataEncryptionPassword"
+            android:title="Password for encryption"
+            android:summary="Password to use for AES encryption" />
+        <Preference
+            android:key="EncryptionInfo"
+            android:summary="Some Information about encryption"
+            android:icon="@drawable/ic_info_outline_black_24dp" />
         <Preference
             android:summary="Reception option"
             android:enabled="false" />
@@ -137,6 +150,10 @@
             android:key="ReceiveDeadline"
             android:summary="Now : No deadline (Default)"
             android:title="Notification Receive Deadline" />
+        <Preference
+            android:key="ReceiveCustomDeadline"
+            android:title="Custom Receive Deadline value"
+            android:summary="Now : 5 min (Default)" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseWiFiSleepPolicy"

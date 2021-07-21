@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -30,16 +31,20 @@ import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
+import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+
+import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
 import static com.noti.main.service.NotiListenerService.getMACAddress;
 
@@ -53,9 +58,32 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        Map<String, String> map = remoteMessage.getData();
+        Map<String,String> map = remoteMessage.getData();
+
+        String rawPassword = prefs.getString("EncryptionPassword", "");
+        if(map.get("encrypted").equals("true")) {
+            if(prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
+                try {
+                    String uid = FirebaseAuth.getInstance().getUid();
+                    if (uid != null) {
+                        JSONObject object = new JSONObject(AESCrypto.decrypt(CompressStringUtil.decompressString(map.get("encryptedData")), AESCrypto.parseAESToken(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)))));
+                        Map<String, String> newMap = new ObjectMapper().readValue(object.toString(), Map.class);
+                        processReception(newMap);
+                    }
+                } catch (GeneralSecurityException e) {
+                    Handler mHandler = new Handler(Looper.getMainLooper());
+                    mHandler.postDelayed(() -> Toast.makeText(this, "Error occcured while decrypting data!\nPlease check password and try again!", Toast.LENGTH_SHORT).show(), 0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else processReception(map);
+    }
+
+    private void processReception(Map<String,String> map) {
         String type = map.get("type");
         String mode = prefs.getString("service", "");
 
@@ -125,6 +153,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
         if(!DeadlineValue.equals("No deadline")) {
+            if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
             String[] foo = DeadlineValue.split(" ");
             long numberToMultiply;
             switch(foo[1]) {
@@ -217,6 +246,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
         if(!DeadlineValue.equals("No deadline")) {
+            if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
             String[] foo = DeadlineValue.split(" ");
             long numberToMultiply;
             switch(foo[1]) {

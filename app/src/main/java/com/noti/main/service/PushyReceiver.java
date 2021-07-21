@@ -112,10 +112,11 @@ public class PushyReceiver extends BroadcastReceiver {
         String Package = map.getStringExtra("package");
 
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
-        if(!DeadlineValue.equals("No deadline")) {
+        if (!DeadlineValue.equals("No deadline")) {
+            if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
             String[] foo = DeadlineValue.split(" ");
             long numberToMultiply;
-            switch(foo[1]) {
+            switch (foo[1]) {
                 case "min":
                     numberToMultiply = 60000L;
                     break;
@@ -146,7 +147,7 @@ public class PushyReceiver extends BroadcastReceiver {
             }
 
             try {
-                if(Date != null) {
+                if (Date != null) {
                     long calculated = Long.parseLong(foo[0]) * numberToMultiply;
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                     if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
@@ -204,10 +205,11 @@ public class PushyReceiver extends BroadcastReceiver {
         String Date = map.getStringExtra("date");
 
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
-        if(!DeadlineValue.equals("No deadline")) {
+        if (!DeadlineValue.equals("No deadline")) {
+            if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
             String[] foo = DeadlineValue.split(" ");
             long numberToMultiply;
-            switch(foo[1]) {
+            switch (foo[1]) {
                 case "min":
                     numberToMultiply = 60000L;
                     break;
@@ -238,7 +240,7 @@ public class PushyReceiver extends BroadcastReceiver {
             }
 
             try {
-                if(Date != null) {
+                if (Date != null) {
                     long calculated = Long.parseLong(foo[0]) * numberToMultiply;
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                     if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
