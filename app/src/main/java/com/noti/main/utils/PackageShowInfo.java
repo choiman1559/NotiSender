@@ -32,12 +32,9 @@ public class PackageShowInfo implements Parcelable {
         for (PackageInfo info : installedPackages) {
             PackageShowInfo packageShowInfo = new PackageShowInfo();
             packageShowInfo.packageName = info.packageName;
-
             packageShowInfo.appName = (String) info.applicationInfo.loadLabel(packageManager);
-
             packageShowInfo.applicationInfo = info.applicationInfo;
             showInfos.add(packageShowInfo);
-
         }
 
         Collections.sort(showInfos, (o1, o2) -> {
