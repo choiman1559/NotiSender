@@ -10,10 +10,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Vibrator;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -51,6 +55,7 @@ import static com.noti.main.service.NotiListenerService.getMACAddress;
 public class FirebaseMessageService extends FirebaseMessagingService {
 
     SharedPreferences prefs;
+    private volatile Ringtone lastPlayedRingtone;
 
     @Override
     public void onCreate() {
@@ -61,6 +66,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @SuppressWarnings("unchecked")
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        if(BuildConfig.DEBUG) Log.d(remoteMessage.getMessageId(), remoteMessage.toString());
         Map<String,String> map = remoteMessage.getData();
 
         String rawPassword = prefs.getString("EncryptionPassword", "");
@@ -154,41 +160,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
         if(!DeadlineValue.equals("No deadline")) {
             if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
-            String[] foo = DeadlineValue.split(" ");
-            long numberToMultiply;
-            switch(foo[1]) {
-                case "min":
-                    numberToMultiply = 60000L;
-                    break;
-
-                case "hour":
-                    numberToMultiply = 3600000L;
-                    break;
-
-                case "day":
-                    numberToMultiply = 86400000L;
-                    break;
-
-                case "week":
-                    numberToMultiply = 604800000L;
-                    break;
-
-                case "month":
-                    numberToMultiply = 2419200000L;
-                    break;
-
-                case "year":
-                    numberToMultiply = 29030400000L;
-                    break;
-
-                default:
-                    numberToMultiply = 0L;
-                    break;
-            }
 
             try {
                 if(Date != null) {
-                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    long calculated = parseTimeAndUnitToLong(DeadlineValue);
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                     if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
                         return;
@@ -224,8 +199,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             builder.setSmallIcon(R.drawable.ic_notification);
             CharSequence channelName = getString(R.string.notify_channel_name);
             String description = getString(R.string.notify_channel_description);
-            int importance = getImportance();
-            NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, importance);
+            NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
+
             channel.setDescription(description);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
@@ -233,6 +208,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         assert notificationManager != null;
         notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        playRingtoneAndVibrate();
     }
 
     protected void sendNotification(Map<String, String> map) {
@@ -247,41 +223,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
         if(!DeadlineValue.equals("No deadline")) {
             if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
-            String[] foo = DeadlineValue.split(" ");
-            long numberToMultiply;
-            switch(foo[1]) {
-                case "min":
-                    numberToMultiply = 60000L;
-                    break;
-
-                case "hour":
-                    numberToMultiply = 3600000L;
-                    break;
-
-                case "day":
-                    numberToMultiply = 86400000L;
-                    break;
-
-                case "week":
-                    numberToMultiply = 604800000L;
-                    break;
-
-                case "month":
-                    numberToMultiply = 2419200000L;
-                    break;
-
-                case "year":
-                    numberToMultiply = 29030400000L;
-                    break;
-
-                    default:
-                        numberToMultiply = 0L;
-                        break;
-            }
 
             try {
                 if(Date != null) {
-                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    long calculated = parseTimeAndUnitToLong(DeadlineValue);
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                     if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
                         if(BuildConfig.DEBUG) {
@@ -373,11 +318,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             CharSequence channelName = getString(R.string.notify_channel_name);
             String description = getString(R.string.notify_channel_description);
             NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
+
             channel.setDescription(description);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
         } else builder.setSmallIcon(R.mipmap.ic_notification);
+
         notificationManager.notify(uniqueCode, builder.build());
+        playRingtoneAndVibrate();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -390,8 +338,85 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 return NotificationManager.IMPORTANCE_LOW;
             case "High":
                 return NotificationManager.IMPORTANCE_MAX;
+            case "Custom…":
+                return NotificationManager.IMPORTANCE_NONE;
             default:
                 return NotificationManager.IMPORTANCE_UNSPECIFIED;
+        }
+    }
+
+    private long parseTimeAndUnitToLong(String data) {
+        String[] foo = data.split(" ");
+        long numberToMultiply;
+        switch(foo[1]) {
+            case "sec":
+                numberToMultiply = 1000L;
+                break;
+
+            case "min":
+                numberToMultiply = 60000L;
+                break;
+
+            case "hour":
+                numberToMultiply = 3600000L;
+                break;
+
+            case "day":
+                numberToMultiply = 86400000L;
+                break;
+
+            case "week":
+                numberToMultiply = 604800000L;
+                break;
+
+            case "month":
+                numberToMultiply = 2419200000L;
+                break;
+
+            case "year":
+                numberToMultiply = 29030400000L;
+                break;
+
+            default:
+                numberToMultiply = 0L;
+                break;
+        }
+        return Long.parseLong(foo[0]) * numberToMultiply;
+    }
+
+    private void playRingtoneAndVibrate() {
+        if(prefs.getString("importance","Default").equals("Custom…")) {
+            if(lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) lastPlayedRingtone.stop();
+
+            Ringtone r;
+            String s = prefs.getString("CustomRingtone", "");
+            DocumentFile AudioMedia = DocumentFile.fromSingleUri(this, Uri.parse(s));
+            if (!s.isEmpty() && AudioMedia != null && AudioMedia.exists())
+                r = RingtoneManager.getRingtone(this, AudioMedia.getUri());
+            else
+                r = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+
+            r.play();
+            lastPlayedRingtone = r;
+
+            int VibrationRunningTimeValue = prefs.getInt("VibrationRunningTime", 1000);
+            if(VibrationRunningTimeValue > 0) {
+                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(VibrationRunningTimeValue);
+            }
+
+            String data = prefs.getString("RingtoneRunningTime", "3 sec");
+            new Thread(() -> {
+                long runningTime = parseTimeAndUnitToLong(data);
+                long startTime = System.currentTimeMillis();
+                while (true) {
+                    if(!r.isPlaying()) break;
+                    if ((System.currentTimeMillis() - startTime) > runningTime) {
+                        if(r.isPlaying()) r.stop();
+                        break;
+                    }
+                }
+            }).start();
         }
     }
 

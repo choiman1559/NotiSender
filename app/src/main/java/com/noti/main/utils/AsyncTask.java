@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/*
+ *
+ */
+
 package com.noti.main.utils;
 
 import androidx.annotation.MainThread;
@@ -42,6 +46,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@SuppressWarnings("unused")
 public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
 
@@ -70,7 +75,6 @@ public abstract class AsyncTask<Params, Progress, Result> {
     // Used only for rejected executions.
     // Initialization protected by sRunOnSerialPolicy lock.
     private static ThreadPoolExecutor sBackupExecutor;
-    private static LinkedBlockingQueue<Runnable> sBackupExecutorQueue;
 
     private static final RejectedExecutionHandler sRunOnSerialPolicy =
             new RejectedExecutionHandler() {
@@ -80,7 +84,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
                     // Create this executor lazily, hopefully almost never.
                     synchronized (this) {
                         if (sBackupExecutor == null) {
-                            sBackupExecutorQueue = new LinkedBlockingQueue<Runnable>();
+                            LinkedBlockingQueue<Runnable> sBackupExecutorQueue = new LinkedBlockingQueue<>();
                             sBackupExecutor = new ThreadPoolExecutor(
                                     BACKUP_POOL_SIZE, BACKUP_POOL_SIZE, KEEP_ALIVE_SECONDS,
                                     TimeUnit.SECONDS, sBackupExecutorQueue, sThreadFactory);
@@ -99,7 +103,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     static {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                 CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(), sThreadFactory);
+                new SynchronousQueue<>(), sThreadFactory);
         threadPoolExecutor.setRejectedExecutionHandler(sRunOnSerialPolicy);
         THREAD_POOL_EXECUTOR = threadPoolExecutor;
     }
@@ -127,7 +131,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private final Handler mHandler;
 
     private static class SerialExecutor implements Executor {
-        final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
+        final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
         Runnable mActive;
 
         public synchronized void execute(final Runnable r) {
@@ -213,13 +217,12 @@ public abstract class AsyncTask<Params, Progress, Result> {
                 ? getMainHandler()
                 : new Handler(callbackLooper);
 
-        mWorker = new WorkerRunnable<Params, Result>() {
-            public Result call() throws Exception {
+        mWorker = new WorkerRunnable<>() {
+            public Result call() {
                 mTaskInvoked.set(true);
                 Result result = null;
                 try {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                    //noinspection unchecked
                     result = doInBackground(mParams);
                     Binder.flushPendingCommands();
                 } catch (Throwable tr) {
@@ -232,7 +235,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
             }
         };
 
-        mFuture = new FutureTask<Result>(mWorker) {
+        mFuture = new FutureTask<>(mWorker) {
             @Override
             protected void done() {
                 try {
@@ -257,9 +260,8 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private Result postResult(Result result) {
-        @SuppressWarnings("unchecked")
         Message message = getHandler().obtainMessage(MESSAGE_POST_RESULT,
-                new AsyncTaskResult<Result>(this, result));
+                new AsyncTaskResult<>(this, result));
         message.sendToTarget();
         return result;
     }
@@ -591,7 +593,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     protected final void publishProgress(Progress... values) {
         if (!isCancelled()) {
             getHandler().obtainMessage(MESSAGE_POST_PROGRESS,
-                    new AsyncTaskResult<Progress>(this, values)).sendToTarget();
+                    new AsyncTaskResult<>(this, values)).sendToTarget();
         }
     }
 
@@ -629,7 +631,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
         Params[] mParams;
     }
 
-    @SuppressWarnings({"RawUseOfParameterizedType"})
+    @SuppressWarnings("RawUseOfParameterizedType")
     private static class AsyncTaskResult<Data> {
         final AsyncTask mTask;
         final Data[] mData;

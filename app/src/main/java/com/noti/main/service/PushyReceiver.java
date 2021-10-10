@@ -11,15 +11,19 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Vibrator;
 import android.telephony.SmsManager;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.noti.main.R;
 import com.noti.main.ui.receive.NotificationViewActivity;
@@ -40,6 +44,7 @@ import static com.noti.main.service.NotiListenerService.getMACAddress;
 public class PushyReceiver extends BroadcastReceiver {
 
     SharedPreferences prefs;
+    private volatile Ringtone lastPlayedRingtone;
 
     @Override
     public void onReceive(Context context, Intent map) {
@@ -114,41 +119,10 @@ public class PushyReceiver extends BroadcastReceiver {
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
         if (!DeadlineValue.equals("No deadline")) {
             if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
-            String[] foo = DeadlineValue.split(" ");
-            long numberToMultiply;
-            switch (foo[1]) {
-                case "min":
-                    numberToMultiply = 60000L;
-                    break;
-
-                case "hour":
-                    numberToMultiply = 3600000L;
-                    break;
-
-                case "day":
-                    numberToMultiply = 86400000L;
-                    break;
-
-                case "week":
-                    numberToMultiply = 604800000L;
-                    break;
-
-                case "month":
-                    numberToMultiply = 2419200000L;
-                    break;
-
-                case "year":
-                    numberToMultiply = 29030400000L;
-                    break;
-
-                default:
-                    numberToMultiply = 0L;
-                    break;
-            }
 
             try {
                 if (Date != null) {
-                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    long calculated = parseTimeAndUnitToLong(DeadlineValue);
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                     if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
                         return;
@@ -193,6 +167,7 @@ public class PushyReceiver extends BroadcastReceiver {
 
         assert notificationManager != null;
         notificationManager.notify((int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        playRingtoneAndVibrate(context);
     }
 
     protected void sendNotification(Intent map, Context context) {
@@ -207,41 +182,10 @@ public class PushyReceiver extends BroadcastReceiver {
         String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
         if (!DeadlineValue.equals("No deadline")) {
             if(DeadlineValue.equals("Custom…")) DeadlineValue = prefs.getString("DeadlineCustomValue", "5 min");
-            String[] foo = DeadlineValue.split(" ");
-            long numberToMultiply;
-            switch (foo[1]) {
-                case "min":
-                    numberToMultiply = 60000L;
-                    break;
-
-                case "hour":
-                    numberToMultiply = 3600000L;
-                    break;
-
-                case "day":
-                    numberToMultiply = 86400000L;
-                    break;
-
-                case "week":
-                    numberToMultiply = 604800000L;
-                    break;
-
-                case "month":
-                    numberToMultiply = 2419200000L;
-                    break;
-
-                case "year":
-                    numberToMultiply = 29030400000L;
-                    break;
-
-                default:
-                    numberToMultiply = 0L;
-                    break;
-            }
 
             try {
                 if (Date != null) {
-                    long calculated = Long.parseLong(foo[0]) * numberToMultiply;
+                    long calculated = parseTimeAndUnitToLong(DeadlineValue);
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                     if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
                         return;
@@ -331,7 +275,84 @@ public class PushyReceiver extends BroadcastReceiver {
             assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
         } else builder.setSmallIcon(R.mipmap.ic_notification);
+
         notificationManager.notify(uniqueCode, builder.build());
+        playRingtoneAndVibrate(context);
+    }
+
+    private long parseTimeAndUnitToLong(String data) {
+        String[] foo = data.split(" ");
+        long numberToMultiply;
+        switch(foo[1]) {
+            case "sec":
+                numberToMultiply = 1000L;
+                break;
+
+            case "min":
+                numberToMultiply = 60000L;
+                break;
+
+            case "hour":
+                numberToMultiply = 3600000L;
+                break;
+
+            case "day":
+                numberToMultiply = 86400000L;
+                break;
+
+            case "week":
+                numberToMultiply = 604800000L;
+                break;
+
+            case "month":
+                numberToMultiply = 2419200000L;
+                break;
+
+            case "year":
+                numberToMultiply = 29030400000L;
+                break;
+
+            default:
+                numberToMultiply = 0L;
+                break;
+        }
+        return Long.parseLong(foo[0]) * numberToMultiply;
+    }
+
+    private void playRingtoneAndVibrate(Context context) {
+        if(prefs.getString("importance","Default").equals("Custom…")) {
+            if(lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) lastPlayedRingtone.stop();
+
+            Ringtone r;
+            String s = prefs.getString("CustomRingtone", "");
+            DocumentFile AudioMedia = DocumentFile.fromSingleUri(context, Uri.parse(s));
+            if (!s.isEmpty() && AudioMedia != null && AudioMedia.exists())
+                r = RingtoneManager.getRingtone(context, AudioMedia.getUri());
+            else
+                r = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+
+            r.play();
+            lastPlayedRingtone = r;
+
+            int VibrationRunningTimeValue = prefs.getInt("VibrationRunningTime", 1000);
+            if(VibrationRunningTimeValue > 0) {
+                Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(VibrationRunningTimeValue);
+            }
+
+            String data = prefs.getString("RingtoneRunningTime", "3 sec");
+            new Thread(() -> {
+                long runningTime = parseTimeAndUnitToLong(data);
+                long startTime = System.currentTimeMillis();
+                while (true) {
+                    if(!r.isPlaying()) break;
+                    if ((System.currentTimeMillis() - startTime) > runningTime) {
+                        if(r.isPlaying()) r.stop();
+                        break;
+                    }
+                }
+            }).start();
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

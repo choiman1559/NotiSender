@@ -29,6 +29,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -133,16 +134,22 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 101) {
-            if (Build.VERSION.SDK_INT > 28 && !Settings.canDrawOverlays(this)) finish();
-        } else if (requestCode == 102) {
-            Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
-            if (!sets.contains(getPackageName())) finish();
-        } else if (requestCode == 103) {
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            if (Build.VERSION.SDK_INT > 22 && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
-                finish();
-            }
+        switch(requestCode) {
+            case 101:
+                if (Build.VERSION.SDK_INT > 28 && !Settings.canDrawOverlays(this)) finish();
+                break;
+
+            case 102:
+                Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
+                if (!sets.contains(getPackageName())) finish();
+                break;
+
+            case 103:
+                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                if (Build.VERSION.SDK_INT > 22 && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
+                    finish();
+                }
+                break;
         }
     }
 
@@ -150,13 +157,13 @@ public class SettingsActivity extends AppCompatActivity {
         SettingsFragment fragment = new SettingsFragment();
         Bundle bundle = new Bundle(0);
         fragment.setArguments(bundle);
-        fragment.setRetainInstance(true);
         return fragment;
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
 
         private static final int RC_SIGN_IN = 100;
+        private static final int RC_OPEN_AUDIO = 104;
         private GoogleSignInClient mGoogleSignInClient;
         private FirebaseAuth mAuth;
         FirebaseFirestore mFirebaseFirestore;
@@ -173,6 +180,11 @@ public class SettingsActivity extends AppCompatActivity {
         Preference UseWhiteList;
         Preference TestRun;
         Preference SetImportance;
+        Preference ImportanceWarning;
+        Preference CustomRingtone;
+        Preference ResetCustomRingtone;
+        Preference RingtoneRunningTime;
+        Preference VibrationRunningTime;
         Preference ReceiveDeadline;
         Preference ReceiveCustomDeadline;
         Preference UseWiFiSleepPolicy;
@@ -252,6 +264,11 @@ public class SettingsActivity extends AppCompatActivity {
             Blacklist = findPreference("blacklist");
             UseWhiteList = findPreference("UseWhite");
             SetImportance = findPreference("importance");
+            ImportanceWarning = findPreference("ImportanceWarning");
+            CustomRingtone = findPreference("CustomRingtone");
+            ResetCustomRingtone = findPreference("ResetCustomRingtone");
+            RingtoneRunningTime = findPreference("RingtoneRunningTime");
+            VibrationRunningTime = findPreference("VibrationRunningTime");
             ReceiveDeadline = findPreference("ReceiveDeadline");
             ReceiveCustomDeadline = findPreference("ReceiveCustomDeadline");
             UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
@@ -356,15 +373,43 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
 
+            boolean isCustomRingtoneEnabled = prefs.getString("importance","Default").equals("Custom…");
+
             if (Build.VERSION.SDK_INT >= 26) {
+                ImportanceWarning.setVisible(false);
+                CustomRingtone.setVisible(isCustomRingtoneEnabled);
+                RingtoneRunningTime.setVisible(isCustomRingtoneEnabled);
+                VibrationRunningTime.setVisible(isCustomRingtoneEnabled);
+                ResetCustomRingtone.setVisible(isCustomRingtoneEnabled && !prefs.getString("CustomRingtone","").isEmpty());
                 SetImportance.setSummary("Now : " + prefs.getString("importance", ""));
                 SetImportance.setOnPreferenceChangeListener(((p, n) -> {
                     SetImportance.setSummary("Now : " + n);
+
+                    boolean foo = n.equals("Custom…");
+                    CustomRingtone.setVisible(foo);
+                    RingtoneRunningTime.setVisible(foo);
+                    VibrationRunningTime.setVisible(foo);
+                    ResetCustomRingtone.setVisible(foo && !prefs.getString("CustomRingtone","").isEmpty());
                     return true;
                 }));
             } else {
                 SetImportance.setEnabled(false);
-                SetImportance.setSummary("Not for Android N or lower.");
+                SetImportance.setSummary("Now : Custom…");
+                ResetCustomRingtone.setVisible(!prefs.getString("CustomRingtone","").isEmpty());
+            }
+
+            String RingtoneRunningTimeValue = prefs.getString("RingtoneRunningTime", "3 sec");
+            RingtoneRunningTime.setSummary("Now : " + RingtoneRunningTimeValue + (RingtoneRunningTimeValue.equals("3 sec") ? " (Default)" : ""));
+
+            int VibrationRunningTimeValue = prefs.getInt("VibrationRunningTime", 1000);
+            VibrationRunningTime.setSummary("Now : " + VibrationRunningTimeValue + (VibrationRunningTimeValue == 1000 ? " ms (Default)" : " ms"));
+
+            if(ImportanceWarning.isEnabled() || isCustomRingtoneEnabled) {
+                String s = prefs.getString("CustomRingtone","");
+                DocumentFile AudioMedia = DocumentFile.fromSingleUri(mContext, Uri.parse(s));
+                if(AudioMedia != null && AudioMedia.exists()) {
+                    CustomRingtone.setSummary("Now : " + AudioMedia.getName());
+                }
             }
 
             boolean isntUpOsM = Build.VERSION.SDK_INT < 22;
@@ -540,6 +585,8 @@ public class SettingsActivity extends AppCompatActivity {
                             .setLargeIcon(R.mipmap.ic_launcher)
                             .circleLargeIcon()
                             .setSmallIcon(R.drawable.ic_broken_image)
+                            .setChannelName("Testing Channel")
+                            .setChannelId("Notification Test")
                             .setImportance(getImportance())
                             .enableVibration(true)
                             .setAutoCancel(true)
@@ -898,6 +945,108 @@ public class SettingsActivity extends AppCompatActivity {
                     dialog.show();
                     break;
 
+                case "CustomRingtone":
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("audio/*");
+                    startActivityForResult(intent, RC_OPEN_AUDIO);
+                    break;
+
+                case "RingtoneRunningTime":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input value");
+                    dialog.setMessage("input receive deadline value. max is 65535.");
+
+                    View dialogView = getLayoutInflater().inflate(R.layout.dialog_receive_deadline, null);
+                    TextInputEditText dialogEditValue = dialogView.findViewById(R.id.editValue);
+                    MaterialAutoCompleteTextView dialogUnitSpinner = dialogView.findViewById(R.id.unitSpinner);
+
+                    String[] dialogRawValues = prefs.getString("RingtoneRunningTime", "3 sec").split(" ");
+                    dialogEditValue.setText(dialogRawValues[0]);
+                    dialogUnitSpinner.setText(dialogRawValues[1]);
+                    dialogUnitSpinner.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.deadline_units)));
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = dialogEditValue.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else {
+                            int IntValue = Integer.parseInt(value);
+                            if (IntValue > 65535) {
+                                Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            } else {
+                                final String finalValue = value + " " + dialogUnitSpinner.getText().toString();
+                                prefs.edit().putString("RingtoneRunningTime", finalValue).apply();
+                                RingtoneRunningTime.setSummary("Now : " + finalValue + (finalValue.equals("3 sec") ? " (Default)" : ""));
+                            }
+                        }
+                    });
+
+                    dialog.setNeutralButton("Reset Default", (d, w) -> {
+                        prefs.edit().putString("RingtoneRunningTime", "3 sec").apply();
+                        RingtoneRunningTime.setSummary("Now : 3 sec (Default)");
+                    });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
+                    dialog.setView(dialogView);
+                    dialog.show();
+                    break;
+
+                case "VibrationRunningTime":
+                    dialog = new AlertDialog.Builder(mContext);
+                    dialog.setCancelable(false);
+                    dialog.setTitle("Input Vibration playing time (ms)");
+                    dialog.setMessage("The playing time maximum limit is 65535 ms.");
+
+                    editText = new EditText(mContext);
+                    editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    editText.setHint("Input Limit Value");
+                    editText.setGravity(Gravity.CENTER);
+                    editText.setText(String.valueOf(prefs.getInt("VibrationRunningTime", 1000)));
+
+                    parentLayout = new LinearLayout(mContext);
+                    layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(30, 16, 30, 16);
+                    editText.setLayoutParams(layoutParams);
+                    parentLayout.addView(editText);
+                    dialog.setView(parentLayout);
+
+                    dialog.setPositiveButton("Apply", (d, w) -> {
+                        String value = editText.getText().toString();
+                        if (value.equals("")) {
+                            Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        } else {
+                            int IntValue = Integer.parseInt(value);
+                            if (IntValue > 65535) {
+                                Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            } else {
+                                prefs.edit().putInt("VibrationRunningTime", IntValue).apply();
+                                VibrationRunningTime.setSummary("Now : " + IntValue + (IntValue == 1000 ? " ms (Default)" : " ms"));
+                            }
+                        }
+                    });
+                    dialog.setNeutralButton("Reset Default", (d, w) -> {
+                        prefs.edit().putInt("VibrationRunningTime", 1000).apply();
+                        VibrationRunningTime.setSummary("Now : " + 1000 + " ms (Default)");
+                    });
+                    dialog.setNegativeButton("Cancel", (d, w) -> {
+                    });
+                    dialog.show();
+                    break;
+
+                case "ResetCustomRingtone":
+                    CustomRingtone.setSummary("Now : system default");
+                    mContext.getContentResolver()
+                            .releasePersistableUriPermission(Uri.parse(prefs.getString("CustomRingtone","")),
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    prefs.edit().remove("CustomRingtone").apply();
+                    Toast.makeText(mContext, "Selection reset done!", Toast.LENGTH_SHORT).show();
+                    ResetCustomRingtone.setVisible(false);
+                    break;
+
                 case "ReceiveCustomDeadline":
                     dialog = new AlertDialog.Builder(mContext);
                     dialog.setCancelable(false);
@@ -1018,13 +1167,26 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             super.onActivityResult(requestCode, resultCode, data);
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (requestCode == RC_SIGN_IN && result != null && result.isSuccess()) {
-                Log.d("Google log in", "Result : " + (result.isSuccess() ? "success" : "failed") + " Status : " + result.getStatus().toString());
-                GoogleSignInAccount account = result.getSignInAccount();
-                assert account != null;
-                firebaseAuthWithGoogle(account);
-            } else mBillingHelper.handleActivityResult(requestCode, resultCode, data);
+
+            if(requestCode == RC_OPEN_AUDIO) {
+                Uri AudioMedia = (resultCode == Activity.RESULT_CANCELED ? null : data.getData());
+                if(AudioMedia == null) Toast.makeText(mContext, "Please choose audio file!", Toast.LENGTH_SHORT).show();
+                else {
+                    DocumentFile file = DocumentFile.fromSingleUri(mContext, AudioMedia);
+                    CustomRingtone.setSummary("Now : " + (file == null ? "system default" : file.getName()));
+                    mContext.getContentResolver().takePersistableUriPermission(AudioMedia, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    prefs.edit().putString("CustomRingtone", AudioMedia.toString()).apply();
+                    ResetCustomRingtone.setVisible(true);
+                }
+            } else {
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                if (requestCode == RC_SIGN_IN && result != null && result.isSuccess()) {
+                    Log.d("Google log in", "Result : " + (result.isSuccess() ? "success" : "failed") + " Status : " + result.getStatus().toString());
+                    GoogleSignInAccount account = result.getSignInAccount();
+                    assert account != null;
+                    firebaseAuthWithGoogle(account);
+                } else mBillingHelper.handleActivityResult(requestCode, resultCode, data);
+            }
         }
 
         private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {

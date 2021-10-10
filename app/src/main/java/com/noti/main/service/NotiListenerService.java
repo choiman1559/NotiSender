@@ -73,7 +73,7 @@ public class NotiListenerService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
     }
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
@@ -359,6 +359,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     public static void sendNotification(JSONObject notification, String PackageName, Context context) {
+        if(prefs == null) prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
             if(!prefs.getString("AuthKey_Pushy", "").equals("")) sendPushyNotification(notification, PackageName, context);
         } else sendFCMNotification(notification, PackageName, context);

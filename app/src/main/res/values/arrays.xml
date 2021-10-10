@@ -15,9 +15,11 @@
         <item>High</item>
         <item>Default</item>
         <item>Low</item>
+        <item>Custom…</item>
     </string-array>
 
     <string-array name="deadline_units">
+        <item>sec</item>
         <item>min</item>
         <item>hour</item>
         <item>day</item>
