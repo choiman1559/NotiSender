@@ -40,7 +40,7 @@ and mode "reception" is setting phone by client, get notifications from "send" m
  (Personal suggestion: Using [MonetCompat Framework](https://github.com/KieronQuinn/MonetCompat)?)
  - [ ] Soft-coding all Strings (which are hard-coded in the source code) into string.xml
  - [ ] Translate the app into languages other than English
- - [ ] Add custom notification ringtone and vibration options
+ - [X] Add custom notification ringtone and vibration options
  - [ ] Source code optimization and cleanup
  
 **The Noti Sender development team always welcomes your issues, PRs.**
