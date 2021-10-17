@@ -15,10 +15,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.utils.PackageShowInfo;
 import com.noti.main.R;
 import com.noti.main.utils.ThreadProxy;
@@ -59,7 +59,9 @@ public class BlacklistActivity extends Activity {
             TextView textView = view.findViewById(R.id.app_name);
             textView.setTextColor(prefs.getBoolean(packageShowInfo.get(position).packageName, false) ? (isWhite() ? Color.BLUE : Color.RED) : Color.BLACK);
         });
-        findViewById(R.id.back).setOnClickListener(v -> finish());
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener((v) -> this.finish());
     }
 
     protected boolean isWhite() {

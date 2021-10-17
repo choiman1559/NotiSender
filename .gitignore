@@ -4,6 +4,8 @@
 /.idea
 /.gradle
 /gradle
+!/gradle/wrapper/gradle-wrapper.properties
+!/gradle/wrapper/gradle-wrapper.jar
 .DS_Store
 /build
 /captures

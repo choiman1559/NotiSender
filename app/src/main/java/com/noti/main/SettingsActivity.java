@@ -17,7 +17,9 @@ import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -54,6 +56,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import com.kieronquinn.monetcompat.core.MonetCompat;
+import com.kieronquinn.monetcompat.interfaces.MonetColorsChangedListener;
 import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
@@ -65,6 +69,7 @@ import com.noti.main.utils.DetectAppSource;
 import java.util.Date;
 import java.util.Set;
 
+import dev.kdrag0n.monet.theme.ColorScheme;
 import me.pushy.sdk.Pushy;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -76,9 +81,9 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings_activity);
+        setContentView(R.layout.activity_main);
 
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
         if (Build.VERSION.SDK_INT > 28 && !Settings.canDrawOverlays(this)) {
             AlertDialog.Builder alert_confirm = new AlertDialog.Builder(this);
             alert_confirm.setMessage("You need to permit overlay permission to use this app")
@@ -116,7 +121,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.settings, newInstance())
+                .replace(R.id.content_frame, newInstance())
                 .commitNowAllowingStateLoss();
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -160,12 +165,14 @@ public class SettingsActivity extends AppCompatActivity {
         return fragment;
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat {
+    public static class SettingsFragment extends PreferenceFragmentCompat implements MonetColorsChangedListener {
 
         private static final int RC_SIGN_IN = 100;
         private static final int RC_OPEN_AUDIO = 104;
         private GoogleSignInClient mGoogleSignInClient;
         private FirebaseAuth mAuth;
+        private MonetCompat monet = null;
+        boolean updateOnCreate = false;
         FirebaseFirestore mFirebaseFirestore;
         SharedPreferences prefs;
         Activity mContext;
@@ -212,6 +219,27 @@ public class SettingsActivity extends AppCompatActivity {
         Preference EncryptionInfo;
 
         SettingsFragment() { }
+
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            MonetCompat.setup(requireContext());
+            monet = MonetCompat.getInstance();
+            monet.addMonetColorsChangedListener(this, !updateOnCreate);
+            if(updateOnCreate) monet.updateMonetColors();
+            return super.onCreateView(inflater, container, savedInstanceState);
+        }
+
+        @Override
+        public void onDestroyView() {
+            super.onDestroyView();
+            monet.removeMonetColorsChangedListener(this);
+            monet = null;
+        }
+
+        @Override
+        public void onMonetColorsChanged(@NonNull MonetCompat monetCompat, @NonNull ColorScheme colorScheme, boolean b) {
+
+        }
 
         @Override
         public void onAttach(@NonNull Context context) {
@@ -900,7 +928,6 @@ public class SettingsActivity extends AppCompatActivity {
                                 editText.setText(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
                             } catch (Exception e) {
                                 Toast.makeText(mContext, "Error while processing crypto", Toast.LENGTH_SHORT).show();
-                                if(BuildConfig.DEBUG) e.printStackTrace();
                             }
                         }
                     }
@@ -926,7 +953,6 @@ public class SettingsActivity extends AppCompatActivity {
                                 if(uid != null) prefs.edit().putString("EncryptionPassword", AESCrypto.encrypt(value, AESCrypto.parseAESToken(uid))).apply();
                             } catch (Exception e) {
                                 Toast.makeText(mContext, "Error while processing crypto", Toast.LENGTH_SHORT).show();
-                                if(BuildConfig.DEBUG) e.printStackTrace();
                             }
                         }
                     });
@@ -1208,7 +1234,7 @@ public class SettingsActivity extends AppCompatActivity {
             FragmentActivity activity = getActivity();
             if (activity != null) activity.getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.settings, newInstance())
+                    .replace(R.id.content_frame, newInstance())
                     .commitNowAllowingStateLoss();
         }
 

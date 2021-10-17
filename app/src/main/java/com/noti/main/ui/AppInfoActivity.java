@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.R;
 import com.noti.main.utils.DetectAppSource;
 
@@ -17,7 +18,7 @@ public class AppInfoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_appinfo_actiity);
+        setContentView(R.layout.activity_appinfo);
 
         TextView version = findViewById(R.id.version);
         try {
@@ -55,6 +56,9 @@ public class AppInfoActivity extends AppCompatActivity {
 
         Button GoToGit = findViewById(R.id.gotogit);
         GoToGit.setOnClickListener(v -> startActivity());
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener((v) -> this.finish());
     }
 
     void startActivity() {

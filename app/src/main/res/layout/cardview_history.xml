@@ -4,7 +4,8 @@
     android:id="@+id/layout"
     android:clickable="true"
     android:layout_width="match_parent"
-    android:layout_height="60dp">
+    android:layout_height="60dp"
+    android:focusable="true">
 
         <ImageView
             android:id="@+id/icon"
@@ -30,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="start"
-                android:textColor="#000000"
+                android:textColor="@color/ui_fg"
                 android:textSize="18sp"
                 android:ellipsize="marquee"
                 android:singleLine="true"
@@ -41,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
-                android:textColor="#000000"
+                android:textColor="@color/ui_fg"
                 android:layout_marginStart="1dp"
                 android:textSize="12sp"
                 android:ellipsize="marquee"
