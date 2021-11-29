@@ -22,7 +22,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
@@ -133,7 +132,7 @@ public class MainPreference extends PreferenceFragmentCompat {
                                     .apply();
                         }
                     } else {
-                        new AlertDialog.Builder(mContext)
+                        new MaterialAlertDialogBuilder(mContext)
                                 .setTitle("Error occurred!")
                                 .setMessage("Error occurred while initializing client token.\nplease check your internet connection and try again.")
                                 .setPositiveButton("OK", (dialog, which) -> mContext.finishAndRemoveTask())
@@ -269,6 +268,7 @@ public class MainPreference extends PreferenceFragmentCompat {
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                 dialog.setTitle("Server details");
                 dialog.setMessage(getString(R.string.Server_information));
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
                 dialog.setPositiveButton("Close", (d, w) -> {
                 });
                 dialog.show();

@@ -89,8 +89,6 @@ public class OtherPreference extends PreferenceFragmentCompat {
             UpdateChannel.setSummary("Now : " + n);
             return true;
         });
-
-
     }
 
     @Override
@@ -103,6 +101,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
         switch (preference.getKey()) {
             case "DataLimit":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Data Limit");
                 dialog.setMessage("If data size is bigger than 4kb (4096 bytes), then data may not send.");
@@ -149,6 +148,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
             case "HistoryLimit":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Data Limit");
                 dialog.setMessage("The history data maximum limit is 65535 pcs.");
@@ -193,6 +193,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
             case "DeleteHistory":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_delete_24_regular);
                 dialog.setTitle("Waring!");
                 dialog.setMessage("Are you sure to delete notification history?\nThis operation cannot be undone.");
                 dialog.setPositiveButton("Delete", (d, w) -> {
@@ -206,6 +207,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
             case "ResetList":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_delete_24_regular);
                 dialog.setTitle("Waring!");
                 dialog.setMessage("Are you sure to reset your white/black list?\nThis operation cannot be undone.");
                 dialog.setPositiveButton("Reset", (d, w) -> {

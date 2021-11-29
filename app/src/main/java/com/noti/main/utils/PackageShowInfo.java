@@ -84,7 +84,7 @@ public class PackageShowInfo implements Parcelable {
         this.applicationInfo = in.readParcelable(ApplicationInfo.class.getClassLoader());
     }
 
-    public static final Creator<PackageShowInfo> CREATOR = new Creator<PackageShowInfo>() {
+    public static final Creator<PackageShowInfo> CREATOR = new Creator<>() {
         @Override
         public PackageShowInfo createFromParcel(Parcel source) {
             return new PackageShowInfo(source);

@@ -224,6 +224,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
             case "IntervalTime":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
                 dialog.setMessage("The interval time maximum limit is 2147483647 ms.");
@@ -268,6 +269,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
             case "IntervalInfo":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
                 dialog.setTitle("Interval details");
                 dialog.setMessage(getString(R.string.Interval_information));
                 dialog.setPositiveButton("Close", (d, w) -> {
@@ -277,6 +279,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
             case "BannedWords":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
                 dialog.setMessage("Each entry is separated by \"/\".");
@@ -320,6 +323,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
             case "DefaultTitle":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
                 dialog.setMessage("Input default title string that used when notifications title string is null.");
@@ -353,6 +357,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
             case "DefaultMessage":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
                 dialog.setMessage("Input default message string that used when notifications message string is null.");
@@ -386,6 +391,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
             case "UseDataEncryptionPassword":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input password");
                 dialog.setMessage("Enter the password to be used for encryption.\nPassword is limited to a maximum of 20 characters.");
@@ -441,6 +447,7 @@ public class SendPreference extends PreferenceFragmentCompat {
             case "EncryptionInfo":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                 dialog.setTitle("Encryption Info");
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
                 dialog.setMessage(getString(R.string.Encryption_information));
                 dialog.setPositiveButton("Close", (d, w) -> { });
                 dialog.show();

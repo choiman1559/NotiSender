@@ -62,22 +62,16 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
                     }
                     mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
                         @Override
-                        public void onPurchasesSuccess() {
-
-                        }
+                        public void onPurchasesSuccess() { }
 
                         @Override
-                        public void onPurchasesError() {
-
-                        }
+                        public void onPurchasesError() { }
                     });
                 }
             }
 
             @Override
-            public void onSkuDetailsError(String error) {
-
-            }
+            public void onSkuDetailsError(String error) { }
         });
     }
 
@@ -88,14 +82,10 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
         }
         mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
             @Override
-            public void onPurchasesSuccess() {
-
-            }
+            public void onPurchasesSuccess() { }
 
             @Override
-            public void onPurchasesError() {
-
-            }
+            public void onPurchasesError() { }
         });
     }
 
@@ -103,14 +93,10 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
     public void onPurchaseHistoryRestored() {
         mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
             @Override
-            public void onPurchasesSuccess() {
-
-            }
+            public void onPurchasesSuccess() { }
 
             @Override
-            public void onPurchasesError() {
-
-            }
+            public void onPurchasesError() { }
         });
     }
 

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*
- *
- */
-
 package com.noti.main.utils;
 
 import androidx.annotation.MainThread;

@@ -151,6 +151,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
 
             case "RingtoneRunningTime":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input value");
                 dialog.setMessage("input receive deadline value. max is 65535.");
@@ -192,6 +193,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
 
             case "VibrationRunningTime":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Vibration playing time (ms)");
                 dialog.setMessage("The playing time maximum limit is 65535 ms.");
@@ -246,6 +248,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
 
             case "ReceiveCustomDeadline":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input value");
                 dialog.setMessage("input receive deadline value. max is 65535.");
