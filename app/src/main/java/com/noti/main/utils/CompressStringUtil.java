@@ -57,7 +57,7 @@ public class CompressStringUtil {
             byte[] buffer = new byte[8192];
             int len;
             while ((len = in.read(buffer)) > 0) baos.write(buffer, 0, len);
-            return new String(baos.toByteArray(), charsetName);
+            return baos.toString(charsetName);
         } catch (IOException e) {
             e.printStackTrace();
             throw new AssertionError(e);

@@ -9,15 +9,15 @@
 
     <string name="serviceToggle">Service on/off</string>
 
-    <string name="select_package">Select the app which you (don\'t) want send noti. </string>
+    <string name="select_package">Select App</string>
     <string name="all">send all notifications</string>
-
-    <string name="device_list">Device List</string>
 
     <string name="App_info">App info</string>
     <string name="App_info_des">infos about this app</string>
-
+    <string name="App_info_about">About</string>
     <string name="gotogit">Go to git repo</string>
+
+    <string name="History_title">Notification History</string>
 
     <string name="notify_channel_id">NotiSender</string>
     <string name="notify_channel_name">Noti Sender</string>

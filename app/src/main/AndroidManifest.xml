@@ -26,22 +26,25 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents.DayNight"
         android:allowBackup="true"
-        android:fullBackupContent="true">
+        android:name=".Application"
+        android:fullBackupContent="true"
+        android:theme="@style/Theme.App.Palette">
 
         <activity android:name=".ui.prefs.BlacklistActivity" />
         <activity android:name=".ui.AppInfoActivity" />
-        <activity android:name=".ui.prefs.HistoryActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".ui.OptionActivity" />
+        <activity android:name=".ui.prefs.HistoryActivity" />
         <activity android:name=".ui.receive.NotificationViewActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
+            android:theme="@style/Theme.MaterialComponents.DayNight.Dialog"/>
         <activity android:name=".ui.receive.SmsViewActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
+            android:theme="@style/Theme.MaterialComponents.DayNight.Dialog"/>
         <activity android:name=".ui.receive.ExitActivity"/>
+
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings">
+            android:label="@string/title_activity_settings"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES"/>
             </intent-filter>
@@ -49,7 +52,8 @@
 
         <activity
             android:name=".updater.UpdaterActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -59,7 +63,8 @@
         <service
             android:name=".service.NotiListenerService"
             android:label="Read notifications"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
@@ -76,7 +81,8 @@
         <service android:name=".service.QuickSettingService"
             android:label="Noti Sender"
             android:icon="@drawable/ic_notification_tile"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>

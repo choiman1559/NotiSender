@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Black/White List">
+        <Preference
+            android:key="blacklist"
+            android:summary="select apps that you won't send notification"
+            android:title="Edit blacklist"
+            android:icon="@drawable/ic_fluent_document_bullet_list_off_24_filled"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseWhite"
+            android:summary="you can use this option to select only apps to send notification."
+            android:title="Use Whitelist instead of Blacklist" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Send Icon">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="SendIcon"
+            android:summary="Send Noti's Icon with Notification together"
+            android:title="Send Icon"
+            android:icon="@drawable/ic_fluent_image_24_regular"/>
+        <ListPreference
+            android:defaultValue="52 x 52 (Default)"
+            android:entries="@array/resolution"
+            android:entryValues="@array/resolution"
+            android:key="IconRes"
+            android:summary="Now : 52 x 52 (Default)"
+            android:title="Resolution of icon"
+            android:icon="@drawable/ic_fluent_resize_image_24_regular"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="IconUseNotification"
+            android:summary="If notification icon isn't exists, app icon will be sent."
+            android:title="Send notification's icon instead of app icon (Unstable)" />
+        <Preference
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:key="IconWaring"
+            android:summary="If icon's file size is too big, icon may not sent or sending notification may fail." />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="SMS Reply">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseReplySms"
+            android:summary="need sms permission"
+            android:title="Reply to SMS from other devices"
+            android:icon="@drawable/ic_fluent_chat_24_regular"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Interval">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseInterval"
+            android:summary="Use interval between notifications"
+            android:title="Use Interval"
+            android:icon="@drawable/ic_fluent_arrow_autofit_width_24_filled"/>
+        <ListPreference
+            android:defaultValue="Entire app"
+            android:entries="@array/interval"
+            android:entryValues="@array/interval"
+            android:key="IntervalType"
+            android:summary="Now : Entire app"
+            android:title="Set Interval processing method" />
+        <Preference
+            android:key="IntervalTime"
+            android:summary="Now : 100 ms (Default)"
+            android:title="Set interval time" />
+        <Preference
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:key="IntervalInfo"
+            android:summary="Click here to get more information about interval" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Ban Words">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseBannedOption"
+            android:summary="Use banned words customizing option"
+            android:title="Use Banned words option"
+            android:icon="@drawable/ic_fluent_shape_exclude_24_regular"/>
+        <Preference
+            android:key="BannedWords"
+            android:summary="Click here to set banned words"
+            android:title="Customizing banned words" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Default Text">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="StrictStringNull"
+            android:summary="Do not send notification if title or message string is null"
+            android:title="Null string strict mode" />
+        <Preference
+            android:key="DefaultTitle"
+            android:summary="Click here to set default title string"
+            android:title="Customizing default title string" />
+        <Preference
+            android:key="DefaultMessage"
+            android:summary="Click here to set default message string"
+            android:title="Customizing default message string" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Data Encryption">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseDataEncryption"
+            android:summary="Encrypt your notification data using AES algorithm"
+            android:title="Encrypt sending data"
+            android:icon="@drawable/ic_fluent_lock_shield_24_regular"/>
+        <Preference
+            android:key="UseDataEncryptionPassword"
+            android:summary="Password to use for AES encryption"
+            android:title="Password for encryption" />
+        <Preference
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:key="EncryptionInfo"
+            android:summary="Some Information about encryption" />
+    </PreferenceCategory>
+</PreferenceScreen>

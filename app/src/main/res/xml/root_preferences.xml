@@ -6,12 +6,13 @@
         <Preference
             android:key="Login"
             android:summary="@string/UID_default"
-            android:title="@string/Login" />
+            android:title="@string/Login"
+            android:icon="@drawable/ic_fluent_inprivate_account_24_regular"/>
         <SwitchPreference
             android:defaultValue="false"
             android:enabled="false"
             android:key="serviceToggle"
-            android:title="service on/off" />
+            android:title="Service on/off" />
         <ListPreference
             android:defaultValue="not selected"
             android:entries="@array/services_shown"
@@ -19,7 +20,6 @@
             android:key="service"
             android:title="Select service"
             android:summary="Now : reception"/>
-
         <ListPreference
             android:key="server"
             android:defaultValue="Firebase Cloud Message"
@@ -27,12 +27,10 @@
             android:entryValues="@array/server"
             android:title="Select server"
             android:summary="Now : Firebase Cloud Message"/>
-
         <Preference
             android:key="Subscribe"
             android:summary="To use Pushy's server, you have to pay 1.49$ per month."
             android:title="Subscribe" />
-
         <Preference
             android:key="ServerInfo"
             android:summary="Information about server differences"
@@ -41,192 +39,46 @@
 
     <PreferenceCategory android:title="Customizing">
         <Preference
-            android:summary="Send option"
-            android:enabled="false"/>
+            android:key="SendOption"
+            android:title="Send Options"
+            android:summary="Options for send task"
+            android:icon="@drawable/ic_fluent_arrow_export_ltr_24_filled"/>
         <Preference
-            android:key="blacklist"
-            android:summary="select apps that you won't send notification"
-            android:title="Edit blacklist" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="UseWhite"
-            android:summary="you can use this option to select only apps to send notification."
-            android:title="Use Whitelist instead of Blacklist" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="SendIcon"
-            android:summary="Send Noti's Icon with Notification together"
-            android:title="Send Icon" />
-        <ListPreference
-            android:defaultValue="52 x 52 (Default)"
-            android:entries="@array/resolution"
-            android:entryValues="@array/resolution"
-            android:key="IconRes"
-            android:summary="Now : 52 x 52 (Default)"
-            android:title="Resolution of icon" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="IconUseNotification"
-            android:title="Send notification's icon instead of app icon (Unstable)"
-            android:summary="If notification icon isn't exists, app icon will be sent."/>
+            android:key="ReceptionOption"
+            android:title="Reception Options"
+            android:summary="Options for reception task"
+            android:icon="@drawable/ic_fluent_arrow_import_24_filled"/>
         <Preference
-            android:key="IconWaring"
-            android:summary="If icon's file size is too big, icon may not sent or sending notification may fail."
-            android:icon="@drawable/ic_info_outline_black_24dp" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="UseReplySms"
-            android:summary="need sms permission"
-            android:title="Reply to SMS from other devices" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="UseInterval"
-            android:title="Use Interval"
-            android:summary="Use interval between notifications" />
-        <ListPreference
-            android:key="IntervalType"
-            android:title="Set Interval processing method"
-            android:summary="Now : Entire app"
-            android:entries="@array/interval"
-            android:entryValues="@array/interval"
-            android:defaultValue="Entire app" />
-        <Preference
-            android:key="IntervalTime"
-            android:title="Set interval time"
-            android:summary="Now : 100 ms (Default)"/>
-        <Preference
-            android:key="IntervalInfo"
-            android:summary="Click here to get more information about interval"
-            android:icon="@drawable/ic_info_outline_black_24dp" />
-        <SwitchPreference
-            android:key="UseBannedOption"
-            android:title="Use Banned words option"
-            android:summary="Use banned words customizing option"
-            android:defaultValue="false"/>
-        <Preference
-            android:key="BannedWords"
-            android:title="Customizing banned words"
-            android:summary="Click here to set banned words" />
-        <SwitchPreference
-            android:key="StrictStringNull"
-            android:title="Null string strict mode"
-            android:summary="Do not send notification if title or message string is null"
-            android:defaultValue="false"/>
-        <Preference
-            android:key="DefaultTitle"
-            android:title="Customizing default title string"
-            android:summary="Click here to set default title string" />
-        <Preference
-            android:key="DefaultMessage"
-            android:title="Customizing default message string"
-            android:summary="Click here to set default message string" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="UseDataEncryption"
-            android:title="Encrypt sending data"
-            android:summary="Encrypt your notification data using AES algorithm"/>
-        <Preference
-            android:key="UseDataEncryptionPassword"
-            android:title="Password for encryption"
-            android:summary="Password to use for AES encryption" />
-        <Preference
-            android:key="EncryptionInfo"
-            android:summary="Some Information about encryption"
-            android:icon="@drawable/ic_info_outline_black_24dp" />
-        <Preference
-            android:summary="Reception option"
-            android:enabled="false" />
-        <ListPreference
-            android:defaultValue="Default"
-            android:entries="@array/importance"
-            android:entryValues="@array/importance"
-            android:key="importance"
-            android:summary="Now : Default"
-            android:title="Notification Importance" />
-        <Preference
-            android:key="ImportanceWarning"
-            android:summary="If Android version is lower than 8, you have to set ringtone manually."
-            android:icon="@drawable/ic_info_outline_black_24dp" />
-        <Preference
-            android:key="CustomRingtone"
-            android:title="Browse custom ringtone"
-            android:summary="Now : system default" />
-        <Preference
-            android:key="ResetCustomRingtone"
-            android:title="Reset ringtone selection"
-            android:summary="Click here to reset your ringtone selection" />
-        <Preference
-            android:key="RingtoneRunningTime"
-            android:title="Set ringtone maximum playing time"
-            android:summary="Now : 3 sec (Default)" />
-        <Preference
-            android:key="VibrationRunningTime"
-            android:title="Set Vibration playing time"
-            android:summary="Now : 2 sec (Default)" />
-        <ListPreference
-            android:defaultValue="No deadline"
-            android:entries="@array/receive_deadline"
-            android:entryValues="@array/receive_deadline"
-            android:key="ReceiveDeadline"
-            android:summary="Now : No deadline (Default)"
-            android:title="Notification Receive Deadline" />
-        <Preference
-            android:key="ReceiveCustomDeadline"
-            android:title="Custom Receive Deadline value"
-            android:summary="Now : 5 min (Default)" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="UseWiFiSleepPolicy"
-            android:title="WiFi sleep policy compliance (Pushy only)"
-            android:summary="Prevents wake lock by blocking the wifi sleep policy."/>
-        <Preference
-            android:summary="Other option"
-            android:enabled="false" />
-        <Preference
-            android:key="HistoryLimit"
-            android:title="Maximum number of History"
-            android:summary="Now : 150 pcs (Default)" />
-        <Preference
-            android:key="DataLimit"
-            android:title="Data length limit (debug purpose)"
-            android:summary="Now : 4092 bytes (Default)" />
+            android:key="OtherOption"
+            android:title="Other Options"
+            android:summary="Not so important options"
+            android:icon="@drawable/ic_fluent_more_horizontal_24_filled"/>
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Others">
+        android:title="Utilities">
         <Preference
             android:key="NotiLog"
             android:summary="Previous notification history"
-            android:title="Notification History" />
+            android:title="Notification History"
+            android:icon="@drawable/ic_fluent_history_24_filled"/>
         <Preference
             android:key="testNoti"
             android:summary="click this prefs to test notification"
-            android:title="Test Notification" />
-        <Preference
-            android:key="ResetList"
-            android:title="Reset Black/White list"
-            android:summary="Bang it!" />
-        <Preference
-            android:key="DeleteHistory"
-            android:title="Delete notification history"
-            android:summary="Delete notification send/receive history." />
-        <ListPreference
-            android:key="UpdateChannel"
-            android:title="Select update channel"
-            android:summary="Now : Automatically specified"
-            android:entries="@array/updateChannel"
-            android:entryValues="@array/updateChannel"
-            android:defaultValue="Automatically specified" />
+            android:title="Test Notification"
+            android:icon="@drawable/ic_fluent_bug_24_regular"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="About">
         <Preference
             android:key="forWear"
             android:summary="Receive Notification in Wear OS"
-            android:title="Noti Sender For Wear OS" />
+            android:title="Noti Sender For Wear OS"
+            android:icon="@drawable/ic_fluent_smartwatch_24_regular"/>
         <Preference
             android:key="AppInfo"
             android:summary="@string/App_info_des"
-            android:title="@string/App_info" />
+            android:title="@string/App_info"
+            android:icon="@drawable/ic_fluent_book_information_24_filled"/>
     </PreferenceCategory>
 </PreferenceScreen>

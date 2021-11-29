@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.utils.PackageShowInfo;
 import com.noti.main.R;
 import com.noti.main.utils.ThreadProxy;
@@ -26,6 +27,7 @@ import com.noti.main.utils.ThreadProxy;
 import java.util.List;
 
 public class BlacklistActivity extends Activity {
+    static int defaultColor;
     private ListView packageListView;
     private List<PackageShowInfo> packageShowInfo;
     PackageManager pm;
@@ -35,6 +37,7 @@ public class BlacklistActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blacklist);
+        defaultColor = (Build.VERSION.SDK_INT > 22 ? getColor(R.color.ui_fg) : getResources().getColor(R.color.ui_fg));
         pg = findViewById(R.id.pg);
         pm = getPackageManager();
         packageListView = findViewById(R.id.package_list);
@@ -57,9 +60,11 @@ public class BlacklistActivity extends Activity {
             SharedPreferences prefs = getSharedPreferences(isWhite() ? "Whitelist" : "Blacklist", MODE_PRIVATE);
             prefs.edit().putBoolean(packageShowInfo.get(position).packageName, !prefs.getBoolean(packageShowInfo.get(position).packageName, false)).apply();
             TextView textView = view.findViewById(R.id.app_name);
-            textView.setTextColor(prefs.getBoolean(packageShowInfo.get(position).packageName, false) ? (isWhite() ? Color.BLUE : Color.RED) : Color.BLACK);
+            textView.setTextColor(prefs.getBoolean(packageShowInfo.get(position).packageName, false) ? (isWhite() ? Color.BLUE : Color.RED) : defaultColor);
         });
-        findViewById(R.id.back).setOnClickListener(v -> finish());
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener((v) -> this.finish());
     }
 
     protected boolean isWhite() {
@@ -105,7 +110,7 @@ public class BlacklistActivity extends Activity {
             } else {
                 holder.appName.setText(packageShowInfo.appName);
             }
-            holder.appName.setTextColor(getSharedPreferences(isWhite() ? "Whitelist" : "Blacklist" ,MODE_PRIVATE).getBoolean(packageShowInfo.packageName, false) ? (isWhite() ? Color.BLUE : Color.RED) : Color.BLACK);
+            holder.appName.setTextColor(getSharedPreferences(isWhite() ? "Whitelist" : "Blacklist" ,MODE_PRIVATE).getBoolean(packageShowInfo.packageName, false) ? (isWhite() ? Color.BLUE : Color.RED) : defaultColor);
             holder.icon.setImageDrawable(defaultDrawable);
             final View alertIconView = convertView;
             ThreadProxy.getInstance().execute(() -> {
