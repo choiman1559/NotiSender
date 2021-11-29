@@ -2,13 +2,15 @@ package com.noti.main.utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.PurchaseInfo;
 import com.anjlab.android.iab.v3.SkuDetails;
-import com.anjlab.android.iab.v3.TransactionDetails;
+
+import java.util.List;
 
 public class BillingHelper implements BillingProcessor.IBillingHandler {
 
@@ -32,10 +34,6 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
         return billingHelper;
     }
 
-    public void handleActivityResult(int requestCode, int resultCode, Intent data) {
-        mBillingProcessor.handleActivityResult(requestCode, resultCode, data);
-    }
-
     public void Subscribe() {
         if (mBillingProcessor != null && mBillingProcessor.isInitialized()) {
             mBillingProcessor.subscribe(mContext, SubscribeID);
@@ -54,24 +52,66 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
 
     @Override
     public void onBillingInitialized() {
-        SkuDetails Details = mBillingProcessor.getSubscriptionListingDetails(SubscribeID);
-        if (mBillingCallback != null && Details != null) {
-            mBillingCallback.onUpdatePrice(Details.priceValue);
-        }
-        mBillingProcessor.loadOwnedPurchasesFromGoogle();
+        mBillingProcessor.getSubscriptionListingDetailsAsync(SubscribeID, new BillingProcessor.ISkuDetailsResponseListener() {
+            @Override
+            public void onSkuDetailsResponse(@Nullable List<SkuDetails> products) {
+                if(products != null && products.size() > 0) {
+                    SkuDetails Details = products.get(0);
+                    if (mBillingCallback != null && Details != null) {
+                        mBillingCallback.onUpdatePrice(Details.priceValue);
+                    }
+                    mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
+                        @Override
+                        public void onPurchasesSuccess() {
+
+                        }
+
+                        @Override
+                        public void onPurchasesError() {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onSkuDetailsError(String error) {
+
+            }
+        });
     }
 
     @Override
-    public void onProductPurchased(@NonNull String productId, TransactionDetails details) {
+    public void onProductPurchased(@NonNull String productId, @Nullable PurchaseInfo details) {
         if (mBillingCallback != null) {
             mBillingCallback.onPurchased(productId);
         }
-        mBillingProcessor.loadOwnedPurchasesFromGoogle();
+        mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
+            @Override
+            public void onPurchasesSuccess() {
+
+            }
+
+            @Override
+            public void onPurchasesError() {
+
+            }
+        });
     }
 
     @Override
     public void onPurchaseHistoryRestored() {
-        mBillingProcessor.loadOwnedPurchasesFromGoogle();
+        mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
+            @Override
+            public void onPurchasesSuccess() {
+
+            }
+
+            @Override
+            public void onPurchasesError() {
+
+            }
+        });
     }
 
     @Override

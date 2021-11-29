@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Importance">
+        <ListPreference
+            android:defaultValue="Default"
+            android:entries="@array/importance"
+            android:entryValues="@array/importance"
+            android:key="importance"
+            android:summary="Now : Default"
+            android:title="Notification Importance"
+            android:icon="@drawable/ic_fluent_important_24_regular"/>
+        <Preference
+            android:key="ImportanceWarning"
+            android:summary="If Android version is lower than 8, you have to set ringtone manually."
+            android:icon="@drawable/ic_info_outline_black_24dp" />
+        <Preference
+            android:key="CustomRingtone"
+            android:title="Browse custom ringtone"
+            android:summary="Now : system default" />
+        <Preference
+            android:key="ResetCustomRingtone"
+            android:title="Reset ringtone selection"
+            android:summary="Click here to reset your ringtone selection" />
+        <Preference
+            android:key="RingtoneRunningTime"
+            android:title="Set ringtone maximum playing time"
+            android:summary="Now : 3 sec (Default)" />
+        <Preference
+            android:key="VibrationRunningTime"
+            android:title="Set Vibration playing time"
+            android:summary="Now : 2 sec (Default)" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Receive Deadline">
+        <ListPreference
+            android:defaultValue="No deadline"
+            android:entries="@array/receive_deadline"
+            android:entryValues="@array/receive_deadline"
+            android:key="ReceiveDeadline"
+            android:summary="Now : No deadline (Default)"
+            android:title="Notification Receive Deadline"
+            android:icon="@drawable/ic_fluent_timer_24_regular"/>
+        <Preference
+            android:key="ReceiveCustomDeadline"
+            android:title="Custom Receive Deadline value"
+            android:summary="Now : 5 min (Default)" />
+    </PreferenceCategory>
+</PreferenceScreen>

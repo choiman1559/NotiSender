@@ -20,9 +20,7 @@
         <item name="colorControlActivated">@color/accent</item>
     </style>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -57,10 +55,12 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.App.Palette">
+    <style name="Theme.App.Palette" parent="Theme.MaterialComponents.DayNight">
         <item name="android:fontFamily">@font/inter_medium</item>
         <item name="android:fontFeatureSettings">cv03, cv04</item>
     </style>
+
+    <style name="Theme.App.Material3" parent="Theme.Material3.DayNight.NoActionBar" />
 
     <style name="TextAppearance.App.CollapsingToolbar.Expanded" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
         <item name="android:fontFamily">@font/inter</item>

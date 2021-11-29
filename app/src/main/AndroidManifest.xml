@@ -33,11 +33,12 @@
 
         <activity android:name=".ui.prefs.BlacklistActivity" />
         <activity android:name=".ui.AppInfoActivity" />
+        <activity android:name=".ui.OptionActivity" />
         <activity android:name=".ui.prefs.HistoryActivity" />
         <activity android:name=".ui.receive.NotificationViewActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
+            android:theme="@style/Theme.MaterialComponents.DayNight.Dialog"/>
         <activity android:name=".ui.receive.SmsViewActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.Dialog"/>
+            android:theme="@style/Theme.MaterialComponents.DayNight.Dialog"/>
         <activity android:name=".ui.receive.ExitActivity"/>
 
         <activity

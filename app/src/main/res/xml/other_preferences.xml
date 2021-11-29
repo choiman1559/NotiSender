@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Clear Data">
+        <Preference
+            android:key="ResetList"
+            android:title="Reset Black/White list"
+            android:summary="Clear saved black/white list" />
+        <Preference
+            android:key="DeleteHistory"
+            android:title="Delete Notification history"
+            android:summary="Clear Notification send/receive history." />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Others">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseWiFiSleepPolicy"
+            android:title="WiFi sleep policy compliance (Pushy only)"
+            android:summary="Prevents wake lock by blocking the wifi sleep policy."/>
+        <Preference
+            android:key="HistoryLimit"
+            android:title="Maximum number of History"
+            android:summary="Now : 150 pcs (Default)" />
+        <Preference
+            android:key="DataLimit"
+            android:title="Data length limit (debug purpose)"
+            android:summary="Now : 4092 bytes (Default)" />
+        <ListPreference
+            android:key="UpdateChannel"
+            android:title="Select update channel"
+            android:summary="Now : Automatically specified"
+            android:entries="@array/updateChannel"
+            android:entryValues="@array/updateChannel"
+            android:defaultValue="Automatically specified" />
+    </PreferenceCategory>
+</PreferenceScreen>
