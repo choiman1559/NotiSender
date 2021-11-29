@@ -8,9 +8,9 @@ Send notifications to other android devices easily
 
 [![version](https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQKUUtefY6l9YGHF0GmQAijrUAUueZcJqwGIA&usqp=CAU)](https://play.google.com/store/apps/details?id=com.noti.main)
 
- ![s1](https://play-lh.googleusercontent.com/EE7O4_oMJksDwdc5vovXGdxR9pnuKjJuGFGZaJpsOAYbaT3Sz1JH_pct9AfIohOHGc8=w720-h310)
- ![s2](https://play-lh.googleusercontent.com/-0IQ61SszP_H0RZj2d85eVEBgJJXOibQgofhkhDU5OvSpfCerwfyNM6pk6fCNnJ0WpB4=w720-h310)
- ![s3](https://play-lh.googleusercontent.com/-YknOH0aokrSuzvQJSA7SidUsbFo5O15Lhgz10GAYjDG7LU2i9tvy5b0QJVmrKqsdUE=w720-h310)
+ ![s1](https://play-lh.googleusercontent.com/WlNFoGxSV-BQEby1JwXiXgeF16NhRNHFtRDfGhgIiajb_1QVdhHFNmmZeTkR7VUixw=w720-h310)
+ ![s2](https://play-lh.googleusercontent.com/k66WfjR4XgRXT6n_9bv9Ltsf_vR3D31BtHWlf8AZJB_hXsmj48VdZ_LhzoiSexZoAg=w720-h310)
+ ![s3](https://play-lh.googleusercontent.com/_2rM0StxYotKVXzyVH2Kn1w_Chcd8jFAPWOZjk-mLwankuCe9C1-d1p2HD37al97mMQ=w720-h310)
 
 ## How-To-Use 
 
@@ -36,8 +36,7 @@ and mode "reception" is setting phone by client, get notifications from "send" m
  
  ## TO-DO List
  
- - [ ] UI reorganization and Material You design application
- (Personal suggestion: Using [MonetCompat Framework](https://github.com/KieronQuinn/MonetCompat)?)
+ - [X] UI reorganization and Material You design application
  - [ ] Soft-coding all Strings (which are hard-coded in the source code) into string.xml
  - [ ] Translate the app into languages other than English
  - [X] Add custom notification ringtone and vibration options
