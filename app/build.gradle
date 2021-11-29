@@ -72,8 +72,8 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.14.3'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.anjlab.android.iab.v3:library:2.0.3'
-    implementation 'com.github.isradeleon:Notify-Android:1.0.3'
-    implementation 'com.github.KieronQuinn:MonetCompat:0.2.1'
+    implementation 'com.github.isradeleon:Notify-Android:1.0.4'
+    implementation 'com.github.KieronQuinn:MonetCompat:0.3'
     implementation 'com.microsoft.design:fluent-system-icons:1.1.152@aar'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.0'
 }

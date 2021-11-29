@@ -275,11 +275,11 @@ public class MainPreference extends PreferenceFragmentCompat {
                 break;
 
             case "testNoti":
-                Notify.create(mContext)
+                Notify.build(mContext)
                         .setTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
                         .setContent("messageTest")
                         .setLargeIcon(R.mipmap.ic_launcher)
-                        .circleLargeIcon()
+                        .largeCircularIcon()
                         .setSmallIcon(R.drawable.ic_broken_image)
                         .setChannelName("Testing Channel")
                         .setChannelId("Notification Test")
@@ -316,17 +316,17 @@ public class MainPreference extends PreferenceFragmentCompat {
         startActivity(new Intent(mContext, OptionActivity.class).putExtra("Type", type));
     }
 
-    private Notify.NotificationImportance getImportance() {
+    private Notify.NotifyImportance getImportance() {
         String value = prefs.getString("importance", "Default");
         switch (value) {
             case "Default":
-                return Notify.NotificationImportance.MAX;
+                return Notify.NotifyImportance.MAX;
             case "Low":
-                return Notify.NotificationImportance.LOW;
+                return Notify.NotifyImportance.LOW;
             case "High":
-                return Notify.NotificationImportance.HIGH;
+                return Notify.NotifyImportance.HIGH;
             default:
-                return Notify.NotificationImportance.MIN;
+                return Notify.NotifyImportance.MIN;
         }
     }
 
