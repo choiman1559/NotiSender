@@ -65,8 +65,8 @@ public class MainPreference extends PreferenceFragmentCompat {
     private GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
     private MonetCompat monet = null;
-    FirebaseFirestore mFirebaseFirestore;
     SharedPreferences prefs;
+    FirebaseFirestore mFirebaseFirestore;
     Activity mContext;
 
     //General Category
@@ -107,8 +107,6 @@ public class MainPreference extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
-        MaterialToolbar toolbar = mContext.findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.app_name);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))

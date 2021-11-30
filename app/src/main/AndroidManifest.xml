@@ -18,8 +18,8 @@
 
     <!-- In builds released on Google Play, SMS-related permissions are removed. -->
 
-    <!-- <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" /> -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <application
         android:icon="@mipmap/ic_launcher"

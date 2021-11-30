@@ -13,33 +13,39 @@ import com.noti.main.ui.options.ReceptionPreference;
 import com.noti.main.ui.options.SendPreference;
 
 public class OptionActivity extends AppCompatActivity {
+
+    private static String title = "Default Message";
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_options);
 
         Fragment fragment;
-        String title;
-        switch(getIntent().getStringExtra("Type")) {
-            case "Send":
-                fragment = new SendPreference();
-                title = "Send Options";
-                break;
 
-            case "Reception":
-                fragment = new ReceptionPreference();
-                title = "Reception Options";
-                break;
+        fragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        if(savedInstanceState == null || fragment == null) {
+            switch (getIntent().getStringExtra("Type")) {
+                case "Send":
+                    fragment = new SendPreference();
+                    title = "Send Options";
+                    break;
 
-            case "Other":
-                fragment = new OtherPreference();
-                title = "Other Options";
-                break;
+                case "Reception":
+                    fragment = new ReceptionPreference();
+                    title = "Reception Options";
+                    break;
 
-            default:
-                fragment = null;
-                title = getString(R.string.app_name);
-                break;
+                case "Other":
+                    fragment = new OtherPreference();
+                    title = "Other Options";
+                    break;
+
+                default:
+                    fragment = null;
+                    title = getString(R.string.app_name);
+                    break;
+            }
         }
 
         Bundle bundle = new Bundle(0);
@@ -48,7 +54,7 @@ public class OptionActivity extends AppCompatActivity {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.content_frame, fragment)
-                    .commitNowAllowingStateLoss();
+                    .commit();
         }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);

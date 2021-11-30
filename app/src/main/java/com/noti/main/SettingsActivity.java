@@ -32,7 +32,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     public static Fragment mFragment;
-    public static final String mFragmentTag = "SettingFragment";
 
     @SuppressLint("BatteryLife")
     @Override
@@ -76,7 +75,9 @@ public class SettingsActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             attachFragment(this, new MainPreference());
         } else {
-            mFragment = (MainPreference) getSupportFragmentManager().findFragmentByTag(mFragmentTag);
+            mFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+            if(mFragment != null) attachFragment(this, mFragment);
+            else attachFragment(this, mFragment = new MainPreference());
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -121,7 +122,7 @@ public class SettingsActivity extends AppCompatActivity {
         SettingsActivity.mFragment = fragment;
         activity.getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.content_frame, SettingsActivity.mFragment, SettingsActivity.mFragmentTag)
-                .commitNowAllowingStateLoss();
+                .replace(R.id.content_frame, SettingsActivity.mFragment)
+                .commit();
     }
 }

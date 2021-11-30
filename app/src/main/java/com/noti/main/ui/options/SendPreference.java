@@ -95,8 +95,6 @@ public class SendPreference extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.send_preferences, rootKey);
-        MaterialToolbar toolbar = mContext.findViewById(R.id.toolbar);
-        toolbar.setTitle("Send Option");
 
         prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
