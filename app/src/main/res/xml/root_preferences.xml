@@ -42,17 +42,17 @@
             android:key="SendOption"
             android:title="Send Options"
             android:summary="Options for send task"
-            android:icon="@drawable/ic_fluent_arrow_export_ltr_24_filled"/>
+            android:icon="@drawable/ic_fluent_arrow_export_ltr_24_regular"/>
         <Preference
             android:key="ReceptionOption"
             android:title="Reception Options"
             android:summary="Options for reception task"
-            android:icon="@drawable/ic_fluent_arrow_import_24_filled"/>
+            android:icon="@drawable/ic_fluent_arrow_import_24_regular"/>
         <Preference
             android:key="OtherOption"
             android:title="Other Options"
             android:summary="Not so important options"
-            android:icon="@drawable/ic_fluent_more_horizontal_24_filled"/>
+            android:icon="@drawable/ic_fluent_more_horizontal_24_regular"/>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -61,12 +61,17 @@
             android:key="NotiLog"
             android:summary="Previous notification history"
             android:title="Notification History"
-            android:icon="@drawable/ic_fluent_history_24_filled"/>
+            android:icon="@drawable/ic_fluent_history_24_regular"/>
         <Preference
             android:key="testNoti"
             android:summary="click this prefs to test notification"
             android:title="Test Notification"
             android:icon="@drawable/ic_fluent_bug_24_regular"/>
+        <Preference
+            android:key="Donation"
+            android:title="Donate to developer"
+            android:summary="Please help us make the app even better!"
+            android:icon="@drawable/ic_fluent_gift_24_regular"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="About">
@@ -79,6 +84,6 @@
             android:key="AppInfo"
             android:summary="@string/App_info_des"
             android:title="@string/App_info"
-            android:icon="@drawable/ic_fluent_book_information_24_filled"/>
+            android:icon="@drawable/ic_fluent_book_information_24_regular"/>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -14,7 +14,9 @@ import java.util.List;
 
 public class BillingHelper implements BillingProcessor.IBillingHandler {
 
-    private static final String SubscribeID = "pushy_subscribe";
+    public static final String SubscribeID = "pushy_subscribe";
+    public static final String DonateID = "donate_3";
+
     private BillingCallback mBillingCallback;
     private BillingProcessor mBillingProcessor;
     private Activity mContext;
@@ -42,6 +44,12 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
 
     public boolean isSubscribed() {
         return mBillingProcessor.isSubscribed(SubscribeID);
+    }
+
+    public void Donate() {
+        if (mBillingProcessor != null && mBillingProcessor.isInitialized()) {
+            mBillingProcessor.purchase(mContext, DonateID);
+        }
     }
 
     public void Destroy() {

@@ -35,7 +35,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
@@ -150,11 +149,25 @@ public class MainPreference extends PreferenceFragmentCompat {
         mBillingHelper = BillingHelper.initialize(mContext, new BillingHelper.BillingCallback() {
             @Override
             public void onPurchased(String productId) {
-                Toast.makeText(mContext, "Thanks for purchase!", Toast.LENGTH_SHORT).show();
-                ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
-                ServiceToggle.setSummary("");
-                Subscribe.setVisible(false);
-                new RegisterForPushNotificationsAsync().execute();
+                switch(productId) {
+                    case BillingHelper.SubscribeID:
+                        Toast.makeText(mContext, "Thanks for purchase!", Toast.LENGTH_SHORT).show();
+                        ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+                        ServiceToggle.setSummary("");
+                        Subscribe.setVisible(false);
+                        new RegisterForPushNotificationsAsync().execute();
+                        break;
+
+                    case BillingHelper.DonateID:
+                        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                        dialog.setTitle("Thank you for your donation!");
+                        dialog.setMessage("This donation will be used to improve Noti Sender!");
+                        dialog.setIcon(R.drawable.ic_fluent_gift_24_regular);
+                        dialog.setCancelable(false);
+                        dialog.setPositiveButton("Close", (dialogInterface, i) -> { });
+                        dialog.show();
+                        break;
+                }
             }
 
             @Override
@@ -305,6 +318,10 @@ public class MainPreference extends PreferenceFragmentCompat {
 
             case "OtherOption":
                 startOptionsActivity("Other");
+                break;
+
+            case "Donation":
+                mBillingHelper.Donate();
                 break;
         }
         return super.onPreferenceTreeClick(preference);

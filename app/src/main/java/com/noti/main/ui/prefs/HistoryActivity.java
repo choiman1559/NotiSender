@@ -19,6 +19,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.adapter.FragmentViewHolder;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -29,16 +30,27 @@ import com.noti.main.utils.ThreadProxy;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HistoryActivity extends AppCompatActivity {
+
+    private static final List<Fragment> mFragments = new ArrayList<>();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
+        mFragments.add(HistoryFragment.newInstance(0));
+        mFragments.add(HistoryFragment.newInstance(1));
+
         TabLayout TabLayout = findViewById(R.id.tabs);
         ViewPager2 viewPager = findViewById(R.id.viewpager);
-        FragmentStateAdapter adapter = new TabsPagerAdapter(this, getSupportFragmentManager(), getLifecycle());
+        FragmentStateAdapter adapter = new TabsPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        adapter.saveState();
 
+        viewPager.setSaveEnabled(true);
         viewPager.setAdapter(adapter);
         new TabLayoutMediator(TabLayout, viewPager, (tab, position) -> {
             switch (position) {
@@ -61,17 +73,20 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     public static class TabsPagerAdapter extends FragmentStateAdapter {
-        private final Activity mContext;
 
-        public TabsPagerAdapter(Activity context, FragmentManager fm, Lifecycle lifecycle) {
+        public TabsPagerAdapter(FragmentManager fm, Lifecycle lifecycle) {
             super(fm, lifecycle);
-            mContext = context;
+        }
+
+        @Override
+        public boolean containsItem(long itemId) {
+            return (long) mFragments.get(0).hashCode() == itemId || (long) mFragments.get(1).hashCode() == itemId;
         }
 
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return new HistoryFragment(mContext, position);
+            return mFragments.get(position);
         }
 
         @Override
@@ -85,14 +100,27 @@ public class HistoryActivity extends AppCompatActivity {
         Activity mContext;
         int mode;
 
-        HistoryFragment(Activity context, int mode) {
-            this.mContext = context;
-            this.mode = mode;
+        HistoryFragment() {
+
+        }
+
+        public static HistoryFragment newInstance(int mode) {
+            HistoryFragment historyFragment = new HistoryFragment();
+            historyFragment.mode = mode;
+            return historyFragment;
+        }
+
+        @Override
+        public void onAttach(@NonNull Context context) {
+            super.onAttach(context);
+            if (context instanceof Activity) mContext = (Activity) context;
+            else throw new RuntimeException("Can't get Activity instanceof Context!");
         }
 
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+
             SharedPreferences prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
             ProgressBar progress = mContext.findViewById(R.id.progress);
             RecyclerView listView = view.findViewById(R.id.listView);
