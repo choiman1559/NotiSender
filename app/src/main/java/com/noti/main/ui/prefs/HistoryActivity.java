@@ -80,7 +80,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         @Override
         public boolean containsItem(long itemId) {
-            return (long) mFragments.get(0).hashCode() == itemId || (long) mFragments.get(1).hashCode() == itemId;
+            return (long) mFragments.hashCode() == itemId || (long) mFragments.get(0).hashCode() == itemId || (long) mFragments.get(1).hashCode() == itemId;
         }
 
         @NonNull

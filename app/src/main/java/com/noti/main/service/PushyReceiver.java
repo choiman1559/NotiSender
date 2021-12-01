@@ -254,7 +254,7 @@ public class PushyReceiver extends BroadcastReceiver {
         notificationIntent.putExtra("icon", Icon_original != null ? Icon : null);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, uniqueCode, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, context.getString(R.string.notify_channel_id))
                 .setContentTitle(title + " (" + AppName + ")")

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -18,7 +19,12 @@ public class AppInfoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_appinfo);
+        setContentView(Build.VERSION.SDK_INT > 25 ? R.layout.activity_appinfo : R.layout.activity_appinfo_v25);
+
+        if(Build.VERSION.SDK_INT <= 25) {
+            TextView OSS = findViewById(R.id.oss);
+            OSS.setText(R.string.ossl);
+        }
 
         TextView version = findViewById(R.id.version);
         try {

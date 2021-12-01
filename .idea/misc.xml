@@ -9,9 +9,12 @@
         <entry key="app/src/main/res/drawable/ic_baseline_account_circle_24.xml" value="0.3333333333333333" />
         <entry key="app/src/main/res/drawable/ic_info_outline_black_24dp.xml" value="0.3333333333333333" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.3333333333333333" />
+        <entry key="app/src/main/res/font-v26/inter.xml" value="0.34791666666666665" />
         <entry key="app/src/main/res/font/inter.xml" value="0.34791666666666665" />
         <entry key="app/src/main/res/layout/activity_appinfo.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_appinfo_actiity.xml" value="0.15364583333333334" />
+        <entry key="app/src/main/res/layout/activity_appinfo_v25.xml" value="0.15072639225181597" />
+        <entry key="app/src/main/res/layout/activity_appinfo_v27.xml" value="0.2824074074074074" />
         <entry key="app/src/main/res/layout/activity_blacklist.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/layout/activity_device_list.xml" value="0.67" />
         <entry key="app/src/main/res/layout/activity_history.xml" value="0.22" />

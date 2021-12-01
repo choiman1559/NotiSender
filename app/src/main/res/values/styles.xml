@@ -58,6 +58,8 @@
     <style name="Theme.App.Palette" parent="Theme.MaterialComponents.DayNight">
         <item name="android:fontFamily">@font/inter_medium</item>
         <item name="android:fontFeatureSettings">cv03, cv04</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="Theme.App.Material3" parent="Theme.Material3.DayNight.NoActionBar" />
