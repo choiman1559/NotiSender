@@ -19,6 +19,9 @@
 
     <string name="History_title">Notification History</string>
 
+    <string name="tasker_label">Task type</string>
+    <string name="tasker_label_des">Task type to execute</string>
+
     <string name="notify_channel_id">NotiSender</string>
     <string name="notify_channel_name">Noti Sender</string>
     <string name="notify_channel_description">Send notification to another device</string>

@@ -15,13 +15,19 @@
     <PreferenceCategory
         android:title="Others">
         <ListPreference
-            android:key="UpdateChannel"
-            android:title="Select update channel"
-            android:summary="Now : Automatically specified"
-            android:entries="@array/updateChannel"
-            android:entryValues="@array/updateChannel"
-            android:defaultValue="Automatically specified"
-            android:icon="@drawable/ic_fluent_phone_update_checkmark_24_regular"/>
+        android:key="UpdateChannel"
+        android:title="Select update channel"
+        android:summary="Now : Automatically specified"
+        android:entries="@array/updateChannel"
+        android:entryValues="@array/updateChannel"
+        android:defaultValue="Automatically specified"
+        android:icon="@drawable/ic_fluent_phone_update_checkmark_24_regular"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseTaskerExtension"
+            android:title="Enable Tasker Plugin"
+            android:summary="Activate the Tasker extension plugin"
+            android:icon="@drawable/ic_fluent_star_settings_24_regular"/>
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseWiFiSleepPolicy"

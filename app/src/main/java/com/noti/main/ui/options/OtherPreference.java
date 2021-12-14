@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
@@ -33,6 +34,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     MonetCompat monet;
     Activity mContext;
 
+    Preference UseTaskerExtension;
     Preference UseWiFiSleepPolicy;
     Preference HistoryLimit;
     Preference DataLimit;
@@ -66,12 +68,20 @@ public class OtherPreference extends PreferenceFragmentCompat {
         setPreferencesFromResource(R.xml.other_preferences, rootKey);
         prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
 
+        UseTaskerExtension = findPreference("UseTaskerExtension");
         UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
         HistoryLimit = findPreference("HistoryLimit");
         DataLimit = findPreference("DataLimit");
         ResetList = findPreference("ResetList");
         DeleteHistory = findPreference("DeleteHistory");
         UpdateChannel = findPreference("UpdateChannel");
+
+        try {
+            mContext.getPackageManager().getPackageInfo("net.dinglisch.android.taskerm", 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            UseTaskerExtension.setEnabled(false);
+            UseTaskerExtension.setSummary("This option requires the Tasker app.");
+        }
 
         UseWiFiSleepPolicy.setOnPreferenceChangeListener((p, n) -> {
             Pushy.toggleWifiPolicyCompliance((boolean) n, mContext);
