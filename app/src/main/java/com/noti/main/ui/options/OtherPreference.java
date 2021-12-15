@@ -26,6 +26,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
 
+import java.util.ArrayList;
+
 import me.pushy.sdk.Pushy;
 
 public class OtherPreference extends PreferenceFragmentCompat {
@@ -35,6 +37,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     Activity mContext;
 
     Preference UseTaskerExtension;
+    Preference TaskerCompatibleInfo;
     Preference UseWiFiSleepPolicy;
     Preference HistoryLimit;
     Preference DataLimit;
@@ -69,6 +72,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
         prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
 
         UseTaskerExtension = findPreference("UseTaskerExtension");
+        TaskerCompatibleInfo = findPreference("TaskerCompatibleInfo");
         UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
         HistoryLimit = findPreference("HistoryLimit");
         DataLimit = findPreference("DataLimit");
@@ -77,10 +81,17 @@ public class OtherPreference extends PreferenceFragmentCompat {
         UpdateChannel = findPreference("UpdateChannel");
 
         try {
-            mContext.getPackageManager().getPackageInfo("net.dinglisch.android.taskerm", 0);
+            ArrayList<String> taskerPluginList = new ArrayList<>();
+            taskerPluginList.add("net.dinglisch.android.taskerm");
+            taskerPluginList.add("com.llamalab.automate");
+            taskerPluginList.add("com.twofortyfouram.locale.x");
+
+            for(String packageName : taskerPluginList) {
+                mContext.getPackageManager().getPackageInfo(packageName, 0);
+            }
         } catch (PackageManager.NameNotFoundException e) {
             UseTaskerExtension.setEnabled(false);
-            UseTaskerExtension.setSummary("This option requires the Tasker app.");
+            UseTaskerExtension.setSummary("This option requires the Tasker-compatible app.");
         }
 
         UseWiFiSleepPolicy.setOnPreferenceChangeListener((p, n) -> {
@@ -226,6 +237,16 @@ public class OtherPreference extends PreferenceFragmentCompat {
                     Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
                 });
                 dialog.setNegativeButton("Cancel", (d, w) -> {
+                });
+                dialog.show();
+                break;
+
+            case "TaskerCompatibleInfo":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setTitle("Tasker compatible apps");
+                dialog.setMessage(getString(R.string.Dialog_Tasker_compatible));
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                dialog.setPositiveButton("Close", (d, w) -> {
                 });
                 dialog.show();
                 break;
