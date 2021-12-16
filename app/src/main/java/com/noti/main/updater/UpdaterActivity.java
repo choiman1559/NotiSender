@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.noti.main.R;
 import com.noti.main.SettingsActivity;
 import com.noti.main.updater.tasks.GetPlayVersion;
@@ -24,9 +25,12 @@ import com.noti.main.utils.DetectAppSource;
 
 public class UpdaterActivity extends AppCompatActivity {
 
+    private static boolean isActivityRunning = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isActivityRunning = true;
         setContentView(R.layout.activity_updater);
         if(isManagerInstalled(this)) {
             new AlertDialog.Builder(this)
@@ -42,6 +46,18 @@ public class UpdaterActivity extends AppCompatActivity {
         } else init();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isActivityRunning = false;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isActivityRunning = false;
+    }
+
     private void init() {
         TextView status1 = findViewById(R.id.status1);
         ProgressBar status2 = findViewById(R.id.status2);
@@ -53,10 +69,12 @@ public class UpdaterActivity extends AppCompatActivity {
             switch (prefs.getString("UpdateChannel","Automatically specified")) {
                 case "Github":
                     new GetGithubVersion(this).execute();
+                    startDelayCheckThread(this);
                     break;
 
                 case "Play Store":
                     new GetPlayVersion(this).execute();
+                    startDelayCheckThread(this);
                     break;
 
                 case "Do not check update":
@@ -101,6 +119,21 @@ public class UpdaterActivity extends AppCompatActivity {
         if(requestCode == 5) {
             init();
         }
+    }
+
+    public static void startDelayCheckThread(AppCompatActivity context) {
+        final long startTime = System.currentTimeMillis();
+        new Thread(() -> {
+            while(true) {
+                if(System.currentTimeMillis() - startTime > 10000L) {
+                    if(isActivityRunning) {
+                        Snackbar.make(context, context.findViewById(R.id.layout), "There is a delay in checking for updates.",Snackbar.LENGTH_INDEFINITE)
+                                .setAction("Skip", v -> startMainActivity(context)).show();
+                    }
+                    break;
+                }
+            }
+        }).start();
     }
 
     public static void startMainActivity(Context context) {

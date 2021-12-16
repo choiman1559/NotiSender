@@ -13,6 +13,8 @@ import com.noti.main.updater.UpdaterActivity;
 import com.noti.main.utils.AsyncTask;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 @SuppressLint("StaticFieldLeak")
 public class GetPlayVersion extends AsyncTask<Void, String, String> {
@@ -27,18 +29,24 @@ public class GetPlayVersion extends AsyncTask<Void, String, String> {
     @Override
     protected String doInBackground(Void... voids) {
 
-        String newVersion;
+        String newVersion = "";
         try {
             packageName = context.getPackageName();
             currentVersion = context.getPackageManager().getPackageInfo(packageName, 0).versionName;
-            newVersion = Jsoup.connect("https://play.google.com/store/apps/details?id=" + packageName + "&hl=en")
+            Elements elements = Jsoup.connect("https://play.google.com/store/apps/details?id=" + packageName + "&hl=en")
                     .timeout(30000)
-                    .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                    .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0")
                     .referrer("http://www.google.com")
                     .get()
-                    .select("div.hAyfc:nth-child(4) > span:nth-child(2) > div:nth-child(1) > span:nth-child(1)")
-                    .first()
-                    .ownText();
+                    .getElementsByTag("script");
+
+            for(Element script : elements) {
+                if(script.html().contains("key: 'ds:3'")) {
+                    String versionRaw = script.html();
+                    newVersion = versionRaw.substring(versionRaw.indexOf("data:[") + 1, versionRaw.indexOf("],")).replace("\"","").split(",")[1];
+                }
+            }
+
             return newVersion;
         } catch (Exception e) {
             e.printStackTrace();

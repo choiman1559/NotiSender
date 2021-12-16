@@ -1,7 +1,9 @@
 package com.noti.main.service;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
+import android.content.ContextParams;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -218,18 +220,30 @@ public class NotiListenerService extends NotificationListenerService {
         sendNotification(notificationHead, PackageName, this);
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
         Bitmap ICON = null;
         try {
-            if (Build.VERSION.SDK_INT > 22 && prefs.getBoolean("IconUseNotification", false)) {
-                Icon LargeIcon = notification.getLargeIcon();
-                Icon SmallIcon = notification.getSmallIcon();
+            if (prefs.getBoolean("IconUseNotification", false)) {
+                Context packageContext = createPackageContext(PackageName, CONTEXT_IGNORE_SECURITY);
 
-                if (LargeIcon != null) ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(this));
-                else if (SmallIcon != null)
-                    ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(this));
-                else
-                    ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
+                if(Build.VERSION.SDK_INT > 22) {
+                    Icon LargeIcon = notification.getLargeIcon();
+                    Icon SmallIcon = notification.getSmallIcon();
+
+                    if (LargeIcon != null)
+                        ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(packageContext));
+                    else if (SmallIcon != null)
+                        ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(packageContext));
+                    else
+                        ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
+                } else {
+                    Bitmap LargeIcon = notification.largeIcon;
+                    int SmallIcon = notification.icon;
+
+                    if(LargeIcon != null) ICON = LargeIcon;
+                    else if(SmallIcon != 0) ICON = getBitmapFromDrawable(packageContext.getDrawable(SmallIcon));
+                }
             } else {
                 ICON = getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(PackageName));
             }

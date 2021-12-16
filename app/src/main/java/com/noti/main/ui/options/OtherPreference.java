@@ -80,16 +80,21 @@ public class OtherPreference extends PreferenceFragmentCompat {
         DeleteHistory = findPreference("DeleteHistory");
         UpdateChannel = findPreference("UpdateChannel");
 
-        try {
-            ArrayList<String> taskerPluginList = new ArrayList<>();
-            taskerPluginList.add("net.dinglisch.android.taskerm");
-            taskerPluginList.add("com.llamalab.automate");
-            taskerPluginList.add("com.twofortyfouram.locale.x");
+        ArrayList<String> taskerPluginList = new ArrayList<>();
+        taskerPluginList.add("net.dinglisch.android.taskerm");
+        taskerPluginList.add("com.llamalab.automate");
+        taskerPluginList.add("com.twofortyfouram.locale.x");
+        int packageCount = 0;
 
-            for(String packageName : taskerPluginList) {
+        for(String packageName : taskerPluginList) {
+            try {
                 mContext.getPackageManager().getPackageInfo(packageName, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                packageCount++;
             }
-        } catch (PackageManager.NameNotFoundException e) {
+        }
+
+        if(packageCount == taskerPluginList.size()) {
             UseTaskerExtension.setEnabled(false);
             UseTaskerExtension.setSummary("This option requires the Tasker-compatible app.");
         }
