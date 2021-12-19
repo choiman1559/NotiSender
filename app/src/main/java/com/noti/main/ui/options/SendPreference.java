@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,11 +27,11 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
+import com.noti.main.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.DetectAppSource;
@@ -245,11 +244,11 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue > 0x7FFFFFFF - 1) {
-                            Toast.makeText(mContext, "Value must be lower than 2147483647", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Value must be lower than 2147483647", "DISMISS",ToastHelper.LENGTH_SHORT);
                         } else {
                             prefs.edit().putInt("IntervalTime", IntValue).apply();
                             IntervalTime.setSummary("Now : " + IntValue + (IntValue == 150 ? " ms (Default)" : " ms"));
@@ -300,7 +299,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else prefs.edit().putString("BannedWords", value).apply();
                 });
                 dialog.setNeutralButton("Clear", (d, w) -> prefs.edit().putString("BannedWords", "").apply());
@@ -344,7 +343,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else prefs.edit().putString("DefaultTitle", value).apply();
                 });
                 dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().putString("DefaultTitle", "New notification").apply());
@@ -378,7 +377,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else prefs.edit().putString("DefaultMessage", value).apply();
                 });
                 dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().putString("DefaultMessage", "notification arrived.").apply());
@@ -407,7 +406,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                         try {
                             editText.setText(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
                         } catch (Exception e) {
-                            Toast.makeText(mContext, "Error while processing crypto", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Error while processing crypto","DISMISS", ToastHelper.LENGTH_SHORT);
                         }
                     }
                 }
@@ -424,15 +423,15 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input password", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input password","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else if(value.length() > 20) {
-                        Toast.makeText(mContext, "Password too long! maximum 20 chars.", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Password too long! maximum 20 chars.", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
                         try {
                             String uid = mAuth.getUid();
                             if(uid != null) prefs.edit().putString("EncryptionPassword", AESCrypto.encrypt(value, AESCrypto.parseAESToken(uid))).apply();
                         } catch (Exception e) {
-                            Toast.makeText(mContext, "Error while processing crypto", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Error while processing crypto", "DISMISS",ToastHelper.LENGTH_SHORT);
                         }
                     }
                 });
@@ -462,14 +461,14 @@ public class SendPreference extends PreferenceFragmentCompat {
                 if (requestCode == 2) {
                     int SourceCode = DetectAppSource.detectSource(mContext);
                     if (SourceCode == 1 || SourceCode == 2) {
-                        Toast.makeText(mContext, "require sms permission!", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "require sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
                     } else if (SourceCode == 3) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
                         builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
                         builder.setNegativeButton("Close", (d, w) -> { }).show();
                     } else
-                        Toast.makeText(mContext, "Error while getting SHA-1 hash!", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Error while getting SHA-1 hash!", "OK",ToastHelper.LENGTH_SHORT);
                     ((SwitchPreference) UseReplySms).setChecked(false);
                 }
                 return;

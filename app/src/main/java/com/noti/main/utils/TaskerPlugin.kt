@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RadioGroup
-import android.widget.Toast
 
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -25,6 +24,7 @@ import com.joaomgcd.taskerpluginlibrary.config.TaskerPluginConfigHelperNoOutput
 import com.joaomgcd.taskerpluginlibrary.input.TaskerInputField
 import com.joaomgcd.taskerpluginlibrary.input.TaskerInputRoot
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
+import com.noti.main.ui.ToastHelper
 
 class TaskerConfigActionHelper(config: TaskerPluginConfig<GetConfigInput>) : TaskerPluginConfigHelperNoOutput<GetConfigInput,TaskerConfigActionRunner>(config) {
     override val runnerClass: Class<TaskerConfigActionRunner> get() = TaskerConfigActionRunner::class.java
@@ -71,11 +71,7 @@ class TaskerConfigAction : Activity(), TaskerPluginConfig<GetConfigInput> {
                     toggleOff.isChecked -> toReturn = toggleOff.text as String
                     toggleAuto.isChecked -> toReturn = toggleAuto.text as String
 
-                    else -> Toast.makeText(
-                        context,
-                        "Please choose config option!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    else -> ToastHelper.show(this, "Please choose config option!", "OK", ToastHelper.LENGTH_SHORT, saveButton)
                 }
 
                 if (toReturn.isNotEmpty()) {

@@ -50,6 +50,7 @@ import com.noti.main.R;
 import com.noti.main.SettingsActivity;
 import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.OptionActivity;
+import com.noti.main.ui.ToastHelper;
 import com.noti.main.ui.prefs.HistoryActivity;
 import com.noti.main.utils.AsyncTask;
 import com.noti.main.utils.BillingHelper;
@@ -151,7 +152,7 @@ public class MainPreference extends PreferenceFragmentCompat {
             public void onPurchased(String productId) {
                 switch(productId) {
                     case BillingHelper.SubscribeID:
-                        Toast.makeText(mContext, "Thanks for purchase!", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Thanks for purchase!", "OK",ToastHelper.LENGTH_SHORT);
                         ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
                         ServiceToggle.setSummary("");
                         Subscribe.setVisible(false);
@@ -393,9 +394,9 @@ public class MainPreference extends PreferenceFragmentCompat {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(mContext, task -> {
                     if (!task.isSuccessful()) {
-                        Toast.makeText(mContext, "failed to login Google", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "failed to login Google", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else if (mAuth.getCurrentUser() != null) {
-                        Toast.makeText(mContext, "Success to login Google", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Success to login Google", "DISMISS",ToastHelper.LENGTH_SHORT);
                         prefs.edit().putString("UID", mAuth.getUid()).apply();
                         prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
                         recreate();

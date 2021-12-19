@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +24,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
+import com.noti.main.ui.ToastHelper;
 
 import java.util.ArrayList;
 
@@ -150,13 +150,13 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue < 1) {
-                            Toast.makeText(mContext, "Value must be higher than 0", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Value must be higher than 0", "DISMISS",ToastHelper.LENGTH_SHORT);
                         } else if (IntValue > 32786) {
-                            Toast.makeText(mContext, "Value must be lower than 32786", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Value must be lower than 32786", "DISMISS",ToastHelper.LENGTH_SHORT);
                         } else {
                             prefs.edit().putInt("DataLimit", IntValue).apply();
                             DataLimit.setSummary("Now : " + IntValue + (IntValue == 4096 ? " bytes (Default)" : " bytes"));
@@ -197,11 +197,11 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue > 65535) {
-                            Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Value must be lower than 65535", "DISMISS",ToastHelper.LENGTH_SHORT);
                         } else {
                             prefs.edit().putInt("HistoryLimit", IntValue).apply();
                             HistoryLimit.setSummary("Now : " + IntValue + (IntValue == 150 ? " pcs (Default)" : " pcs"));
@@ -224,7 +224,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setMessage("Are you sure to delete notification history?\nThis operation cannot be undone.");
                 dialog.setPositiveButton("Delete", (d, w) -> {
                     prefs.edit().putString("sendLogs", "").putString("receivedLogs", "").apply();
-                    Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
+                    ToastHelper.show(mContext, "Task done!","OK", ToastHelper.LENGTH_SHORT);
                 });
                 dialog.setNegativeButton("Cancel", (d, w) -> {
                 });
@@ -239,7 +239,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Reset", (d, w) -> {
                     mContext.getSharedPreferences("Whitelist", MODE_PRIVATE).edit().clear().apply();
                     mContext.getSharedPreferences("Blacklist", MODE_PRIVATE).edit().clear().apply();
-                    Toast.makeText(mContext, "Task done!", Toast.LENGTH_SHORT).show();
+                    ToastHelper.show(mContext, "Task done!", "OK", ToastHelper.LENGTH_SHORT);
                 });
                 dialog.setNegativeButton("Cancel", (d, w) -> {
                 });

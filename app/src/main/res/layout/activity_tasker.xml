@@ -118,5 +118,6 @@
         android:text="Save Config"
         android:textColor="@color/ui_bg"
         app:icon="@drawable/ic_fluent_save_24_regular"
-        app:iconTint="@color/ui_bg" />
+        app:iconTint="@color/ui_bg"
+        app:layout_dodgeInsetEdges="bottom"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

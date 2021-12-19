@@ -42,6 +42,11 @@
             android:title="WiFi sleep policy compliance (Pushy only)"
             android:summary="Prevents wake lock by blocking the wifi sleep policy."
             android:icon="@drawable/ic_fluent_alert_snooze_24_regular"/>
+        <SwitchPreference
+            android:key="UseToastInstead"
+            android:defaultValue="false"
+            android:title="Use Toast instead of Snackbar"
+            android:summary="Using Toast to display messages such as warnings within the app" />
         <Preference
             android:key="HistoryLimit"
             android:title="Maximum number of History"

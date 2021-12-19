@@ -31,6 +31,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
+import com.noti.main.ui.ToastHelper;
 
 public class ReceptionPreference extends PreferenceFragmentCompat {
 
@@ -168,11 +169,11 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = dialogEditValue.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue > 65535) {
-                            Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Value must be lower than 65535","DISMISS", ToastHelper.LENGTH_SHORT);
                         } else {
                             final String finalValue = value + " " + dialogUnitSpinner.getText().toString();
                             prefs.edit().putString("RingtoneRunningTime", finalValue).apply();
@@ -216,11 +217,11 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue > 65535) {
-                            Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Value must be lower than 65535","DISMISS", ToastHelper.LENGTH_SHORT);
                         } else {
                             prefs.edit().putInt("VibrationRunningTime", IntValue).apply();
                             VibrationRunningTime.setSummary("Now : " + IntValue + (IntValue == 1000 ? " ms (Default)" : " ms"));
@@ -242,7 +243,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                         .releasePersistableUriPermission(Uri.parse(prefs.getString("CustomRingtone","")),
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 prefs.edit().remove("CustomRingtone").apply();
-                Toast.makeText(mContext, "Selection reset done!", Toast.LENGTH_SHORT).show();
+                ToastHelper.show(mContext, "Selection reset done!","OK", ToastHelper.LENGTH_SHORT);
                 ResetCustomRingtone.setVisible(false);
                 break;
 
@@ -265,11 +266,11 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editValue.getText().toString();
                     if (value.equals("")) {
-                        Toast.makeText(mContext, "Please Input Value", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue > 65535) {
-                            Toast.makeText(mContext, "Value must be lower than 65535", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(mContext, "Value must be lower than 65535", "DISMISS",ToastHelper.LENGTH_SHORT);
                         } else {
                             final String finalValue = value + " " + unitSpinner.getText().toString();
                             prefs.edit().putString("DeadlineCustomValue", finalValue).apply();
@@ -296,7 +297,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == RC_OPEN_AUDIO) {
             Uri AudioMedia = (resultCode == Activity.RESULT_CANCELED || data == null ? null : data.getData());
-            if(AudioMedia == null) Toast.makeText(mContext, "Please choose audio file!", Toast.LENGTH_SHORT).show();
+            if(AudioMedia == null) ToastHelper.show(mContext, "Please choose audio file!","OK", ToastHelper.LENGTH_SHORT);
             else {
                 DocumentFile file = DocumentFile.fromSingleUri(mContext, AudioMedia);
                 CustomRingtone.setSummary("Now : " + (file == null ? "system default" : file.getName()));
