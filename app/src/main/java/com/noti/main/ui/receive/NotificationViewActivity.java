@@ -7,12 +7,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.google.android.material.button.MaterialButton;
+import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
 
@@ -20,12 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class NotificationViewActivity extends Activity {
-
-    void Log(String message) {
-        if (getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("debugInfo", false) ) {
-            Log.d("debug",message);
-        }
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,23 +32,24 @@ public class NotificationViewActivity extends Activity {
         String Package = intent.getStringExtra("package");
         Bitmap icon = intent.getParcelableExtra("icon");
 
-        Button OK = findViewById(R.id.ok);
-        Button NO = findViewById(R.id.cancel);
+        MaterialButton OK = findViewById(R.id.ok);
+        MaterialButton NO = findViewById(R.id.cancel);
         ImageView ICON = findViewById(R.id.iconView);
-        TextView DETAIL = findViewById(R.id.notiDetail);
+        TextView NAME = findViewById(R.id.titleDetail);
+        TextView DETAIL = findViewById(R.id.contentDetail);
 
         String APP_NAME = intent.getStringExtra("appname");
         String TITLE = intent.getStringExtra("title");
         String DEVICE_NAME = intent.getStringExtra("device_name");
         String DATE = intent.getStringExtra("date");
         String detail = "";
-        detail += "App Name : " + APP_NAME + "\n";
-        detail += "Noti Title : " + TITLE + "\n";
-        detail += "Device : " + DEVICE_NAME + "\n";
+        detail += "Noti Title  : " + TITLE + "\n";
+        detail += "Device      : " + DEVICE_NAME + "\n";
         detail += "Posted Time : " + DATE + "\n";
 
         if(icon != null) ICON.setImageBitmap(icon);
         else ICON.setVisibility(View.GONE);
+        NAME.setText(APP_NAME);
         DETAIL.setText(detail);
 
         OK.setOnClickListener(v -> {
@@ -70,7 +66,7 @@ public class NotificationViewActivity extends Activity {
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage() );
             }
-            Log(notificationHead.toString());
+            if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
             NotiListenerService.sendNotification(notificationHead, Package, this);
             ExitActivity.exitApplication(this);
         });

@@ -62,6 +62,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="Theme.App.Palette.Dialog" parent="Theme.Material3.DayNight.Dialog" >
+        <item name="android:windowBackground">@drawable/round_corner</item>
+    </style>
+
     <style name="Theme.App.Material3" parent="Theme.Material3.DayNight.NoActionBar" />
 
     <style name="TextAppearance.App.CollapsingToolbar.Expanded" parent="TextAppearance.Design.CollapsingToolbar.Expanded">

@@ -1,16 +1,18 @@
 package com.noti.main.ui.receive;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.google.android.material.button.MaterialButton;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
 
@@ -18,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SmsViewActivity extends Activity {
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,18 +34,19 @@ public class SmsViewActivity extends Activity {
         String Date = i.getStringExtra("date");
         String Package = i.getStringExtra("package");
 
-        Button Reply = findViewById(R.id.ok);
-        Button Cancel = findViewById(R.id.cancel);
+        MaterialButton Reply = findViewById(R.id.ok);
+        MaterialButton Cancel = findViewById(R.id.cancel);
         EditText Content = findViewById(R.id.smsContent);
         TextView ContentView = findViewById(R.id.notiDetail);
+        TextView TitleView = findViewById(R.id.titleDetail);
 
         String content = "";
-        content += "Sms Overview\n";
-        content += "from : " + address + "\n";
-        content += "date : " +  Date + "\n";
-        content += "sent device : " + Device_name + "\n";
-        content += "message : " + message + "\n";
-        ContentView.setText(content);
+        content += "<b>From</b> : " + address + "<br>";
+        content += "<b>Date</b> : " +  Date + "<br>";
+        content += "<b>Sent device</b> : " + Device_name + "<br>";
+        content += "<b>Message</b> : " + message;
+        ContentView.setText(Html.fromHtml(content));
+        TitleView.setText("Sms Overview");
 
         Reply.setOnClickListener(v -> {
             String msg = Content.getText().toString();
