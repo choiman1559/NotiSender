@@ -16,8 +16,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 1011404
-        versionName "1.14.4"
+        versionCode 1011405
+        versionName "1.14.5"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -46,6 +46,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
+    implementation 'com.google.android.gms:play-services-nearby:18.0.1'
     testImplementation 'junit:junit:4.13.2'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

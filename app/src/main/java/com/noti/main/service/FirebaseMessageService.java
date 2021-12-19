@@ -70,7 +70,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         Map<String,String> map = remoteMessage.getData();
 
         String rawPassword = prefs.getString("EncryptionPassword", "");
-        if(map.get("encrypted").equals("true")) {
+        if("true".equals(map.get("encrypted"))) {
             if(prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
                 try {
                     String uid = FirebaseAuth.getInstance().getUid();
@@ -103,7 +103,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         sendSmsNotification(map);
                     }
                 } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
-                    if (map.get("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.get("send_device_id").equals(getMACAddress())) {
+                    if ((Build.MANUFACTURER + " " + Build.MODEL).equals(map.get("send_device_name")) && getMACAddress().equals(map.get("send_device_id"))) {
                         if (type.equals("reception|normal")) {
                             startNewRemoteActivity(map);
                         } else if (type.equals("reception|sms")) {
@@ -127,7 +127,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getMACAddress();
 
-        return Device_name.equals(DEVICE_NAME) && Device_id.equals(DEVICE_ID);
+        return DEVICE_NAME.equals(Device_name) && DEVICE_ID.equals(Device_id);
     }
 
     protected void startNewRemoteActivity(Map<String, String> map) {
@@ -165,7 +165,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 if(Date != null) {
                     long calculated = parseTimeAndUnitToLong(DeadlineValue);
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
-                    if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
+                    if (ReceivedDate != null && (System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
                         return;
                     }
                 }
@@ -182,8 +182,18 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationIntent.putExtra("date",Date);
         notificationIntent.putExtra("package", Package);
 
+        int uniqueCode = 0;
+        try {
+            if(Date != null) {
+                Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
+                uniqueCode = d == null ? 0 : (int) ((d.getTime() / 1000L) % Integer.MAX_VALUE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))
@@ -228,7 +238,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 if(Date != null) {
                     long calculated = parseTimeAndUnitToLong(DeadlineValue);
                     Date ReceivedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
-                    if ((System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
+                    if (ReceivedDate != null && (System.currentTimeMillis() - ReceivedDate.getTime()) > calculated) {
                         if(BuildConfig.DEBUG) {
                             Toast.makeText(getApplicationContext(), "App " + Package + " received but not proceed 'cause deadline! Elapsed time : " + (System.currentTimeMillis() - ReceivedDate.getTime()), Toast.LENGTH_SHORT).show();
                             Log.d(getClass().getSimpleName(), "App " + Package + " received but not proceed 'cause deadline! Elapsed time : " + (System.currentTimeMillis() - ReceivedDate.getTime()));
@@ -243,7 +253,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         Bitmap Icon_original = null;
         Bitmap Icon = null;
-        if (!map.get("icon").equals("none")) {
+        if (!"none".equals(map.get("icon"))) {
             Icon_original = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
             if(Icon_original != null) {
                 Icon = Bitmap.createBitmap(Icon_original.getWidth(), Icon_original.getHeight(), Icon_original.getConfig());

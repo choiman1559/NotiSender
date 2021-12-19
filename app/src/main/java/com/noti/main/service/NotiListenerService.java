@@ -3,7 +3,6 @@ package com.noti.main.service;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
-import android.content.ContextParams;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -21,6 +20,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.auth.FirebaseAuth;
 import com.noti.main.BuildConfig;
@@ -67,10 +67,41 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
+    private static class SmsQuery {
+        private String Number;
+        private String Content;
+        private long TimeStamp;
+
+        public String getNumber() {
+            return Number;
+        }
+
+        public String getContent() {
+            return Content;
+        }
+
+        public long getTimeStamp() {
+            return TimeStamp;
+        }
+
+        public void setNumber(String number) {
+            Number = number;
+        }
+
+        public void setContent(String content) {
+            Content = content;
+        }
+
+        public void setTimeStamp(long timeStamp) {
+            TimeStamp = timeStamp;
+        }
+    }
+
     private static SharedPreferences prefs;
     private volatile long intervalTimestamp = 0;
     private volatile StatusBarNotification pastNotification = null;
     private final ArrayList<Query> intervalQuery = new ArrayList<>();
+    private final ArrayList<SmsQuery> smsIntervalQuery = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -149,7 +180,7 @@ public class NotiListenerService extends NotificationListenerService {
                 if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))))
                     return;
                 else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
-                    sendSmsNotification(isLogging, PackageName);
+                    sendSmsNotification(isLogging, PackageName, time);
                 } else if (isWhitelist(PackageName)) {
                     if (prefs.getBoolean("StrictStringNull", false) && (TITLE == null || TEXT == null))
                         return;
@@ -187,7 +218,7 @@ public class NotiListenerService extends NotificationListenerService {
         pastNotification = sbn;
     }
 
-    private void sendSmsNotification(Boolean isLogging, String PackageName) {
+    private void sendSmsNotification(Boolean isLogging, String PackageName, Date time) {
         Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
         cursor.moveToFirst();
         String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
@@ -195,29 +226,31 @@ public class NotiListenerService extends NotificationListenerService {
         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow("date")))));
         cursor.close();
 
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = getMACAddress();
-        String TOPIC = "/topics/" + prefs.getString("UID", "");
+        if(isSmsIntervalGaped(address, message, time)) {
+            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_ID = getMACAddress();
+            String TOPIC = "/topics/" + prefs.getString("UID", "");
 
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notifcationBody = new JSONObject();
-        try {
-            notifcationBody.put("type", "send|sms");
-            notifcationBody.put("message", message);
-            notifcationBody.put("address", address);
-            notifcationBody.put("package", PackageName);
-            notifcationBody.put("device_name", DEVICE_NAME);
-            notifcationBody.put("device_id", DEVICE_ID);
-            notifcationBody.put("date", date);
+            JSONObject notificationHead = new JSONObject();
+            JSONObject notifcationBody = new JSONObject();
+            try {
+                notifcationBody.put("type", "send|sms");
+                notifcationBody.put("message", message);
+                notifcationBody.put("address", address);
+                notifcationBody.put("package", PackageName);
+                notifcationBody.put("device_name", DEVICE_NAME);
+                notifcationBody.put("device_id", DEVICE_ID);
+                notifcationBody.put("date", date);
 
-            int dataLimit = prefs.getInt("DataLimit", 4096);
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
-        } catch (JSONException e) {
-            if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
+                int dataLimit = prefs.getInt("DataLimit", 4096);
+                notificationHead.put("to", TOPIC);
+                notificationHead.put("data", notifcationBody.toString().length() < dataLimit ? notifcationBody : notifcationBody.put("icon", "none"));
+            } catch (JSONException e) {
+                if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
+            }
+            if (isLogging) Log.d("data", notificationHead.toString());
+            sendNotification(notificationHead, PackageName, this);
         }
-        if (isLogging) Log.d("data", notificationHead.toString());
-        sendNotification(notificationHead, PackageName, this);
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -332,6 +365,37 @@ public class NotiListenerService extends NotificationListenerService {
         return isWhitelist == isContain;
     }
 
+    private boolean isSmsIntervalGaped(String Number, String Content, Date time) {
+        if (prefs.getBoolean("UseInterval", false)) {
+            int timeInterval = prefs.getInt("IntervalTime", 150);
+            SmsQuery query = new SmsQuery();
+            synchronized (smsIntervalQuery) {
+                int index = -1;
+                SmsQuery object = null;
+
+                for(int i = 0;i < smsIntervalQuery.size(); i++) {
+                    object = smsIntervalQuery.get(i);
+                    if(object.getNumber().equals(Number) && object.getContent().equals(Content)) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                query.setNumber(Number);
+                query.setContent(Content);
+                query.setTimeStamp(time.getTime());
+
+                if(index > -1) {
+                    smsIntervalQuery.set(index, query);
+                    if(time.getTime() - object.getTimeStamp() <= timeInterval) return false;
+                } else {
+                    smsIntervalQuery.add(query);
+                }
+            }
+        }
+        return true;
+    }
+
     private boolean isIntervalNotGaped(Boolean isLogging, String PackageName, Date time) {
         if (prefs.getBoolean("UseInterval", false)) {
             String Type = prefs.getString("IntervalType", "Entire app");
@@ -377,6 +441,7 @@ public class NotiListenerService extends NotificationListenerService {
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
             if(!prefs.getString("AuthKey_Pushy", "").equals("")) sendPushyNotification(notification, PackageName, context);
         } else sendFCMNotification(notification, PackageName, context);
+        System.gc();
     }
 
     private static void sendFCMNotification(JSONObject notification, String PackageName, Context context) {
@@ -406,7 +471,7 @@ public class NotiListenerService extends NotificationListenerService {
             if(BuildConfig.DEBUG) e.printStackTrace();
         }
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API, notification,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,FCM_API, notification,
                 response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName),
                 error -> {
                     Toast.makeText(context, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
@@ -428,7 +493,7 @@ public class NotiListenerService extends NotificationListenerService {
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(URI, notification, response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName), error -> {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, notification, response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName), error -> {
             Toast.makeText(context, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
             Log.i(TAG, "onErrorResponse: Didn't work: " + new String(error.networkResponse.data, StandardCharsets.UTF_8) + ", package: " + PackageName);
         }) {
