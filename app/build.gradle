@@ -16,8 +16,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 1011405
-        versionName "1.14.5"
+        versionCode 1011406
+        versionName "1.14.6"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

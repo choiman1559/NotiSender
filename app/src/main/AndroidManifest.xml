@@ -63,7 +63,6 @@
 
         <activity
             android:name=".updater.UpdaterActivity"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

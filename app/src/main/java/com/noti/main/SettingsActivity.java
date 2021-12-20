@@ -16,6 +16,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -23,6 +24,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.noti.main.ui.options.MainPreference;
 import com.noti.main.utils.BillingHelper;
 
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -83,6 +86,14 @@ public class SettingsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
+        }
+
+        //Christmas Event!!!
+        Calendar calendar = Calendar.getInstance(Locale.getDefault());
+        int date = calendar.get(Calendar.DATE);
+        if(calendar.get(Calendar.MONTH) == Calendar.DECEMBER && date < 26 && date > 17) {
+            MaterialToolbar toolbar = findViewById(R.id.toolbar);
+            toolbar.setNavigationIcon(R.drawable.hat);
         }
     }
 

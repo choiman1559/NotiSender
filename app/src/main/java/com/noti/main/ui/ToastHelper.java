@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.Activity;
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.IntDef;
@@ -27,7 +28,7 @@ public class ToastHelper {
 
     public static void show(Activity context, String message, String actionMessage, @Duration int duration, @Nullable View anchorView) {
         if(!context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("UseToastInstead", false)) {
-            Snackbar snackbar = Snackbar.make(context, context.getWindow().getDecorView().getRootView(), message, (duration == LENGTH_SHORT ? Snackbar.LENGTH_SHORT : Snackbar.LENGTH_LONG));
+            Snackbar snackbar = Snackbar.make(context, ((ViewGroup) context.findViewById(android.R.id.content)).getChildAt(0), message, (duration == LENGTH_SHORT ? Snackbar.LENGTH_SHORT : Snackbar.LENGTH_LONG));
             if(!actionMessage.isEmpty()) {
                 snackbar.setAction(actionMessage, v -> { });
             }
