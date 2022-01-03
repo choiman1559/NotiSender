@@ -83,7 +83,7 @@
             android:summary="Click here to get more information about interval" />
         <Preference
             android:key="IntervalQueryGCTrigger"
-            android:summary="Now : 50 objects (Default)"
+            android:summary="Now : Disabled (Default)"
             android:title="Interval GC trigger value (Unstable)" />
     </PreferenceCategory>
 

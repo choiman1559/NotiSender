@@ -183,7 +183,7 @@ public class SendPreference extends PreferenceFragmentCompat {
         int intervalTime = prefs.getInt("IntervalTime", 150);
         IntervalTime.setSummary("Now : " + intervalTime + (intervalTime == 150 ? " ms (Default)" : " ms"));
         int gcTriggerValue = prefs.getInt("IntervalQueryGCTrigger", 50);
-        IntervalQueryGCTrigger.setSummary("Now : " + gcTriggerValue + (gcTriggerValue == 50 ? " objects (Default)" : " objects"));
+        IntervalQueryGCTrigger.setSummary("Now : " + (gcTriggerValue < 1 ? " Disabled (Default)" : gcTriggerValue + " objects"));
 
         boolean useInterval = prefs.getBoolean("UseInterval", false);
         IntervalInfo.setVisible(useInterval);
@@ -308,13 +308,13 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
-                dialog.setMessage("When the Query Object used during interval calculation is no longer used, it is cleaned up to free memory.\n\nThe GC trigger count maximum limit is 2147483647 objects and Input 0 to disable this option.");
+                dialog.setMessage("When the Query Object used during interval calculation is no longer used, it is cleaned up to free memory.\n\nThe GC trigger count maximum limit is 2147483647 objects and Input 0 or lower to disable this option.");
 
                 editText = new EditText(mContext);
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 editText.setHint("Input GC Trigger count Value");
                 editText.setGravity(Gravity.CENTER);
-                editText.setText(String.valueOf(prefs.getInt("IntervalQueryGCTrigger", 50)));
+                editText.setText(String.valueOf(prefs.getInt("IntervalQueryGCTrigger", 0)));
 
                 parentLayout = new LinearLayout(mContext);
                 layoutParams = new LinearLayout.LayoutParams(
@@ -335,13 +335,13 @@ public class SendPreference extends PreferenceFragmentCompat {
                             ToastHelper.show(mContext, "Value must be lower than 2147483647", "DISMISS",ToastHelper.LENGTH_SHORT);
                         } else {
                             prefs.edit().putInt("IntervalQueryGCTrigger", IntValue).apply();
-                            IntervalQueryGCTrigger.setSummary("Now : " + IntValue + (IntValue == 50 ? " objects (Default)" : " objects"));
+                            IntervalQueryGCTrigger.setSummary("Now : " + (IntValue < 1 ? " Disabled (Default)" : IntValue + " objects"));
                         }
                     }
                 });
                 dialog.setNeutralButton("Reset Default", (d, w) -> {
-                    prefs.edit().putInt("IntervalQueryGCTrigger", 50).apply();
-                    IntervalQueryGCTrigger.setSummary("Now : " + 50 + " objects (Default)");
+                    prefs.edit().putInt("IntervalQueryGCTrigger", 0).apply();
+                    IntervalQueryGCTrigger.setSummary("Now : Disabled (Default)");
                 });
                 dialog.setNegativeButton("Cancel", (d, w) -> {
                 });
