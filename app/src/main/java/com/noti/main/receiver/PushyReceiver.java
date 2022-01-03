@@ -1,4 +1,4 @@
-package com.noti.main.service;
+package com.noti.main.receiver;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

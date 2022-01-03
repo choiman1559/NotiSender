@@ -84,6 +84,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
         taskerPluginList.add("net.dinglisch.android.taskerm");
         taskerPluginList.add("com.llamalab.automate");
         taskerPluginList.add("com.twofortyfouram.locale.x");
+        taskerPluginList.add("com.arlosoft.macrodroid");
         int packageCount = 0;
 
         for(String packageName : taskerPluginList) {

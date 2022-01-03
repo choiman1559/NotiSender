@@ -53,16 +53,16 @@ public class SmsViewActivity extends Activity {
             if(msg.equals("")) Content.setError("Please type message");
             else {
                 JSONObject notificationHead = new JSONObject();
-                JSONObject notifcationBody = new JSONObject();
+                JSONObject notificationBody = new JSONObject();
                 try {
-                    notifcationBody.put("type","reception|sms");
-                    notifcationBody.put("message",msg);
-                    notifcationBody.put("address",address);
-                    notifcationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
-                    notifcationBody.put("send_device_name",Device_name);
-                    notifcationBody.put("send_device_id",i.getStringExtra("device_id"));
+                    notificationBody.put("type","reception|sms");
+                    notificationBody.put("message",msg);
+                    notificationBody.put("address",address);
+                    notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+                    notificationBody.put("send_device_name",Device_name);
+                    notificationBody.put("send_device_id",i.getStringExtra("device_id"));
                     notificationHead.put("to",Topic);
-                    notificationHead.put("data", notifcationBody);
+                    notificationHead.put("data", notificationBody);
                 } catch (JSONException e) {
                     Log.e("Noti", "onCreate: " + e.getMessage() );
                 }

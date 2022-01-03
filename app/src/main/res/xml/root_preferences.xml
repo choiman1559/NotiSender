@@ -68,10 +68,10 @@
             android:title="Test Notification"
             android:icon="@drawable/ic_fluent_bug_24_regular"/>
         <Preference
-            android:key="Donation"
-            android:title="Donate to developer"
-            android:summary="Please help us make the app even better!"
-            android:icon="@drawable/ic_fluent_gift_24_regular"/>
+            android:key="findPhone"
+            android:summary="Play loud sound on other devices to find"
+            android:title="Find my devices"
+            android:icon="@drawable/ic_fluent_screen_search_24_regular"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="About">
@@ -80,6 +80,11 @@
             android:summary="Receive Notification in Wear OS"
             android:title="Noti Sender For Wear OS"
             android:icon="@drawable/ic_fluent_smartwatch_24_regular"/>
+        <Preference
+            android:key="Donation"
+            android:title="Donate to developer"
+            android:summary="Please help us make the app even better!"
+            android:icon="@drawable/ic_fluent_gift_24_regular"/>
         <Preference
             android:key="AppInfo"
             android:summary="@string/App_info_des"

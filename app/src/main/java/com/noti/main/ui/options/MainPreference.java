@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
@@ -47,6 +49,7 @@ import com.kieronquinn.monetcompat.core.MonetCompat;
 
 import com.noti.main.R;
 import com.noti.main.SettingsActivity;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.OptionActivity;
 import com.noti.main.ui.ToastHelper;
@@ -60,13 +63,24 @@ import me.pushy.sdk.Pushy;
 
 public class MainPreference extends PreferenceFragmentCompat {
 
-    private final int RC_SIGN_IN = 100;
     private GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
     private MonetCompat monet = null;
     SharedPreferences prefs;
     FirebaseFirestore mFirebaseFirestore;
     Activity mContext;
+
+    ActivityResultLauncher<Intent> startAccountTask = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if(result.getData() != null) {
+            GoogleSignInResult loginResult = Auth.GoogleSignInApi.getSignInResultFromIntent(result.getData());
+            if (loginResult != null && loginResult.isSuccess()) {
+                Log.d("Google log in", "Result : " + (loginResult.isSuccess() ? "success" : "failed") + " Status : " + loginResult.getStatus().toString());
+                GoogleSignInAccount account = loginResult.getSignInAccount();
+                assert account != null;
+                firebaseAuthWithGoogle(account);
+            }
+        }
+    });
 
     //General Category
     Preference Login;
@@ -79,6 +93,7 @@ public class MainPreference extends PreferenceFragmentCompat {
     //Other Category
     Preference ForWearOS;
     Preference TestRun;
+    Preference FindPhone;
 
     public MainPreference() { }
 
@@ -145,6 +160,7 @@ public class MainPreference extends PreferenceFragmentCompat {
         Subscribe = findPreference("Subscribe");
         ServerInfo = findPreference("ServerInfo");
         ForWearOS = findPreference("forWear");
+        FindPhone = findPreference("findPhone");
 
         mBillingHelper = BillingHelper.initialize(mContext, new BillingHelper.BillingCallback() {
             @Override
@@ -323,6 +339,13 @@ public class MainPreference extends PreferenceFragmentCompat {
             case "Donation":
                 mBillingHelper.Donate();
                 break;
+
+            case "findPhone":
+                if(ServiceToggle.isEnabled() && ((SwitchPreference) ServiceToggle).isChecked()) {
+                    NotiListenerService.sendFindTaskNotification(mContext);
+                    ToastHelper.show(mContext, "Your request is posted!","OK", ToastHelper.LENGTH_SHORT);
+                } else ToastHelper.show(mContext, "Please check your service toggle and try again!","Dismiss", ToastHelper.LENGTH_SHORT);
+                break;
         }
         return super.onPreferenceTreeClick(preference);
     }
@@ -352,7 +375,7 @@ public class MainPreference extends PreferenceFragmentCompat {
 
             if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
                 Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                startAccountTask.launch(signInIntent);
             } else
                 Snackbar.make(mContext.findViewById(R.id.layout), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
@@ -373,18 +396,6 @@ public class MainPreference extends PreferenceFragmentCompat {
             builder.setNegativeButton("No", ((dialog, which) -> {
             }));
             builder.show();
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-        if (requestCode == RC_SIGN_IN && result != null && result.isSuccess()) {
-            Log.d("Google log in", "Result : " + (result.isSuccess() ? "success" : "failed") + " Status : " + result.getStatus().toString());
-            GoogleSignInAccount account = result.getSignInAccount();
-            assert account != null;
-            firebaseAuthWithGoogle(account);
         }
     }
 

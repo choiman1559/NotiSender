@@ -39,13 +39,24 @@
             android:summary="If icon's file size is too big, icon may not sent or sending notification may fail." />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="SMS Reply">
+    <PreferenceCategory android:title="Telephony Reply">
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseReplySms"
             android:summary="need sms permission"
-            android:title="Reply to SMS from other devices"
+            android:title="Check SMS from other devices"
             android:icon="@drawable/ic_fluent_chat_24_regular"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseReplyTelecom"
+            android:summary="Reply as SMS or opens dialer app"
+            android:title="Send incoming call information"
+            android:icon="@drawable/ic_fluent_call_inbound_24_regular"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseCallLog"
+            android:summary="Use CallLog instead of TelephonyManager (Debug purpose)"
+            android:title="Detect incoming calls by other method" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Interval">
@@ -70,6 +81,10 @@
             android:icon="@drawable/ic_info_outline_black_24dp"
             android:key="IntervalInfo"
             android:summary="Click here to get more information about interval" />
+        <Preference
+            android:key="IntervalQueryGCTrigger"
+            android:summary="Now : 50 objects (Default)"
+            android:title="Interval GC trigger value (Unstable)" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Ban Words">

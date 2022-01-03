@@ -12,15 +12,16 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
-    <!-- In builds released on Google Play, SMS-related permissions are removed. -->
-
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -40,6 +41,8 @@
             android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.receive.SmsViewActivity"
             android:theme="@style/Theme.App.Palette.Dialog"/>
+        <activity android:name=".ui.receive.TelecomViewActivity"
+        android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.receive.ExitActivity" />
 
         <activity
@@ -98,7 +101,7 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".service.PushyReceiver" android:exported="false">
+        <receiver android:name=".receiver.PushyReceiver" android:exported="false">
             <intent-filter>
                 <!-- Do not modify this -->
                 <action android:name="pushy.me" />
@@ -116,6 +119,15 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".receiver.TelecomReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".receiver.FindDeviceCancelReceiver" />
 
         <service android:name="me.pushy.sdk.services.PushySocketService" android:stopWithTask="false" />
 

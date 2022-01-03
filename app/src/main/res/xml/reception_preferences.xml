@@ -20,7 +20,8 @@
         <Preference
             android:key="ResetCustomRingtone"
             android:title="Reset ringtone selection"
-            android:summary="Click here to reset your ringtone selection" />
+            android:summary="Click here to reset your ringtone selection"
+            android:icon="@drawable/ic_fluent_delete_24_regular"/>
         <Preference
             android:key="RingtoneRunningTime"
             android:title="Set ringtone maximum playing time"
@@ -44,5 +45,15 @@
             android:key="ReceiveCustomDeadline"
             android:title="Custom Receive Deadline value"
             android:summary="Now : 5 min (Default)" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Find my device">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="NotReceiveFindDevice"
+            android:title="Do not receive Find request"
+            android:summary="Ignores Find my devices request on this device"
+            android:icon="@drawable/ic_fluent_screen_search_24_regular"/>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -54,15 +54,15 @@ public class NotificationViewActivity extends Activity {
 
         OK.setOnClickListener(v -> {
             JSONObject notificationHead = new JSONObject();
-            JSONObject notifcationBody = new JSONObject();
+            JSONObject notificationBody = new JSONObject();
             try {
-                notifcationBody.put("package", Package);
-                notifcationBody.put("type","reception|normal");
-                notifcationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
-                notifcationBody.put("send_device_name",DEVICE_NAME);
-                notifcationBody.put("send_device_id",intent.getStringExtra("device_id"));
+                notificationBody.put("package", Package);
+                notificationBody.put("type","reception|normal");
+                notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+                notificationBody.put("send_device_name",DEVICE_NAME);
+                notificationBody.put("send_device_id",intent.getStringExtra("device_id"));
                 notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notifcationBody);
+                notificationHead.put("data", notificationBody);
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage() );
             }

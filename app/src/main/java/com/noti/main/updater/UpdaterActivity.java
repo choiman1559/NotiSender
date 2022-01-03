@@ -1,5 +1,7 @@
 package com.noti.main.updater;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -26,6 +28,7 @@ import com.noti.main.utils.DetectAppSource;
 public class UpdaterActivity extends AppCompatActivity {
 
     private static boolean isActivityRunning = false;
+    ActivityResultLauncher<Intent> startDeleteActivity = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> init());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +44,7 @@ public class UpdaterActivity extends AppCompatActivity {
                         startMainActivity(this);
                         this.finish();
                     })
-                    .setPositiveButton("Delete", (d, w) -> startActivityForResult(new Intent(Intent.ACTION_DELETE).setData(Uri.parse("package:com.noti.sender")), 5))
+                    .setPositiveButton("Delete", (d, w) -> startDeleteActivity.launch(new Intent(Intent.ACTION_DELETE).setData(Uri.parse("package:com.noti.sender"))))
                     .show();
         } else init();
     }
@@ -110,14 +113,6 @@ public class UpdaterActivity extends AppCompatActivity {
         } else {
             startMainActivity(this);
             this.finish();
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 5) {
-            init();
         }
     }
 

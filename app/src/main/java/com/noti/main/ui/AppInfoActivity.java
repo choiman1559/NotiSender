@@ -51,8 +51,7 @@ public class AppInfoActivity extends AppCompatActivity {
                     break;
             }
 
-            String Value = "Version\n";
-            Value += "Main app : " + LV + "\n";
+            String Value = "Version : " + LV + "\n";
             Value += "Downloaded from : " + Source + "\n\n";
             Value += "this app is free-software under the GNU LGPL 3.0 license.";
             version.setText(Value);

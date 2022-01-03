@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -19,9 +18,10 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -34,7 +34,6 @@ import com.noti.main.R;
 import com.noti.main.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.utils.AESCrypto;
-import com.noti.main.utils.DetectAppSource;
 
 public class SendPreference extends PreferenceFragmentCompat {
 
@@ -56,8 +55,11 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference IntervalTime;
     Preference IntervalType;
     Preference IntervalInfo;
+    Preference IntervalQueryGCTrigger;
 
     Preference UseReplySms;
+    Preference UseReplyTelecom;
+    Preference UseCallLog;
 
     Preference UseBannedOption;
     Preference BannedWords;
@@ -69,6 +71,27 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference UseDataEncryption;
     Preference UseDataEncryptionPassword;
     Preference EncryptionInfo;
+
+    ActivityResultLauncher<String[]> startCallLogPermit = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+        for(Boolean isGranted : result.values()) {
+            if(!isGranted) {
+                ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                ((SwitchPreference) UseReplyTelecom).setChecked(false);
+                UseCallLog.setVisible(false);
+                break;
+            }
+        }
+    });
+
+    ActivityResultLauncher<String[]> startSmsRwPermit = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+        for(Boolean isGranted : result.values()) {
+            if(!isGranted) {
+                ToastHelper.show(mContext, "require sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                ((SwitchPreference) UseReplySms).setChecked(false);
+                break;
+            }
+        }
+    });
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -107,16 +130,21 @@ public class SendPreference extends PreferenceFragmentCompat {
         IconUseNotification = findPreference("IconUseNotification");
 
         UseReplySms = findPreference("UseReplySms");
+        UseReplyTelecom = findPreference("UseReplyTelecom");
+        UseCallLog = findPreference("UseCallLog");
+
         UseInterval = findPreference("UseInterval");
         IntervalTime = findPreference("IntervalTime");
         IntervalType = findPreference("IntervalType");
         IntervalInfo = findPreference("IntervalInfo");
+        IntervalQueryGCTrigger = findPreference("IntervalQueryGCTrigger");
+
         UseBannedOption = findPreference("UseBannedOption");
         BannedWords = findPreference("BannedWords");
-
         UseNullStrict = findPreference("StrictStringNull");
         DefaultTitle = findPreference("DefaultTitle");
         DefaultMessage = findPreference("DefaultMessage");
+
         UseDataEncryption = findPreference("UseDataEncryption");
         UseDataEncryptionPassword = findPreference("UseDataEncryptionPassword");
         EncryptionInfo = findPreference("EncryptionInfo");
@@ -154,15 +182,20 @@ public class SendPreference extends PreferenceFragmentCompat {
 
         int intervalTime = prefs.getInt("IntervalTime", 150);
         IntervalTime.setSummary("Now : " + intervalTime + (intervalTime == 150 ? " ms (Default)" : " ms"));
+        int gcTriggerValue = prefs.getInt("IntervalQueryGCTrigger", 50);
+        IntervalQueryGCTrigger.setSummary("Now : " + gcTriggerValue + (gcTriggerValue == 50 ? " objects (Default)" : " objects"));
+
         boolean useInterval = prefs.getBoolean("UseInterval", false);
         IntervalInfo.setVisible(useInterval);
         IntervalType.setVisible(useInterval);
         IntervalTime.setVisible(useInterval);
+        IntervalQueryGCTrigger.setVisible(useInterval);
         UseInterval.setOnPreferenceChangeListener((p, n) -> {
             boolean useIt = (boolean) n;
             IntervalInfo.setVisible(useIt);
             IntervalType.setVisible(useIt);
             IntervalTime.setVisible(useIt);
+            IntervalQueryGCTrigger.setVisible(useIt);
             return true;
         });
         IntervalType.setSummary("Now : " + prefs.getString("IntervalType", "Entire app"));
@@ -205,6 +238,12 @@ public class SendPreference extends PreferenceFragmentCompat {
                 return true;
             });
         }
+
+        UseCallLog.setVisible(prefs.getBoolean("UseReplyTelecom", false));
+        UseReplyTelecom.setOnPreferenceChangeListener((preference, newValue) -> {
+            UseCallLog.setVisible((boolean) newValue);
+            return true;
+        });
     }
 
     @Override
@@ -264,6 +303,51 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.show();
                 break;
 
+            case "IntervalQueryGCTrigger":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
+                dialog.setCancelable(false);
+                dialog.setTitle("Input Value");
+                dialog.setMessage("When the Query Object used during interval calculation is no longer used, it is cleaned up to free memory.\n\nThe GC trigger count maximum limit is 2147483647 objects and Input 0 to disable this option.");
+
+                editText = new EditText(mContext);
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                editText.setHint("Input GC Trigger count Value");
+                editText.setGravity(Gravity.CENTER);
+                editText.setText(String.valueOf(prefs.getInt("IntervalQueryGCTrigger", 50)));
+
+                parentLayout = new LinearLayout(mContext);
+                layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(30, 16, 30, 16);
+                editText.setLayoutParams(layoutParams);
+                parentLayout.addView(editText);
+                dialog.setView(parentLayout);
+
+                dialog.setPositiveButton("Apply", (d, w) -> {
+                    String value = editText.getText().toString();
+                    if (value.equals("")) {
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
+                    } else {
+                        int IntValue = Integer.parseInt(value);
+                        if (IntValue > 0x7FFFFFFF - 1) {
+                            ToastHelper.show(mContext, "Value must be lower than 2147483647", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        } else {
+                            prefs.edit().putInt("IntervalQueryGCTrigger", IntValue).apply();
+                            IntervalQueryGCTrigger.setSummary("Now : " + IntValue + (IntValue == 50 ? " objects (Default)" : " objects"));
+                        }
+                    }
+                });
+                dialog.setNeutralButton("Reset Default", (d, w) -> {
+                    prefs.edit().putInt("IntervalQueryGCTrigger", 50).apply();
+                    IntervalQueryGCTrigger.setSummary("Now : " + 50 + " objects (Default)");
+                });
+                dialog.setNegativeButton("Cancel", (d, w) -> {
+                });
+                dialog.show();
+                break;
+
             case "IntervalInfo":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                 dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
@@ -313,7 +397,17 @@ public class SendPreference extends PreferenceFragmentCompat {
                 if (UseSMS.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (mContext.checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
                             || mContext.checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-                        requestPermissions(new String[]{Manifest.permission.READ_SMS, Manifest.permission.SEND_SMS}, 2);
+                        startSmsRwPermit.launch(new String[]{Manifest.permission.READ_SMS, Manifest.permission.SEND_SMS});
+                    }
+                }
+                break;
+
+            case "UseReplyTelecom":
+                SwitchPreference UseTelecom = (SwitchPreference) UseReplyTelecom;
+                if (UseTelecom.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (mContext.checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED
+                            || mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                        startCallLogPermit.launch(new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.READ_PHONE_STATE});
                     }
                 }
                 break;
@@ -451,28 +545,5 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
         }
         return super.onPreferenceTreeClick(preference);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        for (int grantResult : grantResults) {
-            if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                if (requestCode == 2) {
-                    int SourceCode = DetectAppSource.detectSource(mContext);
-                    if (SourceCode == 1 || SourceCode == 2) {
-                        ToastHelper.show(mContext, "require sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-                    } else if (SourceCode == 3) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
-                        builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
-                        builder.setNegativeButton("Close", (d, w) -> { }).show();
-                    } else
-                        ToastHelper.show(mContext, "Error while getting SHA-1 hash!", "OK",ToastHelper.LENGTH_SHORT);
-                    ((SwitchPreference) UseReplySms).setChecked(false);
-                }
-                return;
-            }
-        }
     }
 }

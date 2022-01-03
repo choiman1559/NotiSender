@@ -43,8 +43,6 @@ class TaskerConfigAction : Activity(), TaskerPluginConfig<GetConfigInput> {
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.Theme_App_Palette)
-        recreate()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tasker)
         taskerHelper.onCreate()
@@ -108,6 +106,6 @@ class TaskerConfigActionRunner : TaskerPluginRunnerActionNoOutput<GetConfigInput
             return TaskerPluginResultSucess()
         }
 
-        return TaskerPluginResultError(IllegalArgumentException("Tasker extension option not enabled"))
+        return TaskerPluginResultError(IllegalStateException("Tasker extension option not enabled"))
     }
 }

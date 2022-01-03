@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
@@ -34,7 +36,6 @@ import com.noti.main.ui.ToastHelper;
 
 public class ReceptionPreference extends PreferenceFragmentCompat {
 
-    final int RC_OPEN_AUDIO = 104;
     SharedPreferences prefs;
     MonetCompat monet;
     Activity mContext;
@@ -48,6 +49,22 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
 
     Preference ReceiveDeadline;
     Preference ReceiveCustomDeadline;
+
+    ActivityResultLauncher<Intent> startOpenDocument = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if(result.getData() != null) {
+            Intent data = result.getData();
+            Uri AudioMedia = result.getResultCode() == Activity.RESULT_CANCELED ? null : data.getData();
+            if (AudioMedia == null){
+                ToastHelper.show(mContext, "Please choose audio file!", "OK", ToastHelper.LENGTH_SHORT);
+            } else {
+                DocumentFile file = DocumentFile.fromSingleUri(mContext, AudioMedia);
+                CustomRingtone.setSummary("Now : " + (file == null ? "system default" : file.getName()));
+                mContext.getContentResolver().takePersistableUriPermission(AudioMedia, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                prefs.edit().putString("CustomRingtone", AudioMedia.toString()).apply();
+                ResetCustomRingtone.setVisible(true);
+            }
+        }
+    });
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -146,7 +163,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("audio/*");
-                startActivityForResult(intent, RC_OPEN_AUDIO);
+                startOpenDocument.launch(intent);
                 break;
 
             case "RingtoneRunningTime":
@@ -166,17 +183,19 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 dialogUnitSpinner.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.deadline_units)));
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
-                    String value = dialogEditValue.getText().toString();
-                    if (value.equals("")) {
-                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
-                    } else {
-                        int IntValue = Integer.parseInt(value);
-                        if (IntValue > 65535) {
-                            ToastHelper.show(mContext, "Value must be lower than 65535","DISMISS", ToastHelper.LENGTH_SHORT);
+                    if(dialogEditValue.getText() != null) {
+                        String value = dialogEditValue.getText().toString();
+                        if (value.equals("")) {
+                            ToastHelper.show(mContext, "Please Input Value", "DISMISS", ToastHelper.LENGTH_SHORT);
                         } else {
-                            final String finalValue = value + " " + dialogUnitSpinner.getText().toString();
-                            prefs.edit().putString("RingtoneRunningTime", finalValue).apply();
-                            RingtoneRunningTime.setSummary("Now : " + finalValue + (finalValue.equals("3 sec") ? " (Default)" : ""));
+                            int IntValue = Integer.parseInt(value);
+                            if (IntValue > 65535) {
+                                ToastHelper.show(mContext, "Value must be lower than 65535", "DISMISS", ToastHelper.LENGTH_SHORT);
+                            } else {
+                                final String finalValue = value + " " + dialogUnitSpinner.getText().toString();
+                                prefs.edit().putString("RingtoneRunningTime", finalValue).apply();
+                                RingtoneRunningTime.setSummary("Now : " + finalValue + (finalValue.equals("3 sec") ? " (Default)" : ""));
+                            }
                         }
                     }
                 });
@@ -263,17 +282,19 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 unitSpinner.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.deadline_units)));
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
-                    String value = editValue.getText().toString();
-                    if (value.equals("")) {
-                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
-                    } else {
-                        int IntValue = Integer.parseInt(value);
-                        if (IntValue > 65535) {
-                            ToastHelper.show(mContext, "Value must be lower than 65535", "DISMISS",ToastHelper.LENGTH_SHORT);
+                    if(editValue.getText() != null) {
+                        String value = editValue.getText().toString();
+                        if (value.equals("")) {
+                            ToastHelper.show(mContext, "Please Input Value", "DISMISS", ToastHelper.LENGTH_SHORT);
                         } else {
-                            final String finalValue = value + " " + unitSpinner.getText().toString();
-                            prefs.edit().putString("DeadlineCustomValue", finalValue).apply();
-                            ReceiveCustomDeadline.setSummary("Now : " + finalValue + (finalValue.equals("5 min") ? " (Default)" : ""));
+                            int IntValue = Integer.parseInt(value);
+                            if (IntValue > 65535) {
+                                ToastHelper.show(mContext, "Value must be lower than 65535", "DISMISS", ToastHelper.LENGTH_SHORT);
+                            } else {
+                                final String finalValue = value + " " + unitSpinner.getText().toString();
+                                prefs.edit().putString("DeadlineCustomValue", finalValue).apply();
+                                ReceiveCustomDeadline.setSummary("Now : " + finalValue + (finalValue.equals("5 min") ? " (Default)" : ""));
+                            }
                         }
                     }
                 });
@@ -289,21 +310,5 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 break;
         }
         return super.onPreferenceTreeClick(preference);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_OPEN_AUDIO) {
-            Uri AudioMedia = (resultCode == Activity.RESULT_CANCELED || data == null ? null : data.getData());
-            if(AudioMedia == null) ToastHelper.show(mContext, "Please choose audio file!","OK", ToastHelper.LENGTH_SHORT);
-            else {
-                DocumentFile file = DocumentFile.fromSingleUri(mContext, AudioMedia);
-                CustomRingtone.setSummary("Now : " + (file == null ? "system default" : file.getName()));
-                mContext.getContentResolver().takePersistableUriPermission(AudioMedia, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                prefs.edit().putString("CustomRingtone", AudioMedia.toString()).apply();
-                ResetCustomRingtone.setVisible(true);
-            }
-        }
     }
 }
