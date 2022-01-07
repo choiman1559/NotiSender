@@ -45,6 +45,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 
 import com.noti.main.R;
@@ -54,6 +55,7 @@ import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.OptionActivity;
 import com.noti.main.ui.ToastHelper;
 import com.noti.main.ui.prefs.HistoryActivity;
+import com.noti.main.updater.UpdaterActivity;
 import com.noti.main.utils.AsyncTask;
 import com.noti.main.utils.BillingHelper;
 
@@ -138,6 +140,7 @@ public class MainPreference extends PreferenceFragmentCompat {
                     if (task.isSuccessful() && task.getResult() != null) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             prefs.edit()
+                                    .putString("Latest_Version_Play", document.getString("Version_Play"))
                                     .putString("ApiKey_FCM", document.getString("FCM"))
                                     .putString("ApiKey_Pushy", document.getString("Pushy"))
                                     .putString("ApiKey_Billing", document.getString("Billing"))

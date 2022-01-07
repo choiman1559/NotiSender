@@ -2,7 +2,6 @@ package com.noti.main.updater;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
@@ -28,6 +27,7 @@ import com.noti.main.utils.DetectAppSource;
 public class UpdaterActivity extends AppCompatActivity {
 
     private static boolean isActivityRunning = false;
+    public static boolean isErrorOccurred = false;
     ActivityResultLauncher<Intent> startDeleteActivity = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> init());
 
     @Override
@@ -121,7 +121,7 @@ public class UpdaterActivity extends AppCompatActivity {
         new Thread(() -> {
             while(true) {
                 if(System.currentTimeMillis() - startTime > 10000L) {
-                    if(isActivityRunning) {
+                    if(isActivityRunning && !isErrorOccurred) {
                         Snackbar.make(context, context.findViewById(R.id.layout), "There is a delay in checking for updates.",Snackbar.LENGTH_INDEFINITE)
                                 .setAction("Skip", v -> startMainActivity(context)).show();
                     }

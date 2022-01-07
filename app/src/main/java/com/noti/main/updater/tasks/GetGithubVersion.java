@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.noti.main.R;
 import com.noti.main.ui.receive.ExitActivity;
 import com.noti.main.updater.UpdaterActivity;
@@ -94,6 +95,10 @@ public class GetGithubVersion extends AsyncTask<Void, Void, JSONArray> {
                 }
             } catch (JSONException | PackageManager.NameNotFoundException ex) {
                 ex.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                UpdaterActivity.isErrorOccurred = true;
+                Snackbar.make(context, context.findViewById(R.id.layout), "There is a error in checking for updates.",Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Skip", v -> UpdaterActivity.startMainActivity(context)).show();
             }
         }
     }
