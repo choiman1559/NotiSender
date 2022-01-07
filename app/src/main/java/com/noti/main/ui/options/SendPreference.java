@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -34,6 +35,7 @@ import com.noti.main.R;
 import com.noti.main.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.utils.AESCrypto;
+import com.noti.main.utils.DetectAppSource;
 
 public class SendPreference extends PreferenceFragmentCompat {
 
@@ -72,21 +74,47 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference UseDataEncryptionPassword;
     Preference EncryptionInfo;
 
-    ActivityResultLauncher<String[]> startCallLogPermit = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-        for(Boolean isGranted : result.values()) {
-            if(!isGranted) {
-                ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-                ((SwitchPreference) UseReplyTelecom).setChecked(false);
-                UseCallLog.setVisible(false);
-                break;
+    ActivityResultLauncher<String> startCallLogPermit = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+        if(!isGranted) {
+            int SourceCode = DetectAppSource.detectSource(mContext);
+            if(SourceCode == 1 || SourceCode == 2) {
+                ToastHelper.show(mContext, "require read phone state permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+            } else if (SourceCode == 3) {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
+                builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
+                builder.setNegativeButton("Close", (d, w) -> { }).show();
+            } else {
+                ToastHelper.show(mContext, "Error while getting SHA-1 hash!", "OK",ToastHelper.LENGTH_SHORT);
             }
+
+            ((SwitchPreference) UseCallLog).setChecked(false);
+        }
+    });
+
+    ActivityResultLauncher<String> startReplyTelecomPermit = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+        if(!isGranted) {
+            ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+            ((SwitchPreference) UseReplyTelecom).setChecked(false);
+            UseCallLog.setVisible(false);
         }
     });
 
     ActivityResultLauncher<String[]> startSmsRwPermit = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
         for(Boolean isGranted : result.values()) {
             if(!isGranted) {
-                ToastHelper.show(mContext, "require sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                int SourceCode = DetectAppSource.detectSource(mContext);
+                if(SourceCode == 1 || SourceCode == 2) {
+                    ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                } else if (SourceCode == 3) {
+                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                    builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
+                    builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
+                    builder.setNegativeButton("Close", (d, w) -> { }).show();
+                } else {
+                    ToastHelper.show(mContext, "require sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                }
+
                 ((SwitchPreference) UseReplySms).setChecked(false);
                 break;
             }
@@ -405,9 +433,17 @@ public class SendPreference extends PreferenceFragmentCompat {
             case "UseReplyTelecom":
                 SwitchPreference UseTelecom = (SwitchPreference) UseReplyTelecom;
                 if (UseTelecom.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (mContext.checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED
-                            || mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                        startCallLogPermit.launch(new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.READ_PHONE_STATE});
+                    if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                        startReplyTelecomPermit.launch(Manifest.permission.READ_PHONE_STATE);
+                    }
+                }
+                break;
+
+            case "UseCallLog":
+                SwitchPreference CallLogSwitch = (SwitchPreference) UseCallLog;
+                if(CallLogSwitch.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if(mContext.checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+                        startCallLogPermit.launch(Manifest.permission.READ_CALL_LOG);
                     }
                 }
                 break;
