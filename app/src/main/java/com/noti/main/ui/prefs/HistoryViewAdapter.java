@@ -1,9 +1,12 @@
 package com.noti.main.ui.prefs;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +14,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.noti.main.R;
 import com.noti.main.utils.ThreadProxy;
 
@@ -25,6 +30,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
     JSONArray list;
     Drawable defaultDrawable;
     Activity mContext;
+    SharedPreferences prefs;
     int mode;
 
     HistoryViewAdapter(JSONArray list, int mode, Activity mContext) {
@@ -32,6 +38,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         this.mode = mode;
         this.mContext = mContext;
         this.defaultDrawable = ContextCompat.getDrawable(mContext, R.drawable.ic_launcher_background);
+        prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
     }
 
     @NonNull
@@ -60,11 +67,6 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             title = obj.getString("title");
             content = obj.getString("text");
 
-            holder.title.setSelected(true);
-            holder.title.setText(title.equals("") ? "No Title" : title);
-            holder.information.setSelected(true);
-            holder.information.setText(String.format("%s (%s) %s", pm.getApplicationLabel(pm.getApplicationInfo(Package, PackageManager.GET_META_DATA)), Package, date));
-
             final String finalPackage = Package;
             final String finalDate = date;
             final String finalTitle = title;
@@ -81,28 +83,80 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 }
             });
 
+            holder.title.setSelected(true);
+            holder.title.setText(title.equals("") ? "No Title" : title);
+            holder.information.setSelected(true);
+            holder.information.setText(String.format("%s (%s) %s", pm.getApplicationLabel(pm.getApplicationInfo(Package, PackageManager.GET_META_DATA)), Package, date));
+
             holder.setOnViewClickListener(() -> {
                 try {
                     String message = "";
-                    message += "App Name : " + pm.getApplicationLabel(pm.getApplicationInfo(finalPackage, PackageManager.GET_META_DATA)) + "\n";
-                    message += "App Package : " + finalPackage + "\n";
-                    message += "Time : " + finalDate + "\n";
-                    message += "Title : " + finalTitle + "\n";
-                    message += "Content : " + finalContent + "\n";
-                    if (mode == 1) message += "From : " + finalDevice + "\n";
+                    message += "<b>App Name : </b>" + pm.getApplicationLabel(pm.getApplicationInfo(finalPackage, PackageManager.GET_META_DATA)) + "<br>";
+                    message += "<b>App Package : </b>" + finalPackage + "<br>";
+                    message += "<b>Time : </b>" + finalDate + "<br>";
+                    message += "<b>Title : </b>" + finalTitle + "<br>";
+                    message += "<b>Content : </b>" + finalContent + "<br>";
+                    if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                     builder.setTitle("Notification Details");
-                    builder.setMessage(message);
+                    builder.setMessage(Html.fromHtml(message));
                     builder.setPositiveButton("Close", (dialog, which) -> { });
                     builder.show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
+        } catch (JSONException e) {
+            final String finalPackage = Package;
+            final String finalDate = date;
+            final String finalTitle = title;
+            final String finalContent = content;
+            final String finalDevice = device;
 
-        } catch (JSONException | PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            holder.title.setText(title);
+            holder.setOnViewClickListener(() -> {
+                String message = "";
+                message += "<b>App Package : </b>" + finalPackage + "<br>";
+                message += "<b>Time : </b>" + finalDate + "<br>";
+                message += "<b>Title : </b>" + finalTitle + "<br>";
+                message += "<b>Content : </b>" + finalContent + "<br>";
+                if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
+                message += "<b>Error Cause : </b>" + e.toString() + "<br>";
+
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                builder.setTitle("Error Details");
+                builder.setMessage(Html.fromHtml(message));
+                builder.setPositiveButton("Close", (dialog, which) -> { });
+                builder.show();
+            });
+        } catch (PackageManager.NameNotFoundException e) {
+            final String finalPackage = Package;
+            final String finalDate = date;
+            final String finalTitle = title;
+            final String finalContent = content;
+            final String finalDevice = device;
+
+            holder.title.setText(finalTitle);
+            holder.information.setText(String.format("Can't find package : %s", finalPackage));
+            holder.icon.setImageDrawable(defaultDrawable);
+
+            holder.setOnViewClickListener(() -> {
+                String message = "";
+                message += "<b>App Package : </b>" + finalPackage + "<br>";
+                message += "<b>Time : </b>" + finalDate + "<br>";
+                message += "<b>Title : </b>" + finalTitle + "<br>";
+                message += "<b>Content : </b>" + finalContent + "<br>";
+                if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
+                message += "<b>Error Cause : </b>" + e.toString() + "<br>";
+
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                builder.setTitle("Error Details");
+                builder.setMessage(Html.fromHtml(message));
+                builder.setPositiveButton("Close", (dialog, which) -> { });
+                builder.show();
+            });
+        } catch (Exception e) {
             holder.title.setText(String.format("Error : %s", Package));
             holder.information.setText(String.format("cause : %s", e.toString()));
             holder.icon.setImageDrawable(defaultDrawable);
@@ -115,16 +169,16 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
 
             holder.setOnViewClickListener(() -> {
                 String message = "";
-                message += "App Package : " + finalPackage + "\n";
-                message += "Time : " + finalDate + "\n";
-                message += "Title : " + finalTitle + "\n";
-                message += "Content : " + finalContent + "\n";
-                if (mode == 1) message += "From : " + finalDevice + "\n";
-                message += "Error Cause : " + e.toString() + "\n";
+                message += "<b>App Package : </b>" + finalPackage + "<br>";
+                message += "<b>Time : </b>" + finalDate + "<br>";
+                message += "<b>Title : </b>" + finalTitle + "<br>";
+                message += "<b>Content : </b>" + finalContent + "<br>";
+                if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
+                message += "<b>Error Cause : </b>" + e.toString() + "<br>";
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                 builder.setTitle("Error Details");
-                builder.setMessage(message);
+                builder.setMessage(Html.fromHtml(message));
                 builder.setPositiveButton("Close", (dialog, which) -> { });
                 builder.show();
             });
@@ -140,12 +194,14 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         protected ImageView icon;
         protected TextView title;
         protected TextView information;
+        protected View parent;
         OnViewClickListener mListener;
 
         public HistoryViewHolder(View view) {
             super(view);
             icon = view.findViewById(R.id.icon);
             title = view.findViewById(R.id.title);
+            parent = view.findViewById(R.id.layout);
             information = view.findViewById(R.id.information);
             view.setOnClickListener(v -> {
                 if(mListener!= null) mListener.onViewClick();
