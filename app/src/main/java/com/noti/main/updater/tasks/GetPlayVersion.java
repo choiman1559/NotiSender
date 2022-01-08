@@ -4,13 +4,15 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.appcompat.view.ContextThemeWrapper;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.noti.main.R;
@@ -53,7 +55,7 @@ public class GetPlayVersion extends AsyncTask<Void, String, String> {
             try {
                 Version[] Versions = {new Version(currentVersion.split(" ")[0]), new Version(onlineVersion.split(" ")[0])};
                 if (Versions[1].compareTo(Versions[0]) > 0) {
-                    new AlertDialog.Builder(context)
+                    new MaterialAlertDialogBuilder(new ContextThemeWrapper(context, R.style.MaterialAlertDialog_Material3))
                             .setCancelable(false)
                             .setTitle(context.getString(R.string.dialog_update_title))
                             .setMessage("new version " + Versions[1].get() + " exists!\nAre you want to update?")

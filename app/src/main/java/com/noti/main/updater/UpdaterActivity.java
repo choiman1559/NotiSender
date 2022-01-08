@@ -3,8 +3,8 @@ package com.noti.main.updater;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.noti.main.R;
 import com.noti.main.SettingsActivity;
@@ -36,7 +37,7 @@ public class UpdaterActivity extends AppCompatActivity {
         isActivityRunning = true;
         setContentView(R.layout.activity_updater);
         if(isManagerInstalled(this)) {
-            new AlertDialog.Builder(this)
+            new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3))
                     .setCancelable(false)
                     .setTitle(this.getString(R.string.updater_manager_deprecated_title))
                     .setMessage(this.getString(R.string.updater_manager_deprecated_message))

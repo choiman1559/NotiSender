@@ -2,12 +2,14 @@ package com.noti.main.updater.tasks;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.appcompat.view.ContextThemeWrapper;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.noti.main.R;
 import com.noti.main.ui.receive.ExitActivity;
@@ -75,7 +77,7 @@ public class GetGithubVersion extends AsyncTask<Void, Void, JSONArray> {
                 Version v2 = new Version(localVersion);
 
                 if (v1.compareTo(v2) > 0) {
-                    new AlertDialog.Builder(context)
+                    new MaterialAlertDialogBuilder(new ContextThemeWrapper(context, R.style.MaterialAlertDialog_Material3))
                             .setCancelable(false)
                             .setTitle(context.getString(R.string.dialog_update_title))
                             .setMessage("Version : " + latestVersion + "\n\n" + obj.getString("body"))
