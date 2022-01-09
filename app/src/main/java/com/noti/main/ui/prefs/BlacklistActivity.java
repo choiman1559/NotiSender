@@ -1,6 +1,5 @@
 package com.noti.main.ui.prefs;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -26,7 +26,7 @@ import com.noti.main.utils.ThreadProxy;
 
 import java.util.List;
 
-public class BlacklistActivity extends Activity {
+public class BlacklistActivity extends AppCompatActivity {
     static int defaultColor;
     private ListView packageListView;
     private List<PackageShowInfo> packageShowInfo;

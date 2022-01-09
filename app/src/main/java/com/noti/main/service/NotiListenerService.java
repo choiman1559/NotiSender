@@ -76,7 +76,7 @@ public class NotiListenerService extends NotificationListenerService {
         prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
     }
 
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+    public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
         int width = bm.getWidth();
         int height = bm.getHeight();
         float scaleWidth = ((float) newWidth) / width;
@@ -90,7 +90,7 @@ public class NotiListenerService extends NotificationListenerService {
         return resizedBitmap;
     }
 
-    private Bitmap getBitmapFromDrawable(Drawable drawable) {
+    public static Bitmap getBitmapFromDrawable(Drawable drawable) {
         try {
             Bitmap bitmap;
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
