@@ -13,7 +13,7 @@
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
+        android:background="@color/ui_bg_toolbar"
         android:fitsSystemWindows="true"
         app:elevation="0dp">
 
@@ -28,7 +28,7 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 app:navigationIcon="@drawable/back_btn_selector"
-                app:navigationIconTint="?attr/colorOnPrimary"
+                app:navigationIconTint="@color/ui_fg"
                 app:title="@string/History_title" />
 
             <com.google.android.material.tabs.TabLayout
