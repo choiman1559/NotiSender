@@ -22,7 +22,7 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:contentScrim="?attr/colorPrimarySurface"
+            app:contentScrim="@color/ui_bg_toolbar"
             app:statusBarScrim="@android:color/transparent"
             app:titleCollapseMode="fade"
             app:scrimAnimationDuration="50"
@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:minHeight="?attr/actionBarSize"
-                app:navigationIconTint="?attr/colorOnPrimary"
+                app:navigationIconTint="@color/ui_fg"
                 app:navigationIcon="@drawable/back_btn_selector"
                 app:title="@string/app_name"
                 app:layout_collapseMode="pin"/>

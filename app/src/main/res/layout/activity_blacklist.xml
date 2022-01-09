@@ -22,7 +22,7 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
-            app:contentScrim="?attr/colorPrimarySurface"
+            app:contentScrim="@color/ui_bg_toolbar"
             app:expandedTitleMarginEnd="24dp"
             app:expandedTitleMarginStart="24dp"
             app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
@@ -38,7 +38,7 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 app:navigationIcon="@drawable/back_btn_selector"
-                app:navigationIconTint="?attr/colorOnPrimary"
+                app:navigationIconTint="@color/ui_fg"
                 app:title="@string/select_package" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>

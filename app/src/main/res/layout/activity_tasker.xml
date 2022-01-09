@@ -17,17 +17,17 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:fitsSystemWindows="true"
-        app:statusBarForeground="?attr/colorPrimarySurface"
+        app:statusBarForeground="@color/ui_bg_toolbar"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?attr/colorPrimarySurface"
+            android:background="@color/ui_bg_toolbar"
             app:layout_collapseMode="pin"
             app:navigationIcon="@drawable/back_btn_selector"
-            app:navigationIconTint="?attr/colorOnPrimary"
+            app:navigationIconTint="@color/ui_fg"
             app:title="Select Configuration" />
 
         <LinearLayout
