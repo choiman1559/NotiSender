@@ -44,12 +44,15 @@ import static com.noti.main.service.NotiListenerService.getUniqueID;
 public class PushyReceiver extends BroadcastReceiver {
 
     SharedPreferences prefs;
+    SharedPreferences logPrefs;
     private volatile Ringtone lastPlayedRingtone;
 
     @Override
     public void onReceive(Context context, Intent map) {
         if (prefs == null)
             prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        if(logPrefs == null)
+            logPrefs = context.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
 
         String type = map.getStringExtra("type");
         String mode = prefs.getString("service", "");
@@ -212,7 +215,7 @@ public class PushyReceiver extends BroadcastReceiver {
             try {
                 JSONArray array = new JSONArray();
                 JSONObject object = new JSONObject();
-                String originString = prefs.getString("receivedLogs", "");
+                String originString = logPrefs.getString("receivedLogs", "");
 
                 if (!originString.equals("")) array = new JSONArray(originString);
                 object.put("date", Date);
@@ -221,14 +224,14 @@ public class PushyReceiver extends BroadcastReceiver {
                 object.put("text", content);
                 object.put("device", Device_name);
                 array.put(object);
-                prefs.edit().putString("receivedLogs", array.toString()).apply();
+                logPrefs.edit().putString("receivedLogs", array.toString()).apply();
 
                 if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
                     int a = array.length() - prefs.getInt("HistoryLimit", 150);
                     for (int i = 0; i < a; i++) {
                         array.remove(i);
                     }
-                    prefs.edit().putString("receivedLogs", array.toString()).apply();
+                    logPrefs.edit().putString("receivedLogs", array.toString()).apply();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

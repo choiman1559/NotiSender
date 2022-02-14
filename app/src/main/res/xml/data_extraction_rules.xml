@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="sharedpref" path="com.noti.main_preferences.xml"/>
+        <include domain="sharedpref" path="com.noti.main_logs.xml"/>
+        <include domain="sharedpref" path="Whitelist.xml"/>
+        <include domain="sharedpref" path="Blacklist.xml"/>
+    </cloud-backup>
+</data-extraction-rules>

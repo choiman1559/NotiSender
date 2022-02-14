@@ -120,7 +120,7 @@ public class HistoryActivity extends AppCompatActivity {
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
 
-            SharedPreferences prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+            SharedPreferences prefs = mContext.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
             ProgressBar progress = mContext.findViewById(R.id.progress);
             RecyclerView listView = view.findViewById(R.id.listView);
             LinearLayout layout = view.findViewById(R.id.noneLayout);

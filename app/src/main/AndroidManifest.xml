@@ -20,9 +20,9 @@
         tools:ignore="QueryAllPackagesPermission" />
 
     <!-- In builds released on Google Play, Telephony-related permissions are removed. -->
-    <uses-permission android:name="android.permission.SEND_SMS" />
+    <!-- <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/> -->
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -32,7 +32,9 @@
         android:allowBackup="true"
         android:name=".Application"
         android:fullBackupContent="true"
-        android:theme="@style/Theme.App.Palette">
+        android:theme="@style/Theme.App.Palette"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="s">
 
         <activity android:name=".ui.prefs.BlacklistActivity" />
         <activity android:name=".ui.AppInfoActivity" />

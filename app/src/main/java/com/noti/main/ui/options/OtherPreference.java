@@ -45,6 +45,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     Preference DeleteHistory;
     Preference UpdateChannel;
 
+    @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         MonetCompat.setup(requireContext());
@@ -224,7 +225,11 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setTitle("Waring!");
                 dialog.setMessage("Are you sure to delete notification history?\nThis operation cannot be undone.");
                 dialog.setPositiveButton("Delete", (d, w) -> {
-                    prefs.edit().putString("sendLogs", "").putString("receivedLogs", "").apply();
+                    mContext.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE)
+                            .edit()
+                            .putString("sendLogs", "")
+                            .putString("receivedLogs", "")
+                            .apply();
                     ToastHelper.show(mContext, "Task done!","OK", ToastHelper.LENGTH_SHORT);
                 });
                 dialog.setNegativeButton("Cancel", (d, w) -> {

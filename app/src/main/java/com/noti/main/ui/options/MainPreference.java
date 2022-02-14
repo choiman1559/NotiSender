@@ -67,6 +67,7 @@ public class MainPreference extends PreferenceFragmentCompat {
     private FirebaseAuth mAuth;
     private MonetCompat monet = null;
     SharedPreferences prefs;
+    SharedPreferences logPrefs;
     FirebaseFirestore mFirebaseFirestore;
     Activity mContext;
 
@@ -74,7 +75,7 @@ public class MainPreference extends PreferenceFragmentCompat {
         if(result.getData() != null) {
             GoogleSignInResult loginResult = Auth.GoogleSignInApi.getSignInResultFromIntent(result.getData());
             if (loginResult != null && loginResult.isSuccess()) {
-                Log.d("Google log in", "Result : " + (loginResult.isSuccess() ? "success" : "failed") + " Status : " + loginResult.getStatus().toString());
+                Log.d("Google log in", "Result : " + (loginResult.isSuccess() ? "success" : "failed") + " Status : " + loginResult.getStatus());
                 GoogleSignInAccount account = loginResult.getSignInAccount();
                 assert account != null;
                 firebaseAuthWithGoogle(account);
@@ -97,6 +98,7 @@ public class MainPreference extends PreferenceFragmentCompat {
 
     public MainPreference() { }
 
+    @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         MonetCompat.setup(requireContext());
@@ -131,6 +133,7 @@ public class MainPreference extends PreferenceFragmentCompat {
         mAuth = FirebaseAuth.getInstance();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        logPrefs = mContext.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
 
         mFirebaseFirestore.collection("ApiKey")
                 .get()
@@ -266,6 +269,8 @@ public class MainPreference extends PreferenceFragmentCompat {
         } catch (PackageManager.NameNotFoundException e) {
             ForWearOS.setVisible(false);
         }
+
+        migrationHistory();
     }
 
     @Override
@@ -373,6 +378,27 @@ public class MainPreference extends PreferenceFragmentCompat {
                 return Notify.NotifyImportance.HIGH;
             default:
                 return Notify.NotifyImportance.MIN;
+        }
+    }
+
+    private void migrationHistory() {
+        String sendLogs = prefs.getString("sendLogs", "");
+        String receivedLogs = prefs.getString("receivedLogs", "");
+        SharedPreferences.Editor logEdit = logPrefs.edit();
+        boolean isNeedToApply = false;
+
+        if(!sendLogs.isEmpty()) {
+            logEdit.putString("sendLogs", sendLogs);
+            isNeedToApply = true;
+        }
+        if(!receivedLogs.isEmpty()) {
+            logEdit.putString("receivedLogs", receivedLogs);
+            isNeedToApply = true;
+        }
+
+        if(isNeedToApply) {
+            prefs.edit().remove("sendLogs").remove("receivedLogs").apply();
+            logEdit.apply();
         }
     }
 

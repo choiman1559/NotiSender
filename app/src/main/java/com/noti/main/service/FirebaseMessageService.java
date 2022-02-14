@@ -58,6 +58,7 @@ import static com.noti.main.service.NotiListenerService.getUniqueID;
 public class FirebaseMessageService extends FirebaseMessagingService {
 
     SharedPreferences prefs;
+    SharedPreferences logPrefs;
     public static volatile Ringtone lastPlayedRingtone;
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while(true) {
@@ -69,6 +70,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public void onCreate() {
         super.onCreate();
         prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
     }
 
     @SuppressWarnings("unchecked")
@@ -363,7 +365,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             try {
                 JSONArray array = new JSONArray();
                 JSONObject object = new JSONObject();
-                String originString = prefs.getString("receivedLogs","");
+                String originString = logPrefs.getString("receivedLogs","");
 
                 if(!originString.equals("")) array = new JSONArray(originString);
                 object.put("date",Date);
@@ -372,14 +374,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 object.put("text",content);
                 object.put("device",Device_name);
                 array.put(object);
-                prefs.edit().putString("receivedLogs",array.toString()).apply();
+                logPrefs.edit().putString("receivedLogs",array.toString()).apply();
 
                 if(array.length() >= prefs.getInt("HistoryLimit",150)) {
                     int a = array.length() - prefs.getInt("HistoryLimit",150);
                     for(int i = 0;i < a;i++){
                         array.remove(i);
                     }
-                    prefs.edit().putString("receivedLogs", array.toString()).apply();
+                    logPrefs.edit().putString("receivedLogs", array.toString()).apply();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

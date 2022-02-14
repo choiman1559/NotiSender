@@ -57,6 +57,7 @@ public class NotiListenerService extends NotificationListenerService {
 
     private static NotiListenerService instance;
     private static SharedPreferences prefs;
+    private static SharedPreferences logPrefs;
     private volatile StatusBarNotification pastNotification = null;
 
     private static int queryAccessCount = 0;
@@ -76,6 +77,7 @@ public class NotiListenerService extends NotificationListenerService {
     public void onCreate() {
         super.onCreate();
         prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        logPrefs = this.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
     }
 
     public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
@@ -239,7 +241,7 @@ public class NotiListenerService extends NotificationListenerService {
                         try {
                             JSONArray array = new JSONArray();
                             JSONObject object = new JSONObject();
-                            String originString = prefs.getString("sendLogs", "");
+                            String originString = logPrefs.getString("sendLogs", "");
 
                             if (!originString.equals("")) array = new JSONArray(originString);
                             object.put("date", DATE);
@@ -247,14 +249,14 @@ public class NotiListenerService extends NotificationListenerService {
                             object.put("title", extra.getString(Notification.EXTRA_TITLE));
                             object.put("text", extra.getString(Notification.EXTRA_TEXT));
                             array.put(object);
-                            prefs.edit().putString("sendLogs", array.toString()).apply();
+                            logPrefs.edit().putString("sendLogs", array.toString()).apply();
 
                             if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
                                 int a = array.length() - prefs.getInt("HistoryLimit", 150);
                                 for (int i = 0; i < a; i++) {
                                     array.remove(i);
                                 }
-                                prefs.edit().putString("sendLogs", array.toString()).apply();
+                                logPrefs.edit().putString("sendLogs", array.toString()).apply();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
