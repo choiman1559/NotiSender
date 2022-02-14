@@ -1,6 +1,5 @@
 package com.noti.main.receiver;
 
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.RequiresApi;
-import androidx.annotation.VisibleForTesting;
 
 import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
@@ -27,6 +25,7 @@ public class TelecomReceiver extends BroadcastReceiver {
                     super.onCallStateChanged(state, incomingNumber);
                     if (state == TelephonyManager.CALL_STATE_RINGING) {
                         NotiListenerService.getInstance().sendTelecomNotification(context, BuildConfig.DEBUG, incomingNumber);
+                        telephony.listen(this, PhoneStateListener.LISTEN_NONE);
                     }
                 }
             }, PhoneStateListener.LISTEN_CALL_STATE);

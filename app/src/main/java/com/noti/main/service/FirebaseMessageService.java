@@ -53,7 +53,7 @@ import java.util.Map;
 
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
-import static com.noti.main.service.NotiListenerService.getMACAddress;
+import static com.noti.main.service.NotiListenerService.getUniqueID;
 
 public class FirebaseMessageService extends FirebaseMessagingService {
 
@@ -85,7 +85,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     if (uid != null) {
                         JSONObject object = new JSONObject(AESCrypto.decrypt(CompressStringUtil.decompressString(map.get("encryptedData")), AESCrypto.parseAESToken(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)))));
                         Map<String, String> newMap = new ObjectMapper().readValue(object.toString(), Map.class);
-                        processReception(newMap);
+                        processReception(newMap, this);
                     }
                 } catch (GeneralSecurityException e) {
                     Handler mHandler = new Handler(Looper.getMainLooper());
@@ -94,12 +94,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     e.printStackTrace();
                 }
             }
-        } else processReception(map);
+        } else processReception(map, this);
     }
 
-    private void processReception(Map<String,String> map) {
+    private void processReception(Map<String,String> map, Context context) {
         String type = map.get("type");
         String mode = prefs.getString("service", "");
+        Log.d("ddd","process");
 
         if(type != null && mode != null) {
             if (prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
@@ -123,7 +124,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 }
 
                 if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
-                    if (mode.equals("hybrid") && isDeviceItself(map)) return;
+                    if (mode.equals("hybrid") && isDeviceItself(map, context)) return;
                     switch (type) {
                         case "send|normal":
                             sendNotification(map);
@@ -136,7 +137,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             break;
                     }
                 } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
-                    if ((Build.MANUFACTURER + " " + Build.MODEL).equals(map.get("send_device_name")) && getMACAddress().equals(map.get("send_device_id"))) {
+                    if ((Build.MANUFACTURER + " " + Build.MODEL).equals(map.get("send_device_name")) && getUniqueID(context).equals(map.get("send_device_id"))) {
                         if (type.equals("reception|normal")) {
                             startNewRemoteActivity(map);
                         } else if (type.equals("reception|sms")) {
@@ -145,14 +146,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 }
 
-                if(type.equals("send|find") && !isDeviceItself(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
+                if(type.equals("send|find") && !isDeviceItself(map, context) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                     sendFindTaskNotification();
                 }
             }
         }
     }
 
-    protected boolean isDeviceItself(Map<String, String> map) {
+    protected boolean isDeviceItself(Map<String, String> map, Context context) {
         String Device_name = map.get("device_name");
         String Device_id = map.get("device_id");
 
@@ -162,7 +163,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
 
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = getMACAddress();
+        String DEVICE_ID = getUniqueID(context);
 
         return DEVICE_NAME.equals(Device_name) && DEVICE_ID.equals(Device_id);
     }
@@ -337,6 +338,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     protected void sendNotification(Map<String, String> map) {
+        Log.d("ddd","noti");
         String title = map.get("title");
         String content = map.get("message");
         String Package = map.get("package");

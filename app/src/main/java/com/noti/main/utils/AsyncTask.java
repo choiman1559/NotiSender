@@ -493,6 +493,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #executeOnExecutor(Executor, Object[])
      * @see #execute(Runnable)
      */
+    @SafeVarargs
     @MainThread
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
         return executeOnExecutor(sDefaultExecutor, params);

@@ -48,6 +48,14 @@
             android:title="WiFi sleep policy compliance (Pushy only)"
             android:summary="Prevents wake lock by blocking the wifi sleep policy."
             android:icon="@drawable/ic_fluent_alert_snooze_24_regular"/>
+        <ListPreference
+            android:key="uniqueIdMethod"
+            android:defaultValue="Globally-Unique ID"
+            android:title="Select method to get device identifiers"
+            android:summary="Choose how to get the unique ID needed to identify your device"
+            android:entries="@array/uniqueIdMethod_description"
+            android:entryValues="@array/uniqueIdMethod"
+            android:icon="@drawable/ic_fluent_fingerprint_24_regular"/>
         <Preference
             android:key="HistoryLimit"
             android:title="Maximum number of History"

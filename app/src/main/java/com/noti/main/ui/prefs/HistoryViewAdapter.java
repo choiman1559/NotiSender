@@ -141,7 +141,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 message += "<b>Title : </b>" + finalTitle + "<br>";
                 message += "<b>Content : </b>" + finalContent + "<br>";
                 if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
-                message += "<b>Error Cause : </b>" + e.toString() + "<br>";
+                message += "<b>Error Cause : </b>" + e + "<br>";
 
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                 builder.setTitle("Error Details");
@@ -167,7 +167,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 message += "<b>Title : </b>" + finalTitle + "<br>";
                 message += "<b>Content : </b>" + finalContent + "<br>";
                 if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
-                message += "<b>Error Cause : </b>" + e.toString() + "<br>";
+                message += "<b>Error Cause : </b>" + e + "<br>";
 
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                 builder.setTitle("Error Details");
@@ -177,7 +177,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             });
         } catch (Exception e) {
             holder.title.setText(String.format("Error : %s", Package));
-            holder.information.setText(String.format("cause : %s", e.toString()));
+            holder.information.setText(String.format("cause : %s", e));
             holder.icon.setImageDrawable(defaultDrawable);
 
             final String finalPackage = Package;
@@ -193,7 +193,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 message += "<b>Title : </b>" + finalTitle + "<br>";
                 message += "<b>Content : </b>" + finalContent + "<br>";
                 if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
-                message += "<b>Error Cause : </b>" + e.toString() + "<br>";
+                message += "<b>Error Cause : </b>" + e + "<br>";
 
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                 builder.setTitle("Error Details");
@@ -271,7 +271,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         } else ICONS = "none";
 
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = NotiListenerService.getMACAddress();
+        String DEVICE_ID = NotiListenerService.getUniqueID(mContext);
         String TOPIC = "/topics/" + prefs.getString("UID", "");
         String APPNAME = null;
         try {

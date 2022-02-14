@@ -76,4 +76,18 @@
         <item>Play Store</item>
         <item>Do not check update</item>
     </string-array>
+
+    <string-array name="uniqueIdMethod">
+        <item>Globally-Unique ID</item>
+        <item>Firebase IID</item>
+        <item>Android ID</item>
+        <item>Device MAC ID</item>
+    </string-array>
+
+    <string-array name="uniqueIdMethod_description">
+        <item>Globally-Unique ID</item>
+        <item>Firebase IID</item>
+        <item>Android ID</item>
+        <item>Device MAC ID\n(Not recommend)</item>
+    </string-array>
 </resources>

@@ -37,15 +37,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.installations.FirebaseInstallations;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 
 import com.noti.main.R;
@@ -55,7 +54,6 @@ import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.OptionActivity;
 import com.noti.main.ui.ToastHelper;
 import com.noti.main.ui.prefs.HistoryActivity;
-import com.noti.main.updater.UpdaterActivity;
 import com.noti.main.utils.AsyncTask;
 import com.noti.main.utils.BillingHelper;
 
@@ -154,6 +152,13 @@ public class MainPreference extends PreferenceFragmentCompat {
                                 .setCancelable(false);
                     }
                 });
+
+        if(prefs.getString("FirebaseIIDPrefix", "").isEmpty()) {
+            FirebaseInstallations.getInstance().getId().addOnCompleteListener(task -> {
+                if (task.isSuccessful())
+                    prefs.edit().putString("FirebaseIIDPrefix", task.getResult()).apply();
+            });
+        }
 
         Login = findPreference("Login");
         TestRun = findPreference("testNoti");
@@ -379,9 +384,9 @@ public class MainPreference extends PreferenceFragmentCompat {
             if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
                 Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                 startAccountTask.launch(signInIntent);
-            } else
-                Snackbar.make(mContext.findViewById(R.id.layout), "Check Internet and Try Again", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
+            } else {
+                ToastHelper.show(mContext, "Check Internet and Try Again", "DISMISS", ToastHelper.LENGTH_SHORT);
+            }
         } else {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
             builder.setTitle("Confirm").setMessage("Are you sure to Log out?");

@@ -81,7 +81,6 @@ public class CompressStringUtil {
             byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
             return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
         } catch (Exception e) {
-            e.getMessage();
             return null;
         }
     }
