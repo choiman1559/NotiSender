@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string-array name="services_shown">
         <item>reception</item>
         <item>send</item>
@@ -89,5 +89,49 @@
         <item>Firebase IID</item>
         <item>Android ID</item>
         <item>Device MAC ID\n(Not recommend)</item>
+    </string-array>
+
+    <string-array name="material_color_low"
+        tools:ignore="Typos">
+        <item>#FFCDD2</item>
+        <item>#F8BBD0</item>
+        <item>#E1BEE7</item>
+        <item>#D1C4E9</item>
+        <item>#C5CAE9</item>
+        <item>#BBDEFB</item>
+        <item>#B3E5FC</item>
+        <item>#B2EBF2</item>
+        <item>#B2DFDB</item>
+        <item>#C8E6C9</item>
+        <item>#DCEDC8</item>
+        <item>#F0F4C3</item>
+        <item>#FFF9C4</item>
+        <item>#FFECB3</item>
+        <item>#FFE0B2</item>
+        <item>#FFCCBC</item>
+        <item>#D7CCC8</item>
+        <item>#CFD8DC</item>
+    </string-array>
+
+    <string-array name="material_color_high"
+        tools:ignore="Typos">
+        <item>#F44336</item>
+        <item>#E91E63</item>
+        <item>#9C27B0</item>
+        <item>#673AB7</item>
+        <item>#3F51B5</item>
+        <item>#2196F3</item>
+        <item>#03A9F4</item>
+        <item>#00BCD4</item>
+        <item>#009688</item>
+        <item>#4CAF50</item>
+        <item>#8BC34A</item>
+        <item>#CDDC39</item>
+        <item>#FFEB3B</item>
+        <item>#FFC107</item>
+        <item>#FF9800</item>
+        <item>#FF5722</item>
+        <item>#795548</item>
+        <item>#607D8B</item>
     </string-array>
 </resources>

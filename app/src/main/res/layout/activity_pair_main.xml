@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:transitionGroup="true"
+    tools:ignore="HardcodedText">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="210dp"
+        android:background="@android:color/transparent"
+        android:fitsSystemWindows="true"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:maxLines="2"
+            app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
+            app:contentScrim="@color/ui_bg_toolbar"
+            app:expandedTitleMarginEnd="24dp"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:scrimAnimationDuration="50"
+            app:scrimVisibleHeightTrigger="160dp"
+            app:statusBarScrim="@android:color/transparent"
+            app:titleCollapseMode="fade">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:minHeight="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/back_btn_selector"
+                app:navigationIconTint="@color/ui_fg"
+                app:title="Connected devices" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/addNewDevice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="horizontal"
+                android:paddingVertical="15dp"
+                tools:ignore="UseCompoundDrawables">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="start|center"
+                    android:layout_marginHorizontal="24dp"
+                    app:srcCompat="@drawable/ic_fluent_add_24_regular"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center"
+                    android:layout_marginStart="5dp"
+                    android:fontFamily="sans-serif"
+                    android:text="Pair new device"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="30dp"
+                android:text="Previously connected devices"
+                android:textColor="@color/ui_accent" />
+
+            <LinearLayout
+                android:id="@+id/deviceListLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:orientation="vertical"
+                tools:ignore="UselessLeaf" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="25dp"
+                android:background="@color/ui_bg_toolbar" />
+
+            <LinearLayout
+                android:id="@+id/connectionPreference"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:focusable="true"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:orientation="vertical"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:text="Connection preferences"
+                    android:layout_marginHorizontal="24dp"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:textColor="@color/ui_fg_secondary"
+                    android:layout_marginHorizontal="24dp"
+                    android:text="Connection timeout, Data type to transfer" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="23dp"
+                android:layout_height="23dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="30dp"
+                android:contentDescription="info icon"
+                app:srcCompat="@drawable/ic_info_outline_black_24dp" />
+
+            <TextView
+                android:id="@+id/deviceNameInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif"
+                android:text="TextView"
+                android:textColor="@color/ui_fg_secondary"
+                tools:text="Visible as 'Pixel 6 Pro' to other devices" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

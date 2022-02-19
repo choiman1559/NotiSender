@@ -12,29 +12,38 @@
         <entry key="app/src/main/res/drawable/round_corner.xml" value="0.2962962962962963" />
         <entry key="app/src/main/res/font-v26/inter.xml" value="0.34791666666666665" />
         <entry key="app/src/main/res/font/inter.xml" value="0.34791666666666665" />
-        <entry key="app/src/main/res/layout/activity_appinfo.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_appinfo.xml" value="0.15" />
         <entry key="app/src/main/res/layout/activity_appinfo_actiity.xml" value="0.15364583333333334" />
         <entry key="app/src/main/res/layout/activity_appinfo_v25.xml" value="0.15072639225181597" />
         <entry key="app/src/main/res/layout/activity_appinfo_v27.xml" value="0.2824074074074074" />
-        <entry key="app/src/main/res/layout/activity_blacklist.xml" value="0.3177083333333333" />
+        <entry key="app/src/main/res/layout/activity_blacklist.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_device_list.xml" value="0.67" />
         <entry key="app/src/main/res/layout/activity_history.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.14" />
         <entry key="app/src/main/res/layout/activity_notidetail.xml" value="0.2810185185185185" />
         <entry key="app/src/main/res/layout/activity_options.xml" value="0.3177083333333333" />
+        <entry key="app/src/main/res/layout/activity_pair_accept.xml" value="0.4053333333333333" />
+        <entry key="app/src/main/res/layout/activity_pair_detail.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_pair_find.xml" value="0.2828703703703704" />
+        <entry key="app/src/main/res/layout/activity_pair_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_smsdetail.xml" value="0.2824074074074074" />
         <entry key="app/src/main/res/layout/activity_tasker.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_updater.xml" value="0.13775971093044265" />
         <entry key="app/src/main/res/layout/cardview_history.xml" value="0.3177083333333333" />
+        <entry key="app/src/main/res/layout/cardview_pair_device.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/cardview_pair_device_setting.xml" value="0.2" />
         <entry key="app/src/main/res/layout/dialog_receive_deadline.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_history.xml" value="0.3177083333333333" />
-        <entry key="app/src/main/res/layout/item_select_package.xml" value="0.3177083333333333" />
+        <entry key="app/src/main/res/layout/item_select_package.xml" value="0.1" />
         <entry key="app/src/main/res/layout/main_frame.xml" value="0.16302083333333334" />
+        <entry key="app/src/main/res/layout/settings_activity.xml" value="0.13798554652213188" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.3333333333333333" />
         <entry key="app/src/main/res/xml/account_preferences.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/xml/general_preferences.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/xml/other_preferences.xml" value="0.3177083333333333" />
+        <entry key="app/src/main/res/xml/pair_preferences.xml" value="0.2612227447627191" />
         <entry key="app/src/main/res/xml/reception_preferences.xml" value="0.3177083333333333" />
+        <entry key="app/src/main/res/xml/root_preferences.xml" value="0.13798554652213188" />
         <entry key="app/src/main/res/xml/root_prefs.xml" value="0.11296296296296296" />
         <entry key="app/src/main/res/xml/send_preferences.xml" value="0.3177083333333333" />
         <entry key="gradle/caches/transforms-3/0b3f2628c3255c1922a8fbd092a2fe14/transformed/jetified-fluent-system-icons-1.1.152/res/drawable/ic_fluent_add_16_filled.xml" value="0.3333333333333333" />

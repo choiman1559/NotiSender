@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.R;
 import com.noti.main.ui.options.OtherPreference;
+import com.noti.main.ui.options.PairPreference;
 import com.noti.main.ui.options.ReceptionPreference;
 import com.noti.main.ui.options.SendPreference;
 
@@ -39,6 +40,11 @@ public class OptionActivity extends AppCompatActivity {
                 case "Other":
                     fragment = new OtherPreference();
                     title = "Other Options";
+                    break;
+
+                case "Pair":
+                    fragment = new PairPreference();
+                    title = "Connection\npreferences";
                     break;
 
                 default:

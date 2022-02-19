@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
+            app:maxLines="2"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:contentScrim="@color/ui_bg_toolbar"
             app:statusBarScrim="@android:color/transparent"

@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.CallLog;
-import android.provider.Settings;
 import android.provider.Telephony;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -39,19 +38,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 public class NotiListenerService extends NotificationListenerService {
 
@@ -108,16 +104,16 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     @SuppressLint("HardwareIds")
-    public static String getUniqueID(Context context) {
+    public static String getUniqueID() {
         String str = "";
         if(prefs != null) {
             switch (prefs.getString("uniqueIdMethod", "Globally-Unique ID")) {
                 case "Globally-Unique ID":
-                    str = UUID.randomUUID().toString();
+                    str = prefs.getString("GUIDPrefix", "");
                     break;
 
                 case "Android ID":
-                    str = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    str = prefs.getString("AndroidIDPrefix", "");
                     break;
 
                 case "Firebase IID":
@@ -125,19 +121,7 @@ public class NotiListenerService extends NotificationListenerService {
                     break;
 
                 case "Device MAC ID":
-                    String interfaceName = "wlan0";
-                    try {
-                        List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-                        for (NetworkInterface intf : interfaces) {
-                            if (!intf.getName().equalsIgnoreCase(interfaceName)) continue;
-                            byte[] mac = intf.getHardwareAddress();
-                            if (mac == null) return "";
-                            StringBuilder buf = new StringBuilder();
-                            for (byte b : mac) buf.append(String.format("%02X:", b));
-                            if (buf.length() > 0) buf.deleteCharAt(buf.length() - 1);
-                            return buf.toString();
-                        }
-                    } catch (Exception ignored) { }
+                    str = prefs.getString("MacIDPrefix", "");
                     break;
             }
             return str;
@@ -228,9 +212,9 @@ public class NotiListenerService extends NotificationListenerService {
                 if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))))
                     return;
                 else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
-                    sendSmsNotification(isLogging, PackageName, time, this);
+                    sendSmsNotification(isLogging, PackageName, time);
                 } else if(prefs.getBoolean("UseReplyTelecom", false) && getSystemDialerApp(this).equals(PackageName)){
-                    if(prefs.getBoolean("UseCallLog", false)) sendTelecomNotification(isLogging, PackageName, time, this);
+                    if(prefs.getBoolean("UseCallLog", false)) sendTelecomNotification(isLogging, PackageName, time);
                     else return;
                 } else if (isWhitelist(PackageName)) {
                     if (prefs.getBoolean("StrictStringNull", false) && (TITLE == null || TEXT == null))
@@ -262,7 +246,7 @@ public class NotiListenerService extends NotificationListenerService {
                             e.printStackTrace();
                         }
                     }).start();
-                    sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT, this);
+                    sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT);
                 }
 
                 if(queryAccessCount > prefs.getInt("IntervalQueryGCTrigger", 50)) {
@@ -277,6 +261,7 @@ public class NotiListenerService extends NotificationListenerService {
     public static void sendFindTaskNotification(Context context) {
         boolean isLogging = BuildConfig.DEBUG;
         Date date = Calendar.getInstance().getTime();
+        if(prefs == null) prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         int timeInterval = prefs.getInt("IntervalTime", 150);
 
         if (isLogging)
@@ -288,7 +273,7 @@ public class NotiListenerService extends NotificationListenerService {
         intervalTimestamp = date.getTime();
 
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = getUniqueID(context);
+        String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + prefs.getString("UID", "");
 
         JSONObject notificationHead = new JSONObject();
@@ -308,7 +293,7 @@ public class NotiListenerService extends NotificationListenerService {
         sendNotification(notificationHead, context.getPackageName(), context);
     }
 
-    private void sendTelecomNotification(Boolean isLogging, String PackageName, Date time, Context context) {
+    private void sendTelecomNotification(Boolean isLogging, String PackageName, Date time) {
         Cursor cursor = getContentResolver().query(android.provider.CallLog.Calls.CONTENT_URI,null, android.provider.CallLog.Calls.TYPE+"="+ CallLog.Calls.INCOMING_TYPE, null,null);
         cursor.moveToFirst();
         String address = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
@@ -317,7 +302,7 @@ public class NotiListenerService extends NotificationListenerService {
 
         if(isTelecomIntervalGaped(address, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-            String DEVICE_ID = getUniqueID(context);
+            String DEVICE_ID = getUniqueID();
             String TOPIC = "/topics/" + prefs.getString("UID", "");
 
             JSONObject notificationHead = new JSONObject();
@@ -349,7 +334,7 @@ public class NotiListenerService extends NotificationListenerService {
 
             if (isTelecomIntervalGaped(address, time)) {
                 String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-                String DEVICE_ID = getUniqueID(context);
+                String DEVICE_ID = getUniqueID();
                 String TOPIC = "/topics/" + prefs.getString("UID", "");
 
                 JSONObject notificationHead = new JSONObject();
@@ -373,7 +358,7 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    private void sendSmsNotification(Boolean isLogging, String PackageName, Date time, Context context) {
+    private void sendSmsNotification(Boolean isLogging, String PackageName, Date time) {
         Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
         cursor.moveToFirst();
         String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
@@ -383,7 +368,7 @@ public class NotiListenerService extends NotificationListenerService {
 
         if(isSmsIntervalGaped(address, message, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-            String DEVICE_ID = getUniqueID(context);
+            String DEVICE_ID = getUniqueID();
             String TOPIC = "/topics/" + prefs.getString("UID", "");
 
             JSONObject notificationHead = new JSONObject();
@@ -408,7 +393,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT, Context context) {
+    private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
         PackageManager pm = this.getPackageManager();
         Bitmap ICON = null;
         try {
@@ -464,7 +449,7 @@ public class NotiListenerService extends NotificationListenerService {
         } else ICONS = "none";
 
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = getUniqueID(context);
+        String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + prefs.getString("UID", "");
         String APPNAME = null;
         try {

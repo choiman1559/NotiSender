@@ -14,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,17 +48,22 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.kieronquinn.monetcompat.core.MonetCompat;
 
+import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.SettingsActivity;
-import com.noti.main.service.NotiListenerService;
 import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.OptionActivity;
 import com.noti.main.ui.ToastHelper;
+import com.noti.main.ui.pair.PairMainActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
 import com.noti.main.utils.AsyncTask;
 import com.noti.main.utils.BillingHelper;
 
+import java.net.NetworkInterface;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import me.pushy.sdk.Pushy;
 
@@ -95,6 +101,7 @@ public class MainPreference extends PreferenceFragmentCompat {
     Preference ForWearOS;
     Preference TestRun;
     Preference FindPhone;
+    Preference pairDevice;
 
     public MainPreference() { }
 
@@ -120,6 +127,7 @@ public class MainPreference extends PreferenceFragmentCompat {
         else throw new RuntimeException("Can't get Activity instanceof Context!");
     }
 
+    @SuppressLint("HardwareIds")
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
@@ -163,6 +171,36 @@ public class MainPreference extends PreferenceFragmentCompat {
             });
         }
 
+        if(prefs.getString("AndroidIDPrefix", "").isEmpty()) {
+            prefs.edit().putString("AndroidIDPrefix", Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID)).apply();
+        }
+
+        if(prefs.getString("GUIDPrefix", "").isEmpty()) {
+            prefs.edit().putString("GUIDPrefix", UUID.randomUUID().toString()).apply();
+        }
+
+        if(prefs.getString("MacIDPrefix", "").isEmpty()) {
+            String interfaceName = "wlan0";
+            try {
+                List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+                for (NetworkInterface intf : interfaces) {
+                    if (!intf.getName().equalsIgnoreCase(interfaceName)) continue;
+                    byte[] mac = intf.getHardwareAddress();
+                    if (mac == null) {
+                        prefs.edit().putString("MacIDPrefix","unknown").apply();
+                        break;
+                    }
+                    StringBuilder buf = new StringBuilder();
+                    for (byte b : mac) buf.append(String.format("%02X:", b));
+                    if (buf.length() > 0) buf.deleteCharAt(buf.length() - 1);
+                    prefs.edit().putString("MacIDPrefix",buf.toString()).apply();
+                    break;
+                }
+            } catch (Exception e) {
+                prefs.edit().putString("MacIDPrefix","unknown").apply();
+            }
+        }
+
         Login = findPreference("Login");
         TestRun = findPreference("testNoti");
         Service = findPreference("service");
@@ -172,6 +210,7 @@ public class MainPreference extends PreferenceFragmentCompat {
         ServerInfo = findPreference("ServerInfo");
         ForWearOS = findPreference("forWear");
         FindPhone = findPreference("findPhone");
+        pairDevice = findPreference("pairDevice");
 
         mBillingHelper = BillingHelper.initialize(mContext, new BillingHelper.BillingCallback() {
             @Override
@@ -264,6 +303,8 @@ public class MainPreference extends PreferenceFragmentCompat {
             return true;
         });
 
+        pairDevice.setVisible(BuildConfig.DEBUG);
+
         try {
             mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);
         } catch (PackageManager.NameNotFoundException e) {
@@ -353,11 +394,10 @@ public class MainPreference extends PreferenceFragmentCompat {
                 mBillingHelper.Donate();
                 break;
 
-            case "findPhone":
-                if(ServiceToggle.isEnabled() && ((SwitchPreference) ServiceToggle).isChecked()) {
-                    NotiListenerService.sendFindTaskNotification(mContext);
-                    ToastHelper.show(mContext, "Your request is posted!","OK", ToastHelper.LENGTH_SHORT);
-                } else ToastHelper.show(mContext, "Please check your service toggle and try again!","Dismiss", ToastHelper.LENGTH_SHORT);
+            case "pairDevice":
+                if(ServiceToggle.isEnabled()) {
+                    startActivity(new Intent(mContext, PairMainActivity.class));
+                } else ToastHelper.show(mContext, "Please check your account status!","Dismiss", ToastHelper.LENGTH_SHORT);
                 break;
         }
         return super.onPreferenceTreeClick(preference);

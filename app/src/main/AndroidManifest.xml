@@ -48,6 +48,21 @@
         android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.receive.ExitActivity" />
 
+        <activity android:name=".ui.pair.PairAcceptActivity"
+            android:theme="@style/Theme.App.Palette.Dialog"/>
+        <activity android:name=".ui.pair.PairingActivity"/>
+        <activity android:name=".ui.pair.PairMainActivity"/>
+        <activity android:name=".ui.pair.PairDetailActivity"/>
+        <activity
+            android:name=".ui.pair.ShareDataActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"

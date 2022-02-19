@@ -59,14 +59,14 @@ public class PushyReceiver extends BroadcastReceiver {
 
         if (prefs.getBoolean("serviceToggle", false) && !prefs.getString("UID", "").equals("")) {
             if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
-                if (mode.equals("hybrid") && isDeviceItself(map, context)) return;
+                if (mode.equals("hybrid") && isDeviceItself(map)) return;
                 if (type.equals("send|normal")) {
                     sendNotification(map, context);
                 } else if (type.equals("send|sms")) {
                     sendSmsNotification(map, context);
                 }
             } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
-                if (map.getStringExtra("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.getStringExtra("send_device_id").equals(getUniqueID(context))) {
+                if (map.getStringExtra("send_device_name").equals(Build.MANUFACTURER + " " + Build.MODEL) && map.getStringExtra("send_device_id").equals(getUniqueID())) {
                     if (type.equals("reception|normal")) {
                         startNewRemoteActivity(map, context);
                     } else if (type.equals("reception|sms")) {
@@ -77,7 +77,7 @@ public class PushyReceiver extends BroadcastReceiver {
         }
     }
 
-    protected boolean isDeviceItself(Intent map, Context context) {
+    protected boolean isDeviceItself(Intent map) {
         String Device_name = map.getStringExtra("device_name");
         String Device_id = map.getStringExtra("device_id");
 
@@ -87,7 +87,7 @@ public class PushyReceiver extends BroadcastReceiver {
         }
 
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = getUniqueID(context);
+        String DEVICE_ID = getUniqueID();
 
         return Device_name.equals(DEVICE_NAME) && Device_id.equals(DEVICE_ID);
     }

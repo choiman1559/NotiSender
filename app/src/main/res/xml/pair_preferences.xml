@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="findPhone"
+        android:summary="Play loud sound on other devices to find"
+        android:title="Find my devices"
+        android:icon="@drawable/ic_fluent_screen_search_24_regular"/>
+</PreferenceScreen>

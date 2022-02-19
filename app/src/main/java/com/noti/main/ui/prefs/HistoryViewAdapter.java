@@ -271,7 +271,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         } else ICONS = "none";
 
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = NotiListenerService.getUniqueID(mContext);
+        String DEVICE_ID = NotiListenerService.getUniqueID();
         String TOPIC = "/topics/" + prefs.getString("UID", "");
         String APPNAME = null;
         try {
