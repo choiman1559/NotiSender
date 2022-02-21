@@ -91,6 +91,15 @@
         <item>Device MAC ID\n(Not recommend)</item>
     </string-array>
 
+    <string-array name="pairAction">
+        <item>Show notification with text</item>
+        <item>Copy text to clipboard</item>
+        <item>Open link in Browser</item>
+        <item>Trigger tasker event</item>
+        <item>Run application</item>
+        <item>Run terminal command</item>
+    </string-array>
+
     <string-array name="material_color_low"
         tools:ignore="Typos">
         <item>#FFCDD2</item>

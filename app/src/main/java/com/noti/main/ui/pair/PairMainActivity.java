@@ -77,6 +77,12 @@ public class PairMainActivity extends AppCompatActivity {
                 intent.putExtra("device_id", data[1]);
                 startActivity(intent);
             });
+            holder.baseLayout.setOnClickListener(v -> {
+                Intent intent = new Intent(this, RequestActionActivity.class);
+                intent.putExtra("device_name", data[0]);
+                intent.putExtra("device_id", data[1]);
+                startActivity(intent);
+            });
 
             deviceListLayout.addView(layout);
         }

@@ -23,16 +23,19 @@
         <entry key="app/src/main/res/layout/activity_notidetail.xml" value="0.2810185185185185" />
         <entry key="app/src/main/res/layout/activity_options.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/layout/activity_pair_accept.xml" value="0.4053333333333333" />
+        <entry key="app/src/main/res/layout/activity_pair_action.xml" value="0.2612227447627191" />
         <entry key="app/src/main/res/layout/activity_pair_detail.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_pair_find.xml" value="0.2828703703703704" />
         <entry key="app/src/main/res/layout/activity_pair_main.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_pair_make_action.xml" value="0.2612227447627191" />
+        <entry key="app/src/main/res/layout/activity_pair_tasker.xml" value="0.2599401453612655" />
         <entry key="app/src/main/res/layout/activity_smsdetail.xml" value="0.2824074074074074" />
-        <entry key="app/src/main/res/layout/activity_tasker.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_tasker.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_updater.xml" value="0.13775971093044265" />
         <entry key="app/src/main/res/layout/cardview_history.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/layout/cardview_pair_device.xml" value="0.22" />
         <entry key="app/src/main/res/layout/cardview_pair_device_setting.xml" value="0.2" />
-        <entry key="app/src/main/res/layout/dialog_receive_deadline.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/dialog_receive_deadline.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_history.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/layout/item_select_package.xml" value="0.1" />
         <entry key="app/src/main/res/layout/main_frame.xml" value="0.16302083333333334" />
@@ -41,7 +44,7 @@
         <entry key="app/src/main/res/xml/account_preferences.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/xml/general_preferences.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/xml/other_preferences.xml" value="0.3177083333333333" />
-        <entry key="app/src/main/res/xml/pair_preferences.xml" value="0.2612227447627191" />
+        <entry key="app/src/main/res/xml/pair_preferences.xml" value="0.25" />
         <entry key="app/src/main/res/xml/reception_preferences.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/xml/root_preferences.xml" value="0.13798554652213188" />
         <entry key="app/src/main/res/xml/root_prefs.xml" value="0.11296296296296296" />

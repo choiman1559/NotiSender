@@ -21,13 +21,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            app:maxLines="2"
             app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
             app:contentScrim="@color/ui_bg_toolbar"
             app:expandedTitleMarginEnd="24dp"
             app:expandedTitleMarginStart="24dp"
             app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:maxLines="2"
             app:scrimAnimationDuration="50"
             app:scrimVisibleHeightTrigger="160dp"
             app:statusBarScrim="@android:color/transparent"
@@ -59,13 +59,13 @@
                 android:id="@+id/icon"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="30dp"
                 android:background="@drawable/round_corner"
                 android:backgroundTint="@color/colorPrimaryDark"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_fluent_phone_24_regular"
                 app:tint="@android:color/white"
-                android:layout_gravity="center"
-                android:scaleType="centerInside"
-                android:layout_marginTop="30dp"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -74,17 +74,17 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|center"
                 android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="sans-serif"
                 android:gravity="center"
                 android:textSize="20sp"
-                android:layout_marginTop="10dp"
-                tools:text="Santa Fe"/>
+                tools:text="Santa Fe" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_marginHorizontal="12dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginVertical="20dp"
                 android:background="@drawable/round_corner"
                 android:backgroundTint="@color/palette_bg">
 
@@ -120,30 +120,113 @@
                     android:backgroundTint="@android:color/transparent"
                     android:drawableTop="@drawable/ic_fluent_screen_search_24_regular"
                     android:drawableTint="@color/ui_accent"
-                    android:textColor="@color/ui_accent"
                     android:text="Find"
                     android:textAllCaps="false"
+                    android:textColor="@color/ui_accent"
                     tools:ignore="UnusedAttribute" />
             </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/batteryLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="10dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/batteryIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="24dp"
+                    app:srcCompat="@drawable/ic_fluent_battery_warning_24_regular"
+                    tools:ignore="ContentDescription" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:text="Battery status"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/batteryDetail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="88% remaining, Changing"
+                        android:textColor="@color/ui_fg_secondary" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/batterySaveEnabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="horizontal"
+                android:paddingVertical="10dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="24dp"
+                    app:srcCompat="@drawable/ic_fluent_battery_saver_24_regular"
+                    tools:ignore="ContentDescription" />
+
+                <LinearLayout
+                    android:id="@+id/batterySaveEnabledLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:text="Battery saver on"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="May affect data communication speed"
+                        android:textColor="@color/ui_fg_secondary" />
+                </LinearLayout>
+            </LinearLayout>
 
             <ImageView
                 android:layout_width="23dp"
                 android:layout_height="23dp"
-                app:srcCompat="@drawable/ic_info_outline_black_24dp"
-                android:contentDescription="info icon"
+                android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginHorizontal="24dp"/>
+                android:contentDescription="info icon"
+                app:srcCompat="@drawable/ic_info_outline_black_24dp" />
 
             <TextView
                 android:id="@+id/deviceIdInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="15dp"
-                android:textColor="@color/ui_fg_secondary"
                 android:fontFamily="sans-serif"
-                tools:text="Device's unique address: 1q2w3e4r5t6y"
-                android:layout_marginHorizontal="24dp"/>
+                android:text="TextView"
+                android:textColor="@color/ui_fg_secondary"
+                tools:text="Device's unique address: 1q2w3e4r5t6y" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

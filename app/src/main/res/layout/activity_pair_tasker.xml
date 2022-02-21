@@ -71,53 +71,6 @@
                         android:textStyle="italic" />
                 </LinearLayout>
 
-                <RadioGroup
-                    android:id="@+id/radio_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="10dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginVertical="15dp"
-                        android:gravity="center"
-                        android:text="Choose an action to run when called from Tasker."
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/toggleOn"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Enable Service Toggle"
-                        android:textSize="15sp" />
-
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/toggleOff"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Disable Service Toggle"
-                        android:textSize="15sp" />
-
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/toggleAuto"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Automatically Enable/Disable"
-                        android:textSize="15sp" />
-
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/togglePair"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Run action on other paired devices"
-                        android:textSize="15sp" />
-                </RadioGroup>
-
                 <LinearLayout
                     android:id="@+id/actionConfigLayout"
                     android:layout_width="match_parent"
@@ -149,52 +102,23 @@
                             android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    <ImageView
+                        android:id="@+id/infoIcon"
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
+                        android:layout_marginHorizontal="24dp"
+                        android:layout_marginTop="30dp"
+                        android:contentDescription="info icon" />
+
+                    <TextView
+                        android:id="@+id/deviceNameInfo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="10dp">
-
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/taskSelectSpinner"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Select task"
-                            android:inputType="none" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="10dp">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/taskArgs0"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:cursorVisible="true"
-                            android:inputType="text"
-                            android:maxLines="1" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="10dp">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/taskArgs1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:cursorVisible="true"
-                            android:inputType="text"
-                            android:maxLines="1" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginHorizontal="24dp"
+                        android:layout_marginTop="15dp"
+                        android:fontFamily="sans-serif"
+                        android:text="Only requests from selected devices will be triggered."
+                        android:textColor="@color/ui_fg_secondary" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

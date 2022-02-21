@@ -3,6 +3,7 @@ package com.noti.main.ui.pair;
 import static com.noti.main.service.FirebaseMessageService.pairingProcessList;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -17,10 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.noti.main.Application;
 import com.noti.main.R;
-import com.noti.main.service.FirebaseMessageService;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.pair.PairDeviceInfo;
-import com.noti.main.service.pair.PairingUtils;
 import com.noti.main.ui.receive.ExitActivity;
 
 import org.json.JSONException;
@@ -46,7 +45,7 @@ public class PairAcceptActivity extends AppCompatActivity {
         info.setText(Html.fromHtml("Are you sure you want to grant the pairing request?<br><b>Requested Device:</b> " + Device_name));
 
         AcceptButton.setOnClickListener(v -> {
-            sendAcceptedMessage(Device_name, Device_id, true);
+            sendAcceptedMessage(Device_name, Device_id, true, this);
             SharedPreferences prefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
             boolean isNotRegistered = true;
             String dataToSave = Device_name + "|" + Device_id;
@@ -64,11 +63,11 @@ public class PairAcceptActivity extends AppCompatActivity {
                 prefs.edit().putStringSet("paired_list", list).apply();
             }
         });
-        CancelButton.setOnClickListener(v -> sendAcceptedMessage(Device_name, Device_id, false));
+        CancelButton.setOnClickListener(v -> sendAcceptedMessage(Device_name, Device_id, false, this));
     }
 
-    void sendAcceptedMessage(String Device_name, String Device_id, boolean isAccepted) {
-        String Topic = "/topics/" + getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID","");
+    public static void sendAcceptedMessage(String Device_name, String Device_id, boolean isAccepted, Context context) {
+        String Topic = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID","");
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {
@@ -84,9 +83,8 @@ public class PairAcceptActivity extends AppCompatActivity {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
 
-        NotiListenerService.sendNotification(notificationHead, "pair.func", PairAcceptActivity.this);
-        if(Application.isUsingDebugPairLog) Log.d("sync sent","response pair: " + notificationBody);
-        ExitActivity.exitApplication(PairAcceptActivity.this);
+        NotiListenerService.sendNotification(notificationHead, "pair.func", context);
+        ExitActivity.exitApplication(context);
 
         if(isAccepted) {
             for(PairDeviceInfo info : pairingProcessList) {

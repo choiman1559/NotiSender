@@ -33,6 +33,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class PairingUtils {
+    private PairingUtils() {
+
+    }
+
     public static void requestDeviceListWidely(Context context) {
         Application.isFindingDeviceToPair = true;
         String Topic = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID","");
@@ -48,7 +52,7 @@ public class PairingUtils {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
         NotiListenerService.sendNotification(notificationHead, "pair.func", context);
-        if(Application.isUsingDebugPairLog) Log.d("sync sent","request list: " + notificationBody);
+        if(isShowDebugLog(context)) Log.d("sync sent","request list: " + notificationBody);
     }
 
     public static void responseDeviceInfoToFinder(Map<String, String> map, Context context) {
@@ -67,7 +71,7 @@ public class PairingUtils {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
         NotiListenerService.sendNotification(notificationHead, "pair.func", context);
-        if(Application.isUsingDebugPairLog) Log.d("sync sent","response list: " + notificationBody);
+        if(isShowDebugLog(context)) Log.d("sync sent","response list: " + notificationBody);
     }
 
     public static void onReceiveDeviceInfo(Map<String, String> map) {
@@ -90,10 +94,31 @@ public class PairingUtils {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
         NotiListenerService.sendNotification(notificationHead, "pair.func", context);
-        if(Application.isUsingDebugPairLog) Log.d("sync sent","request pair: " + notificationBody);
+        if(isShowDebugLog(context)) Log.d("sync sent","request pair: " + notificationBody);
     }
 
     public static void showPairChoiceAction(Map<String, String> map, Context context) {
+        if(context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("allowAcceptPairAutomatically", false)) {
+            PairAcceptActivity.sendAcceptedMessage(map.get("device_name"), map.get("device_id"), true, context);
+            SharedPreferences prefs = context.getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
+            boolean isNotRegistered = true;
+            String dataToSave = map.get("device_name") + "|" + map.get("device_id");
+
+            Set<String> list = new HashSet<>(prefs.getStringSet("paired_list", new HashSet<>()));
+            for(String str : list) {
+                if(str.equals(dataToSave)) {
+                    isNotRegistered = false;
+                    break;
+                }
+            }
+
+            if(isNotRegistered) {
+                list.add(dataToSave);
+                prefs.edit().putStringSet("paired_list", list).apply();
+            }
+            return;
+        }
+
         int uniqueCode = (int) (Calendar.getInstance().getTime().getTime() / 1000L % Integer.MAX_VALUE);
 
         Intent notificationIntent = new Intent(context, PairAcceptActivity.class);
@@ -130,7 +155,7 @@ public class PairingUtils {
     }
 
     public static void checkPairResultAndRegister(Map<String, String> map,PairDeviceInfo info, Context context) {
-        if(Application.isUsingDebugPairLog) Log.i("pair result", "device name: " + map.get("device_name") + " /device id: " + map.get("device_id") + " /result: " + map.get("pair_accept"));
+        if(isShowDebugLog(context)) Log.i("pair result", "device name: " + map.get("device_name") + " /device id: " + map.get("device_id") + " /result: " + map.get("pair_accept"));
         if(m_onDevicePairResultListener != null) m_onDevicePairResultListener.onReceive(map);
         if("true".equals(map.get("pair_accept"))) {
             SharedPreferences prefs = context.getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
@@ -153,5 +178,9 @@ public class PairingUtils {
             Application.isFindingDeviceToPair = false;
             FirebaseMessageService.pairingProcessList.remove(info);
         }
+    }
+
+    public static boolean isShowDebugLog(Context context) {
+        return context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("printDebugLog", false);
     }
 }

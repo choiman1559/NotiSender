@@ -3,6 +3,27 @@
     <Preference
         android:key="findPhone"
         android:summary="Play loud sound on other devices to find"
-        android:title="Find my devices"
+        android:title="Execute Find my devices"
         android:icon="@drawable/ic_fluent_screen_search_24_regular"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="allowAcceptPairAutomatically"
+        android:summary="WARNING: May be paired automatically without user permission"
+        android:title="Accept pairing without confirm"
+        android:icon="@drawable/ic_fluent_arrow_sync_checkmark_24_regular" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="showAlreadyConnected"
+        android:summary="Display already connected devices in the search list"
+        android:title="Search already connected devices"
+        android:icon="@drawable/ic_fluent_plug_disconnected_24_regular" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="printDebugLog"
+        android:summary="Output debug information about pairing to Logcat"
+        android:title="Print debug log"
+        android:icon="@drawable/ic_fluent_bug_24_regular" />
 </PreferenceScreen>

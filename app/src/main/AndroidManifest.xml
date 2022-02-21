@@ -53,6 +53,7 @@
         <activity android:name=".ui.pair.PairingActivity"/>
         <activity android:name=".ui.pair.PairMainActivity"/>
         <activity android:name=".ui.pair.PairDetailActivity"/>
+        <activity android:name=".ui.pair.RequestActionActivity"/>
         <activity
             android:name=".ui.pair.ShareDataActivity"
             android:exported="true">
@@ -60,6 +61,15 @@
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/*" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".receiver.TaskerPairEvent"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Remote Trigger Event">
+            <intent-filter>
+                <action android:name="net.dinglisch.android.tasker.ACTION_EDIT_EVENT" />
             </intent-filter>
         </activity>
 
@@ -76,7 +86,7 @@
             android:name=".utils.TaskerConfigAction"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
-            android:label="Enable/Disable Notification Sender service.">
+            android:label="Noti Sender tasker plugin configuration">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>

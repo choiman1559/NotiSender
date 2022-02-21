@@ -36,8 +36,10 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
+import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceStatus;
+import com.noti.main.service.pair.PairListener;
 import com.noti.main.service.pair.PairingUtils;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
@@ -56,7 +58,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
@@ -68,14 +69,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     SharedPreferences logPrefs;
     SharedPreferences pairPrefs;
     public static volatile Ringtone lastPlayedRingtone;
+    public static ArrayList<PairDeviceInfo> pairingProcessList;
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while(true) {
             if(lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying()) lastPlayedRingtone.play();
         }
     });
-
-    public static ArrayList<PairDeviceInfo> pairedDeviceList;
-    public static ArrayList<PairDeviceInfo> pairingProcessList;
 
     @Override
     public void onCreate() {
@@ -84,22 +83,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         pairingProcessList = new ArrayList<>();
-
-        UpdatePairedList();
-        pairPrefs.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
-            if(key.equals("paired_list")) {
-                UpdatePairedList();
-            }
-        });
-    }
-
-    public void UpdatePairedList() {
-        pairedDeviceList = new ArrayList<>();
-        Set<String> list = pairPrefs.getStringSet("paired_list", new HashSet<>());
-        for(String string : list) {
-            String[] array = string.split("\\|");
-            pairedDeviceList.add(new PairDeviceInfo(array[0], array[1], PairDeviceStatus.Device_Already_Paired));
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -185,14 +168,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     case "pair|request_device_list":
                         //Target Device action
                         //Have to Send this device info Data Now
-                        boolean isNotPaired = true;
-                        for(PairDeviceInfo info : pairedDeviceList) {
-                            if(info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
-                                isNotPaired = false;
-                            }
-                        }
-
-                        if(isNotPaired || Application.isUsingDebugPairLog) {
+                        if(!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false)) {
                             pairingProcessList.add(new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing));
                             Application.isListeningToPair = true;
                             PairingUtils.responseDeviceInfoToFinder(map, context);
@@ -202,14 +178,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     case "pair|response_device_list":
                         //Request Device Action
                         //Show device list here; give choice to user which device to pair
-                        boolean isNotPaired2 = true;
-                        for(PairDeviceInfo info : pairedDeviceList) {
-                            if(info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
-                                isNotPaired2 = false;
-                            }
-                        }
-
-                        if(Application.isFindingDeviceToPair && (isNotPaired2 || Application.isUsingDebugPairLog)) {
+                        if(Application.isFindingDeviceToPair && (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false))) {
                             pairingProcessList.add(new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing));
                             PairingUtils.onReceiveDeviceInfo(map);
                         }
@@ -243,18 +212,27 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
                     case "pair|request_data":
                         //process request normal data here sent by paired device(s).
+                        if(isTargetDevice(map) && isPairedDevice(map)) {
+                            DataProcess.onDataRequested(map, context);
+                        }
                         break;
 
                     case "pair|receive_data":
                         //process received normal data here sent by paired device(s).
+                        if(isTargetDevice(map) && isPairedDevice(map)) {
+                            PairListener.callOnDataReceived(map);
+                        }
                         break;
 
                     case "pair|request_action":
                         //process received action data here sent by paired device(s).
+                        if(isTargetDevice(map) && isPairedDevice(map)) {
+                            DataProcess.onActionRequested(map, context);
+                        }
                         break;
 
                     case "pair|find":
-                        if(isTargetDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
+                        if(isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                             sendFindTaskNotification();
                         }
                         break;
@@ -286,6 +264,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String DEVICE_ID = getUniqueID();
 
         return DEVICE_NAME.equals(Device_name) && DEVICE_ID.equals(Device_id);
+    }
+
+    protected boolean isPairedDevice(Map<String, String> map) {
+        String dataToFind = map.get("device_name") + "|" + map.get("device_id");
+        for(String str : pairPrefs.getStringSet("paired_list", new HashSet<>())) {
+            if(str.equals(dataToFind)) return true;
+        }
+        return false;
     }
 
     protected void startNewRemoteActivity(Map<String, String> map) {
