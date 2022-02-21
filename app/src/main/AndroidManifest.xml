@@ -56,7 +56,8 @@
         <activity android:name=".ui.pair.RequestActionActivity"/>
         <activity
             android:name=".ui.pair.ShareDataActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.App.Palette.Dialog">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
