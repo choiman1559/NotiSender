@@ -71,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:text="Device name"
                     android:textSize="20sp"
-                    android:fontFamily="sans-serif"
+                    android:fontFamily="@font/sans"
                     android:layout_marginHorizontal="24dp"/>
 
                 <TextView
@@ -133,7 +133,7 @@
                 android:text="TextView"
                 android:layout_marginTop="15dp"
                 android:textColor="@color/ui_fg_secondary"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/sans"
                 tools:text="Phone's Unique address: 1q2w3e4r5t6y"
                 android:layout_marginHorizontal="24dp"/>
         </LinearLayout>

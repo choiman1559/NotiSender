@@ -75,7 +75,7 @@
                 android:layout_gravity="start|center"
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="10dp"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/sans"
                 android:gravity="center"
                 android:textSize="20sp"
                 tools:text="Santa Fe" />
@@ -105,7 +105,7 @@
 
                 <View
                     android:id="@+id/separator"
-                    android:layout_width="2dp"
+                    android:layout_width="1dp"
                     android:layout_height="match_parent"
                     android:layout_centerHorizontal="true"
                     android:background="@color/ui_bg" />
@@ -154,7 +154,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/sans"
                         android:text="Battery status"
                         android:textSize="20sp" />
 
@@ -196,7 +196,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/sans"
                         android:text="Battery saver on"
                         android:textSize="20sp" />
 
@@ -223,7 +223,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="15dp"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/sans"
                 android:text="TextView"
                 android:textColor="@color/ui_fg_secondary"
                 tools:text="Device's unique address: 1q2w3e4r5t6y" />

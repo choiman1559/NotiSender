@@ -68,7 +68,7 @@ public class PairingActivity extends AppCompatActivity {
                 PairDeviceInfo info = infoList.get(i);
                 if(info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
                     int finalI = i;
-                    PairingActivity.this.runOnUiThread((Runnable) () -> {
+                    PairingActivity.this.runOnUiThread(() -> {
                         RelativeLayout view = (RelativeLayout) deviceListLayout.getChildAt(finalI);
                         Holder holder = new Holder(view);
                         if("false".equals(map.get("pair_accept"))) {

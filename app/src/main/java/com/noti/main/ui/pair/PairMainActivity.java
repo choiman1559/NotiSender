@@ -1,8 +1,10 @@
 package com.noti.main.ui.pair;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
@@ -13,8 +15,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.R;
@@ -34,6 +39,13 @@ public class PairMainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pair_main);
+
+        if(Build.VERSION.SDK_INT < 29) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+            }
+        }
 
         LinearLayout addNewDevice = findViewById(R.id.addNewDevice);
         LinearLayout connectionPreference = findViewById(R.id.connectionPreference);
@@ -101,6 +113,18 @@ public class PairMainActivity extends AppCompatActivity {
             baseLayout = view.findViewById(R.id.baseLayout);
             icon = view.findViewById(R.id.icon);
             setting = view.findViewById(R.id.deviceDetail);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == 100) {
+            for (int foo : grantResults) {
+                if (foo != PackageManager.PERMISSION_GRANTED) {
+                    finish();
+                }
+            }
         }
     }
 }

@@ -116,7 +116,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="24dp"
                         android:layout_marginTop="15dp"
-                        android:fontFamily="sans-serif"
+                        android:fontFamily="@font/sans"
                         android:text="Only requests from selected devices will be triggered."
                         android:textColor="@color/ui_fg_secondary" />
                 </LinearLayout>

@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="start|center"
                     android:layout_marginStart="5dp"
-                    android:fontFamily="sans-serif"
+                    android:fontFamily="@font/sans"
                     android:text="Pair new device"
                     android:textSize="20sp" />
             </LinearLayout>
@@ -121,7 +121,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
+                    android:fontFamily="@font/sans"
                     android:text="Connection preferences"
                     android:layout_marginHorizontal="24dp"
                     android:textSize="20sp" />
@@ -149,7 +149,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="15dp"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/sans"
                 android:text="TextView"
                 android:textColor="@color/ui_fg_secondary"
                 tools:text="Visible as 'Pixel 6 Pro' to other devices" />

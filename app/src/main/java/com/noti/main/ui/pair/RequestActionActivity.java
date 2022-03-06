@@ -87,15 +87,15 @@ public class RequestActionActivity extends AppCompatActivity {
             } else if (taskArgs1.getVisibility() == View.VISIBLE && taskArgs1.getText() == null) {
                 taskArgs1.setError("Please type argument");
             } else {
-                if(taskArgs0.getVisibility() ==  View.VISIBLE && taskArgs1.getVisibility() ==  View.VISIBLE) {
+                if (taskArgs0.getVisibility() == View.VISIBLE && taskArgs1.getVisibility() == View.VISIBLE) {
                     DataProcess.requestAction(this, Device_name, Device_id, taskSelectSpinner.getText().toString(), Objects.requireNonNull(taskArgs0.getText()).toString(), Objects.requireNonNull(taskArgs1.getText()).toString());
-                } else if(taskArgs0.getVisibility() ==  View.VISIBLE) {
+                } else if (taskArgs0.getVisibility() == View.VISIBLE) {
                     DataProcess.requestAction(this, Device_name, Device_id, taskSelectSpinner.getText().toString(), Objects.requireNonNull(taskArgs0.getText()).toString());
                 } else {
                     DataProcess.requestAction(this, Device_name, Device_id, taskSelectSpinner.getText().toString());
                 }
 
-                ToastHelper.show(this, "Your request is posted!","OK", ToastHelper.LENGTH_SHORT);
+                ToastHelper.show(this, "Your request is posted!", "OK", ToastHelper.LENGTH_SHORT);
                 finish();
             }
         });
