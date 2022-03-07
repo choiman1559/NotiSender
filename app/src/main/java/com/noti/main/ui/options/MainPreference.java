@@ -48,7 +48,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.kieronquinn.monetcompat.core.MonetCompat;
 
-import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.SettingsActivity;
 import com.noti.main.ui.AppInfoActivity;
@@ -302,8 +301,6 @@ public class MainPreference extends PreferenceFragmentCompat {
             }
             return true;
         });
-
-        pairDevice.setVisible(BuildConfig.DEBUG);
 
         try {
             mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);

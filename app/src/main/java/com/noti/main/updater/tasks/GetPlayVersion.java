@@ -44,7 +44,10 @@ public class GetPlayVersion extends AsyncTask<Void, String, String> {
     protected String doInBackground(Void... voids) {
         SharedPreferences prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         String latestVersion = prefs.getString("Latest_Version_Play", "");
-        if(latestVersion.equals("")) UpdaterActivity.startMainActivity(context);
+        if(latestVersion.isEmpty()) {
+            UpdaterActivity.startMainActivity(context);
+            context.finish();
+        }
         return latestVersion;
     }
 
