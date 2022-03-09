@@ -181,7 +181,7 @@ public class NotiListenerService extends NotificationListenerService {
             return ((TelecomManager) context.getSystemService(Context.TELECOM_SERVICE)).getDefaultDialerPackage();
         } else {
             Intent dialerIntent = new Intent(Intent.ACTION_DIAL).addCategory(Intent.CATEGORY_DEFAULT);
-            List<ResolveInfo> mResolveInfoList = getPackageManager().queryIntentActivities(dialerIntent, 0);
+            List<ResolveInfo> mResolveInfoList = context.getPackageManager().queryIntentActivities(dialerIntent, 0);
             return mResolveInfoList.get(0).activityInfo.packageName;
         }
     }
