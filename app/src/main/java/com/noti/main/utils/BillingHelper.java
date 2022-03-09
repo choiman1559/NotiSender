@@ -48,7 +48,17 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
 
     public void Donate() {
         if (mBillingProcessor != null && mBillingProcessor.isInitialized()) {
-            mBillingProcessor.purchase(mContext, DonateID);
+            if(mBillingProcessor.isPurchased(DonateID)) {
+                mBillingProcessor.consumePurchaseAsync(DonateID, new BillingProcessor.IPurchasesResponseListener() {
+                    @Override
+                    public void onPurchasesSuccess() { }
+
+                    @Override
+                    public void onPurchasesError() { }
+                });
+            } else {
+                mBillingProcessor.purchase(mContext, DonateID);
+            }
         }
     }
 

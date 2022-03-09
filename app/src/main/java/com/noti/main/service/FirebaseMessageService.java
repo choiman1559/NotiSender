@@ -444,7 +444,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     protected void sendNotification(Map<String, String> map) {
-        Log.d("ddd","noti");
         String title = map.get("title");
         String content = map.get("message");
         String Package = map.get("package");
@@ -453,15 +452,21 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Device_id = map.get("device_id");
         String Date = map.get("date");
 
-        Bitmap Icon_original = null;
+        Bitmap Icon_original;
         Bitmap Icon = null;
-        if (!"none".equals(map.get("icon"))) {
+        if (!"none".equals(map.get("icon")) && !prefs.getBoolean("OverrideReceivedIcon" , false)) {
             Icon_original = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
             if(Icon_original != null) {
                 Icon = Bitmap.createBitmap(Icon_original.getWidth(), Icon_original.getHeight(), Icon_original.getConfig());
                 Canvas canvas = new Canvas(Icon);
                 canvas.drawColor(Color.WHITE);
                 canvas.drawBitmap(Icon_original, 0, 0, null);
+            }
+        } else if (prefs.getBoolean("UseAlternativeIcon", false)) {
+            try {
+                Icon = NotiListenerService.getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(Package));
+            } catch (PackageManager.NameNotFoundException e) {
+                //Ignore this case
             }
         }
 
@@ -510,7 +515,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationIntent.putExtra("title",title);
         notificationIntent.putExtra("device_name",Device_name);
         notificationIntent.putExtra("date",Date);
-        notificationIntent.putExtra("icon",Icon_original != null ? Icon : null);
+        notificationIntent.putExtra("icon", Icon);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);

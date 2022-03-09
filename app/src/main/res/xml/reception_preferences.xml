@@ -56,4 +56,19 @@
             android:summary="Ignores Find my devices request on this device"
             android:icon="@drawable/ic_fluent_screen_search_24_regular"/>
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Icon reception">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="UseAlternativeIcon"
+            android:title="Use the app icon installed on this device"
+            android:summary="If the icon data has not been received, then retrieves it from this device."
+            android:icon="@drawable/ic_fluent_image_search_24_regular"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="OverrideReceivedIcon"
+            android:title="Use alternative icon on any condition"
+            android:summary="The above option is used even if app icon information is received." />
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -623,6 +623,40 @@ public class NotiListenerService extends NotificationListenerService {
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
+        //TODO: implements data split feature
+        if(/* currently disable this block because it's still on developing */ false && prefs.getBoolean("splitData", false)) {
+            try {
+                String rawData = notification.getString("data");
+                JSONObject rawObject = new JSONObject(rawData);
+                if(rawData.length() > 3584) {
+                    ArrayList<JSONObject> arr = new ArrayList<>();
+                    JSONObject newData = new JSONObject();
+
+                    //TODO: what about single-object's size is bigger than limit?
+                    for (Iterator<String> key = rawObject.keys(); key.hasNext();) {
+                        String name = key.next();
+                        newData.put(name, rawObject.get(name));
+
+                        if(newData.toString().length() > 1536) {
+                            newData.remove(name);
+                            arr.add(newData);
+                            newData = new JSONObject();
+                            newData.put(name, rawObject.get(name));
+                        }
+                    }
+
+                    for(JSONObject obj : arr) {
+                        obj.put("splitData", true);
+                        obj.put("splitDataIndex", arr.indexOf(obj));
+                        notification.put("data", obj);
+                        sendFCMNotification(notification, PackageName, context);
+                    }
+                }
+            } catch(JSONException e) {
+                if(BuildConfig.DEBUG) e.printStackTrace();
+            }
+        }
+
         try {
             String rawPassword = prefs.getString("EncryptionPassword", "");
             JSONObject data = notification.getJSONObject("data");

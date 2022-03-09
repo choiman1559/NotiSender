@@ -50,6 +50,9 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
     Preference ReceiveDeadline;
     Preference ReceiveCustomDeadline;
 
+    Preference UseAlternativeIcon;
+    Preference OverrideReceivedIcon;
+
     ActivityResultLauncher<Intent> startOpenDocument = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if(result.getData() != null) {
             Intent data = result.getData();
@@ -66,6 +69,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
         }
     });
 
+    @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         MonetCompat.setup(requireContext());
@@ -100,6 +104,8 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
         VibrationRunningTime = findPreference("VibrationRunningTime");
         ReceiveDeadline = findPreference("ReceiveDeadline");
         ReceiveCustomDeadline = findPreference("ReceiveCustomDeadline");
+        UseAlternativeIcon = findPreference("UseAlternativeIcon");
+        OverrideReceivedIcon = findPreference("OverrideReceivedIcon");
 
         boolean isCustomRingtoneEnabled = prefs.getString("importance","Default").equals("Custom…");
         if (Build.VERSION.SDK_INT >= 26) {
@@ -147,6 +153,12 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
         ReceiveDeadline.setOnPreferenceChangeListener((p, n) -> {
             ReceiveDeadline.setSummary("Now : " + n + (n.equals("No deadline") ? " (Default)" : ""));
             ReceiveCustomDeadline.setVisible(n.equals("Custom…"));
+            return true;
+        });
+
+        OverrideReceivedIcon.setVisible(prefs.getBoolean("UseAlternativeIcon", false));
+        UseAlternativeIcon.setOnPreferenceChangeListener((p, n) -> {
+            OverrideReceivedIcon.setVisible((boolean) n);
             return true;
         });
     }
