@@ -46,11 +46,13 @@ import com.noti.main.ui.receive.SmsViewActivity;
 import com.noti.main.ui.receive.TelecomViewActivity;
 import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,7 +70,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     SharedPreferences prefs;
     SharedPreferences logPrefs;
     SharedPreferences pairPrefs;
+    private static PowerUtils manager;
     public static volatile Ringtone lastPlayedRingtone;
+    public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
     public static ArrayList<PairDeviceInfo> pairingProcessList;
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while(true) {
@@ -83,11 +87,15 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         pairingProcessList = new ArrayList<>();
+        manager = PowerUtils.getInstance(this);
+        manager.acquire();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        manager.acquire();
+
         if(BuildConfig.DEBUG) Log.d(remoteMessage.getMessageId(), remoteMessage.toString());
         Map<String,String> map = remoteMessage.getData();
 
@@ -111,12 +119,17 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         } else processReception(map, this);
     }
 
-    private void processReception(Map<String,String> map, Context context) {
+    private void processReception(Map<String, String> map, Context context) {
         String type = map.get("type");
         String mode = prefs.getString("service", "");
 
         if(type != null && mode != null && !prefs.getString("UID", "").equals("")) {
             if (prefs.getBoolean("serviceToggle", false)) {
+                if("split_data".equals(type) && !isDeviceItself(map)) {
+                    processSplitData(map, context);
+                    return;
+                }
+
                 String Date = map.get("date");
                 if(Date != null) {
                     String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
@@ -241,6 +254,34 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    protected void processSplitData(Map<String, String> map, Context context) {
+        synchronized (splitDataList) {
+            Log.d("split_data", "current size : " + splitDataList.size());
+
+            for(int i = 0;i < splitDataList.size();i++) {
+                SplitDataObject object = splitDataList.get(i);
+                if (object.unique_id.equals(map.get("split_unique"))) {
+                    object = object.addData(map);
+                    splitDataList.set(i, object);
+
+                    if(object.length == object.getSize()) {
+                        try {
+                            Map<String, String> newMap = new ObjectMapper().readValue(object.getFullData(), Map.class);
+                            processReception(newMap, context);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            splitDataList.remove(object);
+                        }
+                    }
+                    return;
+                }
+            }
+            splitDataList.add(new SplitDataObject(map));
+        }
+    }
+
     protected boolean isDeviceItself(Map<String, String> map) {
         String Device_name = map.get("device_name");
         String Device_id = map.get("device_id");
@@ -294,6 +335,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     protected void sendFindTaskNotification() {
+        manager.acquire();
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(FirebaseMessageService.this, -2,
                 new Intent(FirebaseMessageService.this, FindDeviceCancelReceiver.class),

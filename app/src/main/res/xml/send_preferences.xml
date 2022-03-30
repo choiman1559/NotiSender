@@ -2,10 +2,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="Black/White List">
         <Preference
+            android:icon="@drawable/ic_fluent_document_bullet_list_off_24_filled"
             android:key="blacklist"
             android:summary="select apps that you won't send notification"
-            android:title="Edit blacklist"
-            android:icon="@drawable/ic_fluent_document_bullet_list_off_24_filled"/>
+            android:title="Edit blacklist" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseWhite"
@@ -16,18 +16,18 @@
     <PreferenceCategory android:title="Send Icon">
         <SwitchPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_image_24_regular"
             android:key="SendIcon"
             android:summary="Send Noti's Icon with Notification together"
-            android:title="Send Icon"
-            android:icon="@drawable/ic_fluent_image_24_regular"/>
+            android:title="Send Icon" />
         <ListPreference
             android:defaultValue="52 x 52 (Default)"
             android:entries="@array/resolution"
             android:entryValues="@array/resolution"
+            android:icon="@drawable/ic_fluent_resize_image_24_regular"
             android:key="IconRes"
             android:summary="Now : 52 x 52 (Default)"
-            android:title="Resolution of icon"
-            android:icon="@drawable/ic_fluent_resize_image_24_regular"/>
+            android:title="Resolution of icon" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="IconUseNotification"
@@ -42,16 +42,16 @@
     <PreferenceCategory android:title="Telephony Reply">
         <SwitchPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_chat_24_regular"
             android:key="UseReplySms"
             android:summary="need sms permission"
-            android:title="Check SMS from other devices"
-            android:icon="@drawable/ic_fluent_chat_24_regular"/>
+            android:title="Check SMS from other devices" />
         <SwitchPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_call_inbound_24_regular"
             android:key="UseReplyTelecom"
             android:summary="Reply as SMS or opens dialer app"
-            android:title="Send incoming call information"
-            android:icon="@drawable/ic_fluent_call_inbound_24_regular"/>
+            android:title="Send incoming call information" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="UseCallLog"
@@ -62,10 +62,10 @@
     <PreferenceCategory android:title="Interval">
         <SwitchPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_arrow_autofit_width_24_filled"
             android:key="UseInterval"
             android:summary="Use interval between notifications"
-            android:title="Use Interval"
-            android:icon="@drawable/ic_fluent_arrow_autofit_width_24_filled"/>
+            android:title="Use Interval" />
         <ListPreference
             android:defaultValue="Entire app"
             android:entries="@array/interval"
@@ -90,10 +90,10 @@
     <PreferenceCategory android:title="Ban Words">
         <SwitchPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_shape_exclude_24_regular"
             android:key="UseBannedOption"
             android:summary="Use banned words customizing option"
-            android:title="Use Banned words option"
-            android:icon="@drawable/ic_fluent_shape_exclude_24_regular"/>
+            android:title="Use Banned words option" />
         <Preference
             android:key="BannedWords"
             android:summary="Click here to set banned words"
@@ -119,10 +119,10 @@
     <PreferenceCategory android:title="Data Encryption">
         <SwitchPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_lock_shield_24_regular"
             android:key="UseDataEncryption"
             android:summary="Encrypt your notification data using AES algorithm"
-            android:title="Encrypt sending data"
-            android:icon="@drawable/ic_fluent_lock_shield_24_regular"/>
+            android:title="Encrypt sending data" />
         <Preference
             android:key="UseDataEncryptionPassword"
             android:summary="Password to use for AES encryption"
@@ -131,5 +131,14 @@
             android:icon="@drawable/ic_info_outline_black_24dp"
             android:key="EncryptionInfo"
             android:summary="Some Information about encryption" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Data split">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_split_vertical_24_regular"
+            android:key="UseSplitData"
+            android:summary="If the data is too large to be transmitted, it will be transmitted in fragments."
+            android:title="Use data split transmission" />
     </PreferenceCategory>
 </PreferenceScreen>

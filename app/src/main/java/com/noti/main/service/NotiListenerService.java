@@ -33,6 +33,7 @@ import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.JsonRequest;
 import com.noti.main.utils.CompressStringUtil;
 import com.noti.main.service.IntervalQueries.*;
+import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,6 +55,9 @@ public class NotiListenerService extends NotificationListenerService {
     private static NotiListenerService instance;
     private static SharedPreferences prefs;
     private static SharedPreferences logPrefs;
+    private static PowerUtils manager;
+
+    private static final Object pastNotificationLock = new Object();
     private volatile StatusBarNotification pastNotification = null;
 
     private static int queryAccessCount = 0;
@@ -63,7 +67,7 @@ public class NotiListenerService extends NotificationListenerService {
     private final ArrayList<TelecomQuery> telecomQuery = new ArrayList<>();
 
     public static NotiListenerService getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new NotiListenerService();
         }
         return instance;
@@ -74,6 +78,7 @@ public class NotiListenerService extends NotificationListenerService {
         super.onCreate();
         prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         logPrefs = this.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
+        manager = PowerUtils.getInstance(this);
     }
 
     public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
@@ -106,7 +111,7 @@ public class NotiListenerService extends NotificationListenerService {
     @SuppressLint("HardwareIds")
     public static String getUniqueID() {
         String str = "";
-        if(prefs != null) {
+        if (prefs != null) {
             switch (prefs.getString("uniqueIdMethod", "Globally-Unique ID")) {
                 case "Globally-Unique ID":
                     str = prefs.getString("GUIDPrefix", "");
@@ -130,7 +135,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private void QueryGC() {
-        if(prefs.getInt("IntervalQueryGCTrigger", 50) < 1) return;
+        if (prefs.getInt("IntervalQueryGCTrigger", 50) < 1) return;
         long currentTimeMillis = Calendar.getInstance().getTime().getTime();
         int timeInterval = prefs.getInt("IntervalTime", 150);
         int[] cleanCount = {0, 0, 0};
@@ -140,9 +145,9 @@ public class NotiListenerService extends NotificationListenerService {
 
         synchronized (intervalQuery) {
             Iterator<Query> iterator = intervalQuery.iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 Query query = iterator.next();
-                if(currentTimeMillis - query.getTimestamp() > timeInterval + 100) {
+                if (currentTimeMillis - query.getTimestamp() > timeInterval + 100) {
                     iterator.remove();
                     cleanCount[0]++;
                 }
@@ -151,9 +156,9 @@ public class NotiListenerService extends NotificationListenerService {
 
         synchronized (smsIntervalQuery) {
             Iterator<SmsQuery> iterator = smsIntervalQuery.iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 SmsQuery query = iterator.next();
-                if(currentTimeMillis - query.getTimeStamp() > timeInterval + 100) {
+                if (currentTimeMillis - query.getTimeStamp() > timeInterval + 100) {
                     iterator.remove();
                     cleanCount[1]++;
                 }
@@ -162,9 +167,9 @@ public class NotiListenerService extends NotificationListenerService {
 
         synchronized (telecomQuery) {
             Iterator<TelecomQuery> iterator = telecomQuery.iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 TelecomQuery query = iterator.next();
-                if(currentTimeMillis - query.getTimeStamp() > timeInterval + 100) {
+                if (currentTimeMillis - query.getTimeStamp() > timeInterval + 100) {
                     iterator.remove();
                     cleanCount[2]++;
                 }
@@ -177,7 +182,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private String getSystemDialerApp(Context context) {
-        if(Build.VERSION.SDK_INT > 22) {
+        if (Build.VERSION.SDK_INT > 22) {
             return ((TelecomManager) context.getSystemService(Context.TELECOM_SERVICE)).getDefaultDialerPackage();
         } else {
             Intent dialerIntent = new Intent(Intent.ACTION_DIAL).addCategory(Intent.CATEGORY_DEFAULT);
@@ -190,82 +195,99 @@ public class NotiListenerService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
 
-        if (sbn.equals(pastNotification)) {
-            pastNotification = sbn;
-            return;
-        }
+        Log.d("ddd", sbn.getPackageName());
+        manager.acquire();
+        synchronized (pastNotificationLock) {
+            if (sbn.equals(pastNotification)) {
+                pastNotification = sbn;
+                manager.release();
+                return;
+            }
 
-        Notification notification = sbn.getNotification();
-        Bundle extra = notification.extras;
-        Date time = Calendar.getInstance().getTime();
-        String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
+            Notification notification = sbn.getNotification();
+            Bundle extra = notification.extras;
+            Date time = Calendar.getInstance().getTime();
+            String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
 
-        boolean isLogging = BuildConfig.DEBUG;
+            boolean isLogging = BuildConfig.DEBUG;
 
-        if (!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
-            String mode = prefs.getString("service", "");
-            if (mode.equals("send") || mode.equals("hybrid")) {
-                String TITLE = extra.getString(Notification.EXTRA_TITLE);
-                String TEXT = extra.getString(Notification.EXTRA_TEXT);
-                String PackageName = sbn.getPackageName();
+            if (!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
+                String mode = prefs.getString("service", "");
+                if (mode.equals("send") || mode.equals("hybrid")) {
+                    String TITLE = extra.getString(Notification.EXTRA_TITLE);
+                    String TEXT = extra.getString(Notification.EXTRA_TEXT);
+                    String PackageName = sbn.getPackageName();
 
-                if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))))
-                    return;
-                else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
-                    sendSmsNotification(isLogging, PackageName, time);
-                } else if(prefs.getBoolean("UseReplyTelecom", false) && getSystemDialerApp(this).equals(PackageName)){
-                    if(prefs.getBoolean("UseCallLog", false)) sendTelecomNotification(isLogging, PackageName, time);
-                    else return;
-                } else if (isWhitelist(PackageName)) {
-                    if (prefs.getBoolean("StrictStringNull", false) && (TITLE == null || TEXT == null))
+                    if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main")))) {
+                        manager.release();
                         return;
-                    if (isBannedWords(TEXT, TITLE) || isIntervalNotGaped(isLogging, PackageName, time))
-                        return;
-                    new Thread(() -> {
-                        try {
-                            JSONArray array = new JSONArray();
-                            JSONObject object = new JSONObject();
-                            String originString = logPrefs.getString("sendLogs", "");
-
-                            if (!originString.equals("")) array = new JSONArray(originString);
-                            object.put("date", DATE);
-                            object.put("package", PackageName);
-                            object.put("title", extra.getString(Notification.EXTRA_TITLE));
-                            object.put("text", extra.getString(Notification.EXTRA_TEXT));
-                            array.put(object);
-                            logPrefs.edit().putString("sendLogs", array.toString()).apply();
-
-                            if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
-                                int a = array.length() - prefs.getInt("HistoryLimit", 150);
-                                for (int i = 0; i < a; i++) {
-                                    array.remove(i);
-                                }
-                                logPrefs.edit().putString("sendLogs", array.toString()).apply();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                    } else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
+                        sendSmsNotification(isLogging, PackageName, time);
+                    } else if (prefs.getBoolean("UseReplyTelecom", false) && getSystemDialerApp(this).equals(PackageName)) {
+                        if (prefs.getBoolean("UseCallLog", false))
+                            sendTelecomNotification(isLogging, PackageName, time);
+                        else {
+                            manager.release();
+                            return;
                         }
-                    }).start();
-                    sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT);
-                }
+                    } else if (isWhitelist(PackageName)) {
+                        if (prefs.getBoolean("StrictStringNull", false) && (TITLE == null || TEXT == null)) {
+                            manager.release();
+                            return;
+                        }
+                        if (isBannedWords(TEXT, TITLE) || isIntervalNotGaped(isLogging, PackageName, time)) {
+                            manager.release();
+                            return;
+                        }
 
-                if(queryAccessCount > prefs.getInt("IntervalQueryGCTrigger", 50)) {
-                    QueryGC();
-                    queryAccessCount = 0;
+                        new Thread(() -> {
+                            try {
+                                JSONArray array = new JSONArray();
+                                JSONObject object = new JSONObject();
+                                String originString = logPrefs.getString("sendLogs", "");
+
+                                if (!originString.equals("")) array = new JSONArray(originString);
+                                object.put("date", DATE);
+                                object.put("package", PackageName);
+                                object.put("title", extra.getString(Notification.EXTRA_TITLE));
+                                object.put("text", extra.getString(Notification.EXTRA_TEXT));
+                                array.put(object);
+                                logPrefs.edit().putString("sendLogs", array.toString()).apply();
+
+                                if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
+                                    int a = array.length() - prefs.getInt("HistoryLimit", 150);
+                                    for (int i = 0; i < a; i++) {
+                                        array.remove(i);
+                                    }
+                                    logPrefs.edit().putString("sendLogs", array.toString()).apply();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+                        sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT);
+                    }
+
+                    if (queryAccessCount > prefs.getInt("IntervalQueryGCTrigger", 50)) {
+                        QueryGC();
+                        queryAccessCount = 0;
+                    }
                 }
             }
+
+            pastNotification = sbn;
         }
-        pastNotification = sbn;
     }
 
     public static void sendFindTaskNotification(Context context) {
         boolean isLogging = BuildConfig.DEBUG;
         Date date = Calendar.getInstance().getTime();
-        if(prefs == null) prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        if (prefs == null)
+            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         int timeInterval = prefs.getInt("IntervalTime", 150);
 
         if (isLogging)
-            Log.d("IntervalCalculate", "Package" + context.getPackageName() + "/Calculated(ms):" + (date.getTime() - intervalTimestamp));
+            Log.d("IntervalCalculate", "Package " + context.getPackageName() + "/Calculated(ms):" + (date.getTime() - intervalTimestamp));
         if (intervalTimestamp != 0 && date.getTime() - intervalTimestamp <= timeInterval) {
             intervalTimestamp = date.getTime();
             return;
@@ -294,13 +316,13 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private void sendTelecomNotification(Boolean isLogging, String PackageName, Date time) {
-        Cursor cursor = getContentResolver().query(android.provider.CallLog.Calls.CONTENT_URI,null, android.provider.CallLog.Calls.TYPE+"="+ CallLog.Calls.INCOMING_TYPE, null,null);
+        Cursor cursor = getContentResolver().query(android.provider.CallLog.Calls.CONTENT_URI, null, android.provider.CallLog.Calls.TYPE + "=" + CallLog.Calls.INCOMING_TYPE, null, null);
         cursor.moveToFirst();
         String address = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.DATE)))));
         cursor.close();
 
-        if(isTelecomIntervalGaped(address, time)) {
+        if (isTelecomIntervalGaped(address, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
             String TOPIC = "/topics/" + prefs.getString("UID", "");
@@ -326,8 +348,9 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     public void sendTelecomNotification(Context context, Boolean isLogging, String address) {
-        if(prefs == null) prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
-        if(!prefs.getBoolean("UseCallLog", false)) {
+        if (prefs == null)
+            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        if (!prefs.getBoolean("UseCallLog", false)) {
             Date time = Calendar.getInstance().getTime();
             String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
             String PackageName = getSystemDialerApp(context);
@@ -366,7 +389,7 @@ public class NotiListenerService extends NotificationListenerService {
         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow("date")))));
         cursor.close();
 
-        if(isSmsIntervalGaped(address, message, time)) {
+        if (isSmsIntervalGaped(address, message, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
             String TOPIC = "/topics/" + prefs.getString("UID", "");
@@ -400,7 +423,7 @@ public class NotiListenerService extends NotificationListenerService {
             if (prefs.getBoolean("IconUseNotification", false)) {
                 Context packageContext = createPackageContext(PackageName, CONTEXT_IGNORE_SECURITY);
 
-                if(Build.VERSION.SDK_INT > 22) {
+                if (Build.VERSION.SDK_INT > 22) {
                     Icon LargeIcon = notification.getLargeIcon();
                     Icon SmallIcon = notification.getSmallIcon();
 
@@ -414,8 +437,9 @@ public class NotiListenerService extends NotificationListenerService {
                     Bitmap LargeIcon = notification.largeIcon;
                     int SmallIcon = notification.icon;
 
-                    if(LargeIcon != null) ICON = LargeIcon;
-                    else if(SmallIcon != 0) ICON = getBitmapFromDrawable(packageContext.getDrawable(SmallIcon));
+                    if (LargeIcon != null) ICON = LargeIcon;
+                    else if (SmallIcon != 0)
+                        ICON = getBitmapFromDrawable(packageContext.getDrawable(SmallIcon));
                 }
             } else {
                 ICON = getBitmapFromDrawable(pm.getApplicationIcon(PackageName));
@@ -474,10 +498,12 @@ public class NotiListenerService extends NotificationListenerService {
             notificationBody.put("icon", ICONS);
 
             int dataLimit = prefs.getInt("DataLimit", 4096);
+            boolean isLimit = notificationBody.toString().length() < dataLimit - 20 || prefs.getBoolean("UseSplitData", false);
+
             notificationHead.put("to", TOPIC);
             notificationHead.put("android", new JSONObject().put("priority", "high"));
             notificationHead.put("priority", 10);
-            notificationHead.put("data", notificationBody.toString().length() < dataLimit - 20 ? notificationBody : notificationBody.put("icon", "none"));
+            notificationHead.put("data", isLimit ? notificationBody : notificationBody.put("icon", "none"));
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }
@@ -513,9 +539,9 @@ public class NotiListenerService extends NotificationListenerService {
                 int index = -1;
                 TelecomQuery object = null;
 
-                for(int i = 0;i < telecomQuery.size(); i++) {
+                for (int i = 0; i < telecomQuery.size(); i++) {
                     object = telecomQuery.get(i);
-                    if(object.getNumber().equals(Number)) {
+                    if (object.getNumber().equals(Number)) {
                         index = i;
                         break;
                     }
@@ -524,9 +550,9 @@ public class NotiListenerService extends NotificationListenerService {
                 query.setNumber(Number);
                 query.setTimeStamp(time.getTime());
 
-                if(index > -1) {
+                if (index > -1) {
                     telecomQuery.set(index, query);
-                    if(time.getTime() - object.getTimeStamp() <= timeInterval) return false;
+                    if (time.getTime() - object.getTimeStamp() <= timeInterval) return false;
                 } else {
                     telecomQuery.add(query);
                 }
@@ -544,9 +570,9 @@ public class NotiListenerService extends NotificationListenerService {
                 int index = -1;
                 SmsQuery object = null;
 
-                for(int i = 0;i < smsIntervalQuery.size(); i++) {
+                for (int i = 0; i < smsIntervalQuery.size(); i++) {
                     object = smsIntervalQuery.get(i);
-                    if(object.getNumber().equals(Number) && object.getContent().equals(Content)) {
+                    if (object.getNumber().equals(Number) && object.getContent().equals(Content)) {
                         index = i;
                         break;
                     }
@@ -556,9 +582,9 @@ public class NotiListenerService extends NotificationListenerService {
                 query.setContent(Content);
                 query.setTimeStamp(time.getTime());
 
-                if(index > -1) {
+                if (index > -1) {
                     smsIntervalQuery.set(index, query);
-                    if(time.getTime() - object.getTimeStamp() <= timeInterval) return false;
+                    if (time.getTime() - object.getTimeStamp() <= timeInterval) return false;
                 } else {
                     smsIntervalQuery.add(query);
                 }
@@ -610,9 +636,11 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     public static void sendNotification(JSONObject notification, String PackageName, Context context) {
-        if(prefs == null) prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        if (prefs == null)
+            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
-            if(!prefs.getString("AuthKey_Pushy", "").equals("")) sendPushyNotification(notification, PackageName, context);
+            if (!prefs.getString("AuthKey_Pushy", "").equals(""))
+                sendPushyNotification(notification, PackageName, context);
         } else sendFCMNotification(notification, PackageName, context);
         System.gc();
     }
@@ -622,38 +650,29 @@ public class NotiListenerService extends NotificationListenerService {
         final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
+        manager.acquire();
 
-        //TODO: implements data split feature
-        if(/* currently disable this block because it's still on developing */ false && prefs.getBoolean("splitData", false)) {
+        if (prefs.getBoolean("UseSplitData", false)) {
             try {
                 String rawData = notification.getString("data");
-                JSONObject rawObject = new JSONObject(rawData);
-                if(rawData.length() > 3584) {
-                    ArrayList<JSONObject> arr = new ArrayList<>();
-                    JSONObject newData = new JSONObject();
-
-                    //TODO: what about single-object's size is bigger than limit?
-                    for (Iterator<String> key = rawObject.keys(); key.hasNext();) {
-                        String name = key.next();
-                        newData.put(name, rawObject.get(name));
-
-                        if(newData.toString().length() > 1536) {
-                            newData.remove(name);
-                            arr.add(newData);
-                            newData = new JSONObject();
-                            newData.put(name, rawObject.get(name));
-                        }
+                if (rawData.length() > 3072) {
+                    String[] arr = rawData.split("(?<=\\G.{1024})");
+                    for(int i = 0;i < arr.length;i++) {
+                        String str = arr[i];
+                        JSONObject obj = new JSONObject();
+                        obj.put("type", "split_data");
+                        obj.put("split_index", i + "/" + arr.length);
+                        obj.put("split_unique", Integer.toString(rawData.hashCode()));
+                        obj.put("split_data", str);
+                        obj.put("device_name", Build.MANUFACTURER + " " + Build.MODEL);
+                        obj.put("device_id", getUniqueID());
+                        Log.d("unique_id", "id: " + rawData.hashCode());
+                        sendFCMNotification(notification.put("data", obj), PackageName, context);
                     }
-
-                    for(JSONObject obj : arr) {
-                        obj.put("splitData", true);
-                        obj.put("splitDataIndex", arr.indexOf(obj));
-                        notification.put("data", obj);
-                        sendFCMNotification(notification, PackageName, context);
-                    }
+                    return;
                 }
-            } catch(JSONException e) {
-                if(BuildConfig.DEBUG) e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
@@ -674,15 +693,19 @@ public class NotiListenerService extends NotificationListenerService {
                 data.put("encrypted", "false");
                 notification.put("data", data);
             }
-        } catch(Exception e) {
-            if(BuildConfig.DEBUG) e.printStackTrace();
+        } catch (Exception e) {
+            if (BuildConfig.DEBUG) e.printStackTrace();
         }
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,FCM_API, notification,
-                response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName),
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, FCM_API, notification,
+                response -> {
+                    Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName);
+                    manager.release();
+                },
                 error -> {
                     Toast.makeText(context, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
                     Log.i(TAG, "onErrorResponse: Didn't work" + " ,package: " + PackageName);
+                    manager.release();
                 }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -700,9 +723,13 @@ public class NotiListenerService extends NotificationListenerService {
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, notification, response -> Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName), error -> {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, notification, response -> {
+            Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName);
+            manager.release();
+        }, error -> {
             Toast.makeText(context, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
             Log.i(TAG, "onErrorResponse: Didn't work: " + new String(error.networkResponse.data, StandardCharsets.UTF_8) + ", package: " + PackageName);
+            manager.release();
         }) {
             @Override
             public Map<String, String> getHeaders() {
