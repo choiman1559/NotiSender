@@ -2,7 +2,6 @@ package com.noti.main.updater.tasks;
 
 import static android.content.Context.MODE_PRIVATE;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,7 +19,6 @@ import com.noti.main.ui.receive.ExitActivity;
 import com.noti.main.updater.UpdaterActivity;
 import com.noti.main.utils.AsyncTask;
 
-@SuppressLint("StaticFieldLeak")
 public class GetPlayVersion extends AsyncTask<Void, String, String> {
     Activity context;
     String packageName;

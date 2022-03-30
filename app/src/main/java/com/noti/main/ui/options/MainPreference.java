@@ -492,7 +492,6 @@ public class MainPreference extends PreferenceFragmentCompat {
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
     private class RegisterForPushNotificationsAsync extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
             try {

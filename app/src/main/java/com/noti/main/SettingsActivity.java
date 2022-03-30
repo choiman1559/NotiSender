@@ -1,6 +1,7 @@
 package com.noti.main;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,9 +9,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
@@ -58,8 +62,15 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
+
+
+
+        Log.d("ver", Build.VERSION.SDK_INT + "");
+        if(Build.VERSION.SDK_INT > 31 && !((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).areNotificationsEnabled()) {
+            requestPermissions(new String[] { "android.permission.POST_NOTIFICATIONS" }, 100);
+        }
+
         if (Build.VERSION.SDK_INT > 28 && !Settings.canDrawOverlays(this)) {
             MaterialAlertDialogBuilder alert_confirm = new MaterialAlertDialogBuilder(this);
             alert_confirm.setMessage("You need to permit overlay permission to use this app")
@@ -125,5 +136,17 @@ public class SettingsActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.content_frame, SettingsActivity.mFragment)
                 .commit();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == 100) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if(Build.VERSION.SDK_INT > 31 && !notificationManager.areNotificationsEnabled()) {
+                Toast.makeText(getApplicationContext(), "Notification permission is needed!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
     }
 }

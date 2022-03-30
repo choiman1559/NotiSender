@@ -1,6 +1,5 @@
 package com.noti.main.updater.tasks;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,7 +25,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-@SuppressLint("StaticFieldLeak")
 public class GetGithubVersion extends AsyncTask<Void, Void, JSONArray> {
     private final Activity context;
 

@@ -9,7 +9,13 @@
         <entry key="app/src/main/res/drawable/dialog_background.xml" value="0.27" />
         <entry key="app/src/main/res/drawable/ic_baseline_account_circle_24.xml" value="0.3333333333333333" />
         <entry key="app/src/main/res/drawable/ic_info_outline_black_24dp.xml" value="0.3333333333333333" />
+        <entry key="app/src/main/res/drawable/ic_launchar.xml" value="0.27" />
+        <entry key="app/src/main/res/drawable/ic_launcher.xml" value="0.27" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.3333333333333333" />
+        <entry key="app/src/main/res/drawable/ic_launcher_splash.xml" value="0.27" />
+        <entry key="app/src/main/res/drawable/ic_launcher_svg.xml" value="0.27" />
+        <entry key="app/src/main/res/drawable/ic_untitled_1_.xml" value="0.27" />
+        <entry key="app/src/main/res/drawable/ic_untitled_2_.xml" value="0.27" />
         <entry key="app/src/main/res/drawable/round_corner.xml" value="0.2962962962962963" />
         <entry key="app/src/main/res/font-v26/inter.xml" value="0.34791666666666665" />
         <entry key="app/src/main/res/font-v26/sans.xml" value="0.2860196665241556" />
@@ -45,6 +51,7 @@
         <entry key="app/src/main/res/layout/main_frame.xml" value="0.16302083333333334" />
         <entry key="app/src/main/res/layout/settings_activity.xml" value="0.13798554652213188" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.3333333333333333" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.27" />
         <entry key="app/src/main/res/xml/account_preferences.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/xml/general_preferences.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/xml/other_preferences.xml" value="0.3177083333333333" />
