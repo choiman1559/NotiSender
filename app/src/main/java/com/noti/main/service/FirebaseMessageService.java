@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -371,9 +372,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         audioManager.setSpeakerphoneOn(true);
 
         if(lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) lastPlayedRingtone.stop();
-        lastPlayedRingtone = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+        lastPlayedRingtone = RingtoneManager.getRingtone(this, RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE));
         if(Build.VERSION.SDK_INT >= 28) {
+            AudioAttributes.Builder audioAttributes = new AudioAttributes.Builder();
+            audioAttributes.setUsage(AudioAttributes.USAGE_ALARM);
+            audioAttributes.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
+
             lastPlayedRingtone.setLooping(true);
+            lastPlayedRingtone.setAudioAttributes(audioAttributes.build());
             lastPlayedRingtone.play();
         } else ringtonePlayedThread.start();
     }

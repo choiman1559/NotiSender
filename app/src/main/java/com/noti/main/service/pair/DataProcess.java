@@ -33,7 +33,9 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.noti.main.R;
+import com.noti.main.receiver.TaskerPairEventKt;
 import com.noti.main.utils.AsyncTask;
+import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -161,6 +163,7 @@ public class DataProcess {
     }
 
     public static void onActionRequested(Map<String, String> map, Context context) {
+        PowerUtils.getInstance(context).acquire();
         String Device_id = map.get("device_id");
         String Device_name = map.get("device_name");
         String actionType = map.get("request_action");
@@ -203,7 +206,7 @@ public class DataProcess {
 
                 case "Trigger tasker event":
                     if (Device_name != null && Device_id != null) {
-                        com.noti.main.receiver.TaskerPairEventKt.callTaskerEvent(Device_name, Device_id, context);
+                        TaskerPairEventKt.callTaskerEvent(Device_name, Device_id, context);
                     }
                     break;
 
