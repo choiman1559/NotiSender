@@ -65,6 +65,7 @@ public class DataProcess {
             notificationBody.put("date", date);
 
             notificationHead.put("to", TOPIC);
+            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
@@ -99,6 +100,7 @@ public class DataProcess {
             if (args.length > 0) notificationBody.put("action_args", dataToSend.toString());
 
             notificationHead.put("to", TOPIC);
+            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
@@ -150,6 +152,7 @@ public class DataProcess {
             notificationBody.put("date", date);
 
             notificationHead.put("to", TOPIC);
+            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
