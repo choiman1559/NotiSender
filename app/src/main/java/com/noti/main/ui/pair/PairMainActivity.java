@@ -40,13 +40,6 @@ public class PairMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pair_main);
 
-        if(Build.VERSION.SDK_INT < 29) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
-            }
-        }
-
         LinearLayout addNewDevice = findViewById(R.id.addNewDevice);
         LinearLayout connectionPreference = findViewById(R.id.connectionPreference);
         TextView deviceNameInfo = findViewById(R.id.deviceNameInfo);
@@ -113,18 +106,6 @@ public class PairMainActivity extends AppCompatActivity {
             baseLayout = view.findViewById(R.id.baseLayout);
             icon = view.findViewById(R.id.icon);
             setting = view.findViewById(R.id.deviceDetail);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == 100) {
-            for (int foo : grantResults) {
-                if (foo != PackageManager.PERMISSION_GRANTED) {
-                    finish();
-                }
-            }
         }
     }
 }

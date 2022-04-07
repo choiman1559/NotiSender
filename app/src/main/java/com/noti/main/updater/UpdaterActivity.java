@@ -133,7 +133,7 @@ public class UpdaterActivity extends AppCompatActivity {
     }
 
     public static void startMainActivity(Context context) {
-        Intent intent = new Intent(context, SettingsActivity.class);
+        Intent intent = new Intent(context, StartActivity.class);
         context.startActivity(intent);
     }
 
