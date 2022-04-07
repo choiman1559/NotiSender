@@ -112,7 +112,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 } catch (GeneralSecurityException e) {
                     Handler mHandler = new Handler(Looper.getMainLooper());
-                    mHandler.postDelayed(() -> Toast.makeText(this, "Error occcured while decrypting data!\nPlease check password and try again!", Toast.LENGTH_SHORT).show(), 0);
+                    mHandler.postDelayed(() -> Toast.makeText(this, "Error occurred while decrypting data!\nPlease check password and try again!", Toast.LENGTH_SHORT).show(), 0);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

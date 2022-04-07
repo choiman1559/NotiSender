@@ -121,6 +121,7 @@ public class SendPreference extends PreferenceFragmentCompat {
         }
     });
 
+    @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         MonetCompat.setup(requireContext());

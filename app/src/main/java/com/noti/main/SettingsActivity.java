@@ -64,9 +64,6 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
 
-
-
-        Log.d("ver", Build.VERSION.SDK_INT + "");
         if(Build.VERSION.SDK_INT > 31 && !((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).areNotificationsEnabled()) {
             requestPermissions(new String[] { "android.permission.POST_NOTIFICATIONS" }, 100);
         }
