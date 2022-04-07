@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:transitionGroup="true"
+    tools:ignore="HardcodedText">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="210dp"
+        android:background="@android:color/transparent"
+        android:fitsSystemWindows="true"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:maxLines="2"
+            app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
+            app:contentScrim="@color/ui_bg_toolbar"
+            app:expandedTitleMarginEnd="24dp"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:scrimAnimationDuration="50"
+            app:scrimVisibleHeightTrigger="160dp"
+            app:statusBarScrim="@android:color/transparent"
+            app:titleCollapseMode="fade">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:minHeight="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIconTint="@color/ui_fg"
+                app:title="Welcome" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="24dp"
+                android:fontFamily="@font/sans"
+                android:text="Before we start,\nWe need to grant some permissions."
+                android:textSize="20sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Permit_Notification"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Notification Permission"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="12dp"
+                android:layout_marginHorizontal="24dp"
+                android:background="@drawable/round_corner"
+                android:textColor="@color/ui_bg"
+                app:iconTint="@color/ui_bg"
+                app:icon="@drawable/ic_fluent_alert_24_regular" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Permit_Overlay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Overlay Permission"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginVertical="12dp"
+                android:layout_marginHorizontal="24dp"
+                android:textColor="@color/ui_bg"
+                app:iconTint="@color/ui_bg"
+                app:icon="@drawable/ic_fluent_cursor_hover_24_regular"
+                android:background="@drawable/round_corner"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Permit_Battery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="battery optimizations"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginVertical="12dp"
+                android:layout_marginHorizontal="24dp"
+                android:textColor="@color/ui_bg"
+                app:iconTint="@color/ui_bg"
+                app:icon="@drawable/ic_fluent_battery_checkmark_24_regular"
+                android:background="@drawable/round_corner"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Permit_File"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="File access permission"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginVertical="12dp"
+                android:layout_marginHorizontal="24dp"
+                android:textColor="@color/ui_bg"
+                app:iconTint="@color/ui_bg"
+                app:icon="@drawable/ic_fluent_folder_24_regular"
+                android:background="@drawable/round_corner"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Permit_PairKey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Configure Pair Key"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginVertical="12dp"
+                android:layout_marginHorizontal="24dp"
+                android:textColor="@color/ui_bg"
+                app:iconTint="@color/ui_bg"
+                app:icon="@drawable/ic_fluent_edit_24_regular"
+                android:background="@drawable/round_corner"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Permit_Alarm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Alarm Access Permission"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginVertical="12dp"
+                android:layout_marginHorizontal="24dp"
+                android:textColor="@color/ui_bg"
+                app:iconTint="@color/ui_bg"
+                app:icon="@drawable/ic_fluent_folder_24_regular"
+                android:background="@drawable/round_corner"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/Start_App"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="start app"
+        android:textColor="@color/ui_bg"
+        android:enabled="false"
+        app:icon="@drawable/ic_fluent_play_24_regular"
+        app:iconTint="@color/ui_bg"
+        app:layout_dodgeInsetEdges="bottom" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
