@@ -25,7 +25,7 @@ import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
 
 import com.noti.main.R
 import com.noti.main.service.pair.DataProcess
-import com.noti.main.ui.ToastHelper
+import com.noti.main.utils.ui.ToastHelper
 
 class TaskerConfigActionHelper(config: TaskerPluginConfig<GetConfigInput>) :
     TaskerPluginConfigHelperNoOutput<GetConfigInput, TaskerConfigActionRunner>(config) {

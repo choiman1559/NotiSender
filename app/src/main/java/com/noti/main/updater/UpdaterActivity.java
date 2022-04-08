@@ -20,7 +20,7 @@ import android.widget.Toast;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.noti.main.R;
-import com.noti.main.SettingsActivity;
+import com.noti.main.StartActivity;
 import com.noti.main.updater.tasks.GetPlayVersion;
 import com.noti.main.updater.tasks.GetGithubVersion;
 import com.noti.main.utils.DetectAppSource;

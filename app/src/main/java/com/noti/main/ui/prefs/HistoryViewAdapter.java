@@ -24,7 +24,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.service.NotiListenerService;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.utils.CompressStringUtil;
 import com.noti.main.utils.ThreadProxy;
 

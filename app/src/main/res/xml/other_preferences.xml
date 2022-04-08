@@ -14,7 +14,7 @@
 
     <PreferenceCategory
         android:title="Tasker Plug-in">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="UseTaskerExtension"
             android:title="Enable Tasker Plugin"
@@ -36,13 +36,13 @@
         android:entryValues="@array/updateChannel"
         android:defaultValue="Automatically specified"
         android:icon="@drawable/ic_fluent_phone_update_checkmark_24_regular"/>
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:key="UseToastInstead"
             android:defaultValue="false"
             android:title="Use Toast instead of Snackbar"
             android:summary="Using Toast to display messages such as warnings within the app"
             android:icon="@drawable/ic_fluent_channel_alert_24_regular"/>
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="UseWiFiSleepPolicy"
             android:title="WiFi sleep policy compliance (Pushy only)"

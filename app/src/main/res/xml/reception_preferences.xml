@@ -49,7 +49,7 @@
 
     <PreferenceCategory
         android:title="Find my device">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="NotReceiveFindDevice"
             android:title="Do not receive Find request"
@@ -59,13 +59,13 @@
 
     <PreferenceCategory
         android:title="Icon reception">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="UseAlternativeIcon"
             android:title="Use the app icon installed on this device"
             android:summary="If the icon data has not been received, then retrieves it from this device."
             android:icon="@drawable/ic_fluent_image_search_24_regular"/>
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="OverrideReceivedIcon"
             android:title="Use alternative icon on any condition"

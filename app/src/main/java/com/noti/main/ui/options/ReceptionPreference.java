@@ -32,7 +32,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 
 public class ReceptionPreference extends PreferenceFragmentCompat {
 

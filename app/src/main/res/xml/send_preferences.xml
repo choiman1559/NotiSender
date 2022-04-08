@@ -6,7 +6,7 @@
             android:key="blacklist"
             android:summary="select apps that you won't send notification"
             android:title="Edit blacklist" />
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="UseWhite"
             android:summary="you can use this option to select only apps to send notification."
@@ -14,7 +14,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Send Icon">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_image_24_regular"
             android:key="SendIcon"
@@ -28,7 +28,7 @@
             android:key="IconRes"
             android:summary="Now : 52 x 52 (Default)"
             android:title="Resolution of icon" />
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="IconUseNotification"
             android:summary="If notification icon isn't exists, app icon will be sent."
@@ -40,19 +40,19 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Telephony Reply">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_chat_24_regular"
             android:key="UseReplySms"
             android:summary="need sms permission"
             android:title="Check SMS from other devices" />
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_call_inbound_24_regular"
             android:key="UseReplyTelecom"
             android:summary="Reply as SMS or opens dialer app"
             android:title="Send incoming call information" />
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="UseCallLog"
             android:summary="Use CallLog instead of TelephonyManager (Debug purpose)"
@@ -60,7 +60,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Interval">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_arrow_autofit_width_24_filled"
             android:key="UseInterval"
@@ -88,7 +88,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Ban Words">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_shape_exclude_24_regular"
             android:key="UseBannedOption"
@@ -101,7 +101,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Default Text">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="StrictStringNull"
             android:summary="Do not send notification if title or message string is null"
@@ -117,7 +117,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Data Encryption">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_lock_shield_24_regular"
             android:key="UseDataEncryption"
@@ -134,7 +134,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Data split">
-        <SwitchPreference
+        <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_split_vertical_24_regular"
             android:key="UseSplitData"

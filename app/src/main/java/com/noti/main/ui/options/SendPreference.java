@@ -32,7 +32,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.DetectAppSource;

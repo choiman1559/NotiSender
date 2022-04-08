@@ -18,7 +18,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
 import com.noti.main.service.NotiListenerService;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 
 public class PairPreference extends PreferenceFragmentCompat  {
 

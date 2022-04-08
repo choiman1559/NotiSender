@@ -24,7 +24,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.ArrayList;
 

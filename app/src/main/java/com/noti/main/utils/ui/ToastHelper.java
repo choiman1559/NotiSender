@@ -1,4 +1,4 @@
-package com.noti.main.ui;
+package com.noti.main.utils.ui;
 
 import static android.content.Context.MODE_PRIVATE;
 

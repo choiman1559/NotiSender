@@ -2,7 +2,7 @@ package com.noti.main.ui.options;
 
 import static android.content.Context.MODE_PRIVATE;
 
-import static com.noti.main.SettingsActivity.mBillingHelper;
+import static com.noti.main.ui.SettingsActivity.mBillingHelper;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -28,7 +28,6 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreference;
 
 import com.application.isradeleon.notify.Notify;
 import com.google.android.gms.auth.api.Auth;
@@ -48,11 +47,12 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.kieronquinn.monetcompat.core.MonetCompat;
 
+import com.kieronquinn.monetcompat.view.MonetSwitch;
 import com.noti.main.R;
-import com.noti.main.SettingsActivity;
+import com.noti.main.ui.SettingsActivity;
 import com.noti.main.ui.AppInfoActivity;
 import com.noti.main.ui.OptionActivity;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.pair.PairMainActivity;
 import com.noti.main.ui.prefs.HistoryActivity;
 import com.noti.main.utils.AsyncTask;
@@ -91,7 +91,7 @@ public class MainPreference extends PreferenceFragmentCompat {
     //General Category
     Preference Login;
     Preference Service;
-    Preference ServiceToggle;
+    MonetSwitch ServiceToggle;
     Preference Server;
     Preference Subscribe;
     Preference ServerInfo;
@@ -203,7 +203,7 @@ public class MainPreference extends PreferenceFragmentCompat {
         Login = findPreference("Login");
         TestRun = findPreference("testNoti");
         Service = findPreference("service");
-        ServiceToggle = findPreference("serviceToggle");
+        ServiceToggle = mContext.findViewById(R.id.serviceToggle);
         Server = findPreference("server");
         Subscribe = findPreference("Subscribe");
         ServerInfo = findPreference("ServerInfo");
@@ -218,7 +218,6 @@ public class MainPreference extends PreferenceFragmentCompat {
                     case BillingHelper.SubscribeID:
                         ToastHelper.show(mContext, "Thanks for purchase!", "OK",ToastHelper.LENGTH_SHORT);
                         ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
-                        ServiceToggle.setSummary("");
                         Subscribe.setVisible(false);
                         new RegisterForPushNotificationsAsync().execute();
                         break;
@@ -258,7 +257,7 @@ public class MainPreference extends PreferenceFragmentCompat {
                 } else {
                     Subscribe.setVisible(true);
                     ServiceToggle.setEnabled(false);
-                    ServiceToggle.setSummary("Needs subscribe to use Pushy server");
+                    ServiceToggle.setChecked(false);
                 }
             } else {
                 Subscribe.setVisible(false);
@@ -266,15 +265,13 @@ public class MainPreference extends PreferenceFragmentCompat {
             }
         } else {
             ServiceToggle.setEnabled(false);
-            if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy") && !mBillingHelper.isSubscribed()) {
-                Subscribe.setVisible(true);
-                ServiceToggle.setSummary("Needs subscribe to use Pushy server");
-            } else Subscribe.setVisible(false);
+            ServiceToggle.setChecked(false);
+            Subscribe.setVisible(prefs.getString("server", "Firebase Cloud Message").equals("Pushy") && !mBillingHelper.isSubscribed());
         }
 
         prefs.registerOnSharedPreferenceChangeListener((p, k) -> {
             if (k.equals("serviceToggle")) {
-                ((SwitchPreference) ServiceToggle).setChecked(prefs.getBoolean("serviceToggle", false));
+                ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
             }
         });
 
@@ -292,15 +289,17 @@ public class MainPreference extends PreferenceFragmentCompat {
                 else {
                     Subscribe.setVisible(true);
                     ServiceToggle.setEnabled(false);
-                    ServiceToggle.setSummary("Needs subscribe to use Pushy server");
+                    ServiceToggle.setChecked(false);
                 }
             } else {
                 ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
-                ServiceToggle.setSummary("");
                 Subscribe.setVisible(false);
             }
             return true;
         });
+
+        ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
+        ServiceToggle.setOnCheckedChangeListener((v, isChecked) -> prefs.edit().putBoolean("serviceToggle", isChecked).apply());
 
         try {
             mContext.getPackageManager().getPackageInfo("com.google.android.wearable.app", 0);

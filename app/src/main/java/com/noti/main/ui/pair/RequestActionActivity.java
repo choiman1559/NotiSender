@@ -14,7 +14,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.Objects;
 

@@ -25,7 +25,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairListener;
-import com.noti.main.ui.ToastHelper;
+import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;

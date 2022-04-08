@@ -42,10 +42,27 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/content_frame"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
 
+        <com.kieronquinn.monetcompat.view.MonetSwitch
+            android:id="@+id/serviceToggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="5dp"
+            android:outlineProvider="none"
+            android:elevation="8dp"
+            android:text="@string/ServiceToggle"
+            android:textSize="20sp"
+            android:backgroundTint="@color/ui_bg" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/content_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

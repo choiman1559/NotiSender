@@ -9,6 +9,7 @@
         <item name="android:navigationBarColor">@color/navigation_bar</item>
         <item name="colorControlActivated">@color/accent</item>
     </style>
+
     <style name="Theme.MonetCompat.Legacy" parent="Theme.AppCompat.DayNight">
         <item name="android:colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>

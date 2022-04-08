@@ -1,9 +1,8 @@
-package com.noti.main;
+package com.noti.main.ui;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -11,13 +10,17 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import com.kieronquinn.monetcompat.app.MonetCompatActivity;
+import com.kieronquinn.monetcompat.view.MonetSwitch;
+import com.noti.main.BuildConfig;
+import com.noti.main.R;
 import com.noti.main.ui.options.MainPreference;
 import com.noti.main.utils.BillingHelper;
 
 import java.util.Calendar;
 import java.util.Locale;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends MonetCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     public static BillingHelper mBillingHelper;
@@ -25,7 +28,6 @@ public class SettingsActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     public static Fragment mFragment;
 
-    @SuppressLint("BatteryLife")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

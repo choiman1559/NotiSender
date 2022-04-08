@@ -8,11 +8,6 @@
             android:summary="@string/UID_default"
             android:title="@string/Login"
             android:icon="@drawable/ic_fluent_inprivate_account_24_regular"/>
-        <SwitchPreference
-            android:defaultValue="false"
-            android:enabled="false"
-            android:key="serviceToggle"
-            android:title="Service on/off" />
         <ListPreference
             android:defaultValue="not selected"
             android:entries="@array/services_shown"

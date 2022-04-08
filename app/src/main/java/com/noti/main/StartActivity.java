@@ -12,10 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.text.InputType;
-import android.view.Gravity;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -23,22 +19,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.installations.FirebaseInstallations;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.sync.protocol.ui.ToastHelper;
-import com.sync.protocol.ui.activity.PairMainActivity;
+import com.noti.main.ui.SettingsActivity;
+import com.noti.main.utils.ui.ToastHelper;
 
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class StartActivity extends AppCompatActivity {
@@ -49,7 +44,6 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_Overlay;
     MaterialButton Permit_Battery;
     MaterialButton Permit_File;
-    MaterialButton Permit_PairKey;
     MaterialButton Permit_Alarm;
 
     ActivityResultLauncher<Intent> startOverlayPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -82,12 +76,12 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
 
+        prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         Permit_Notification = findViewById(R.id.Permit_Notification);
         Permit_Overlay = findViewById(R.id.Permit_Overlay);
         Permit_Battery = findViewById(R.id.Permit_Battery);
         Permit_File = findViewById(R.id.Permit_File);
-        Permit_PairKey = findViewById(R.id.Permit_PairKey);
-        Permit_PairKey = findViewById(R.id.Permit_Alarm)
+        Permit_Alarm = findViewById(R.id.Permit_Alarm);
         Start_App = findViewById(R.id.Start_App);
 
         int count = 0;
@@ -117,12 +111,6 @@ public class StartActivity extends AppCompatActivity {
         Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
         if (sets.contains(getPackageName())) {
             setButtonCompleted(this, Permit_Alarm);
-            count++;
-        }
-
-        prefs = getSharedPreferences(getPackageName() + "_preferences", MODE_PRIVATE);
-        if(!prefs.getString("UID", "").isEmpty()) {
-            setButtonCompleted(this, Permit_PairKey);
             count++;
         }
 
@@ -163,7 +151,7 @@ public class StartActivity extends AppCompatActivity {
             }
         }
 
-        if(count >= 6) {
+        if(count >= 5) {
             startActivity(new Intent(this, SettingsActivity.class));
             finish();
         }
@@ -175,54 +163,13 @@ public class StartActivity extends AppCompatActivity {
         Permit_Battery.setOnClickListener((v) -> {
             if (Build.VERSION.SDK_INT > 22) startBatteryOptimizations.launch(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:" + getPackageName())));
         });
+        Permit_Alarm.setOnClickListener((v) -> startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
         Permit_File.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101));
-        Permit_PairKey.setOnClickListener((v) -> {
-            MaterialAlertDialogBuilder dialog;
-            EditText editText;
-            LinearLayout parentLayout;
-            LinearLayout.LayoutParams layoutParams;
-            dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
-            dialog.setIcon(com.microsoft.fluent.mobile.icons.R.drawable.ic_fluent_edit_24_regular);
-            dialog.setCancelable(false);
-            dialog.setTitle("Input Pairing key");
-            dialog.setMessage("Enter the password to be used for pairing.\n\nPairing is possible only with devices using the same pairing key.\n\nThis option can be changed again later in the Connection Options menu.\n\nPairing key is limited to a maximum of 30 characters.");
-
-            editText = new EditText(this);
-            editText.setInputType(InputType.TYPE_CLASS_TEXT);
-            editText.setHint("Input Pairing key");
-            editText.setGravity(Gravity.START);
-            editText.setText(prefs.getString("UID", ""));
-
-            parentLayout = new LinearLayout(this);
-            layoutParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
-            layoutParams.setMargins(30, 16, 30, 16);
-            editText.setLayoutParams(layoutParams);
-            parentLayout.addView(editText);
-            dialog.setView(parentLayout);
-
-            dialog.setPositiveButton("Apply", (d, w) -> {
-                String value = editText.getText().toString().trim();
-                if (value.equals("")) {
-                    ToastHelper.show(this, "Please Input key","DISMISS", ToastHelper.LENGTH_SHORT);
-                } else if(value.length() > 31) {
-                    ToastHelper.show(this, "Pairing key too long! maximum 30 chars.", "DISMISS",ToastHelper.LENGTH_SHORT);
-                } else {
-                    prefs.edit().putString("UID", value).apply();
-                    FirebaseMessaging.getInstance().subscribeToTopic(value);
-                    setButtonCompleted(this, Permit_PairKey);
-                    checkPermissionsAndEnableComplete();
-                }
-            });
-            dialog.setNegativeButton("Cancel", (d, w) -> { });
-            dialog.show();
-        });
         Start_App.setOnClickListener((v) -> {
-            if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || Permit_PairKey.isEnabled()) {
+            if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || Permit_Alarm.isEnabled()) {
                 ToastHelper.show(this, "Please complete all section!", ToastHelper.LENGTH_SHORT);
             } else {
-                startActivity(new Intent(this, PairMainActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 finish();
             }
         });
@@ -235,7 +182,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
     void checkPermissionsAndEnableComplete() {
-        if(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && !Permit_PairKey.isEnabled() && !Permit_Alarm.isEnabled()) {
+        if(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && !Permit_Alarm.isEnabled()) {
             Start_App.setEnabled(true);
         }
     }
