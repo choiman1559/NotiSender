@@ -8,9 +8,10 @@ Send notifications to other android devices easily
 
 [![version](https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQKUUtefY6l9YGHF0GmQAijrUAUueZcJqwGIA&usqp=CAU)](https://play.google.com/store/apps/details?id=com.noti.main)
 
- ![s1](https://play-lh.googleusercontent.com/WlNFoGxSV-BQEby1JwXiXgeF16NhRNHFtRDfGhgIiajb_1QVdhHFNmmZeTkR7VUixw=w720-h310)
+ ![s1](https://play-lh.googleusercontent.com/Kpnpqw09gCmO-vhmhZRyaJ2F7VWf4R7vtP7BKf0YTEZCLD51o6OAdPqUIfxAm8UFZbM=w720-h310)
  ![s2](https://play-lh.googleusercontent.com/k66WfjR4XgRXT6n_9bv9Ltsf_vR3D31BtHWlf8AZJB_hXsmj48VdZ_LhzoiSexZoAg=w720-h310)
- ![s3](https://play-lh.googleusercontent.com/_2rM0StxYotKVXzyVH2Kn1w_Chcd8jFAPWOZjk-mLwankuCe9C1-d1p2HD37al97mMQ=w720-h310)
+ ![s3](https://play-lh.googleusercontent.com/Ol3H7nOVcxJV7v0sydOXKRqu9C7Ktl45Xt-v2NwMODrMcLb33U7k3yHjNcBRl4U0Ycm7=w720-h310)
+ ![s4](https://play-lh.googleusercontent.com/_2rM0StxYotKVXzyVH2Kn1w_Chcd8jFAPWOZjk-mLwankuCe9C1-d1p2HD37al97mMQ=w720-h310)
 
 ## How-To-Use 
 
