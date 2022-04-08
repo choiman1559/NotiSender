@@ -139,6 +139,6 @@
             android:icon="@drawable/ic_fluent_split_vertical_24_regular"
             android:key="UseSplitData"
             android:summary="If the data is too large to be transmitted, it will be transmitted in fragments."
-            android:title="Use data split transmission" />
+            android:title="Use data split transmission (Unstable)" />
     </PreferenceCategory>
 </PreferenceScreen>

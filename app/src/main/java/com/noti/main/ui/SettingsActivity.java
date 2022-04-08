@@ -28,12 +28,15 @@ public class SettingsActivity extends MonetCompatActivity {
     @SuppressLint("StaticFieldLeak")
     public static Fragment mFragment;
 
+    public static MonetSwitch ServiceToggle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
 
+        ServiceToggle = findViewById(R.id.serviceToggle);
         if (savedInstanceState == null) {
             attachFragment(this, new MainPreference());
         } else {

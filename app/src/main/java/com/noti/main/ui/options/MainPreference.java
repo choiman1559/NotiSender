@@ -2,6 +2,7 @@ package com.noti.main.ui.options;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import static com.noti.main.ui.SettingsActivity.ServiceToggle;
 import static com.noti.main.ui.SettingsActivity.mBillingHelper;
 
 import android.annotation.SuppressLint;
@@ -47,7 +48,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.kieronquinn.monetcompat.core.MonetCompat;
 
-import com.kieronquinn.monetcompat.view.MonetSwitch;
 import com.noti.main.R;
 import com.noti.main.ui.SettingsActivity;
 import com.noti.main.ui.AppInfoActivity;
@@ -91,7 +91,6 @@ public class MainPreference extends PreferenceFragmentCompat {
     //General Category
     Preference Login;
     Preference Service;
-    MonetSwitch ServiceToggle;
     Preference Server;
     Preference Subscribe;
     Preference ServerInfo;
@@ -163,22 +162,22 @@ public class MainPreference extends PreferenceFragmentCompat {
                     }
                 });
 
-        if(prefs.getString("FirebaseIIDPrefix", "").isEmpty()) {
+        if (prefs.getString("FirebaseIIDPrefix", "").isEmpty()) {
             FirebaseInstallations.getInstance().getId().addOnCompleteListener(task -> {
                 if (task.isSuccessful())
                     prefs.edit().putString("FirebaseIIDPrefix", task.getResult()).apply();
             });
         }
 
-        if(prefs.getString("AndroidIDPrefix", "").isEmpty()) {
+        if (prefs.getString("AndroidIDPrefix", "").isEmpty()) {
             prefs.edit().putString("AndroidIDPrefix", Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID)).apply();
         }
 
-        if(prefs.getString("GUIDPrefix", "").isEmpty()) {
+        if (prefs.getString("GUIDPrefix", "").isEmpty()) {
             prefs.edit().putString("GUIDPrefix", UUID.randomUUID().toString()).apply();
         }
 
-        if(prefs.getString("MacIDPrefix", "").isEmpty()) {
+        if (prefs.getString("MacIDPrefix", "").isEmpty()) {
             String interfaceName = "wlan0";
             try {
                 List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
@@ -186,24 +185,23 @@ public class MainPreference extends PreferenceFragmentCompat {
                     if (!intf.getName().equalsIgnoreCase(interfaceName)) continue;
                     byte[] mac = intf.getHardwareAddress();
                     if (mac == null) {
-                        prefs.edit().putString("MacIDPrefix","unknown").apply();
+                        prefs.edit().putString("MacIDPrefix", "unknown").apply();
                         break;
                     }
                     StringBuilder buf = new StringBuilder();
                     for (byte b : mac) buf.append(String.format("%02X:", b));
                     if (buf.length() > 0) buf.deleteCharAt(buf.length() - 1);
-                    prefs.edit().putString("MacIDPrefix",buf.toString()).apply();
+                    prefs.edit().putString("MacIDPrefix", buf.toString()).apply();
                     break;
                 }
             } catch (Exception e) {
-                prefs.edit().putString("MacIDPrefix","unknown").apply();
+                prefs.edit().putString("MacIDPrefix", "unknown").apply();
             }
         }
 
         Login = findPreference("Login");
         TestRun = findPreference("testNoti");
         Service = findPreference("service");
-        ServiceToggle = mContext.findViewById(R.id.serviceToggle);
         Server = findPreference("server");
         Subscribe = findPreference("Subscribe");
         ServerInfo = findPreference("ServerInfo");
@@ -214,9 +212,9 @@ public class MainPreference extends PreferenceFragmentCompat {
         mBillingHelper = BillingHelper.initialize(mContext, new BillingHelper.BillingCallback() {
             @Override
             public void onPurchased(String productId) {
-                switch(productId) {
+                switch (productId) {
                     case BillingHelper.SubscribeID:
-                        ToastHelper.show(mContext, "Thanks for purchase!", "OK",ToastHelper.LENGTH_SHORT);
+                        ToastHelper.show(mContext, "Thanks for purchase!", "OK", ToastHelper.LENGTH_SHORT);
                         ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
                         Subscribe.setVisible(false);
                         new RegisterForPushNotificationsAsync().execute();
@@ -228,7 +226,8 @@ public class MainPreference extends PreferenceFragmentCompat {
                         dialog.setMessage("This donation will be used to improve Noti Sender!");
                         dialog.setIcon(R.drawable.ic_fluent_gift_24_regular);
                         dialog.setCancelable(false);
-                        dialog.setPositiveButton("Close", (dialogInterface, i) -> { });
+                        dialog.setPositiveButton("Close", (dialogInterface, i) -> {
+                        });
                         dialog.show();
                         break;
                 }
