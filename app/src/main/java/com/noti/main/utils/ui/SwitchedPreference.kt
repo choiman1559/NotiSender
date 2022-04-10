@@ -1,6 +1,7 @@
 package com.noti.main.utils.ui
 
 import android.content.Context
+import android.os.Build
 import android.util.AttributeSet
 import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.PreferenceViewHolder
@@ -14,7 +15,7 @@ class SwitchedPreference(context: Context?, attrs: AttributeSet?) :
     private var switchCompat: SwitchCompat? = null
 
     init {
-        widgetLayoutResource = R.layout.item_switch
+        widgetLayoutResource = if(Build.VERSION.SDK_INT > 24) R.layout.item_switch else R.layout.item_switch_v24
     }
 
     override fun setChecked(checked: Boolean) {

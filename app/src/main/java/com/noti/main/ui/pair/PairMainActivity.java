@@ -1,10 +1,8 @@
 package com.noti.main.ui.pair;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
@@ -15,11 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.R;
@@ -56,14 +51,22 @@ public class PairMainActivity extends AppCompatActivity {
         loadDeviceList();
         pairPrefs.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
             if(key.equals("paired_list")) {
-                deviceListLayout.removeViews(0, deviceListLayout.getChildCount());
                 PairMainActivity.this.runOnUiThread(this::loadDeviceList);
             }
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadDeviceList();
+    }
+
     void loadDeviceList() {
         Set<String> list = pairPrefs.getStringSet("paired_list", new HashSet<>());
+        if(list.size() == deviceListLayout.getChildCount()) return;
+        deviceListLayout.removeViews(0, deviceListLayout.getChildCount());
+
         for(String string : list) {
             String[] data = string.split("\\|");
             RelativeLayout layout = (RelativeLayout) View.inflate(PairMainActivity.this, R.layout.cardview_pair_device_setting, null);

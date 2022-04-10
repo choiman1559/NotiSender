@@ -196,6 +196,7 @@ public class NotiListenerService extends NotificationListenerService {
         super.onNotificationPosted(sbn);
 
         Log.d("ddd", sbn.getPackageName());
+        if(manager == null) manager = PowerUtils.getInstance(this);
         manager.acquire();
         synchronized (pastNotificationLock) {
             if (sbn.equals(pastNotification)) {
@@ -650,6 +651,8 @@ public class NotiListenerService extends NotificationListenerService {
         final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
+
+        if(manager == null) manager = PowerUtils.getInstance(context);
         manager.acquire();
 
         if (prefs.getBoolean("UseSplitData", false)) {

@@ -57,8 +57,7 @@
             android:outlineProvider="none"
             android:elevation="8dp"
             android:text="@string/ServiceToggle"
-            android:textSize="20sp"
-            android:backgroundTint="@color/ui_bg" />
+            android:textSize="20sp" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/content_frame"

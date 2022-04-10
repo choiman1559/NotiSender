@@ -105,14 +105,14 @@ public class SendPreference extends PreferenceFragmentCompat {
             if(!isGranted) {
                 int SourceCode = DetectAppSource.detectSource(mContext);
                 if(SourceCode == 1 || SourceCode == 2) {
-                    ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                    ToastHelper.show(mContext, "require read sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
                 } else if (SourceCode == 3) {
                     MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
                     builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
                     builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
                     builder.setNegativeButton("Close", (d, w) -> { }).show();
                 } else {
-                    ToastHelper.show(mContext, "require sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                    ToastHelper.show(mContext, "require read sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
                 }
 
                 ((SwitchPreference) UseReplySms).setChecked(false);

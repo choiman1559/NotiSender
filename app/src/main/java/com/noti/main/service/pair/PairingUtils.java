@@ -179,7 +179,7 @@ public class PairingUtils {
             }
 
             Application.isFindingDeviceToPair = false;
-            FirebaseMessageService.pairingProcessList.remove(info);
+            Application.pairingProcessList.remove(info);
         }
     }
 

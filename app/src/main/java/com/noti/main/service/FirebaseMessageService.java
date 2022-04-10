@@ -64,6 +64,7 @@ import java.util.Map;
 
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
+import static com.noti.main.Application.pairingProcessList;
 import static com.noti.main.service.NotiListenerService.getUniqueID;
 
 public class FirebaseMessageService extends FirebaseMessagingService {
@@ -74,7 +75,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     private static PowerUtils manager;
     public static volatile Ringtone lastPlayedRingtone;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
-    public static ArrayList<PairDeviceInfo> pairingProcessList;
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while(true) {
             if(lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying()) lastPlayedRingtone.play();
@@ -87,7 +87,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
-        pairingProcessList = new ArrayList<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
     }
@@ -124,8 +123,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String type = map.get("type");
         String mode = prefs.getString("service", "");
 
-        if(type != null && mode != null && !prefs.getString("UID", "").equals("")) {
-            if (prefs.getBoolean("serviceToggle", false)) {
+        if(type != null && !prefs.getString("UID", "").equals("")) {
+            if (mode != null && prefs.getBoolean("serviceToggle", false)) {
                 if("split_data".equals(type) && !isDeviceItself(map)) {
                     processSplitData(map, context);
                     return;

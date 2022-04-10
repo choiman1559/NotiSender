@@ -1,6 +1,6 @@
 package com.noti.main.ui.pair;
 
-import static com.noti.main.service.FirebaseMessageService.pairingProcessList;
+import static com.noti.main.Application.pairingProcessList;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
