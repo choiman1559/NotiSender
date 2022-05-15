@@ -32,6 +32,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.R;
+import com.noti.main.ui.prefs.regex.CustomRegexActivity;
 import com.noti.main.utils.ui.ToastHelper;
 
 public class ReceptionPreference extends PreferenceFragmentCompat {
@@ -49,6 +50,8 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
 
     Preference ReceiveDeadline;
     Preference ReceiveCustomDeadline;
+
+    Preference StartRegexAction;
 
     Preference UseAlternativeIcon;
     Preference OverrideReceivedIcon;
@@ -106,6 +109,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
         ReceiveCustomDeadline = findPreference("ReceiveCustomDeadline");
         UseAlternativeIcon = findPreference("UseAlternativeIcon");
         OverrideReceivedIcon = findPreference("OverrideReceivedIcon");
+        StartRegexAction = findPreference("StartRegexAction");
 
         boolean isCustomRingtoneEnabled = prefs.getString("importance","Default").equals("Custom…");
         if (Build.VERSION.SDK_INT >= 26) {
@@ -319,6 +323,10 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 });
                 dialog.setView(view);
                 dialog.show();
+                break;
+
+            case "StartRegexAction":
+                mContext.startActivity(new Intent(mContext, CustomRegexActivity.class));
                 break;
         }
         return super.onPreferenceTreeClick(preference);

@@ -61,6 +61,10 @@
         <item name="android:fontFeatureSettings">cv03, cv04</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
+        <item name="android:dialogTheme">@style/Theme.App.Palette.Dialog</item>
+        <item name="android:alertDialogTheme">@style/Theme.App.Palette.Dialog</item>
+        <item name="alertDialogTheme">@style/Theme.App.Palette.Dialog</item>
     </style>
 
     <style name="Theme.App.Palette.Dialog" parent="Theme.Material3.DayNight.Dialog" >

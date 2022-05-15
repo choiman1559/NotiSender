@@ -42,6 +42,9 @@
 
         <activity android:name=".StartActivity" />
         <activity android:name=".ui.prefs.BlacklistActivity" />
+        <activity android:name=".ui.prefs.regex.CustomRegexActivity"
+            android:theme="@style/Theme.App.Material3"
+            android:windowSoftInputMode="adjustNothing|stateHidden"/>
         <activity android:name=".ui.AppInfoActivity" />
         <activity android:name=".ui.OptionActivity" />
         <activity android:name=".ui.prefs.HistoryActivity" />

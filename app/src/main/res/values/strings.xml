@@ -44,4 +44,6 @@
     <string name="updater_manager_deprecated_message">Since the Manager and the main app have been reintegrated, Noti Sender Manager (com.noti.sender) is deprecated and no longer needed. \n\nYou can delete manager if you wish. Are you want to delete Manager?</string>
     <string name="Start_Activity_Completed">Completed</string>
     <string name="ServiceToggle">Service On/Off</string>
+    <string name="edit_item">Edit Items</string>
+    <string name="playground">Playground</string>
 </resources>

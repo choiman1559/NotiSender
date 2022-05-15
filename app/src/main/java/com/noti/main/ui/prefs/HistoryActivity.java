@@ -92,6 +92,11 @@ public class HistoryActivity extends AppCompatActivity {
         public int getItemCount() {
             return 2;
         }
+
+        @Override
+        public long getItemId(int position) {
+            return mFragments.get(position).hashCode();
+        }
     }
 
     public static class HistoryFragment extends Fragment {

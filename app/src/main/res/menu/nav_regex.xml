@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/page_1"
+        android:enabled="true"
+        android:icon="@drawable/ic_fluent_text_bullet_list_square_edit_24_regular"
+        android:title="@string/edit_item"/>
+    <item
+        android:id="@+id/page_2"
+        android:enabled="true"
+        android:icon="@drawable/ic_fluent_drawer_play_24_regular"
+        android:title="@string/playground"/>
+</menu>

@@ -9,5 +9,9 @@
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_splash</item>
         <item name="android:windowSplashScreenAnimationDuration">1000</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/ui_bg</item>
+
+        <item name="android:dialogTheme">@style/Theme.App.Palette.Dialog</item>
+        <item name="android:alertDialogTheme">@style/Theme.App.Palette.Dialog</item>
+        <item name="alertDialogTheme">@style/Theme.App.Palette.Dialog</item>
     </style>
 </resources>
