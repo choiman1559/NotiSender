@@ -52,10 +52,12 @@ public class CustomRegexActivity extends AppCompatActivity {
                 super.onPageSelected(position);
                 switch(position) {
                     case 0:
+                        navigationView.getMenu().findItem(R.id.page_1).setChecked(true);
                         actionButton.setImageResource(R.drawable.ic_fluent_add_24_regular);
                         break;
 
                     case 1:
+                        navigationView.getMenu().findItem(R.id.page_2).setChecked(true);
                         actionButton.setImageResource(R.drawable.ic_fluent_question_24_filled);
                         break;
                 }
