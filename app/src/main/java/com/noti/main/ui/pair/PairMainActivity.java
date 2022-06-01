@@ -29,6 +29,11 @@ public class PairMainActivity extends AppCompatActivity {
 
     SharedPreferences pairPrefs;
     LinearLayout deviceListLayout;
+    SharedPreferences.OnSharedPreferenceChangeListener prefsListener = (sharedPreferences, key) -> {
+        if(key.equals("paired_list")) {
+            PairMainActivity.this.runOnUiThread(this::loadDeviceList);
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,11 +54,7 @@ public class PairMainActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener((v) -> this.finish());
 
         loadDeviceList();
-        pairPrefs.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
-            if(key.equals("paired_list")) {
-                PairMainActivity.this.runOnUiThread(this::loadDeviceList);
-            }
-        });
+        pairPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.noti.main.ui.prefs.regex;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -62,6 +64,16 @@ public class CustomRegexActivity extends AppCompatActivity {
                         break;
                 }
             }
+        });
+
+        actionButton.setOnClickListener((v) -> {
+            Intent intent;
+            if(viewPager.getCurrentItem() == 0) {
+                intent = new Intent(this, AddActionActivity.class);
+            } else {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/wiki/Custom-Regular-expression-Reference"));
+            }
+            startActivity(intent);
         });
 
         navigationView.setOnItemSelectedListener(item -> {

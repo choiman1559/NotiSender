@@ -16,6 +16,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_svg.xml" value="0.27" />
         <entry key="app/src/main/res/drawable/ic_untitled_1_.xml" value="0.27" />
         <entry key="app/src/main/res/drawable/ic_untitled_2_.xml" value="0.27" />
+        <entry key="app/src/main/res/drawable/more_round_corner.xml" value="0.2685" />
         <entry key="app/src/main/res/drawable/round_corner.xml" value="0.2962962962962963" />
         <entry key="app/src/main/res/drawable/switch_thumb.xml" value="0.2685" />
         <entry key="app/src/main/res/drawable/switch_track.xml" value="0.2685" />
@@ -23,6 +24,7 @@
         <entry key="app/src/main/res/font-v26/sans.xml" value="0.2860196665241556" />
         <entry key="app/src/main/res/font/inter.xml" value="0.34791666666666665" />
         <entry key="app/src/main/res/font/sans.xml" value="0.2860196665241556" />
+        <entry key="app/src/main/res/layout/activity_add_action.xml" value="0.2611111111111111" />
         <entry key="app/src/main/res/layout/activity_appinfo.xml" value="0.15" />
         <entry key="app/src/main/res/layout/activity_appinfo_actiity.xml" value="0.15364583333333334" />
         <entry key="app/src/main/res/layout/activity_appinfo_v25.xml" value="0.15072639225181597" />
@@ -51,7 +53,7 @@
         <entry key="app/src/main/res/layout/cardview_history.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/layout/cardview_pair_device.xml" value="0.22" />
         <entry key="app/src/main/res/layout/cardview_pair_device_setting.xml" value="0.2" />
-        <entry key="app/src/main/res/layout/cardview_regex_item.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/cardview_regex_item.xml" value="0.5" />
         <entry key="app/src/main/res/layout/dialog_receive_deadline.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_history.xml" value="0.3177083333333333" />
         <entry key="app/src/main/res/layout/fragment_list_regex.xml" value="0.11347517730496454" />

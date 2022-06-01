@@ -13,6 +13,14 @@ public class QuickSettingService extends TileService {
     private Tile tile;
     private SharedPreferences prefs;
 
+    SharedPreferences.OnSharedPreferenceChangeListener prefsListener = (sharedPreferences, key) -> {
+        if(key.equals("serviceToggle")) {
+            if(prefs.getString("UID","").equals("")) tile.setState(Tile.STATE_UNAVAILABLE);
+            else tile.setState(prefs.getBoolean("serviceToggle",false) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
+            tile.updateTile();
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -27,13 +35,7 @@ public class QuickSettingService extends TileService {
         else tile.setState(prefs.getBoolean("serviceToggle",false) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
         tile.updateTile();
 
-        prefs.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
-            if(key.equals("serviceToggle")) {
-                if(prefs.getString("UID","").equals("")) tile.setState(Tile.STATE_UNAVAILABLE);
-                else tile.setState(prefs.getBoolean("serviceToggle",false) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
-                tile.updateTile();
-            }
-        });
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener);
     }
 
     @Override

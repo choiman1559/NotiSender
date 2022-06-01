@@ -3,9 +3,7 @@ package com.noti.main.ui.prefs.regex;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -19,7 +17,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.noti.main.R;
 import com.noti.main.utils.ui.ToastHelper;
@@ -51,12 +48,6 @@ public class PlaygroundFragment extends Fragment {
         SharedPreferences prefs = mContext.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
         ProgressBar progress = mContext.findViewById(R.id.progress);
         progress.setVisibility(View.GONE);
-
-        FloatingActionButton actionButton = mContext.findViewById(R.id.Button_Action);
-        actionButton.setOnClickListener((v) -> {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/wiki/Custom-Regular-expression-Reference"));
-            mContext.startActivity(browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        });
 
         TextInputEditText titleValue = view.findViewById(R.id.titleValue);
         TextInputEditText contentValue = view.findViewById(R.id.contentValue);
@@ -98,7 +89,7 @@ public class PlaygroundFragment extends Fragment {
             data.DEVICE_NAME = getText(deviceNameValue);
             data.DATE = getText(dateValue);
 
-            RegexInterpreter.evalRegex(mContext, getText(exprValue), data, result -> ToastHelper.show(mContext, "Eval Result is: " + result, ToastHelper.LENGTH_SHORT));
+            RegexInterpreter.evalRegex(mContext, getText(exprValue), data, result -> ToastHelper.show(mContext, "Eval Result is: " + (boolean) result, ToastHelper.LENGTH_SHORT));
         });
     }
 

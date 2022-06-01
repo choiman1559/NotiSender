@@ -76,6 +76,12 @@ public class MainPreference extends PreferenceFragmentCompat {
     FirebaseFirestore mFirebaseFirestore;
     Activity mContext;
 
+    SharedPreferences.OnSharedPreferenceChangeListener prefsListener = (p, k) -> {
+        if (k.equals("serviceToggle")) {
+            ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
+        }
+    };
+
     ActivityResultLauncher<Intent> startAccountTask = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if(result.getData() != null) {
             GoogleSignInResult loginResult = Auth.GoogleSignInApi.getSignInResultFromIntent(result.getData());
@@ -268,11 +274,7 @@ public class MainPreference extends PreferenceFragmentCompat {
             Subscribe.setVisible(prefs.getString("server", "Firebase Cloud Message").equals("Pushy") && !mBillingHelper.isSubscribed());
         }
 
-        prefs.registerOnSharedPreferenceChangeListener((p, k) -> {
-            if (k.equals("serviceToggle")) {
-                ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
-            }
-        });
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
         Service.setSummary("Now : " + prefs.getString("service", "not selected"));
         Service.setOnPreferenceChangeListener((p, n) -> {

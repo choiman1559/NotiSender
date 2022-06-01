@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ImageDecoder;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -19,6 +20,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -42,6 +44,7 @@ import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceStatus;
 import com.noti.main.service.pair.PairListener;
 import com.noti.main.service.pair.PairingUtils;
+import com.noti.main.ui.prefs.regex.RegexInterpreter;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
 import com.noti.main.ui.receive.TelecomViewActivity;
@@ -61,6 +64,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
@@ -72,6 +76,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     SharedPreferences prefs;
     SharedPreferences logPrefs;
     SharedPreferences pairPrefs;
+    SharedPreferences regexPrefs;
+
     private static PowerUtils manager;
     public static volatile Ringtone lastPlayedRingtone;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
@@ -87,6 +93,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
+        regexPrefs = getSharedPreferences("com.noti.main_regex", MODE_PRIVATE);
         manager = PowerUtils.getInstance(this);
         manager.acquire();
     }
@@ -577,20 +584,88 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setGroupSummary(true)
                 .setAutoCancel(true);
 
-        if(Icon != null) builder.setLargeIcon(Icon);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setSmallIcon(R.drawable.ic_notification);
-            CharSequence channelName = getString(R.string.notify_channel_name);
-            String description = getString(R.string.notify_channel_description);
-            NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
+        String regexData = regexPrefs.getString("RegexData", "");
+        if(regexData.isEmpty()) {
+            if(Icon != null) builder.setLargeIcon(Icon);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.setSmallIcon(R.drawable.ic_notification);
+                CharSequence channelName = getString(R.string.notify_channel_name);
+                String description = getString(R.string.notify_channel_description);
+                NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
 
-            channel.setDescription(description);
-            assert notificationManager != null;
-            notificationManager.createNotificationChannel(channel);
-        } else builder.setSmallIcon(R.mipmap.ic_notification);
+                channel.setDescription(description);
+                assert notificationManager != null;
+                notificationManager.createNotificationChannel(channel);
+            } else builder.setSmallIcon(R.mipmap.ic_notification);
 
-        notificationManager.notify(uniqueCode, builder.build());
-        playRingtoneAndVibrate();
+            notificationManager.notify(uniqueCode, builder.build());
+            playRingtoneAndVibrate();
+        } else {
+            try {
+                JSONArray array = new JSONArray(regexData);
+                String[] regexArray = new String[array.length()];
+                RegexInterpreter.DataType[] dataArray = new RegexInterpreter.DataType[array.length()];
+
+                for(int i = 0; i < array.length(); i++) {
+                    JSONObject object = array.getJSONObject(i);
+                    String regex = object.getBoolean("enabled") ? object.getString("regex") : "false";
+                    RegexInterpreter.DataType data = new RegexInterpreter.DataType();
+                    data.TITLE = title;
+                    data.CONTENT = content;
+                    data.DEVICE_NAME = Device_name;
+                    data.PACKAGE_NAME = Package;
+                    data.APP_NAME = AppName;
+                    data.DATE = Date;
+
+                    regexArray[i] = regex;
+                    dataArray[i] = data;
+                }
+
+                AtomicReference<Bitmap> finalIcon = new AtomicReference<>(Icon);
+                int finalUniqueCode = uniqueCode;
+                RegexInterpreter.evalRegexWithArray(this, regexArray, dataArray, (obj) -> {
+                    String bitmapUri = "";
+                    String ringtoneUri = "";
+
+                    int targetIndex =  Integer.parseInt((String) obj);
+                    if(targetIndex > -1) {
+                        try {
+                            JSONObject object = array.getJSONObject(targetIndex);
+                            if(object.has("bitmap")) bitmapUri = object.getString("bitmap");
+                            if(object.has("ringtone")) ringtoneUri = object.getString("ringtone");
+
+                            if(!bitmapUri.isEmpty()) {
+                                Uri uri = Uri.parse(bitmapUri);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                    finalIcon.set(ImageDecoder.decodeBitmap(ImageDecoder.createSource(FirebaseMessageService.this.getContentResolver(), uri)));
+                                } else {
+                                    finalIcon.set(MediaStore.Images.Media.getBitmap(FirebaseMessageService.this.getContentResolver(), uri));
+                                }
+                            }
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if(finalIcon.get() != null) builder.setLargeIcon(finalIcon.get());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        builder.setSmallIcon(R.drawable.ic_notification);
+                        CharSequence channelName = getString(R.string.notify_channel_name);
+                        String description = getString(R.string.notify_channel_description);
+                        NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
+
+                        channel.setDescription(description);
+                        assert notificationManager != null;
+                        notificationManager.createNotificationChannel(channel);
+                    } else builder.setSmallIcon(R.mipmap.ic_notification);
+
+                    notificationManager.notify(finalUniqueCode, builder.build());
+                    playRingtoneAndVibrate(ringtoneUri);
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -663,7 +738,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     private void playRingtoneAndVibrate() {
-        if(prefs.getString("importance","Default").equals("Custom…")) {
+        playRingtoneAndVibrate("");
+    }
+
+    private void playRingtoneAndVibrate(String mediaUri) {
+        if(!mediaUri.isEmpty() || prefs.getString("importance","Default").equals("Custom…")) {
 
             int VibrationRunningTimeValue = prefs.getInt("VibrationRunningTime", 1000);
             if(VibrationRunningTimeValue > 0) {
@@ -677,7 +756,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             }
 
             Ringtone r;
-            String s = prefs.getString("CustomRingtone", "");
+            String s = mediaUri.isEmpty() ? mediaUri : prefs.getString("CustomRingtone", "");
             DocumentFile AudioMedia = DocumentFile.fromSingleUri(this, Uri.parse(s));
             if (!s.isEmpty() && AudioMedia != null && AudioMedia.exists())
                 r = RingtoneManager.getRingtone(this, AudioMedia.getUri());

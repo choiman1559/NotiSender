@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,24 @@ import org.json.JSONException;
 
 public class RegexListFragment extends Fragment {
     Activity mContext;
-    SharedPreferences regexPrefs;
+    static SharedPreferences regexPrefs;
+
+    @SuppressLint("StaticFieldLeak")
+    static RegexItemAdapter adapter;
+
+    static SharedPreferences.OnSharedPreferenceChangeListener prefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+            if(s.equals("RegexData")) {
+                try {
+                    adapter.array = new JSONArray(regexPrefs.getString("RegexData", ""));
+                    new Handler().post(adapter::notifyDataSetChanged);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -42,7 +60,7 @@ public class RegexListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        regexPrefs = mContext.getSharedPreferences("CustomRegex", Context.MODE_PRIVATE);
+        regexPrefs = mContext.getSharedPreferences("com.noti.main_regex", Context.MODE_PRIVATE);
         ProgressBar progress = mContext.findViewById(R.id.progress);
         RecyclerView listView = view.findViewById(R.id.listView);
 
@@ -56,20 +74,10 @@ public class RegexListFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            RegexItemAdapter adapter = new RegexItemAdapter(mContext, array);
+            adapter = new RegexItemAdapter(mContext, array);
             listView.setAdapter(adapter);
             listView.setLayoutManager(new LinearLayoutManagerWrapper(mContext));
-
-            regexPrefs.registerOnSharedPreferenceChangeListener((sharedPreferences, s) -> {
-                if(s.equals("RegexData")) {
-                    try {
-                        adapter.array = new JSONArray(regexPrefs.getString("RegexData", ""));
-                        adapter.notifyDataSetChanged();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+            regexPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
         });
     }
 

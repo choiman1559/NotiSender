@@ -45,6 +45,8 @@
         <activity android:name=".ui.prefs.regex.CustomRegexActivity"
             android:theme="@style/Theme.App.Material3"
             android:windowSoftInputMode="adjustNothing|stateHidden"/>
+        <activity android:name=".ui.prefs.regex.AddActionActivity"
+            android:windowSoftInputMode="adjustNothing|stateHidden"/>
         <activity android:name=".ui.AppInfoActivity" />
         <activity android:name=".ui.OptionActivity" />
         <activity android:name=".ui.prefs.HistoryActivity" />
@@ -55,7 +57,6 @@
         <activity android:name=".ui.receive.TelecomViewActivity"
         android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.receive.ExitActivity" />
-
         <activity android:name=".ui.pair.PairAcceptActivity"
             android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.pair.PairingActivity"/>
