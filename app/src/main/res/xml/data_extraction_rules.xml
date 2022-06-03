@@ -5,6 +5,6 @@
         <include domain="sharedpref" path="com.noti.main_logs.xml"/>
         <include domain="sharedpref" path="Whitelist.xml"/>
         <include domain="sharedpref" path="Blacklist.xml"/>
-        <include domain="sharedpref" path="CustomRegex.xml"/>
+        <include domain="sharedpref" path="com.noti.main_regex.xml"/>
     </cloud-backup>
 </data-extraction-rules>

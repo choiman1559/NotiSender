@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="deploymentTargetDropDown">
+    <multipleDevicesSelectedInDropDown value="true" />
     <runningDeviceTargetsSelectedWithDialog>
       <Target>
         <type value="RUNNING_DEVICE_TARGET" />
         <deviceKey>
           <Key>
             <type value="SERIAL_NUMBER" />
-            <value value="adb-1f55bc1a-R8wXGJ._adb-tls-connect._tcp" />
+            <value value="adb-R5CR30T51RX-t7qbdt._adb-tls-connect._tcp" />
           </Key>
         </deviceKey>
       </Target>
