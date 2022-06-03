@@ -608,7 +608,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
                 for(int i = 0; i < array.length(); i++) {
                     JSONObject object = array.getJSONObject(i);
-                    String regex = object.getBoolean("enabled") ? object.getString("regex") : "false";
+                    boolean isEnabled = object.optBoolean("enabled");
+
+                    String regex = isEnabled ? object.getString("regex") : "false";
                     RegexInterpreter.DataType data = new RegexInterpreter.DataType();
                     data.TITLE = title;
                     data.CONTENT = content;
@@ -756,7 +758,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             }
 
             Ringtone r;
-            String s = mediaUri.isEmpty() ? mediaUri : prefs.getString("CustomRingtone", "");
+            String s = mediaUri.isEmpty() ? prefs.getString("CustomRingtone", "") : mediaUri;
             DocumentFile AudioMedia = DocumentFile.fromSingleUri(this, Uri.parse(s));
             if (!s.isEmpty() && AudioMedia != null && AudioMedia.exists())
                 r = RingtoneManager.getRingtone(this, AudioMedia.getUri());

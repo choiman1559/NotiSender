@@ -82,6 +82,7 @@ public class AddActionActivity extends AppCompatActivity {
         }
     });
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,9 +196,12 @@ public class AddActionActivity extends AppCompatActivity {
 
                     if (index != -1) {
                         array.put(index, jsonObject);
-                    } else array.put(jsonObject);
+                    } else {
+                        array.put(jsonObject);
+                    }
 
                     regexPrefs.edit().putString("RegexData", array.toString()).apply();
+                    setResult(1, new Intent().putExtra("index", index));
                     AddActionActivity.this.finish();
                 } catch (Exception e) {
                     e.printStackTrace();

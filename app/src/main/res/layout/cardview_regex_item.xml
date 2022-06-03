@@ -19,30 +19,48 @@
         app:cardCornerRadius="24dp"
         app:cardElevation="3dp">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="8dp">
+            android:layout_marginVertical="16dp">
 
-            <TextView
-                android:id="@+id/Title"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Change icon if Hello"
-                android:textAppearance="?attr/textAppearanceTitleLarge"
-                android:textSize="20sp"
-                android:maxEms="20"/>
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Label or Title"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textSize="20sp"
+                    android:singleLine="true"
+                    android:maxEms="20"/>
+
+                <TextView
+                    android:id="@+id/taskDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No action specified"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:maxEms="20"/>
+            </LinearLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/Enabled"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:checked="false"
                 android:thumb="@drawable/switch_thumb"
                 app:track="@drawable/switch_track"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"/>
-        </LinearLayout>
+                android:layout_alignParentEnd="true"
+                android:gravity="center"/>
+        </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

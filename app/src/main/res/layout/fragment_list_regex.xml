@@ -4,15 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/listView"
+        android:layout_marginTop="5dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listView"
-            android:layout_marginTop="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:layout_height="match_parent" />
 </RelativeLayout>

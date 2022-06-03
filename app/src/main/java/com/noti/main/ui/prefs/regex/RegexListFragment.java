@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,9 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,30 +24,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 public class RegexListFragment extends Fragment {
-    Activity mContext;
+
+    AppCompatActivity mContext;
     static SharedPreferences regexPrefs;
+    private ItemTouchHelper mItemTouchHelper;
 
     @SuppressLint("StaticFieldLeak")
     static RegexItemAdapter adapter;
 
-    static SharedPreferences.OnSharedPreferenceChangeListener prefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-            if(s.equals("RegexData")) {
-                try {
-                    adapter.array = new JSONArray(regexPrefs.getString("RegexData", ""));
-                    new Handler().post(adapter::notifyDataSetChanged);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof Activity) mContext = (Activity) context;
+        if (context instanceof AppCompatActivity) mContext = (AppCompatActivity) context;
         else throw new RuntimeException("Can't get Activity instanceof Context!");
     }
 
@@ -74,10 +63,13 @@ public class RegexListFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            adapter = new RegexItemAdapter(mContext, array);
+            adapter = new RegexItemAdapter(mContext, array, viewHolder -> mItemTouchHelper.startDrag(viewHolder));
             listView.setAdapter(adapter);
             listView.setLayoutManager(new LinearLayoutManagerWrapper(mContext));
-            regexPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
+
+            ItemTouchHelper.Callback callback = new ItemTouchCallback(adapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(listView);
         });
     }
 

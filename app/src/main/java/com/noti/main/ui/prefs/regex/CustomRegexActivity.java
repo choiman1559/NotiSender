@@ -1,10 +1,16 @@
 package com.noti.main.ui.prefs.regex;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,19 +27,42 @@ import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.noti.main.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CustomRegexActivity extends AppCompatActivity {
 
     private static final List<Fragment> mFragments = new ArrayList<>();
+    public static ActivityResultLauncher<Intent> startAddOptionActivity;
+    SharedPreferences regexPrefs;
 
-    @SuppressLint("NonConstantResourceId")
+    @SuppressLint({"NonConstantResourceId", "NotifyDataSetChanged"})
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         DynamicColors.applyToActivityIfAvailable(this);
         setContentView(R.layout.activity_regex);
+
+        regexPrefs = getSharedPreferences("com.noti.main_regex", Context.MODE_PRIVATE);
+        startAddOptionActivity = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            try {
+                Intent data = result.getData();
+                if (data != null && data.hasExtra("index")) {
+                    RegexListFragment.adapter.array = new JSONArray(regexPrefs.getString("RegexData", ""));
+                    int index = data.getIntExtra("index", -1);
+                    if (index > -1)
+                        new Handler(getMainLooper()).post(() -> RegexListFragment.adapter.notifyItemChanged(index));
+                    else
+                        new Handler(getMainLooper()).post(() -> RegexListFragment.adapter.notifyDataSetChanged());
+                    Log.d("ddd", index + "");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
 
         mFragments.add(new RegexListFragment());
         mFragments.add(new PlaygroundFragment());
@@ -73,7 +102,7 @@ public class CustomRegexActivity extends AppCompatActivity {
             } else {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/wiki/Custom-Regular-expression-Reference"));
             }
-            startActivity(intent);
+            startAddOptionActivity.launch(intent);
         });
 
         navigationView.setOnItemSelectedListener(item -> {
