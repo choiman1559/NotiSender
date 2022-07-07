@@ -60,13 +60,16 @@ public class AppInfoActivity extends AppCompatActivity {
         }
 
         Button GoToGit = findViewById(R.id.gotogit);
-        GoToGit.setOnClickListener(v -> startActivity());
+        GoToGit.setOnClickListener(v -> startUrlActivity("https://github.com/choiman1559/NotiSender"));
+
+        Button PrivacyPolicy = findViewById(R.id.privacy);
+        PrivacyPolicy.setOnClickListener(v -> startUrlActivity("https://github.com/choiman1559/NotiSender/blob/master/PrivacyPolicy"));
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener((v) -> this.finish());
     }
 
-    void startActivity() {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender")));
+    void startUrlActivity(String url) {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
     }
 }

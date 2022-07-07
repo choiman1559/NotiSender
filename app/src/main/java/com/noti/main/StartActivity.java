@@ -12,6 +12,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -19,11 +22,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.installations.FirebaseInstallations;
@@ -33,6 +38,7 @@ import com.noti.main.utils.ui.ToastHelper;
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,6 +51,7 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_Battery;
     MaterialButton Permit_File;
     MaterialButton Permit_Alarm;
+    MaterialButton Permit_Privacy;
 
     ActivityResultLauncher<Intent> startOverlayPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if(Build.VERSION.SDK_INT < 29 || Settings.canDrawOverlays(this)) {
@@ -82,6 +89,7 @@ public class StartActivity extends AppCompatActivity {
         Permit_Battery = findViewById(R.id.Permit_Battery);
         Permit_File = findViewById(R.id.Permit_File);
         Permit_Alarm = findViewById(R.id.Permit_Alarm);
+        Permit_Privacy = findViewById(R.id.Permit_Privacy);
         Start_App = findViewById(R.id.Start_App);
 
         int count = 0;
@@ -111,6 +119,11 @@ public class StartActivity extends AppCompatActivity {
         Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
         if (sets.contains(getPackageName())) {
             setButtonCompleted(this, Permit_Alarm);
+            count++;
+        }
+
+        if(prefs.getBoolean("AcceptedPrivacyPolicy", false)) {
+            setButtonCompleted(this, Permit_Privacy);
             count++;
         }
 
@@ -151,7 +164,7 @@ public class StartActivity extends AppCompatActivity {
             }
         }
 
-        if(count >= 5) {
+        if(count >= 6) {
             startActivity(new Intent(this, SettingsActivity.class));
             finish();
         }
@@ -165,8 +178,22 @@ public class StartActivity extends AppCompatActivity {
         });
         Permit_Alarm.setOnClickListener((v) -> startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
         Permit_File.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101));
+        Permit_Privacy.setOnClickListener((v) -> {
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
+            dialog.setTitle("Privacy Policy");
+            dialog.setMessage(Html.fromHtml("You need to accept <a href=\"https://github.com/choiman1559/NotiSender/blob/master/PrivacyPolicy\">Privacy Policy</a> to use this app."));
+            dialog.setIcon(R.drawable.ic_fluent_inprivate_account_24_regular);
+            dialog.setCancelable(false);
+            dialog.setPositiveButton("Accept", (dialogInterface, i) -> {
+                prefs.edit().putBoolean("AcceptedPrivacyPolicy", true).apply();
+                setButtonCompleted(this, Permit_Privacy);
+                checkPermissionsAndEnableComplete();
+            });
+            dialog.setNegativeButton("Deny", (dialogInterface, i) -> {});
+            ((TextView) Objects.requireNonNull(dialog.show().findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());
+        });
         Start_App.setOnClickListener((v) -> {
-            if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || Permit_Alarm.isEnabled()) {
+            if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || Permit_Alarm.isEnabled() || Permit_Privacy.isEnabled()) {
                 ToastHelper.show(this, "Please complete all section!", ToastHelper.LENGTH_SHORT);
             } else {
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -178,11 +205,11 @@ public class StartActivity extends AppCompatActivity {
     void setButtonCompleted(Context context, MaterialButton button) {
         button.setEnabled(false);
         button.setText(context.getString(R.string.Start_Activity_Completed));
-        button.setIcon(AppCompatResources.getDrawable(context, com.microsoft.fluent.mobile.icons.R.drawable.ic_fluent_checkmark_24_regular));
+        button.setIcon(AppCompatResources.getDrawable(context, R.drawable.ic_fluent_checkmark_24_regular));
     }
 
     void checkPermissionsAndEnableComplete() {
-        if(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && !Permit_Alarm.isEnabled()) {
+        if(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && !Permit_Alarm.isEnabled() && !Permit_Privacy.isEnabled()) {
             Start_App.setEnabled(true);
         }
     }

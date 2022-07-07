@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/AppTheme"
     android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
@@ -68,6 +69,17 @@
                 android:gravity="center"
                 android:textColor="@color/ui_bg"
                 android:text="@string/gotogit" />
+
+            <Button
+                android:id="@+id/privacy"
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textColor="@color/ui_bg"
+                android:text="Privacy Policy"
+                tools:ignore="HardcodedText"
+                android:textAllCaps="false"/>
 
             <TextView
                 android:id="@+id/oss"
