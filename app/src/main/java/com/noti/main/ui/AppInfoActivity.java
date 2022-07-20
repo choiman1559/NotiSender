@@ -1,21 +1,34 @@
 package com.noti.main.ui;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.noti.main.R;
 import com.noti.main.utils.DetectAppSource;
 
+import java.util.Objects;
+
 public class AppInfoActivity extends AppCompatActivity {
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,16 +73,32 @@ public class AppInfoActivity extends AppCompatActivity {
         }
 
         Button GoToGit = findViewById(R.id.gotogit);
-        GoToGit.setOnClickListener(v -> startUrlActivity("https://github.com/choiman1559/NotiSender"));
+        GoToGit.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender"))));
 
         Button PrivacyPolicy = findViewById(R.id.privacy);
-        PrivacyPolicy.setOnClickListener(v -> startUrlActivity("https://github.com/choiman1559/NotiSender/blob/master/PrivacyPolicy"));
+        PrivacyPolicy.setOnClickListener(v -> {
+            RelativeLayout layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_privacy, null,false);
+            WebView webView = layout.findViewById(R.id.webView);
+            webView.loadUrl("file:///android_asset/privacy_policy.html");
+
+            Button acceptButton = layout.findViewById(R.id.acceptButton);
+            acceptButton.setText("Close");
+            Button denyButton = layout.findViewById(R.id.denyButton);
+            denyButton.setVisibility(View.INVISIBLE);
+
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
+            dialog.setTitle("Privacy Policy");
+            dialog.setMessage(Html.fromHtml("You have already accepted the <a href=\"https://github.com/choiman1559/NotiSender/blob/master/PrivacyPolicy\">Privacy Policy</a>.<br> However, You can review this policy any time."));
+            dialog.setView(layout);
+            dialog.setIcon(R.drawable.ic_fluent_inprivate_account_24_regular);
+
+            AlertDialog alertDialog = dialog.show();
+            ((TextView) Objects.requireNonNull(alertDialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());
+
+            acceptButton.setOnClickListener((view) -> alertDialog.dismiss());
+        });
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener((v) -> this.finish());
-    }
-
-    void startUrlActivity(String url) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
     }
 }

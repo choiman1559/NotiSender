@@ -14,12 +14,17 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
+import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.view.ContextThemeWrapper;
@@ -179,18 +184,28 @@ public class StartActivity extends AppCompatActivity {
         Permit_Alarm.setOnClickListener((v) -> startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
         Permit_File.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101));
         Permit_Privacy.setOnClickListener((v) -> {
+            RelativeLayout layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_privacy, null,false);
+            WebView webView = layout.findViewById(R.id.webView);
+            webView.loadUrl("file:///android_asset/privacy_policy.html");
+            Button acceptButton = layout.findViewById(R.id.acceptButton);
+            Button denyButton = layout.findViewById(R.id.denyButton);
+
             MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
             dialog.setTitle("Privacy Policy");
             dialog.setMessage(Html.fromHtml("You need to accept <a href=\"https://github.com/choiman1559/NotiSender/blob/master/PrivacyPolicy\">Privacy Policy</a> to use this app."));
+            dialog.setView(layout);
             dialog.setIcon(R.drawable.ic_fluent_inprivate_account_24_regular);
-            dialog.setCancelable(false);
-            dialog.setPositiveButton("Accept", (dialogInterface, i) -> {
+
+            AlertDialog alertDialog = dialog.show();
+            ((TextView) Objects.requireNonNull(alertDialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());
+
+            acceptButton.setOnClickListener((view) -> {
                 prefs.edit().putBoolean("AcceptedPrivacyPolicy", true).apply();
                 setButtonCompleted(this, Permit_Privacy);
                 checkPermissionsAndEnableComplete();
+                alertDialog.dismiss();
             });
-            dialog.setNegativeButton("Deny", (dialogInterface, i) -> {});
-            ((TextView) Objects.requireNonNull(dialog.show().findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());
+            denyButton.setOnClickListener((view) -> alertDialog.dismiss());
         });
         Start_App.setOnClickListener((v) -> {
             if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || Permit_Alarm.isEnabled() || Permit_Privacy.isEnabled()) {

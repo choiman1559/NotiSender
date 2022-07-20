@@ -217,6 +217,8 @@ public class NotiListenerService extends NotificationListenerService {
                 if (mode.equals("send") || mode.equals("hybrid")) {
                     String TITLE = extra.getString(Notification.EXTRA_TITLE);
                     String TEXT = extra.getString(Notification.EXTRA_TEXT);
+                    String TEXT_LINES = extra.getString(Notification.EXTRA_TEXT_LINES);
+                    if(!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
                     String PackageName = sbn.getPackageName();
 
                     if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main")))) {
