@@ -16,8 +16,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 1011607
-        versionName "1.16.7"
+        versionCode 1011608
+        versionName "1.16.8"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -58,10 +58,10 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.google.android.material:material:1.7.0-alpha02'
+    implementation 'com.google.android.material:material:1.7.0-alpha03'
     implementation 'com.google.android.gms:play-services-auth:20.2.0'
 
-    implementation platform('com.google.firebase:firebase-bom:29.0.3')
+    implementation platform('com.google.firebase:firebase-bom:30.3.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
@@ -70,14 +70,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-config'
     implementation 'com.google.firebase:firebase-storage'
 
-    implementation 'me.pushy:sdk:1.0.82'
+    implementation 'me.pushy:sdk:1.0.84'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.anjlab.android.iab.v3:library:2.0.3'
     implementation 'com.github.isradeleon:Notify-Android:1.0.4'
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.2'
-    implementation 'com.microsoft.design:fluent-system-icons:1.1.172@aar'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21'
+    implementation 'com.microsoft.design:fluent-system-icons:1.1.176@aar'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10'
 }
 
 repositories {
