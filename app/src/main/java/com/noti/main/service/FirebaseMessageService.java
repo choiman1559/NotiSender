@@ -77,6 +77,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     SharedPreferences logPrefs;
     SharedPreferences pairPrefs;
     SharedPreferences regexPrefs;
+    SharedPreferences deviceBlacksPrefs;
 
     private static PowerUtils manager;
     public static volatile Ringtone lastPlayedRingtone;
@@ -94,6 +95,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         regexPrefs = getSharedPreferences("com.noti.main_regex", MODE_PRIVATE);
+        deviceBlacksPrefs = getSharedPreferences("com.noti.main_device.blacklist", MODE_PRIVATE);
         manager = PowerUtils.getInstance(this);
         manager.acquire();
     }
@@ -131,7 +133,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String mode = prefs.getString("service", "");
 
         if(type != null && !prefs.getString("UID", "").equals("")) {
-            if (mode != null && prefs.getBoolean("serviceToggle", false)) {
+            if (prefs.getBoolean("serviceToggle", false)) {
                 if("split_data".equals(type) && !isDeviceItself(map)) {
                     processSplitData(map, context);
                     return;
@@ -153,6 +155,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             e.printStackTrace();
                         }
                     }
+                }
+
+                if(deviceBlacksPrefs.getBoolean(map.get("device_id"), false)) {
+                    return;
                 }
 
                 if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {

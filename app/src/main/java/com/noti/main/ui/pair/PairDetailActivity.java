@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairListener;
@@ -49,6 +50,7 @@ public class PairDetailActivity extends AppCompatActivity {
         String Device_name = intent.getStringExtra("device_name");
         String Device_id = intent.getStringExtra("device_id");
         SharedPreferences prefs = getSharedPreferences("com.noti.main_pair",MODE_PRIVATE);
+        SharedPreferences deviceBlacksPrefs = getSharedPreferences("com.noti.main_device.blacklist", MODE_PRIVATE);
 
         ImageView icon = findViewById(R.id.icon);
         ImageView batteryIcon = findViewById(R.id.batteryIcon);
@@ -57,9 +59,16 @@ public class PairDetailActivity extends AppCompatActivity {
         TextView batteryDetail = findViewById(R.id.batteryDetail);
         Button forgetButton = findViewById(R.id.forgetButton);
         Button findButton = findViewById(R.id.findButton);
+        SwitchMaterial blockToggle = findViewById(R.id.switchCompat);
 
         LinearLayout batterySaveEnabled = findViewById(R.id.batterySaveEnabled);
         LinearLayout batteryLayout = findViewById(R.id.batteryLayout);
+        LinearLayout deviceBlackListLayout = findViewById(R.id.deviceBlackListLayout);
+
+        boolean isBlocked = deviceBlacksPrefs.getBoolean(Device_id, false);
+        blockToggle.setChecked(isBlocked);
+        blockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> deviceBlacksPrefs.edit().putBoolean(Device_id, isChecked).apply());
+        deviceBlackListLayout.setOnClickListener((v) -> blockToggle.setChecked(!blockToggle.isChecked()));
 
         String[] colorLow = getResources().getStringArray(R.array.material_color_low);
         String[] colorHigh = getResources().getStringArray(R.array.material_color_high);

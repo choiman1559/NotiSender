@@ -24,9 +24,9 @@
         tools:ignore="QueryAllPackagesPermission" />
 
     <!-- In builds released on Google Play, Telephony-related permissions are removed. -->
-    <!-- <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG"/> -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
 
     <!-- Notification access permission for android 13+ devices when app is sideloaded -->
     <!-- <uses-permission android:name="android.permission.ACCESS_RESTRICTED_SETTINGS"/> -->
