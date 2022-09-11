@@ -92,11 +92,25 @@ public class SendPreference extends PreferenceFragmentCompat {
         }
     });
 
-    ActivityResultLauncher<String> startReplyTelecomPermit = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-        if(!isGranted) {
-            ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-            ((SwitchPreference) UseReplyTelecom).setChecked(false);
-            UseCallLog.setVisible(false);
+    ActivityResultLauncher<String[]> startReplyTelecomPermit = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+        for(Boolean isGranted : result.values()) {
+            if(!isGranted) {
+                int SourceCode = DetectAppSource.detectSource(mContext);
+                if(SourceCode == 1 || SourceCode == 2) {
+                    ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                } else if (SourceCode == 3) {
+                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                    builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
+                    builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
+                    builder.setNegativeButton("Close", (d, w) -> { }).show();
+                } else {
+                    ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
+                }
+
+                ((SwitchPreference) UseReplyTelecom).setChecked(false);
+                UseCallLog.setVisible(false);
+                break;
+            }
         }
     });
 
@@ -434,8 +448,8 @@ public class SendPreference extends PreferenceFragmentCompat {
             case "UseReplyTelecom":
                 SwitchPreference UseTelecom = (SwitchPreference) UseReplyTelecom;
                 if (UseTelecom.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                        startReplyTelecomPermit.launch(Manifest.permission.READ_PHONE_STATE);
+                    if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED || mContext.checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+                        startReplyTelecomPermit.launch(new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_CALL_LOG});
                     }
                 }
                 break;

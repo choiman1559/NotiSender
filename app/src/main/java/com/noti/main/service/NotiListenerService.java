@@ -353,7 +353,7 @@ public class NotiListenerService extends NotificationListenerService {
     public void sendTelecomNotification(Context context, Boolean isLogging, String address) {
         if (prefs == null)
             prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
-        if (!prefs.getBoolean("UseCallLog", false)) {
+        if (prefs.getBoolean("UseReplyTelecom", false) && !prefs.getBoolean("UseCallLog", false)) {
             Date time = Calendar.getInstance().getTime();
             String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
             String PackageName = getSystemDialerApp(context);

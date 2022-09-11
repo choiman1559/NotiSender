@@ -83,8 +83,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static volatile Ringtone lastPlayedRingtone;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
     public static final Thread ringtonePlayedThread = new Thread(() -> {
-        while(true) {
-            if(lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying()) lastPlayedRingtone.play();
+        while (true) {
+            if (lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying())
+                lastPlayedRingtone.play();
         }
     });
 
@@ -105,12 +106,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         manager.acquire();
 
-        if(BuildConfig.DEBUG) Log.d(remoteMessage.getMessageId(), remoteMessage.toString());
-        Map<String,String> map = remoteMessage.getData();
+        if (BuildConfig.DEBUG) Log.d(remoteMessage.getMessageId(), remoteMessage.toString());
+        Map<String, String> map = remoteMessage.getData();
 
         String rawPassword = prefs.getString("EncryptionPassword", "");
-        if("true".equals(map.get("encrypted"))) {
-            if(prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
+        if ("true".equals(map.get("encrypted"))) {
+            if (prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
                 try {
                     String uid = FirebaseAuth.getInstance().getUid();
                     if (uid != null) {
@@ -132,15 +133,15 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String type = map.get("type");
         String mode = prefs.getString("service", "");
 
-        if(type != null && !prefs.getString("UID", "").equals("")) {
+        if (type != null && !prefs.getString("UID", "").equals("")) {
             if (prefs.getBoolean("serviceToggle", false)) {
-                if("split_data".equals(type) && !isDeviceItself(map)) {
+                if ("split_data".equals(type) && !isDeviceItself(map)) {
                     processSplitData(map, context);
                     return;
                 }
 
                 String Date = map.get("date");
-                if(Date != null) {
+                if (Date != null) {
                     String DeadlineValue = prefs.getString("ReceiveDeadline", "No deadline");
                     if (!DeadlineValue.equals("No deadline")) {
                         if (DeadlineValue.equals("Custom…"))
@@ -157,7 +158,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 }
 
-                if(deviceBlacksPrefs.getBoolean(map.get("device_id"), false)) {
+                if (deviceBlacksPrefs.getBoolean(map.get("device_id"), false)) {
                     return;
                 }
 
@@ -184,17 +185,17 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 }
 
-                if(type.equals("send|find") && !isDeviceItself(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
+                if (type.equals("send|find") && !isDeviceItself(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                     sendFindTaskNotification();
                 }
             }
 
-            if(type.startsWith("pair") && !isDeviceItself(map)) {
-                switch(type) {
+            if (type.startsWith("pair") && !isDeviceItself(map)) {
+                switch (type) {
                     case "pair|request_device_list":
                         //Target Device action
                         //Have to Send this device info Data Now
-                        if(!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false)) {
+                        if (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false)) {
                             pairingProcessList.add(new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing));
                             Application.isListeningToPair = true;
                             PairingUtils.responseDeviceInfoToFinder(map, context);
@@ -204,7 +205,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     case "pair|response_device_list":
                         //Request Device Action
                         //Show device list here; give choice to user which device to pair
-                        if(Application.isFindingDeviceToPair && (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false))) {
+                        if (Application.isFindingDeviceToPair && (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false))) {
                             pairingProcessList.add(new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing));
                             PairingUtils.onReceiveDeviceInfo(map);
                         }
@@ -213,9 +214,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     case "pair|request_pair":
                         //Target Device action
                         //Show choice notification (or activity) to user whether user wants to pair this device with another one or not
-                        if(Application.isListeningToPair && isTargetDevice(map)) {
-                            for(PairDeviceInfo info : pairingProcessList) {
-                                if(info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
+                        if (Application.isListeningToPair && isTargetDevice(map)) {
+                            for (PairDeviceInfo info : pairingProcessList) {
+                                if (info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
                                     PairingUtils.showPairChoiceAction(map, context);
                                     break;
                                 }
@@ -226,8 +227,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     case "pair|accept_pair":
                         //Request Device Action
                         //Check if target accepted to pair and process result here
-                        if(Application.isFindingDeviceToPair && isTargetDevice(map)) {
-                            for(PairDeviceInfo info : pairingProcessList) {
+                        if (Application.isFindingDeviceToPair && isTargetDevice(map)) {
+                            for (PairDeviceInfo info : pairingProcessList) {
                                 if (info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
                                     PairingUtils.checkPairResultAndRegister(map, info, context);
                                     break;
@@ -238,27 +239,27 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
                     case "pair|request_data":
                         //process request normal data here sent by paired device(s).
-                        if(isTargetDevice(map) && isPairedDevice(map)) {
+                        if (isTargetDevice(map) && isPairedDevice(map)) {
                             DataProcess.onDataRequested(map, context);
                         }
                         break;
 
                     case "pair|receive_data":
                         //process received normal data here sent by paired device(s).
-                        if(isTargetDevice(map) && isPairedDevice(map)) {
+                        if (isTargetDevice(map) && isPairedDevice(map)) {
                             PairListener.callOnDataReceived(map);
                         }
                         break;
 
                     case "pair|request_action":
                         //process received action data here sent by paired device(s).
-                        if(isTargetDevice(map) && isPairedDevice(map)) {
+                        if (isTargetDevice(map) && isPairedDevice(map)) {
                             DataProcess.onActionRequested(map, context);
                         }
                         break;
 
                     case "pair|find":
-                        if(isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
+                        if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                             sendFindTaskNotification();
                         }
                         break;
@@ -272,13 +273,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         synchronized (splitDataList) {
             Log.d("split_data", "current size : " + splitDataList.size());
 
-            for(int i = 0;i < splitDataList.size();i++) {
+            for (int i = 0; i < splitDataList.size(); i++) {
                 SplitDataObject object = splitDataList.get(i);
                 if (object.unique_id.equals(map.get("split_unique"))) {
                     object = object.addData(map);
                     splitDataList.set(i, object);
 
-                    if(object.length == object.getSize()) {
+                    if (object.length == object.getSize()) {
                         try {
                             Map<String, String> newMap = new ObjectMapper().readValue(object.getFullData(), Map.class);
                             processReception(newMap, context);
@@ -299,7 +300,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Device_name = map.get("device_name");
         String Device_id = map.get("device_id");
 
-        if(Device_id == null || Device_name == null) {
+        if (Device_id == null || Device_name == null) {
             Device_id = map.get("send_device_id");
             Device_name = map.get("send_device_name");
         }
@@ -322,8 +323,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     protected boolean isPairedDevice(Map<String, String> map) {
         String dataToFind = map.get("device_name") + "|" + map.get("device_id");
-        for(String str : pairPrefs.getStringSet("paired_list", new HashSet<>())) {
-            if(str.equals(dataToFind)) return true;
+        for (String str : pairPrefs.getStringSet("paired_list", new HashSet<>())) {
+            if (str.equals(dataToFind)) return true;
         }
         return false;
     }
@@ -331,20 +332,22 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     protected void startNewRemoteActivity(Map<String, String> map) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
         String Package = map.get("package");
-        try{
+        try {
             getPackageManager().getPackageInfo(Package, PackageManager.GET_ACTIVITIES);
             Intent intent = getPackageManager().getLaunchIntentForPackage(Package);
             startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        }catch (Exception e) {
+        } catch (Exception e) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
             startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
     }
 
     protected void startNewRemoteSms(Map<String, String> map) {
-        SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(map.get("address"),null,map.get("message"),null,null);
-        new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Reply message by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+        if(map.get("address") != null && map.get("message") != null) {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(map.get("address"), null, map.get("message"), null, null);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Reply message by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+        }
     }
 
     protected void sendFindTaskNotification() {
@@ -379,13 +382,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         final int findDeviceNotificationId = -2;
         notificationManager.notify(findDeviceNotificationId, builder.build());
 
-        AudioManager audioManager = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         audioManager.setMode(AudioManager.MODE_IN_CALL);
         audioManager.setSpeakerphoneOn(true);
 
-        if(lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) lastPlayedRingtone.stop();
+        if (lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) lastPlayedRingtone.stop();
         lastPlayedRingtone = RingtoneManager.getRingtone(this, RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE));
-        if(Build.VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 28) {
             AudioAttributes.Builder audioAttributes = new AudioAttributes.Builder();
             audioAttributes.setUsage(AudioAttributes.USAGE_ALARM);
             audioAttributes.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
@@ -404,15 +407,15 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Date = map.get("date");
 
         Intent notificationIntent = new Intent(FirebaseMessageService.this, TelecomViewActivity.class);
-        notificationIntent.putExtra("device_id",Device_id);
+        notificationIntent.putExtra("device_id", Device_id);
         notificationIntent.putExtra("address", address);
-        notificationIntent.putExtra("device_name",Device_name);
-        notificationIntent.putExtra("date",Date);
+        notificationIntent.putExtra("device_name", Device_name);
+        notificationIntent.putExtra("date", Date);
         notificationIntent.putExtra("package", Package);
 
         int uniqueCode = 0;
         try {
-            if(Date != null) {
+            if (Date != null) {
                 Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                 uniqueCode = d == null ? 0 : (int) ((d.getTime() / 1000L) % Integer.MAX_VALUE);
             }
@@ -445,7 +448,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         } else builder.setSmallIcon(R.mipmap.ic_notification);
 
         assert notificationManager != null;
-        notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        notificationManager.notify((int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
         playRingtoneAndVibrate();
     }
 
@@ -458,16 +461,16 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Date = map.get("date");
 
         Intent notificationIntent = new Intent(FirebaseMessageService.this, SmsViewActivity.class);
-        notificationIntent.putExtra("device_id",Device_id);
-        notificationIntent.putExtra("message",message);
-        notificationIntent.putExtra("address",address);
-        notificationIntent.putExtra("device_name",Device_name);
-        notificationIntent.putExtra("date",Date);
+        notificationIntent.putExtra("device_id", Device_id);
+        notificationIntent.putExtra("message", message);
+        notificationIntent.putExtra("address", address);
+        notificationIntent.putExtra("device_name", Device_name);
+        notificationIntent.putExtra("date", Date);
         notificationIntent.putExtra("package", Package);
 
         int uniqueCode = 0;
         try {
-            if(Date != null) {
+            if (Date != null) {
                 Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                 uniqueCode = d == null ? 0 : (int) ((d.getTime() / 1000L) % Integer.MAX_VALUE);
             }
@@ -500,7 +503,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         } else builder.setSmallIcon(R.mipmap.ic_notification);
 
         assert notificationManager != null;
-        notificationManager.notify((int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        notificationManager.notify((int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
         playRingtoneAndVibrate();
     }
 
@@ -508,16 +511,16 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String title = map.get("title");
         String content = map.get("message");
         String Package = map.get("package");
-        String AppName =  map.get("appname");
+        String AppName = map.get("appname");
         String Device_name = map.get("device_name");
         String Device_id = map.get("device_id");
         String Date = map.get("date");
 
         Bitmap Icon_original;
         Bitmap Icon = null;
-        if (!"none".equals(map.get("icon")) && !prefs.getBoolean("OverrideReceivedIcon" , false)) {
+        if (!"none".equals(map.get("icon")) && !prefs.getBoolean("OverrideReceivedIcon", false)) {
             Icon_original = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
-            if(Icon_original != null) {
+            if (Icon_original != null) {
                 Icon = Bitmap.createBitmap(Icon_original.getWidth(), Icon_original.getHeight(), Icon_original.getConfig());
                 Canvas canvas = new Canvas(Icon);
                 canvas.drawColor(Color.WHITE);
@@ -535,20 +538,20 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             try {
                 JSONArray array = new JSONArray();
                 JSONObject object = new JSONObject();
-                String originString = logPrefs.getString("receivedLogs","");
+                String originString = logPrefs.getString("receivedLogs", "");
 
-                if(!originString.equals("")) array = new JSONArray(originString);
-                object.put("date",Date);
-                object.put("package",Package);
-                object.put("title",title);
-                object.put("text",content);
-                object.put("device",Device_name);
+                if (!originString.equals("")) array = new JSONArray(originString);
+                object.put("date", Date);
+                object.put("package", Package);
+                object.put("title", title);
+                object.put("text", content);
+                object.put("device", Device_name);
                 array.put(object);
-                logPrefs.edit().putString("receivedLogs",array.toString()).apply();
+                logPrefs.edit().putString("receivedLogs", array.toString()).apply();
 
-                if(array.length() >= prefs.getInt("HistoryLimit",150)) {
-                    int a = array.length() - prefs.getInt("HistoryLimit",150);
-                    for(int i = 0;i < a;i++){
+                if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
+                    int a = array.length() - prefs.getInt("HistoryLimit", 150);
+                    for (int i = 0; i < a; i++) {
                         array.remove(i);
                     }
                     logPrefs.edit().putString("receivedLogs", array.toString()).apply();
@@ -562,7 +565,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
         int uniqueCode = 0;
         try {
-            if(Date != null) {
+            if (Date != null) {
                 Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(Date);
                 uniqueCode = d == null ? 0 : (int) ((d.getTime() / 1000L) % Integer.MAX_VALUE);
             }
@@ -571,11 +574,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
 
         notificationIntent.putExtra("package", Package);
-        notificationIntent.putExtra("device_id",Device_id);
-        notificationIntent.putExtra("appname",AppName);
-        notificationIntent.putExtra("title",title);
-        notificationIntent.putExtra("device_name",Device_name);
-        notificationIntent.putExtra("date",Date);
+        notificationIntent.putExtra("device_id", Device_id);
+        notificationIntent.putExtra("appname", AppName);
+        notificationIntent.putExtra("title", title);
+        notificationIntent.putExtra("device_name", Device_name);
+        notificationIntent.putExtra("date", Date);
         notificationIntent.putExtra("icon", Icon);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -591,8 +594,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setAutoCancel(true);
 
         String regexData = regexPrefs.getString("RegexData", "");
-        if(regexData.isEmpty()) {
-            if(Icon != null) builder.setLargeIcon(Icon);
+        if (regexData.isEmpty()) {
+            if (Icon != null) builder.setLargeIcon(Icon);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 builder.setSmallIcon(R.drawable.ic_notification);
                 CharSequence channelName = getString(R.string.notify_channel_name);
@@ -612,7 +615,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 String[] regexArray = new String[array.length()];
                 RegexInterpreter.DataType[] dataArray = new RegexInterpreter.DataType[array.length()];
 
-                for(int i = 0; i < array.length(); i++) {
+                for (int i = 0; i < array.length(); i++) {
                     JSONObject object = array.getJSONObject(i);
                     boolean isEnabled = object.optBoolean("enabled");
 
@@ -635,14 +638,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     String bitmapUri = "";
                     String ringtoneUri = "";
 
-                    int targetIndex =  Integer.parseInt((String) obj);
-                    if(targetIndex > -1) {
+                    int targetIndex = Integer.parseInt((String) obj);
+                    if (targetIndex > -1) {
                         try {
                             JSONObject object = array.getJSONObject(targetIndex);
-                            if(object.has("bitmap")) bitmapUri = object.getString("bitmap");
-                            if(object.has("ringtone")) ringtoneUri = object.getString("ringtone");
+                            if (object.has("bitmap")) bitmapUri = object.getString("bitmap");
+                            if (object.has("ringtone")) ringtoneUri = object.getString("ringtone");
 
-                            if(!bitmapUri.isEmpty()) {
+                            if (!bitmapUri.isEmpty()) {
                                 Uri uri = Uri.parse(bitmapUri);
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                                     finalIcon.set(ImageDecoder.decodeBitmap(ImageDecoder.createSource(FirebaseMessageService.this.getContentResolver(), uri)));
@@ -655,7 +658,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         }
                     }
 
-                    if(finalIcon.get() != null) builder.setLargeIcon(finalIcon.get());
+                    if (finalIcon.get() != null) builder.setLargeIcon(finalIcon.get());
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         builder.setSmallIcon(R.drawable.ic_notification);
                         CharSequence channelName = getString(R.string.notify_channel_name);
@@ -678,7 +681,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getImportance() {
-        String value = prefs.getString("importance","Default");
+        String value = prefs.getString("importance", "Default");
         switch (value) {
             case "Default":
                 return NotificationManager.IMPORTANCE_DEFAULT;
@@ -695,7 +698,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getPriority() {
-        String value = prefs.getString("importance","Default");
+        String value = prefs.getString("importance", "Default");
         switch (value) {
             case "Low":
                 return NotificationCompat.PRIORITY_LOW;
@@ -709,7 +712,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     private long parseTimeAndUnitToLong(String data) {
         String[] foo = data.split(" ");
         long numberToMultiply;
-        switch(foo[1]) {
+        switch (foo[1]) {
             case "sec":
                 numberToMultiply = 1000L;
                 break;
@@ -750,16 +753,16 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     private void playRingtoneAndVibrate(String mediaUri) {
-        if(!mediaUri.isEmpty() || prefs.getString("importance","Default").equals("Custom…")) {
+        if (!mediaUri.isEmpty() || prefs.getString("importance", "Default").equals("Custom…")) {
 
             int VibrationRunningTimeValue = prefs.getInt("VibrationRunningTime", 1000);
-            if(VibrationRunningTimeValue > 0) {
+            if (VibrationRunningTimeValue > 0) {
                 Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(VibrationRunningTimeValue);
             }
 
-            if(lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) {
-                if(ringtonePlayedThread.isAlive()) return;
+            if (lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) {
+                if (ringtonePlayedThread.isAlive()) return;
                 else lastPlayedRingtone.stop();
             }
 
@@ -779,9 +782,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 long runningTime = parseTimeAndUnitToLong(data);
                 long startTime = System.currentTimeMillis();
                 while (true) {
-                    if(!r.isPlaying()) break;
+                    if (!r.isPlaying()) break;
                     if ((System.currentTimeMillis() - startTime) > runningTime) {
-                        if(r.isPlaying()) r.stop();
+                        if (r.isPlaying()) r.stop();
                         break;
                     }
                 }
