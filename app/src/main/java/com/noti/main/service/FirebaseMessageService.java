@@ -39,6 +39,7 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
+import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceStatus;
@@ -61,6 +62,7 @@ import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -81,6 +83,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     private static PowerUtils manager;
     public static volatile Ringtone lastPlayedRingtone;
+    public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
@@ -97,6 +100,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         regexPrefs = getSharedPreferences("com.noti.main_regex", MODE_PRIVATE);
         deviceBlacksPrefs = getSharedPreferences("com.noti.main_device.blacklist", MODE_PRIVATE);
+        playingSessionMap = new HashMap<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
     }
@@ -265,6 +269,42 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         break;
                 }
             }
+
+            if (type.startsWith("media")) {
+                try {
+                    String raw = map.get("media_data");
+                    if (raw != null && !raw.isEmpty()) {
+                        JSONObject object = new JSONObject(raw);
+
+                        switch (type) {
+                            case "media|meta_data":
+                                if (!isDeviceItself(map)) {
+                                    MediaSession current;
+                                    if (!playingSessionMap.containsKey(map.get("device_id"))) {
+                                        current = new MediaSession(this, map.get("device_name"), map.get("device_id"));
+                                        playingSessionMap.put(map.get("device_id"), current);
+                                    } else {
+                                        current = playingSessionMap.get(map.get("device_id"));
+                                    }
+
+                                    assert current != null;
+                                    current.update(object);
+
+                                    Log.d("ddd", map.get("media_data"));
+                                }
+                                break;
+
+                            case "media|action":
+                                if (isTargetDevice(map)) {
+                                    NotiListenerService.mediaReceiver.onDataReceived(object);
+                                }
+                                break;
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -343,7 +383,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     protected void startNewRemoteSms(Map<String, String> map) {
-        if(map.get("address") != null && map.get("message") != null) {
+        if (map.get("address") != null && map.get("message") != null) {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(map.get("address"), null, map.get("message"), null, null);
             new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Reply message by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);

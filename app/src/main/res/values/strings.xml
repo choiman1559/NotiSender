@@ -46,4 +46,10 @@
     <string name="ServiceToggle">Service On/Off</string>
     <string name="edit_item">Edit Items</string>
     <string name="playground">Playground</string>
+
+    <string name="media_play">Play</string>
+    <string name="media_pause">Pause</string>
+    <string name="media_previous">Previous</string>
+    <string name="media_next">Next</string>
+    <string name="media_close">Close</string>
 </resources>

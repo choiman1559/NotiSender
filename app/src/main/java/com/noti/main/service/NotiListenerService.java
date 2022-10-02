@@ -29,6 +29,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.noti.main.BuildConfig;
+import com.noti.main.receiver.media.MediaBroadcastReceiver;
+import com.noti.main.service.media.MediaReceiver;
 import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.JsonRequest;
 import com.noti.main.utils.CompressStringUtil;
@@ -57,6 +59,9 @@ public class NotiListenerService extends NotificationListenerService {
     private static SharedPreferences logPrefs;
     private static PowerUtils manager;
 
+    @SuppressLint("StaticFieldLeak")
+    public static MediaReceiver mediaReceiver;
+
     private static final Object pastNotificationLock = new Object();
     private volatile StatusBarNotification pastNotification = null;
 
@@ -73,12 +78,23 @@ public class NotiListenerService extends NotificationListenerService {
         return instance;
     }
 
+    public static String getTopic() {
+        return prefs == null ? "" : "/topics/" + prefs.getString("UID", "");
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         logPrefs = this.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         manager = PowerUtils.getInstance(this);
+        mediaReceiver = new MediaReceiver(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mediaReceiver.onDestroy();
     }
 
     public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
