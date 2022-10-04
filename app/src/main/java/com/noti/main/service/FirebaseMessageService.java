@@ -289,8 +289,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
                                     assert current != null;
                                     current.update(object);
-
-                                    Log.d("ddd", map.get("media_data"));
                                 }
                                 break;
 

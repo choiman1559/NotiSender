@@ -8,6 +8,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.os.Build;
@@ -19,6 +21,7 @@ import androidx.core.content.ContextCompat;
 
 import com.noti.main.R;
 import com.noti.main.StartActivity;
+import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,25 +41,34 @@ public class MediaSession {
 
     private final android.media.session.MediaSession.Callback mediaSessionCallback = new android.media.session.MediaSession.Callback() {
         @Override
-        public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
-            switch (mediaButtonIntent.getAction()) {
-                case MediaBroadcastReceiver.ACTION_PLAY:
-                    notificationPlayer.play();
-                    break;
-                case MediaBroadcastReceiver.ACTION_PAUSE:
-                    notificationPlayer.pause();
-                    break;
-                case MediaBroadcastReceiver.ACTION_PREVIOUS:
-                    notificationPlayer.previous();
-                    break;
-                case MediaBroadcastReceiver.ACTION_NEXT:
-                    notificationPlayer.next();
-                    break;
-                case MediaBroadcastReceiver.ACTION_CLOSE_NOTIFICATION:
-                    closeMediaNotification();
-                    break;
-            }
-            return super.onMediaButtonEvent(mediaButtonIntent);
+        public void onPlay() {
+            notificationPlayer.play();
+        }
+
+        @Override
+        public void onPause() {
+            notificationPlayer.pause();
+        }
+
+        @Override
+        public void onSkipToNext() {
+            notificationPlayer.next();
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            notificationPlayer.previous();
+        }
+
+        @Override
+        public void onStop() {
+            notificationPlayer.stop();
+        }
+
+        @Override
+        public void onSeekTo(long pos) {
+            Log.d("seek", pos + "");
+            notificationPlayer.setPosition((int) pos);
         }
     };
 
@@ -70,18 +82,45 @@ public class MediaSession {
 
     private void initMediaSession() {
         this.mediaSession = new android.media.session.MediaSession(context, deviceId);
+        ContextCompat.getMainExecutor(context).execute(() -> mediaSession.setCallback(mediaSessionCallback));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             mediaSession.setMediaButtonBroadcastReceiver(new ComponentName(context, MediaBroadcastReceiver.class));
         } else {
             mediaSession.setMediaButtonReceiver(PendingIntent.getBroadcast(context, 0, new Intent(context, MediaBroadcastReceiver.class), getIntentFlag()));
         }
         mediaSession.setFlags(android.media.session.MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | android.media.session.MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        ContextCompat.getMainExecutor(context).execute(() -> mediaSession.setCallback(mediaSessionCallback));
+    }
+
+    public void updateBitmap(JSONObject npd) throws JSONException {
+        if (lastFetchedData.equals(npd)) return;
+        DefaultValueJSONObject np = new DefaultValueJSONObject(npd);
+
+        if (np.has("albumArt")) {
+            String albumArtRawStream = np.getString("albumArt");
+            Bitmap albumArtRaw = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(albumArtRawStream));
+            Bitmap albumArt = null;
+            if (albumArtRaw != null) {
+                albumArt = Bitmap.createBitmap(albumArtRaw.getWidth(), albumArtRaw.getHeight(), albumArtRaw.getConfig());
+                Canvas canvas = new Canvas(albumArt);
+                canvas.drawColor(Color.WHITE);
+                canvas.drawBitmap(albumArtRaw, 0, 0, null);
+            }
+
+            if (albumArt != null && notificationPlayer != null) {
+                notificationPlayer.albumArt = albumArt;
+            }
+            publishMediaNotification();
+        }
     }
 
     public void update(JSONObject npd) throws JSONException {
         if (lastFetchedData.equals(npd)) return;
-        JSONObjectDefault np = new JSONObjectDefault(npd);
+        DefaultValueJSONObject np = new DefaultValueJSONObject(npd);
+
+        if(np.has("albumArt")) {
+            updateBitmap(npd);
+            return;
+        }
 
         if (np.has("player")) {
             MediaPlayer playerStatus = notificationPlayer;
@@ -121,54 +160,53 @@ public class MediaSession {
         lastFetchedData = npd;
     }
 
-    static class JSONObjectDefault extends JSONObject {
-        public JSONObjectDefault(JSONObject raw) throws JSONException {
+    static class DefaultValueJSONObject extends JSONObject {
+        public DefaultValueJSONObject(JSONObject raw) throws JSONException {
             super(raw.toString());
         }
 
         @NonNull
         public String getString(@NonNull String name, @NonNull String defaultValue) {
-            Object value = null;
+            String value = null;
             try {
-                value = super.get(name);
+                value = super.getString(name);
             } catch (JSONException e) {
                 //ignore
             }
-
-            return !(value instanceof String) || ((String) value).isEmpty() ? defaultValue : (String) value;
+            return value == null ? defaultValue : value;
         }
 
         @NonNull
         public Integer getInt(@NonNull String name, @NonNull Integer defaultValue) {
-            Object value = null;
+            Integer value = null;
             try {
-                value = super.get(name);
+                value = super.getInt(name);
             } catch (JSONException e) {
                 //ignore
             }
-            return !(value instanceof Integer) || value.toString().isEmpty() ? defaultValue : (Integer) value;
+            return value == null ? defaultValue : value;
         }
 
         @NonNull
         public Long getLong(@NonNull String name, @NonNull Long defaultValue) {
-            Object value = null;
+            Long value = null;
             try {
-                value = super.get(name);
+                value = super.getLong(name);
             } catch (JSONException e) {
                 //ignore
             }
-            return !(value instanceof Long) || value.toString().isEmpty() ? defaultValue : (Long) value;
+            return value == null ? defaultValue : value;
         }
 
         @NonNull
         public Boolean getBoolean(@NonNull String name, @NonNull Boolean defaultValue) {
-            Object value = null;
+            Boolean value = null;
             try {
-                value = super.get(name);
+                value = super.getBoolean(name);
             } catch (JSONException e) {
                 //ignore
             }
-            return !(value instanceof Boolean) || value.toString().isEmpty() ? defaultValue : (Boolean) value;
+            return value == null ? defaultValue : value;
         }
     }
 
@@ -334,6 +372,7 @@ public class MediaSession {
                 playbackActions |= PlaybackState.ACTION_SEEK_TO;
             }
         }
+
         playbackState.setActions(playbackActions);
         mediaSession.setPlaybackState(playbackState.build());
         notification.setOngoing(notificationPlayer.isPlaying());

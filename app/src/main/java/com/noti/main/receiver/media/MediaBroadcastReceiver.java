@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.session.MediaSession;
+import android.util.Log;
 
 import com.noti.main.service.FirebaseMessageService;
 
@@ -27,6 +28,8 @@ public class MediaBroadcastReceiver extends BroadcastReceiver {
         } else {
             MediaPlayer player = mMediaSession.getPlayer();
             if (player == null) return;
+
+            Log.d("intent", intent.getAction());
 
             switch (intent.getAction()) {
                 case ACTION_PLAY:

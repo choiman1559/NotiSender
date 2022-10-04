@@ -19,7 +19,6 @@ public class MediaPlayer {
     String title = "";
     String artist = "";
     String album = "";
-    String albumArtUrl = "";
     String url = "";
     String loopStatus = "";
 
@@ -37,6 +36,8 @@ public class MediaPlayer {
     boolean goNextAllowed = true;
     boolean goPreviousAllowed = true;
     boolean seekAllowed = true;
+
+    Bitmap albumArt = null;
 
     public MediaPlayer(Context context, String device_name, String device_id) {
         this.context = context;
@@ -110,13 +111,11 @@ public class MediaPlayer {
     }
 
     public boolean hasAlbumArt() {
-        return !albumArtUrl.isEmpty();
+        return albumArt != null;
     }
 
     public Bitmap getAlbumArt() {
-        return null;
-        //TODO: implements album art transmitting
-        /* AlbumArtCache.getAlbumArt(albumArtUrl, context, player); */
+        return albumArt;
     }
 
     public String getUrl() {

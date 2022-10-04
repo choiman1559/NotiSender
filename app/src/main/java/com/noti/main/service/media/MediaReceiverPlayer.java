@@ -1,8 +1,11 @@
 package com.noti.main.service.media;
 
+import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
+
+import androidx.annotation.Nullable;
 
 class MediaReceiverPlayer {
 
@@ -77,6 +80,14 @@ class MediaReceiverPlayer {
         if (metadata == null) return "";
 
         return defaultString(metadata.getString(MediaMetadata.METADATA_KEY_ALBUM));
+    }
+
+    @Nullable
+    Bitmap getAlbumArt() {
+        MediaMetadata metadata = controller.getMetadata();
+        if (metadata == null) return null;
+
+        return metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
     }
 
     String getArtist() {
