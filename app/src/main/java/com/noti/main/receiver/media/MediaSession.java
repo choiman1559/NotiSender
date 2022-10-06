@@ -8,8 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.os.Build;
@@ -19,9 +18,11 @@ import androidx.annotation.NonNull;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StreamDownloadTask;
 import com.noti.main.R;
 import com.noti.main.StartActivity;
-import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +31,9 @@ public class MediaSession {
     private static final int NOTIFICATION_ID = 0xbdd2e171;
     private static final String NOTIFICATION_CHANNEL_ID = "MediaNotification";
     public final static String MEDIA_CONTROL = "media_control";
+    public final FirebaseStorage storage;
 
+    private final String UID;
     private static String deviceId = "";
     private static String deviceName = "";
 
@@ -72,11 +75,14 @@ public class MediaSession {
         }
     };
 
-    public MediaSession(Context context, String device_name, String device_id) {
+    public MediaSession(Context context, String device_name, String device_id, String userID) {
+        this.context = context;
         this.notificationPlayer = new MediaPlayer(context, device_name, device_id);
+
         deviceId = device_id;
         deviceName = device_name;
-        this.context = context;
+        storage = FirebaseStorage.getInstance();
+        UID = userID;
         initMediaSession();
     }
 
@@ -96,20 +102,22 @@ public class MediaSession {
         DefaultValueJSONObject np = new DefaultValueJSONObject(npd);
 
         if (np.has("albumArt")) {
-            String albumArtRawStream = np.getString("albumArt");
-            Bitmap albumArtRaw = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(albumArtRawStream));
-            Bitmap albumArt = null;
-            if (albumArtRaw != null) {
-                albumArt = Bitmap.createBitmap(albumArtRaw.getWidth(), albumArtRaw.getHeight(), albumArtRaw.getConfig());
-                Canvas canvas = new Canvas(albumArt);
-                canvas.drawColor(Color.WHITE);
-                canvas.drawBitmap(albumArtRaw, 0, 0, null);
-            }
+            String albumArtHash = np.getString("albumArt");
 
-            if (albumArt != null && notificationPlayer != null) {
-                notificationPlayer.albumArt = albumArt;
-            }
-            publishMediaNotification();
+            StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
+            StorageReference albumArtRef = storageRef.child(UID + "/albumArt/" + albumArtHash + ".jpg");
+
+            StreamDownloadTask task = albumArtRef.getStream();
+            task.addOnSuccessListener(taskSnapshot -> new Thread(() -> {
+                Bitmap albumArt = BitmapFactory.decodeStream(taskSnapshot.getStream());
+                if (albumArt != null && notificationPlayer != null) {
+                    notificationPlayer.albumArt = albumArt;
+                    albumArt.recycle();
+                }
+
+                ContextCompat.getMainExecutor(context).execute(this::publishMediaNotification);
+                albumArtRef.delete().addOnSuccessListener(unused -> { });
+            }).start());
         }
     }
 
@@ -130,7 +138,6 @@ public class MediaSession {
                 playerStatus.title = np.getString("title", playerStatus.title);
                 playerStatus.artist = np.getString("artist", playerStatus.artist);
                 playerStatus.album = np.getString("album", playerStatus.album);
-                playerStatus.url = np.getString("url", playerStatus.url);
                 if (np.has("loopStatus")) {
                     playerStatus.loopStatus = np.getString("loopStatus", playerStatus.loopStatus);
                     playerStatus.loopStatusAllowed = true;
@@ -151,6 +158,9 @@ public class MediaSession {
                 playerStatus.goNextAllowed = np.getBoolean("canGoNext", playerStatus.goNextAllowed);
                 playerStatus.goPreviousAllowed = np.getBoolean("canGoPrevious", playerStatus.goPreviousAllowed);
                 playerStatus.seekAllowed = np.getBoolean("canSeek", playerStatus.seekAllowed);
+                if(np.getBoolean("sendAlbumArt", false)) {
+                    playerStatus.albumArt = null;
+                }
             } else if (np.getBoolean("isPlaying", false)) {
                 notificationPlayer = new MediaPlayer(context, deviceName, deviceId);
                 update(npd);

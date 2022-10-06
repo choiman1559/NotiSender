@@ -281,7 +281,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                 if (!isDeviceItself(map)) {
                                     MediaSession current;
                                     if (!playingSessionMap.containsKey(map.get("device_id"))) {
-                                        current = new MediaSession(this, map.get("device_name"), map.get("device_id"));
+                                        current = new MediaSession(this, map.get("device_name"), map.get("device_id"), prefs.getString("UID", ""));
                                         playingSessionMap.put(map.get("device_id"), current);
                                     } else {
                                         current = playingSessionMap.get(map.get("device_id"));

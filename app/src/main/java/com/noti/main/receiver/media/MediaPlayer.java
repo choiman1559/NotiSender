@@ -19,7 +19,6 @@ public class MediaPlayer {
     String title = "";
     String artist = "";
     String album = "";
-    String url = "";
     String loopStatus = "";
 
     int volume = 50;
@@ -116,10 +115,6 @@ public class MediaPlayer {
 
     public Bitmap getAlbumArt() {
         return albumArt;
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public boolean isLoopStatusAllowed() {

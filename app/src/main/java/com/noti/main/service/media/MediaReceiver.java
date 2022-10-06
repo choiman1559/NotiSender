@@ -16,23 +16,27 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.noti.main.service.NotiListenerService;
-import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 
 public class MediaReceiver {
     private MediaSessionChangeListener mediaSessionChangeListener;
     private final HashMap<String, MediaReceiverPlayer> players;
+    private final FirebaseStorage storage;
 
     private final SharedPreferences prefs;
     private final Context context;
 
-    private static int lastSendAlbumArt = 0;
+    private volatile static String lastSendAlbumArt = "";
 
     private final class MediaSessionChangeListener implements MediaSessionManager.OnActiveSessionsChangedListener {
         @Override
@@ -50,6 +54,7 @@ public class MediaReceiver {
         this.context = context;
         players = new HashMap<>();
         prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
+        storage = FirebaseStorage.getInstance();
 
         try {
             MediaSessionManager manager = ContextCompat.getSystemService(context, MediaSessionManager.class);
@@ -154,6 +159,12 @@ public class MediaReceiver {
             JSONObject np = new JSONObject();
             if(player.getTitle().isEmpty()) return;
 
+            Bitmap albumArt = player.getAlbumArt();
+            String albumArtUri = player.getAlbumArtUri();
+            boolean isNeedSendAlbumArt = player.isPlaying() && albumArt != null && !lastSendAlbumArt.equals(albumArtUri);
+
+            Log.d("albumart", albumArtUri);
+
             np.put("player", player.getName());
             if (player.getArtist().isEmpty()) {
                 np.put("nowPlaying", player.getTitle());
@@ -173,6 +184,7 @@ public class MediaReceiver {
             np.put("canGoNext", player.canGoNext());
             np.put("canSeek", player.canSeek());
             np.put("volume", player.getVolume());
+            np.put("sendAlbumArt", isNeedSendAlbumArt);
 
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = NotiListenerService.getUniqueID();
@@ -191,31 +203,39 @@ public class MediaReceiver {
 
             NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
 
-            Bitmap albumArt = player.getAlbumArt();
-            int hashCode = albumArt == null ? 0 : albumArt.hashCode();
+            if(isNeedSendAlbumArt) {
+                lastSendAlbumArt = albumArtUri;
 
-            if(player.isPlaying() && albumArt != null && lastSendAlbumArt != hashCode) {
-                lastSendAlbumArt = hashCode;
-                albumArt.setHasAlpha(true);
+                StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
+                StorageReference albumArtRef = storageRef.child(prefs.getString("UID", "") + "/albumArt/" + albumArt.hashCode() + ".jpg");
 
-                String albumArtStream = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(NotiListenerService.getResizedBitmap(albumArt, 16, 16)));
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                albumArt.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                byte[] data = bytes.toByteArray();
                 albumArt.recycle();
 
-                np = new JSONObject();
-                np.put("albumArt", albumArtStream);
+                UploadTask uploadTask = albumArtRef.putBytes(data);
+                uploadTask.addOnSuccessListener(taskSnapshot -> {
+                    try {
+                        JSONObject json = new JSONObject();
+                        json.put("albumArt", albumArt.hashCode());
 
-                notificationHead = new JSONObject();
-                notificationBody = new JSONObject();
+                        JSONObject newNotificationHead = new JSONObject();
+                        JSONObject newNotificationBody = new JSONObject();
 
-                notificationBody.put("type", "media|meta_data");
-                notificationBody.put("device_name", DEVICE_NAME);
-                notificationBody.put("device_id", DEVICE_ID);
-                notificationBody.put("media_data", np.toString());
+                        newNotificationBody.put("type", "media|meta_data");
+                        newNotificationBody.put("device_name", DEVICE_NAME);
+                        newNotificationBody.put("device_id", DEVICE_ID);
+                        newNotificationBody.put("media_data", json.toString());
 
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notificationBody);
+                        newNotificationHead.put("to", TOPIC);
+                        newNotificationHead.put("data", newNotificationBody);
 
-                NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
+                        NotiListenerService.sendNotification(newNotificationHead, context.getPackageName(), context);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
         } catch (JSONException e) {
             e.printStackTrace();

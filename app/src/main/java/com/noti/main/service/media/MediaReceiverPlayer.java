@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
+import android.net.Uri;
 
 import androidx.annotation.Nullable;
 
@@ -88,6 +89,13 @@ class MediaReceiverPlayer {
         if (metadata == null) return null;
 
         return metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+    }
+
+    String getAlbumArtUri() {
+        MediaMetadata metadata = controller.getMetadata();
+        if(metadata == null) return "";
+
+        return metadata.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI);
     }
 
     String getArtist() {
