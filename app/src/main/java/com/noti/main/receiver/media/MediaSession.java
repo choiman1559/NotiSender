@@ -7,12 +7,14 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.TaskStackBuilder;
@@ -23,6 +25,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StreamDownloadTask;
 import com.noti.main.R;
 import com.noti.main.StartActivity;
+import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +37,7 @@ public class MediaSession {
     public final static String MEDIA_CONTROL = "media_control";
     public final FirebaseStorage storage;
 
+    private final SharedPreferences prefs;
     private final String UID;
     private static String deviceId = "";
     private static String deviceName = "";
@@ -43,35 +48,41 @@ public class MediaSession {
     Context context;
 
     private final android.media.session.MediaSession.Callback mediaSessionCallback = new android.media.session.MediaSession.Callback() {
+
+        @Override
+        public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
+            PowerUtils.getInstance(context).acquire();
+            return super.onMediaButtonEvent(mediaButtonIntent);
+        }
+
         @Override
         public void onPlay() {
-            notificationPlayer.play();
+            if(prefs.getBoolean("UseMediaSync", false)) notificationPlayer.play();
         }
 
         @Override
         public void onPause() {
-            notificationPlayer.pause();
+            if(prefs.getBoolean("UseMediaSync", false)) notificationPlayer.pause();
         }
 
         @Override
         public void onSkipToNext() {
-            notificationPlayer.next();
+            if(prefs.getBoolean("UseMediaSync", false)) notificationPlayer.next();
         }
 
         @Override
         public void onSkipToPrevious() {
-            notificationPlayer.previous();
+            if(prefs.getBoolean("UseMediaSync", false)) notificationPlayer.previous();
         }
 
         @Override
         public void onStop() {
-            notificationPlayer.stop();
+            if(prefs.getBoolean("UseMediaSync", false)) notificationPlayer.stop();
         }
 
         @Override
         public void onSeekTo(long pos) {
-            Log.d("seek", pos + "");
-            notificationPlayer.setPosition((int) pos);
+            if(prefs.getBoolean("UseMediaSync", false)) notificationPlayer.setPosition((int) pos);
         }
     };
 
@@ -79,6 +90,7 @@ public class MediaSession {
         this.context = context;
         this.notificationPlayer = new MediaPlayer(context, device_name, device_id);
 
+        prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
         deviceId = device_id;
         deviceName = device_name;
         storage = FirebaseStorage.getInstance();
@@ -101,8 +113,8 @@ public class MediaSession {
         if (lastFetchedData.equals(npd)) return;
         DefaultValueJSONObject np = new DefaultValueJSONObject(npd);
 
-        if (np.has("albumArt")) {
-            String albumArtHash = np.getString("albumArt");
+        if (np.has("albumArtHash")) {
+            String albumArtHash = np.getString("albumArtHash");
 
             StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
             StorageReference albumArtRef = storageRef.child(UID + "/albumArt/" + albumArtHash + ".jpg");
@@ -111,13 +123,30 @@ public class MediaSession {
             task.addOnSuccessListener(taskSnapshot -> new Thread(() -> {
                 Bitmap albumArt = BitmapFactory.decodeStream(taskSnapshot.getStream());
                 if (albumArt != null && notificationPlayer != null) {
+                    if(notificationPlayer.albumArt != null) {
+                        notificationPlayer.albumArt.recycle();
+                    }
                     notificationPlayer.albumArt = albumArt;
-                    albumArt.recycle();
                 }
 
                 ContextCompat.getMainExecutor(context).execute(this::publishMediaNotification);
                 albumArtRef.delete().addOnSuccessListener(unused -> { });
             }).start());
+        } else if(np.has("albumArtBytes")) {
+            Bitmap albumArtRaw = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(np.getString("albumArtBytes")));
+            Bitmap albumArt = null;
+            if (albumArtRaw != null) {
+                albumArt = Bitmap.createBitmap(albumArtRaw.getWidth(), albumArtRaw.getHeight(), albumArtRaw.getConfig());
+                Canvas canvas = new Canvas(albumArt);
+                canvas.drawColor(Color.WHITE);
+                canvas.drawBitmap(albumArtRaw, 0, 0, null);
+            }
+
+            if (albumArt != null && notificationPlayer != null) {
+                if(notificationPlayer.albumArt != null) notificationPlayer.albumArt.recycle();
+                notificationPlayer.albumArt = albumArt;
+            }
+            publishMediaNotification();
         }
     }
 
@@ -125,7 +154,7 @@ public class MediaSession {
         if (lastFetchedData.equals(npd)) return;
         DefaultValueJSONObject np = new DefaultValueJSONObject(npd);
 
-        if(np.has("albumArt")) {
+        if(np.has("albumArtHash") || np.has("albumArtBytes")) {
             updateBitmap(npd);
             return;
         }
@@ -158,9 +187,7 @@ public class MediaSession {
                 playerStatus.goNextAllowed = np.getBoolean("canGoNext", playerStatus.goNextAllowed);
                 playerStatus.goPreviousAllowed = np.getBoolean("canGoPrevious", playerStatus.goPreviousAllowed);
                 playerStatus.seekAllowed = np.getBoolean("canSeek", playerStatus.seekAllowed);
-                if(np.getBoolean("sendAlbumArt", false)) {
-                    playerStatus.albumArt = null;
-                }
+                playerStatus.albumArt = null;
             } else if (np.getBoolean("isPlaying", false)) {
                 notificationPlayer = new MediaPlayer(context, deviceName, deviceId);
                 update(npd);

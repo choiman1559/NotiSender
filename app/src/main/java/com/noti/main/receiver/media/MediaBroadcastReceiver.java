@@ -18,6 +18,8 @@ public class MediaBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if(!context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE).getBoolean("UseMediaSync", true)) return;
+
         com.noti.main.receiver.media.MediaSession mMediaSession = FirebaseMessageService.playingSessionMap.get(intent.getStringExtra(EXTRA_DEVICE_ID));
         if (mMediaSession == null) return;
         MediaSession mediaSession = mMediaSession.mediaSession;

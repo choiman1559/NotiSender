@@ -74,6 +74,10 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference UseDataEncryptionPassword;
     Preference EncryptionInfo;
 
+    Preference UseMediaSync;
+    Preference UseFcmWhenSendImage;
+    Preference FcmWhenSendImageInfo;
+
     ActivityResultLauncher<String> startCallLogPermit = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         if(!isGranted) {
             int SourceCode = DetectAppSource.detectSource(mContext);
@@ -192,6 +196,10 @@ public class SendPreference extends PreferenceFragmentCompat {
         UseDataEncryptionPassword = findPreference("UseDataEncryptionPassword");
         EncryptionInfo = findPreference("EncryptionInfo");
 
+        UseMediaSync = findPreference("UseMediaSync");
+        UseFcmWhenSendImage = findPreference("UseFcmWhenSendImage");
+        FcmWhenSendImageInfo = findPreference("FcmWhenSendImageInfo");
+
         boolean isntUpOsM = Build.VERSION.SDK_INT < 22;
         if (isntUpOsM) {
             IconUseNotification.setEnabled(false);
@@ -287,6 +295,20 @@ public class SendPreference extends PreferenceFragmentCompat {
             UseCallLog.setVisible((boolean) newValue);
             return true;
         });
+
+        boolean isUseMediaSync = prefs.getBoolean("UseMediaSync", false);
+        UseFcmWhenSendImage.setVisible(isUseMediaSync);
+        FcmWhenSendImageInfo.setVisible(isUseMediaSync && prefs.getBoolean("UseFcmWhenSendImage", false));
+        UseMediaSync.setOnPreferenceChangeListener(((preference, newValue) -> {
+            boolean foo = (boolean) newValue;
+            UseFcmWhenSendImage.setVisible(foo);
+            FcmWhenSendImageInfo.setVisible(foo && prefs.getBoolean("UseFcmWhenSendImage", false));
+            return true;
+        }));
+        UseFcmWhenSendImage.setOnPreferenceChangeListener(((preference, newValue) -> {
+            FcmWhenSendImageInfo.setVisible((boolean) newValue);
+            return true;
+        }));
     }
 
     @Override

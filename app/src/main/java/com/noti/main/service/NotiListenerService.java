@@ -250,6 +250,14 @@ public class NotiListenerService extends NotificationListenerService {
                             return;
                         }
                     } else if (isWhitelist(PackageName)) {
+                        if (prefs.getBoolean("IgnoreOngoing", false) &&
+                                (notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0 ||
+                                (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0 ||
+                                (notification.flags & Notification.FLAG_LOCAL_ONLY) != 0) {
+                            manager.release();
+                            return;
+                        }
+
                         if (prefs.getBoolean("StrictStringNull", false) && (TITLE == null || TEXT == null)) {
                             manager.release();
                             return;

@@ -1,6 +1,7 @@
 package com.noti.main.receiver.media;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
 
@@ -11,6 +12,8 @@ import org.json.JSONObject;
 
 public class MediaPlayer {
     Context context;
+    SharedPreferences prefs;
+
     private final String device_name;
     private final String device_id;
 
@@ -40,6 +43,7 @@ public class MediaPlayer {
 
     public MediaPlayer(Context context, String device_name, String device_id) {
         this.context = context;
+        prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
         lastPositionTime = System.currentTimeMillis();
         this.device_name = device_name;
         this.device_id = device_id;
@@ -212,26 +216,28 @@ public class MediaPlayer {
     }
 
     void sendCommand(JSONObject object) {
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = NotiListenerService.getUniqueID();
-        String TOPIC = NotiListenerService.getTopic();
+        if(prefs.getBoolean("serviceToggle", false)) {
+            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_ID = NotiListenerService.getUniqueID();
+            String TOPIC = NotiListenerService.getTopic();
 
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
-        try {
-            notificationBody.put("type", "media|action");
-            notificationBody.put("device_name", DEVICE_NAME);
-            notificationBody.put("device_id", DEVICE_ID);
-            notificationBody.put("send_device_name", device_name);
-            notificationBody.put("send_device_id", device_id);
-            notificationBody.put("media_data", object);
+            JSONObject notificationHead = new JSONObject();
+            JSONObject notificationBody = new JSONObject();
+            try {
+                notificationBody.put("type", "media|action");
+                notificationBody.put("device_name", DEVICE_NAME);
+                notificationBody.put("device_id", DEVICE_ID);
+                notificationBody.put("send_device_name", device_name);
+                notificationBody.put("send_device_id", device_id);
+                notificationBody.put("media_data", object);
 
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
-        } catch (JSONException e) {
-            e.printStackTrace();
+                notificationHead.put("to", TOPIC);
+                notificationHead.put("data", notificationBody);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
         }
-
-        NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
     }
 }

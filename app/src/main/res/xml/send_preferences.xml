@@ -11,6 +11,12 @@
             android:key="UseWhite"
             android:summary="you can use this option to select only apps to send notification."
             android:title="Use Whitelist instead of Blacklist" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:icon="@drawable/ic_fluent_text_continuous_24_regular"
+            android:defaultValue="false"
+            android:key="IgnoreOngoing"
+            android:summary="Do not send data for persistent notifications"
+            android:title="Ignore ongoing notifications" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Send Icon">
@@ -57,6 +63,24 @@
             android:key="UseCallLog"
             android:summary="Use CallLog instead of TelephonyManager (Debug purpose)"
             android:title="Detect incoming calls by other method" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Media control">
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_fluent_play_circle_24_regular"
+            android:key="UseMediaSync"
+            android:summary="Control media player on other device"
+            android:title="Media remote control" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="UseFcmWhenSendImage"
+            android:summary="Do not use a separate CDN network to transmit album art"
+            android:title="Don't use CDN for album art" />
+        <Preference
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:key="FcmWhenSendImageInfo"
+            android:summary="When the above option is used, the transfer speed is fast, but the album art quality is greatly reduced." />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Interval">

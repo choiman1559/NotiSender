@@ -192,6 +192,41 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 if (type.equals("send|find") && !isDeviceItself(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                     sendFindTaskNotification();
                 }
+
+                if (type.startsWith("media") && prefs.getBoolean("UseMediaSync", true)) {
+                    manager.acquire();
+                    try {
+                        String raw = map.get("media_data");
+                        if (raw != null && !raw.isEmpty()) {
+                            JSONObject object = new JSONObject(raw);
+
+                            switch (type) {
+                                case "media|meta_data":
+                                    if (!isDeviceItself(map)) {
+                                        MediaSession current;
+                                        if (!playingSessionMap.containsKey(map.get("device_id"))) {
+                                            current = new MediaSession(this, map.get("device_name"), map.get("device_id"), prefs.getString("UID", ""));
+                                            playingSessionMap.put(map.get("device_id"), current);
+                                        } else {
+                                            current = playingSessionMap.get(map.get("device_id"));
+                                        }
+
+                                        assert current != null;
+                                        current.update(object);
+                                    }
+                                    break;
+
+                                case "media|action":
+                                    if (isTargetDevice(map)) {
+                                        NotiListenerService.mediaReceiver.onDataReceived(object);
+                                    }
+                                    break;
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
             if (type.startsWith("pair") && !isDeviceItself(map)) {
@@ -267,40 +302,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             sendFindTaskNotification();
                         }
                         break;
-                }
-            }
-
-            if (type.startsWith("media")) {
-                try {
-                    String raw = map.get("media_data");
-                    if (raw != null && !raw.isEmpty()) {
-                        JSONObject object = new JSONObject(raw);
-
-                        switch (type) {
-                            case "media|meta_data":
-                                if (!isDeviceItself(map)) {
-                                    MediaSession current;
-                                    if (!playingSessionMap.containsKey(map.get("device_id"))) {
-                                        current = new MediaSession(this, map.get("device_name"), map.get("device_id"), prefs.getString("UID", ""));
-                                        playingSessionMap.put(map.get("device_id"), current);
-                                    } else {
-                                        current = playingSessionMap.get(map.get("device_id"));
-                                    }
-
-                                    assert current != null;
-                                    current.update(object);
-                                }
-                                break;
-
-                            case "media|action":
-                                if (isTargetDevice(map)) {
-                                    NotiListenerService.mediaReceiver.onDataReceived(object);
-                                }
-                                break;
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -627,9 +628,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setContentText(content)
                 .setPriority(Build.VERSION.SDK_INT > 23 ? getPriority() : NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
-                .setGroup(getPackageName() + ".NOTIFICATION")
-                .setGroupSummary(true)
                 .setAutoCancel(true);
+
+        if(Build.VERSION.SDK_INT < 33) {
+            builder
+                    .setGroup(getPackageName() + ".NOTIFICATION")
+                    .setGroupSummary(true);
+        }
 
         String regexData = regexPrefs.getString("RegexData", "");
         if (regexData.isEmpty()) {

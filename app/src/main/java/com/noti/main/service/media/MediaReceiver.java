@@ -20,6 +20,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.noti.main.service.NotiListenerService;
+import com.noti.main.utils.CompressStringUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -150,11 +151,15 @@ public class MediaReceiver {
         if (controller.getPackageName().equals(context.getPackageName())) return;
 
         MediaReceiverPlayer player = new MediaReceiverPlayer(controller, appNameLookup(context, controller.getPackageName()));
-        controller.registerCallback(new MediaReceiverCallback(this, player), new Handler(Looper.getMainLooper()));
+        controller.registerCallback(new MediaReceiverCallback(context,this, player), new Handler(Looper.getMainLooper()));
         players.put(player.getName(), player);
     }
 
     void sendMetadata(MediaReceiverPlayer player) {
+        if(!prefs.getBoolean("serviceToggle", false)) {
+            return;
+        }
+
         try {
             JSONObject np = new JSONObject();
             if(player.getTitle().isEmpty()) return;
@@ -162,8 +167,6 @@ public class MediaReceiver {
             Bitmap albumArt = player.getAlbumArt();
             String albumArtUri = player.getAlbumArtUri();
             boolean isNeedSendAlbumArt = player.isPlaying() && albumArt != null && !lastSendAlbumArt.equals(albumArtUri);
-
-            Log.d("albumart", albumArtUri);
 
             np.put("player", player.getName());
             if (player.getArtist().isEmpty()) {
@@ -184,7 +187,6 @@ public class MediaReceiver {
             np.put("canGoNext", player.canGoNext());
             np.put("canSeek", player.canSeek());
             np.put("volume", player.getVolume());
-            np.put("sendAlbumArt", isNeedSendAlbumArt);
 
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = NotiListenerService.getUniqueID();
@@ -205,37 +207,57 @@ public class MediaReceiver {
 
             if(isNeedSendAlbumArt) {
                 lastSendAlbumArt = albumArtUri;
+                if(prefs.getBoolean("UseFcmWhenSendImage", false)) {
+                    albumArt.setHasAlpha(true);
+                    String albumArtStream = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(NotiListenerService.getResizedBitmap(albumArt, 16, 16)));
 
-                StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-                StorageReference albumArtRef = storageRef.child(prefs.getString("UID", "") + "/albumArt/" + albumArt.hashCode() + ".jpg");
+                    np = new JSONObject();
+                    np.put("albumArtBytes", albumArtStream);
 
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                albumArt.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-                byte[] data = bytes.toByteArray();
-                albumArt.recycle();
+                    notificationHead = new JSONObject();
+                    notificationBody = new JSONObject();
 
-                UploadTask uploadTask = albumArtRef.putBytes(data);
-                uploadTask.addOnSuccessListener(taskSnapshot -> {
-                    try {
-                        JSONObject json = new JSONObject();
-                        json.put("albumArt", albumArt.hashCode());
+                    notificationBody.put("type", "media|meta_data");
+                    notificationBody.put("device_name", DEVICE_NAME);
+                    notificationBody.put("device_id", DEVICE_ID);
+                    notificationBody.put("media_data", np.toString());
 
-                        JSONObject newNotificationHead = new JSONObject();
-                        JSONObject newNotificationBody = new JSONObject();
+                    notificationHead.put("to", TOPIC);
+                    notificationHead.put("data", notificationBody);
 
-                        newNotificationBody.put("type", "media|meta_data");
-                        newNotificationBody.put("device_name", DEVICE_NAME);
-                        newNotificationBody.put("device_id", DEVICE_ID);
-                        newNotificationBody.put("media_data", json.toString());
+                    NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
+                } else {
+                    StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
+                    StorageReference albumArtRef = storageRef.child(prefs.getString("UID", "") + "/albumArt/" + albumArt.hashCode() + ".jpg");
 
-                        newNotificationHead.put("to", TOPIC);
-                        newNotificationHead.put("data", newNotificationBody);
+                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                    albumArt.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                    byte[] data = bytes.toByteArray();
+                    albumArt.recycle();
 
-                        NotiListenerService.sendNotification(newNotificationHead, context.getPackageName(), context);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
+                    UploadTask uploadTask = albumArtRef.putBytes(data);
+                    uploadTask.addOnSuccessListener(taskSnapshot -> {
+                        try {
+                            JSONObject json = new JSONObject();
+                            json.put("albumArtHash", albumArt.hashCode());
+
+                            JSONObject newNotificationHead = new JSONObject();
+                            JSONObject newNotificationBody = new JSONObject();
+
+                            newNotificationBody.put("type", "media|meta_data");
+                            newNotificationBody.put("device_name", DEVICE_NAME);
+                            newNotificationBody.put("device_id", DEVICE_ID);
+                            newNotificationBody.put("media_data", json.toString());
+
+                            newNotificationHead.put("to", TOPIC);
+                            newNotificationHead.put("data", newNotificationBody);
+
+                            NotiListenerService.sendNotification(newNotificationHead, context.getPackageName(), context);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
