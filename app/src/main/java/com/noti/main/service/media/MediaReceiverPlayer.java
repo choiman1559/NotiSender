@@ -91,13 +91,6 @@ class MediaReceiverPlayer {
         return metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
     }
 
-    String getAlbumArtUri() {
-        MediaMetadata metadata = controller.getMetadata();
-        if(metadata == null) return "";
-
-        return metadata.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI);
-    }
-
     String getArtist() {
         MediaMetadata metadata = controller.getMetadata();
         if (metadata == null) return "";

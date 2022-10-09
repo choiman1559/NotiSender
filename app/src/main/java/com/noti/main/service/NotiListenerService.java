@@ -29,7 +29,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.noti.main.BuildConfig;
-import com.noti.main.receiver.media.MediaBroadcastReceiver;
 import com.noti.main.service.media.MediaReceiver;
 import com.noti.main.utils.AESCrypto;
 import com.noti.main.utils.JsonRequest;
@@ -231,13 +230,13 @@ public class NotiListenerService extends NotificationListenerService {
             if (!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
                 String mode = prefs.getString("service", "");
                 if (mode.equals("send") || mode.equals("hybrid")) {
-                    String TITLE = extra.getString(Notification.EXTRA_TITLE);
-                    String TEXT = extra.getString(Notification.EXTRA_TEXT);
-                    String TEXT_LINES = extra.getString(Notification.EXTRA_TEXT_LINES);
-                    if(TEXT_LINES != null && !TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
+                    String TITLE = extra.getString(Notification.EXTRA_TITLE) + "";
+                    String TEXT = extra.getString(Notification.EXTRA_TEXT) + "";
+                    String TEXT_LINES = extra.getString(Notification.EXTRA_TEXT_LINES) + "";
+                    if(!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
                     String PackageName = sbn.getPackageName();
 
-                    if (PackageName.equals(getPackageName()) && (TITLE != null && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main")))) {
+                    if (PackageName.equals(getPackageName()) && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))) {
                         manager.release();
                         return;
                     } else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
@@ -258,7 +257,7 @@ public class NotiListenerService extends NotificationListenerService {
                             return;
                         }
 
-                        if (prefs.getBoolean("StrictStringNull", false) && (TITLE == null || TEXT == null)) {
+                        if (prefs.getBoolean("StrictStringNull", false) && (TITLE.isEmpty() || TEXT.isEmpty())) {
                             manager.release();
                             return;
                         }

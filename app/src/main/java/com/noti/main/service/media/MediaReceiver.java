@@ -37,7 +37,7 @@ public class MediaReceiver {
     private final SharedPreferences prefs;
     private final Context context;
 
-    private volatile static String lastSendAlbumArt = "";
+    private volatile static int lastSendAlbumArt = 0;
 
     private final class MediaSessionChangeListener implements MediaSessionManager.OnActiveSessionsChangedListener {
         @Override
@@ -165,8 +165,7 @@ public class MediaReceiver {
             if(player.getTitle().isEmpty()) return;
 
             Bitmap albumArt = player.getAlbumArt();
-            String albumArtUri = player.getAlbumArtUri();
-            boolean isNeedSendAlbumArt = player.isPlaying() && albumArt != null && !lastSendAlbumArt.equals(albumArtUri);
+            boolean isNeedSendAlbumArt = player.isPlaying() && albumArt != null && lastSendAlbumArt != albumArt.hashCode();
 
             np.put("player", player.getName());
             if (player.getArtist().isEmpty()) {
@@ -206,7 +205,7 @@ public class MediaReceiver {
             NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
 
             if(isNeedSendAlbumArt) {
-                lastSendAlbumArt = albumArtUri;
+                lastSendAlbumArt = albumArt.hashCode();
                 if(prefs.getBoolean("UseFcmWhenSendImage", false)) {
                     albumArt.setHasAlpha(true);
                     String albumArtStream = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(NotiListenerService.getResizedBitmap(albumArt, 16, 16)));

@@ -12,7 +12,7 @@
         </deviceKey>
       </Target>
     </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2022-10-07T17:20:35.865558Z" />
+    <timeTargetWasSelectedWithDropDown value="2022-10-09T01:58:46.310079Z" />
     <multipleDevicesSelectedInDropDown value="true" />
     <runningDeviceTargetsSelectedWithDialog>
       <Target>
@@ -20,7 +20,7 @@
         <deviceKey>
           <Key>
             <type value="SERIAL_NUMBER" />
-            <value value="adb-1f55bc1a-8SfMQj._adb-tls-connect._tcp" />
+            <value value="adb-R5CR30T51RX-t7qbdt._adb-tls-connect._tcp" />
           </Key>
         </deviceKey>
       </Target>
@@ -29,7 +29,7 @@
         <deviceKey>
           <Key>
             <type value="SERIAL_NUMBER" />
-            <value value="adb-R5CR30T51RX-t7qbdt._adb-tls-connect._tcp" />
+            <value value="adb-1f55bc1a-8SfMQj._adb-tls-connect._tcp" />
           </Key>
         </deviceKey>
       </Target>

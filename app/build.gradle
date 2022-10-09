@@ -9,6 +9,12 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of("11"))
+        }
+    }
+
     compileSdkVersion 33
     buildToolsVersion '33.0.0'
 
@@ -16,8 +22,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 1011700
-        versionName "1.17.0"
+        versionCode 1011701
+        versionName "1.17.1"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -76,8 +82,8 @@ dependencies {
     implementation 'com.github.isradeleon:Notify-Android:1.0.4'
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.2'
-    implementation 'com.microsoft.design:fluent-system-icons:1.1.179@aar'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10'
+    implementation 'com.microsoft.design:fluent-system-icons:1.1.184@aar'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20'
 }
 
 repositories {
