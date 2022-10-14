@@ -57,6 +57,7 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_File;
     MaterialButton Permit_Alarm;
     MaterialButton Permit_Privacy;
+    MaterialButton Permit_Collect_Data;
 
     ActivityResultLauncher<Intent> startOverlayPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if(Build.VERSION.SDK_INT < 29 || Settings.canDrawOverlays(this)) {
@@ -95,6 +96,7 @@ public class StartActivity extends AppCompatActivity {
         Permit_File = findViewById(R.id.Permit_File);
         Permit_Alarm = findViewById(R.id.Permit_Alarm);
         Permit_Privacy = findViewById(R.id.Permit_Privacy);
+        Permit_Collect_Data = findViewById(R.id.Permit_Collect_Data);
         Start_App = findViewById(R.id.Start_App);
 
         int count = 0;
@@ -129,6 +131,11 @@ public class StartActivity extends AppCompatActivity {
 
         if(prefs.getBoolean("AcceptedPrivacyPolicy", false)) {
             setButtonCompleted(this, Permit_Privacy);
+            count++;
+        }
+
+        if(prefs.getBoolean("AcceptedDataCollection", false)) {
+            setButtonCompleted(this, Permit_Collect_Data);
             count++;
         }
 
@@ -169,7 +176,7 @@ public class StartActivity extends AppCompatActivity {
             }
         }
 
-        if(count >= 6) {
+        if(count >= 7) {
             startActivity(new Intent(this, SettingsActivity.class));
             finish();
         }
@@ -207,6 +214,19 @@ public class StartActivity extends AppCompatActivity {
             });
             denyButton.setOnClickListener((view) -> alertDialog.dismiss());
         });
+        Permit_Collect_Data.setOnClickListener((v) -> {
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
+            dialog.setTitle("Data Collect Agreement");
+            dialog.setMessage("Noti Sender reads the user's SMS information for synchronization between devices, even when the app is closed or not in use.");
+            dialog.setIcon(R.drawable.ic_fluent_database_search_24_regular);
+            dialog.setPositiveButton("Agree", (dialog1, which) -> {
+                prefs.edit().putBoolean("AcceptedDataCollection", true).apply();
+                setButtonCompleted(this, Permit_Collect_Data);
+                checkPermissionsAndEnableComplete();
+            });
+            dialog.setNegativeButton("Deny", (dialog1, which) -> { });
+            dialog.show();
+        });
         Start_App.setOnClickListener((v) -> {
             if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || Permit_Alarm.isEnabled() || Permit_Privacy.isEnabled()) {
                 ToastHelper.show(this, "Please complete all section!", ToastHelper.LENGTH_SHORT);
@@ -224,7 +244,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
     void checkPermissionsAndEnableComplete() {
-        if(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && !Permit_Alarm.isEnabled() && !Permit_Privacy.isEnabled()) {
+        if(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && !Permit_Alarm.isEnabled() && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled()) {
             Start_App.setEnabled(true);
         }
     }

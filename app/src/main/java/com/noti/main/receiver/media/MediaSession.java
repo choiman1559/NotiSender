@@ -123,14 +123,11 @@ public class MediaSession {
             task.addOnSuccessListener(taskSnapshot -> new Thread(() -> {
                 Bitmap albumArt = BitmapFactory.decodeStream(taskSnapshot.getStream());
                 if (albumArt != null && notificationPlayer != null) {
-                    if(notificationPlayer.albumArt != null) {
-                        notificationPlayer.albumArt.recycle();
-                    }
                     notificationPlayer.albumArt = albumArt;
                 }
 
                 ContextCompat.getMainExecutor(context).execute(this::publishMediaNotification);
-                albumArtRef.delete().addOnSuccessListener(unused -> { });
+                albumArtRef.delete();
             }).start());
         } else if(np.has("albumArtBytes")) {
             Bitmap albumArtRaw = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(np.getString("albumArtBytes")));

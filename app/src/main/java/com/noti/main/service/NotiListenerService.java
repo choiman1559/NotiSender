@@ -257,7 +257,7 @@ public class NotiListenerService extends NotificationListenerService {
                             return;
                         }
 
-                        if (prefs.getBoolean("StrictStringNull", false) && (TITLE.isEmpty() || TEXT.isEmpty())) {
+                        if (prefs.getBoolean("StrictStringNull", false) && ((TITLE.isEmpty() || TITLE.equals("null")) || (TEXT.isEmpty() || TEXT.equals("null")))) {
                             manager.release();
                             return;
                         }
@@ -514,8 +514,8 @@ public class NotiListenerService extends NotificationListenerService {
         JSONObject notificationBody = new JSONObject();
         try {
             notificationBody.put("type", "send|normal");
-            notificationBody.put("title", TITLE != null ? TITLE : prefs.getString("DefaultTitle", "New notification"));
-            notificationBody.put("message", TEXT != null ? TEXT : prefs.getString("DefaultMessage", "notification arrived."));
+            notificationBody.put("title", TITLE == null || TITLE.equals("null") ? prefs.getString("DefaultTitle", "New notification") : TITLE);
+            notificationBody.put("message", TEXT == null || TEXT.equals("null") ? prefs.getString("DefaultMessage", "notification arrived.") : TEXT);
             notificationBody.put("package", PackageName);
             notificationBody.put("appname", APPNAME);
             notificationBody.put("device_name", DEVICE_NAME);

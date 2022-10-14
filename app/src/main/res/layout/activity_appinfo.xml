@@ -97,6 +97,17 @@
                 android:textAllCaps="false"
                 tools:ignore="HardcodedText" />
 
+            <Button
+                android:id="@+id/data_collection"
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textColor="@color/ui_bg"
+                android:text="Data Collections"
+                android:textAllCaps="false"
+                tools:ignore="HardcodedText" />
+
             <TextView
                 android:id="@+id/oss"
                 android:layout_width="match_parent"

@@ -147,6 +147,20 @@
                 app:iconTint="@color/ui_bg"
                 app:icon="@drawable/ic_fluent_inprivate_account_24_regular"
                 android:background="@drawable/round_corner"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Permit_Collect_Data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Data Collections"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginVertical="12dp"
+                android:layout_marginHorizontal="24dp"
+                android:textColor="@color/ui_bg"
+                app:iconTint="@color/ui_bg"
+                app:icon="@drawable/ic_fluent_database_search_24_regular"
+                android:background="@drawable/round_corner"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

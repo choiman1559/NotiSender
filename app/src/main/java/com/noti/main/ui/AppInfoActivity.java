@@ -98,6 +98,16 @@ public class AppInfoActivity extends AppCompatActivity {
             acceptButton.setOnClickListener((view) -> alertDialog.dismiss());
         });
 
+        Button DataCollection = findViewById(R.id.data_collection);
+        DataCollection.setOnClickListener(v -> {
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
+            dialog.setTitle("Data Collect Agreement");
+            dialog.setMessage("Noti Sender reads the user's SMS information for synchronization between devices, even when the app is closed or not in use.");
+            dialog.setIcon(R.drawable.ic_fluent_database_search_24_regular);
+            dialog.setPositiveButton("OK", (dialog1, which) -> { });
+            dialog.show();
+        });
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener((v) -> this.finish());
     }
