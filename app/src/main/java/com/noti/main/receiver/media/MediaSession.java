@@ -184,7 +184,7 @@ public class MediaSession {
                 playerStatus.goNextAllowed = np.getBoolean("canGoNext", playerStatus.goNextAllowed);
                 playerStatus.goPreviousAllowed = np.getBoolean("canGoPrevious", playerStatus.goPreviousAllowed);
                 playerStatus.seekAllowed = np.getBoolean("canSeek", playerStatus.seekAllowed);
-                playerStatus.albumArt = null;
+                if(np.getBoolean("isAlbumArtSent", false)) playerStatus.albumArt = null;
             } else if (np.getBoolean("isPlaying", false)) {
                 notificationPlayer = new MediaPlayer(context, deviceName, deviceId);
                 update(npd);

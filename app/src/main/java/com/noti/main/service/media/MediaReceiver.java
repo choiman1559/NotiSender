@@ -37,7 +37,7 @@ public class MediaReceiver {
     private final SharedPreferences prefs;
     private final Context context;
 
-    private volatile static int lastSendAlbumArt = 0;
+    private volatile int lastSendAlbumArt = 0;
 
     private final class MediaSessionChangeListener implements MediaSessionManager.OnActiveSessionsChangedListener {
         @Override
@@ -165,7 +165,7 @@ public class MediaReceiver {
             if(player.getTitle().isEmpty()) return;
 
             Bitmap albumArt = player.getAlbumArt();
-            boolean isNeedSendAlbumArt = player.isPlaying() && albumArt != null && lastSendAlbumArt != albumArt.hashCode();
+            boolean isNeedSendAlbumArt = prefs.getBoolean("UseAlbumArt", false) && albumArt != null && lastSendAlbumArt != albumArt.hashCode();
 
             np.put("player", player.getName());
             if (player.getArtist().isEmpty()) {
@@ -186,6 +186,7 @@ public class MediaReceiver {
             np.put("canGoNext", player.canGoNext());
             np.put("canSeek", player.canSeek());
             np.put("volume", player.getVolume());
+            np.put("isAlbumArtSent", isNeedSendAlbumArt);
 
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = NotiListenerService.getUniqueID();
@@ -203,8 +204,7 @@ public class MediaReceiver {
             notificationHead.put("data", notificationBody);
 
             NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
-
-            if(prefs.getBoolean("UseAlbumArt", false) && isNeedSendAlbumArt) {
+            if(isNeedSendAlbumArt) {
                 lastSendAlbumArt = albumArt.hashCode();
                 if(prefs.getBoolean("UseFcmWhenSendImage", false)) {
                     albumArt.setHasAlpha(true);

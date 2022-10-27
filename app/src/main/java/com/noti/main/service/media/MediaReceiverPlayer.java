@@ -4,9 +4,10 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
-import android.net.Uri;
 
 import androidx.annotation.Nullable;
+
+import java.util.Objects;
 
 class MediaReceiverPlayer {
 
@@ -169,5 +170,22 @@ class MediaReceiverPlayer {
             if(item != null && !item.isEmpty()) return item;
         }
         return "";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof MediaReceiverPlayer)) return false;
+        MediaReceiverPlayer that = (MediaReceiverPlayer) o;
+        return
+                Objects.equals(this.name, that.name) &&
+                Objects.equals(this.getTitle(), that.getTitle()) &&
+                Objects.equals(this.getAlbum(), that.getAlbum()) &&
+                Objects.equals(this.getArtist(), that.getArtist()) &&
+                Objects.equals(this.getLength(), that.getLength());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(controller, name);
     }
 }
