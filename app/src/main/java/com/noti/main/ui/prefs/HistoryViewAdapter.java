@@ -114,7 +114,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                     builder.setMessage(Html.fromHtml(message));
                     builder.setPositiveButton("Close", (dialog, which) -> { });
                     builder.setNeutralButton("Send Again",  (dialog, which) -> {
-                        if(!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false) && !prefs.getString("service", "reception").equals("reception")) {
+                        if(!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
                             sendNormalNotificationAgain(finalPackage, finalDate, finalTitle, finalContent);
                         } else {
                             ToastHelper.show(mContext, "Please check service type and toggle and try again!","DISMISS", ToastHelper.LENGTH_SHORT);

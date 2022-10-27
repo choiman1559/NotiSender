@@ -204,7 +204,7 @@ public class MediaReceiver {
 
             NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
 
-            if(isNeedSendAlbumArt) {
+            if(prefs.getBoolean("UseAlbumArt", false) && isNeedSendAlbumArt) {
                 lastSendAlbumArt = albumArt.hashCode();
                 if(prefs.getBoolean("UseFcmWhenSendImage", false)) {
                     albumArt.setHasAlpha(true);

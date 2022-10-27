@@ -681,6 +681,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     String bitmapUri = "";
                     String ringtoneUri = "";
 
+                    if(obj == null || obj.equals("null")) return;
                     int targetIndex = Integer.parseInt((String) obj);
                     if (targetIndex > -1) {
                         try {

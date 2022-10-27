@@ -74,6 +74,12 @@
             android:title="Media remote control" />
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
+            android:key="UseAlbumArt"
+            android:icon="@drawable/ic_fluent_album_24_regular"
+            android:summary="Send a thumbnail or album art of current media"
+            android:title="Send Album art" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
             android:key="UseFcmWhenSendImage"
             android:summary="Do not use a separate CDN network to transmit album art"
             android:title="Don't use CDN for album art" />

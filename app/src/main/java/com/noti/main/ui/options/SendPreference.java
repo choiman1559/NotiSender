@@ -75,6 +75,7 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference EncryptionInfo;
 
     Preference UseMediaSync;
+    Preference UseAlbumArt;
     Preference UseFcmWhenSendImage;
     Preference FcmWhenSendImageInfo;
 
@@ -197,6 +198,7 @@ public class SendPreference extends PreferenceFragmentCompat {
         EncryptionInfo = findPreference("EncryptionInfo");
 
         UseMediaSync = findPreference("UseMediaSync");
+        UseAlbumArt = findPreference("UseAlbumArt");
         UseFcmWhenSendImage = findPreference("UseFcmWhenSendImage");
         FcmWhenSendImageInfo = findPreference("FcmWhenSendImageInfo");
 
@@ -298,10 +300,12 @@ public class SendPreference extends PreferenceFragmentCompat {
 
         boolean isUseMediaSync = prefs.getBoolean("UseMediaSync", false);
         UseFcmWhenSendImage.setVisible(isUseMediaSync);
+        UseAlbumArt.setVisible(isUseMediaSync);
         FcmWhenSendImageInfo.setVisible(isUseMediaSync && prefs.getBoolean("UseFcmWhenSendImage", false));
         UseMediaSync.setOnPreferenceChangeListener(((preference, newValue) -> {
             boolean foo = (boolean) newValue;
             UseFcmWhenSendImage.setVisible(foo);
+            UseAlbumArt.setVisible(foo);
             FcmWhenSendImageInfo.setVisible(foo && prefs.getBoolean("UseFcmWhenSendImage", false));
             return true;
         }));
