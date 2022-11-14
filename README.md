@@ -15,7 +15,9 @@ Send notifications to other android devices easily
 
 <img src="https://user-images.githubusercontent.com/43315227/201664876-fa1a6fbf-8320-4924-b5b3-0ac71b8996e1.png" width="400"/>
 
-Hosted and organized by:&nbsp;&nbsp;&nbsp;<img src="https://user-images.githubusercontent.com/43315227/201664627-23351e3d-9b42-4e71-ae18-c1de13e56c94.png" width="150"/> <img src="https://user-images.githubusercontent.com/43315227/201664791-005ff2f1-a296-4ae5-9fb5-94bb5ca5fdaa.png" width="150"/>
+Competition Hosted and organized by:
+
+<img src="https://user-images.githubusercontent.com/43315227/201664627-23351e3d-9b42-4e71-ae18-c1de13e56c94.png" width="150"/> <img src="https://user-images.githubusercontent.com/43315227/201664791-005ff2f1-a296-4ae5-9fb5-94bb5ca5fdaa.png" width="150"/>
 
 ## Screenshots
 
