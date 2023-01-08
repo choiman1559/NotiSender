@@ -11,11 +11,13 @@ public class Application extends android.app.Application {
     public static ArrayList<PairDeviceInfo> pairingProcessList;
 
     public static final String PREFS_NAME = "com.noti.main_preferences";
+    public static boolean isTablet = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
         MonetCompat.enablePaletteCompat();
         pairingProcessList = new ArrayList<>();
+        isTablet = getResources().getBoolean(R.bool.is_tablet);
     }
 }

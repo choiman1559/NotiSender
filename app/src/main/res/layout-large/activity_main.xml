@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:transitionGroup="true"
+        tools:ignore="RtlSymmetry">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="12dp"
+                android:orientation="horizontal"
+                app:layout_collapseMode="none">
+
+                <com.kieronquinn.monetcompat.view.MonetSwitch
+                    android:id="@+id/serviceToggle"
+                    android:layout_width="400dp"
+                    android:layout_height="60dp"
+                    android:elevation="8dp"
+                    android:outlineProvider="none"
+                    android:text="@string/ServiceToggle"
+                    android:textSize="20sp" />
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="12dp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:elevation="0dp"
+                    app:cardCornerRadius="250dp">
+
+                    <ImageView
+                        android:id="@+id/AccountIcon"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:scaleType="centerCrop"
+                        app:srcCompat="@drawable/ic_broken_image"
+                        tools:ignore="ContentDescription,ImageContrastCheck" />
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="6dp"
+                tools:ignore="HardcodedText">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/AccountPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/ui_bg"
+                        tools:layout_editor_absoluteX="8dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginVertical="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/AccountMenuIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="8dp"
+                                android:foregroundGravity="center"
+                                android:src="@drawable/ic_fluent_inprivate_account_24_regular"
+                                tools:ignore="ContentDescription" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:layout_toEndOf="@id/AccountMenuIcon"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/Title"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Service &amp; Account"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textSize="20sp" />
+
+                                <TextView
+                                    android:id="@+id/taskDescription"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Service toggle, Login"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/PairPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/ui_bg"
+                        tools:layout_editor_absoluteX="8dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginVertical="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/PairMenuIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="8dp"
+                                android:foregroundGravity="center"
+                                android:src="@drawable/ic_fluent_cloud_sync_24_regular"
+                                tools:ignore="ContentDescription" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:layout_toEndOf="@id/PairMenuIcon"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Connected Devices"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textSize="20sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Real-time synchronization"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/SendPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/ui_bg"
+                        tools:layout_editor_absoluteX="8dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginVertical="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/SendMenuIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="8dp"
+                                android:foregroundGravity="center"
+                                android:src="@drawable/ic_fluent_arrow_export_ltr_24_regular"
+                                tools:ignore="ContentDescription" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:layout_toEndOf="@id/SendMenuIcon"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Send Option"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textSize="20sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Options for send task"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/ReceptionPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/ui_bg"
+                        tools:layout_editor_absoluteX="8dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginVertical="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/ReceptionMenuIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="8dp"
+                                android:foregroundGravity="center"
+                                android:src="@drawable/ic_fluent_arrow_import_24_regular"
+                                tools:ignore="ContentDescription" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:layout_toEndOf="@id/ReceptionMenuIcon"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Reception Option"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textSize="20sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Options for reception task"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/OtherPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/ui_bg"
+                        tools:layout_editor_absoluteX="8dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginVertical="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/OtherMenuIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="8dp"
+                                android:foregroundGravity="center"
+                                android:src="@drawable/ic_fluent_more_horizontal_24_regular"
+                                tools:ignore="ContentDescription" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:layout_toEndOf="@id/OtherMenuIcon"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Other Option"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textSize="20sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Not so important options"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/HistoryPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/ui_bg"
+                        tools:layout_editor_absoluteX="8dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginVertical="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/HistoryMenuIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="8dp"
+                                android:foregroundGravity="center"
+                                android:src="@drawable/ic_fluent_history_24_regular"
+                                tools:ignore="ContentDescription" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:layout_toEndOf="@id/HistoryMenuIcon"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Notification history"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textSize="20sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Previous synchronized notifications"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/InfoPreferences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/ui_bg"
+                        tools:layout_editor_absoluteX="8dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginVertical="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/InfoMenuIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="8dp"
+                                android:foregroundGravity="center"
+                                android:src="@drawable/ic_info_outline_black_24dp"
+                                tools:ignore="ContentDescription" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:layout_toEndOf="@id/InfoMenuIcon"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="App information"
+                                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                                    android:textSize="20sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxEms="20"
+                                    android:singleLine="true"
+                                    android:text="Status, Legal information"
+                                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                                    android:textSize="15sp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+</LinearLayout>

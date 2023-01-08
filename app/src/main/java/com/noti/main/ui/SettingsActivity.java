@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -12,6 +13,9 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +33,7 @@ import com.google.firebase.installations.FirebaseInstallations;
 import com.kieronquinn.monetcompat.app.MonetCompatActivity;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.kieronquinn.monetcompat.view.MonetSwitch;
+import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.ui.pair.PairMainActivity;
@@ -59,6 +64,7 @@ public class SettingsActivity extends MonetCompatActivity {
     private FirebaseAuth mAuth;
     private MonetCompat monet = null;
     private SharedPreferences prefs;
+    private MaterialCardView selectedCardView;
 
     SharedPreferences.OnSharedPreferenceChangeListener prefsListener = (p, k) -> {
         if (k.equals("serviceToggle")) {
@@ -100,6 +106,20 @@ public class SettingsActivity extends MonetCompatActivity {
         MaterialCardView HistoryPreferences = findViewById(R.id.HistoryPreferences);
         MaterialCardView InfoPreferences = findViewById(R.id.InfoPreferences);
 
+        if (Application.isTablet) {
+            Bundle bundle = new Bundle(0);
+            HolderFragment fragment = (HolderFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+            if (fragment == null) fragment = new HolderFragment();
+            fragment.setArguments(bundle);
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
+
+            markSelectedMenu(AccountPreferences);
+        }
+
         AccountIcon = findViewById(R.id.AccountIcon);
         AccountIcon.setVisibility(View.GONE);
         mAuth = FirebaseAuth.getInstance();
@@ -107,7 +127,8 @@ public class SettingsActivity extends MonetCompatActivity {
 
         @SuppressLint("NonConstantResourceId")
         View.OnClickListener onClickListener = v -> {
-            Intent intent = new Intent(this, OptionActivity.class);
+            String fragmentType = "";
+            Intent intent = null;
 
             switch (v.getId()) {
                 case R.id.PairPreferences:
@@ -115,19 +136,19 @@ public class SettingsActivity extends MonetCompatActivity {
                     break;
 
                 case R.id.AccountPreferences:
-                    intent.putExtra("Type", "Account");
+                    fragmentType = "Account";
                     break;
 
                 case R.id.SendPreferences:
-                    intent.putExtra("Type", "Send");
+                    fragmentType = "Send";
                     break;
 
                 case R.id.ReceptionPreferences:
-                    intent.putExtra("Type", "Reception");
+                    fragmentType = "Reception";
                     break;
 
                 case R.id.OtherPreferences:
-                    intent.putExtra("Type", "Other");
+                    fragmentType = "Other";
                     break;
 
                 case R.id.HistoryPreferences:
@@ -135,14 +156,36 @@ public class SettingsActivity extends MonetCompatActivity {
                     break;
 
                 case R.id.InfoPreferences:
-                    intent.putExtra("Type", "About");
-                    break;
-
-                default:
+                    fragmentType = "About";
                     break;
             }
 
-            startActivity(intent);
+            if (Application.isTablet && intent == null) {
+                markSelectedMenu((MaterialCardView) v);
+                Bundle bundle = new Bundle(0);
+                HolderFragment fragment = (HolderFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+
+                if (fragment == null) {
+                    fragment = new HolderFragment();
+                    fragment.setArguments(bundle);
+
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.content_frame, fragment)
+                            .commit();
+                }
+
+                fragment.setType(fragmentType);
+                fragment.commitFragment();
+                fragment.mToolbar.setTitle(fragmentType);
+            } else {
+                if (intent == null) {
+                    intent = new Intent(this, OptionActivity.class);
+                    intent.putExtra("Type", fragmentType);
+                }
+
+                startActivity(intent);
+            }
         };
 
         PairPreferences.setOnClickListener(onClickListener);
@@ -268,6 +311,35 @@ public class SettingsActivity extends MonetCompatActivity {
         }
     }
 
+    void markSelectedMenu(MaterialCardView cardView) {
+        if (Application.isTablet) {
+            if (selectedCardView == null) {
+                selectedCardView = cardView;
+                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_accent));
+                ImageView icon = (ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0);
+                icon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
+
+                LinearLayout layout = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
+                ((TextView) layout.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
+                ((TextView) layout.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+            } else if (selectedCardView.getId() != cardView.getId()) {
+                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_bg));
+                ((ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_fg)));
+                LinearLayout layout1 = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
+                ((TextView) layout1.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_fg));
+                ((TextView) layout1.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_fg));
+
+                cardView.setCardBackgroundColor(getResources().getColor(R.color.ui_accent));
+                ((ImageView) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
+                LinearLayout layout2 = (LinearLayout) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(1);
+                ((TextView) layout2.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
+                ((TextView) layout2.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+
+                selectedCardView = cardView;
+            }
+        }
+    }
+
     private static class RegisterForPushNotificationsAsync extends AsyncTask<Void, Void, Void> {
         Context context;
 
@@ -317,7 +389,7 @@ public class SettingsActivity extends MonetCompatActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     } finally {
-                        if(imageData != null) {
+                        if (imageData != null) {
                             Bitmap finalImageData = imageData;
                             runOnUiThread(() -> {
                                 AccountIcon.setImageBitmap(finalImageData);
