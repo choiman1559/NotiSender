@@ -8,6 +8,8 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.noti.main.Application;
+
 @RequiresApi(api = Build.VERSION_CODES.N)
 public class QuickSettingService extends TileService {
     private Tile tile;
@@ -24,7 +26,7 @@ public class QuickSettingService extends TileService {
     @Override
     public void onCreate() {
         super.onCreate();
-        prefs = getSharedPreferences("com.noti.main_preferences",MODE_PRIVATE);
+        prefs = getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE);
     }
 
     @Override

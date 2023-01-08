@@ -23,6 +23,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairListener;
@@ -90,7 +91,7 @@ public class PairDetailActivity extends AppCompatActivity {
             Date date = Calendar.getInstance().getTime();
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + getSharedPreferences("com.noti.main_preferences",MODE_PRIVATE).getString("UID", "");
+            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID", "");
 
             JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();

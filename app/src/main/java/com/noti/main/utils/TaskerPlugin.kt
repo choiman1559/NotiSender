@@ -22,6 +22,7 @@ import com.joaomgcd.taskerpluginlibrary.input.TaskerInputRoot
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResult
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultError
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultSucess
+import com.noti.main.Application
 
 import com.noti.main.R
 import com.noti.main.service.pair.DataProcess
@@ -68,7 +69,7 @@ class TaskerConfigAction : Activity(), TaskerPluginConfig<GetConfigInput> {
         val taskArgs0 = findViewById<TextInputEditText>(R.id.taskArgs0)
         val taskArgs1 = findViewById<TextInputEditText>(R.id.taskArgs1)
 
-        val prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.getBoolean("UseTaskerExtension", false)) {
             waringLayout.visibility = View.GONE
             actionConfigLayout.visibility = View.GONE
@@ -210,7 +211,7 @@ class TaskerConfigActionRunner : TaskerPluginRunnerActionNoOutput<GetConfigInput
         context: Context,
         input: TaskerInput<GetConfigInput>
     ): TaskerPluginResult<Unit> {
-        val prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.getBoolean("UseTaskerExtension", false)) {
             val taskType = input.regular.taskType
             if (taskType.startsWith("pairTask")) {

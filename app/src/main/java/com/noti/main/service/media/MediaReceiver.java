@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.utils.CompressStringUtil;
 
@@ -54,7 +55,7 @@ public class MediaReceiver {
     public MediaReceiver(Context context) {
         this.context = context;
         players = new HashMap<>();
-        prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
+        prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
         storage = FirebaseStorage.getInstance();
 
         try {

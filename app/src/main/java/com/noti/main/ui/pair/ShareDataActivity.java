@@ -33,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
 
@@ -136,7 +137,7 @@ public class ShareDataActivity extends AppCompatActivity {
 
                             FirebaseStorage storage = FirebaseStorage.getInstance();
                             StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-                            StorageReference fileRef = storageRef.child(getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID", "") + "/" + name);
+                            StorageReference fileRef = storageRef.child(getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "") + "/" + name);
                             StorageMetadata metadata = new StorageMetadata.Builder().setContentType(type).build();
                             UploadTask uploadTask = fileRef.putFile(dataUri, metadata);
 
@@ -147,7 +148,7 @@ public class ShareDataActivity extends AppCompatActivity {
                             });
 
                             uploadTask.addOnSuccessListener(taskSnapshot -> {
-                                MaterialAlertDialogBuilder completeDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
+                                MaterialAlertDialogBuilder completeDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
                                 completeDialog.setTitle("File upload completed!");
                                 completeDialog.setMessage("The file download task will start automatically on the target device.");
                                 completeDialog.setIcon(R.drawable.ic_fluent_arrow_sync_checkmark_24_regular);

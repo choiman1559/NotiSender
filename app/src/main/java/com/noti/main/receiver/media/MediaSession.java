@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StreamDownloadTask;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.StartActivity;
 import com.noti.main.utils.CompressStringUtil;
@@ -90,7 +91,7 @@ public class MediaSession {
         this.context = context;
         this.notificationPlayer = new MediaPlayer(context, device_name, device_id);
 
-        prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
+        prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
         deviceId = device_id;
         deviceName = device_name;
         storage = FirebaseStorage.getInstance();

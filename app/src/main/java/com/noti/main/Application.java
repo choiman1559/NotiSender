@@ -10,6 +10,8 @@ public class Application extends android.app.Application {
     public static boolean isListeningToPair = false;
     public static ArrayList<PairDeviceInfo> pairingProcessList;
 
+    public static final String PREFS_NAME = "com.noti.main_preferences";
+
     @Override
     public void onCreate() {
         super.onCreate();

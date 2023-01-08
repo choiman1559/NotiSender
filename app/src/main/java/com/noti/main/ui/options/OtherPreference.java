@@ -23,6 +23,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.utils.ui.ToastHelper;
 
@@ -70,7 +71,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.other_preferences, rootKey);
-        prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
 
         UseTaskerExtension = findPreference("UseTaskerExtension");
         TaskerCompatibleInfo = findPreference("TaskerCompatibleInfo");
@@ -128,7 +129,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
         switch (preference.getKey()) {
             case "DataLimit":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Data Limit");
@@ -175,7 +176,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 break;
 
             case "HistoryLimit":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Data Limit");
@@ -220,7 +221,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 break;
 
             case "DeleteHistory":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_delete_24_regular);
                 dialog.setTitle("Waring!");
                 dialog.setMessage("Are you sure to delete notification history?\nThis operation cannot be undone.");
@@ -238,7 +239,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 break;
 
             case "ResetList":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_delete_24_regular);
                 dialog.setTitle("Waring!");
                 dialog.setMessage("Are you sure to reset your white/black list?\nThis operation cannot be undone.");
@@ -253,7 +254,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 break;
 
             case "TaskerCompatibleInfo":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setTitle("Tasker compatible apps");
                 dialog.setMessage(getString(R.string.Dialog_Tasker_compatible));
                 dialog.setIcon(R.drawable.ic_info_outline_black_24dp);

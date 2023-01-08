@@ -8,6 +8,8 @@ import android.media.session.PlaybackState;
 
 import androidx.annotation.Nullable;
 
+import com.noti.main.Application;
+
 class MediaReceiverCallback extends MediaController.Callback {
 
     private final MediaReceiverPlayer player;
@@ -17,7 +19,7 @@ class MediaReceiverCallback extends MediaController.Callback {
     MediaReceiverCallback(Context context, MediaReceiver plugin, MediaReceiverPlayer player) {
         this.player = player;
         this.plugin = plugin;
-        prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
+        prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class PairingUtils {
 
     public static void requestDeviceListWidely(Context context) {
         Application.isFindingDeviceToPair = true;
-        String Topic = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID","");
+        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID","");
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {
@@ -57,7 +57,7 @@ public class PairingUtils {
     }
 
     public static void responseDeviceInfoToFinder(Map<String, String> map, Context context) {
-        String Topic = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID","");
+        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID","");
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {
@@ -81,7 +81,7 @@ public class PairingUtils {
     }
 
     public static void requestPair(String Device_name, String Device_id, Context context) {
-        String Topic = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID","");
+        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID","");
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {
@@ -101,7 +101,7 @@ public class PairingUtils {
     }
 
     public static void showPairChoiceAction(Map<String, String> map, Context context) {
-        if(context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("allowAcceptPairAutomatically", false)) {
+        if(context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getBoolean("allowAcceptPairAutomatically", false)) {
             PairAcceptActivity.sendAcceptedMessage(map.get("device_name"), map.get("device_id"), true, context);
             SharedPreferences prefs = context.getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
             boolean isNotRegistered = true;
@@ -184,6 +184,6 @@ public class PairingUtils {
     }
 
     public static boolean isShowDebugLog(Context context) {
-        return context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("printDebugLog", false);
+        return context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getBoolean("printDebugLog", false);
     }
 }

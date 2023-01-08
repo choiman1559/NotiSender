@@ -25,6 +25,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
@@ -50,7 +51,7 @@ public class PushyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent map) {
         if (prefs == null)
-            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         if(logPrefs == null)
             logPrefs = context.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
 

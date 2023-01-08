@@ -95,7 +95,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         regexPrefs = getSharedPreferences("com.noti.main_regex", MODE_PRIVATE);

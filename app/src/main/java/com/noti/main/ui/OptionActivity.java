@@ -5,9 +5,11 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.R;
+import com.noti.main.ui.options.AccountPreference;
 import com.noti.main.ui.options.OtherPreference;
 import com.noti.main.ui.options.PairPreference;
 import com.noti.main.ui.options.ReceptionPreference;
@@ -47,6 +49,21 @@ public class OptionActivity extends AppCompatActivity {
                     title = "Connection\npreferences";
                     break;
 
+                case "Account":
+                    fragment = new AccountPreference();
+                    title = "Service & Account";
+                    break;
+
+                case "History":
+                    //fragment = new HistoryPreference();
+                    title = "Notification history";
+                    break;
+
+                case "About":
+                    fragment = new AboutFragment();
+                    title = "About NotiSender";
+                    break;
+
                 default:
                     fragment = null;
                     title = getString(R.string.app_name);
@@ -66,5 +83,15 @@ public class OptionActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(title);
         toolbar.setNavigationOnClickListener((v) -> this.finish());
+    }
+
+    public static void attachFragment(FragmentActivity activity, Fragment fragment) {
+        Bundle bundle = new Bundle(0);
+        fragment.setArguments(bundle);
+
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
     }
 }

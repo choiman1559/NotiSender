@@ -16,6 +16,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.kieronquinn.monetcompat.core.MonetCompat;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.utils.ui.ToastHelper;
@@ -51,7 +52,7 @@ public class PairPreference extends PreferenceFragmentCompat  {
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.pair_preferences, rootKey);
-        prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
     }
 
     @Override

@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.button.MaterialButton;
+import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
@@ -28,7 +29,7 @@ public class NotificationViewActivity extends Activity {
         setContentView(R.layout.activity_notidetail);
 
         Intent intent = getIntent();
-        String TOPIC = "/topics/" + getSharedPreferences("com.noti.main_preferences",MODE_PRIVATE).getString("UID","");
+        String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID","");
         String Package = intent.getStringExtra("package");
         Bitmap icon = intent.getParcelableExtra("icon");
 

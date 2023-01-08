@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
 
+import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
 
 import org.json.JSONException;
@@ -43,7 +44,7 @@ public class MediaPlayer {
 
     public MediaPlayer(Context context, String device_name, String device_id) {
         this.context = context;
-        prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
+        prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
         lastPositionTime = System.currentTimeMillis();
         this.device_name = device_name;
         this.device_id = device_id;

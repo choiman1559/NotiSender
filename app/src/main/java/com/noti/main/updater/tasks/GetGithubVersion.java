@@ -75,7 +75,7 @@ public class GetGithubVersion extends AsyncTask<Void, Void, JSONArray> {
                 Version v2 = new Version(localVersion);
 
                 if (v1.compareTo(v2) > 0) {
-                    new MaterialAlertDialogBuilder(new ContextThemeWrapper(context, R.style.MaterialAlertDialog_Material3))
+                    new MaterialAlertDialogBuilder(new ContextThemeWrapper(context, R.style.Theme_App_Palette_Dialog))
                             .setCancelable(false)
                             .setTitle(context.getString(R.string.dialog_update_title))
                             .setMessage("Version : " + latestVersion + "\n\n" + obj.getString("body"))

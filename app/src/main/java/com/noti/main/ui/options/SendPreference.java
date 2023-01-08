@@ -31,6 +31,7 @@ import androidx.preference.SwitchPreference;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
@@ -85,7 +86,7 @@ public class SendPreference extends PreferenceFragmentCompat {
             if(SourceCode == 1 || SourceCode == 2) {
                 ToastHelper.show(mContext, "require read phone state permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
             } else if (SourceCode == 3) {
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
                 builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
                 builder.setNegativeButton("Close", (d, w) -> { }).show();
@@ -104,7 +105,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 if(SourceCode == 1 || SourceCode == 2) {
                     ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
                 } else if (SourceCode == 3) {
-                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                     builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
                     builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
                     builder.setNegativeButton("Close", (d, w) -> { }).show();
@@ -126,7 +127,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 if(SourceCode == 1 || SourceCode == 2) {
                     ToastHelper.show(mContext, "require read sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
                 } else if (SourceCode == 3) {
-                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                     builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
                     builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
                     builder.setNegativeButton("Close", (d, w) -> { }).show();
@@ -166,7 +167,7 @@ public class SendPreference extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.send_preferences, rootKey);
 
-        prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
 
         Blacklist = findPreference("blacklist");
@@ -328,7 +329,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "IntervalTime":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
@@ -373,7 +374,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "IntervalQueryGCTrigger":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
@@ -418,7 +419,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "IntervalInfo":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
                 dialog.setTitle("Interval details");
                 dialog.setMessage(getString(R.string.Interval_information));
@@ -428,7 +429,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "BannedWords":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
@@ -490,7 +491,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "DefaultTitle":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
@@ -524,7 +525,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "DefaultMessage":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Value");
@@ -558,7 +559,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "UseDataEncryptionPassword":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input password");
@@ -613,7 +614,7 @@ public class SendPreference extends PreferenceFragmentCompat {
                 break;
 
             case "EncryptionInfo":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setTitle("Encryption Info");
                 dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
                 dialog.setMessage(getString(R.string.Encryption_information));

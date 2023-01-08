@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.utils.ui.ToastHelper;
 
@@ -45,7 +46,7 @@ public class PlaygroundFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SharedPreferences prefs = mContext.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
+        SharedPreferences prefs = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
         ProgressBar progress = mContext.findViewById(R.id.progress);
         progress.setVisibility(View.GONE);
 

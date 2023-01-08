@@ -14,6 +14,7 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.ui.receive.ExitActivity;
 import com.noti.main.updater.UpdaterActivity;
@@ -40,7 +41,7 @@ public class GetPlayVersion extends AsyncTask<Void, String, String> {
 
     @Override
     protected String doInBackground(Void... voids) {
-        SharedPreferences prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         String latestVersion = prefs.getString("Latest_Version_Play", "");
         if(latestVersion.isEmpty()) {
             UpdaterActivity.startMainActivity(context);
@@ -56,7 +57,7 @@ public class GetPlayVersion extends AsyncTask<Void, String, String> {
             try {
                 Version[] Versions = {new Version(currentVersion.split(" ")[0]), new Version(onlineVersion.split(" ")[0])};
                 if (Versions[1].compareTo(Versions[0]) > 0) {
-                    new MaterialAlertDialogBuilder(new ContextThemeWrapper(context, R.style.MaterialAlertDialog_Material3))
+                    new MaterialAlertDialogBuilder(new ContextThemeWrapper(context, R.style.Theme_App_Palette_Dialog))
                             .setCancelable(false)
                             .setTitle(context.getString(R.string.dialog_update_title))
                             .setMessage("new version " + Versions[1].get() + " exists!\nAre you want to update?")

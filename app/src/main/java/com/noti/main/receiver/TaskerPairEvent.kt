@@ -23,6 +23,7 @@ import com.joaomgcd.taskerpluginlibrary.input.TaskerInputRoot
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultCondition
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionSatisfied
 import com.joaomgcd.taskerpluginlibrary.runner.TaskerPluginResultConditionUnsatisfied
+import com.noti.main.Application
 
 import com.noti.main.R
 
@@ -72,7 +73,7 @@ class TaskerPairEvent : Activity(), TaskerPluginConfig<GetConfigInput> {
         val deviceSelectSpinner = findViewById<MaterialAutoCompleteTextView>(R.id.deviceSelectSpinner)
         val saveButton = findViewById<ExtendedFloatingActionButton>(R.id.save_button)
 
-        val prefs = context.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.getBoolean("UseTaskerExtension", false)) {
             waringLayout.visibility = View.GONE
             infoIcon.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_info_outline_black_24dp, theme))

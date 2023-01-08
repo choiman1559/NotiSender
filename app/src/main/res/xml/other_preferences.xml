@@ -56,7 +56,7 @@
             android:entries="@array/uniqueIdMethod_description"
             android:entryValues="@array/uniqueIdMethod"
             android:icon="@drawable/ic_fluent_fingerprint_24_regular"/>
-        <Preference
+         <Preference
             android:key="HistoryLimit"
             android:title="Maximum number of History"
             android:summary="Now : 150 pcs (Default)" />

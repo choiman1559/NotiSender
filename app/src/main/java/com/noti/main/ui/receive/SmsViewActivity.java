@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.button.MaterialButton;
+import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
 
@@ -27,7 +28,7 @@ public class SmsViewActivity extends Activity {
         setContentView(R.layout.activity_smsdetail);
         Intent i = getIntent();
 
-        String Topic = "/topics/" + getSharedPreferences("com.noti.main_preferences",MODE_PRIVATE).getString("UID","");
+        String Topic = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID","");
         String address = i.getStringExtra("address");
         String message = i.getStringExtra("message");
         String Device_name = i.getStringExtra("device_name");

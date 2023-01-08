@@ -28,6 +28,7 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.firebase.auth.FirebaseAuth;
 
+import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.media.MediaReceiver;
 import com.noti.main.utils.AESCrypto;
@@ -84,7 +85,7 @@ public class NotiListenerService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = this.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         logPrefs = this.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         manager = PowerUtils.getInstance(this);
         mediaReceiver = new MediaReceiver(this);
@@ -309,7 +310,7 @@ public class NotiListenerService extends NotificationListenerService {
         boolean isLogging = BuildConfig.DEBUG;
         Date date = Calendar.getInstance().getTime();
         if (prefs == null)
-            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         int timeInterval = prefs.getInt("IntervalTime", 150);
 
         if (isLogging)
@@ -375,7 +376,7 @@ public class NotiListenerService extends NotificationListenerService {
 
     public void sendTelecomNotification(Context context, Boolean isLogging, String address) {
         if (prefs == null)
-            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         if (prefs.getBoolean("UseReplyTelecom", false) && !prefs.getBoolean("UseCallLog", false)) {
             Date time = Calendar.getInstance().getTime();
             String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
@@ -663,7 +664,7 @@ public class NotiListenerService extends NotificationListenerService {
 
     public static void sendNotification(JSONObject notification, String PackageName, Context context) {
         if (prefs == null)
-            prefs = context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
             if (!prefs.getString("AuthKey_Pushy", "").equals(""))
                 sendPushyNotification(notification, PackageName, context);
@@ -723,6 +724,13 @@ public class NotiListenerService extends NotificationListenerService {
             }
         } catch (Exception e) {
             if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+
+        try {
+            JSONObject data = notification.getJSONObject("data");
+            data.put("topic", prefs.getString("UID", ""));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, FCM_API, notification,

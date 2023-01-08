@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:backgroundTint="@android:color/transparent"
+    tools:ignore="HardcodedText"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/AppVersion"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="App Version"
+            android:layout_marginHorizontal="24dp"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/VersionTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/ui_fg_secondary"
+            android:layout_marginHorizontal="24dp"
+            android:text="1.0.0" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/GithubRepository"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="Github repository"
+            android:layout_marginHorizontal="24dp"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/ui_fg_secondary"
+            android:layout_marginHorizontal="24dp"
+            android:text="Made by Norix Team" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Legal &amp; regulatory"
+        android:textColor="@color/ui_accent" />
+
+    <LinearLayout
+        android:id="@+id/OpenSource"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingVertical="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="Open source licenses"
+            android:layout_marginHorizontal="24dp"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/PrivacyPolicy"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingVertical="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="Privacy Policy"
+            android:layout_marginHorizontal="24dp"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/DataCollection"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingVertical="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="Data collection agreement"
+            android:layout_marginHorizontal="24dp"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Store"
+        android:textColor="@color/ui_accent" />
+
+    <LinearLayout
+        android:id="@+id/StoreLink"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingVertical="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="App details"
+            android:layout_marginHorizontal="24dp"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/DownloadFromTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/ui_fg_secondary"
+            android:layout_marginHorizontal="24dp"
+            android:text="App installed from Debug Build" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="23dp"
+        android:layout_height="23dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="30dp"
+        android:contentDescription="info icon"
+        app:srcCompat="@drawable/ic_info_outline_black_24dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="15dp"
+        android:fontFamily="@font/sans"
+        android:text="This app is free-software under the GNU GPL 3.0 license."
+        android:textColor="@color/ui_fg_secondary" />
+</LinearLayout>

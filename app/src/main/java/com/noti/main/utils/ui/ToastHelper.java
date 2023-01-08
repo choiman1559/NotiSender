@@ -13,6 +13,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.noti.main.Application;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,7 +28,7 @@ public class ToastHelper {
     public static final int LENGTH_LONG = 0;
 
     public static void show(Activity context, String message, String actionMessage, @Duration int duration, @Nullable View anchorView) {
-        if(!context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getBoolean("UseToastInstead", false)) {
+        if(!context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getBoolean("UseToastInstead", false)) {
             Snackbar snackbar = Snackbar.make(context, ((ViewGroup) context.findViewById(android.R.id.content)).getChildAt(0), message, (duration == LENGTH_SHORT ? Snackbar.LENGTH_SHORT : Snackbar.LENGTH_LONG));
             if(!actionMessage.isEmpty()) {
                 snackbar.setAction(actionMessage, v -> { });

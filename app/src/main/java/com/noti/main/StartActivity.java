@@ -3,10 +3,12 @@ package com.noti.main;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -87,9 +89,12 @@ public class StartActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
 
-        prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
+        UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+        boolean isTelevisionsEnabled = uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+
+        prefs = getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         Permit_Notification = findViewById(R.id.Permit_Notification);
         Permit_Overlay = findViewById(R.id.Permit_Overlay);
         Permit_Battery = findViewById(R.id.Permit_Battery);
@@ -112,7 +117,7 @@ public class StartActivity extends AppCompatActivity {
         }
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT < 23 || pm.isIgnoringBatteryOptimizations(getPackageName())) {
+        if (Build.VERSION.SDK_INT < 23 || isTelevisionsEnabled || pm.isIgnoringBatteryOptimizations(getPackageName())) {
             setButtonCompleted(this, Permit_Battery);
             count++;
         }
@@ -124,7 +129,7 @@ public class StartActivity extends AppCompatActivity {
         }
 
         Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
-        if (sets.contains(getPackageName())) {
+        if (isTelevisionsEnabled || sets.contains(getPackageName())) {
             setButtonCompleted(this, Permit_Alarm);
             count++;
         }
@@ -197,7 +202,7 @@ public class StartActivity extends AppCompatActivity {
             Button acceptButton = layout.findViewById(R.id.acceptButton);
             Button denyButton = layout.findViewById(R.id.denyButton);
 
-            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
             dialog.setTitle("Privacy Policy");
             dialog.setMessage(Html.fromHtml("You need to accept <a href=\"https://github.com/choiman1559/NotiSender/blob/master/PrivacyPolicy\">Privacy Policy</a> to use this app."));
             dialog.setView(layout);
@@ -215,7 +220,7 @@ public class StartActivity extends AppCompatActivity {
             denyButton.setOnClickListener((view) -> alertDialog.dismiss());
         });
         Permit_Collect_Data.setOnClickListener((v) -> {
-            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3));
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
             dialog.setTitle("Data Collect Agreement");
             dialog.setMessage("Noti Sender reads the user's SMS information for synchronization between devices, even when the app is closed or not in use.");
             dialog.setIcon(R.drawable.ic_fluent_database_search_24_regular);

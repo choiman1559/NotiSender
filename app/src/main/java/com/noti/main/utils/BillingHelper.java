@@ -14,7 +14,7 @@ import java.util.List;
 
 public class BillingHelper implements BillingProcessor.IBillingHandler {
 
-    public static final String SubscribeID = "pushy_subscribe";
+    public static final String SubscribeID = "sub_pro";
     public static final String DonateID = "donate_3";
 
     private BillingCallback mBillingCallback;

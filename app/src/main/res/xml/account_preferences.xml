@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="Login"
+        android:summary="@string/UID_default"
+        android:title="@string/Login"
+        android:icon="@drawable/ic_fluent_inprivate_account_24_regular"/>
+    <ListPreference
+        android:defaultValue="not selected"
+        android:entries="@array/services_shown"
+        android:entryValues="@array/services"
+        android:key="service"
+        android:title="Select service"
+        android:summary="Now : reception"/>
+    <ListPreference
+        android:key="server"
+        android:defaultValue="Firebase Cloud Message"
+        android:entries="@array/server_shown"
+        android:entryValues="@array/server"
+        android:title="Select server"
+        android:summary="Now : Firebase Cloud Message"/>
+    <Preference
+        android:key="Subscribe"
+        android:summary="To use Pushy's server, you have to pay 1.49$ per month."
+        android:title="Subscribe" />
+    <Preference
+        android:key="ServerInfo"
+        android:summary="Information about server differences"
+        android:icon="@drawable/ic_info_outline_black_24dp" />
+</PreferenceScreen>

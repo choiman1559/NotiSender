@@ -50,7 +50,6 @@
             android:windowSoftInputMode="adjustNothing|stateHidden"/>
         <activity android:name=".ui.prefs.regex.AddActionActivity"
             android:windowSoftInputMode="adjustNothing|stateHidden"/>
-        <activity android:name=".ui.AppInfoActivity" />
         <activity android:name=".ui.OptionActivity" />
         <activity android:name=".ui.prefs.HistoryActivity" />
         <activity android:name=".ui.receive.NotificationViewActivity"

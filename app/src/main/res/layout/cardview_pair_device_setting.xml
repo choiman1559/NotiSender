@@ -42,7 +42,8 @@
             android:textSize="20sp"
             android:fontFamily="@font/sans"
             android:singleLine="true"
-            tools:text="SM-A862S" />
+            android:maxEms="10"
+            tools:text="TestDevice NotePad 14 Pro Plus" />
 
         <TextView
             android:id="@+id/deviceStatus"

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.StartActivity;
 import com.noti.main.updater.tasks.GetPlayVersion;
@@ -37,7 +38,7 @@ public class UpdaterActivity extends AppCompatActivity {
         isActivityRunning = true;
         setContentView(R.layout.activity_updater);
         if(isManagerInstalled(this)) {
-            new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.MaterialAlertDialog_Material3))
+            new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog))
                     .setCancelable(false)
                     .setTitle(this.getString(R.string.updater_manager_deprecated_title))
                     .setMessage(this.getString(R.string.updater_manager_deprecated_message))
@@ -69,7 +70,7 @@ public class UpdaterActivity extends AppCompatActivity {
         if (isOnline()) {
             status1.setText(R.string.updater_checkupdate);
             status2.setIndeterminate(true);
-            SharedPreferences prefs = this.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+            SharedPreferences prefs = this.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
             switch (prefs.getString("UpdateChannel","Automatically specified")) {
                 case "Github":
                     new GetGithubVersion(this).execute();

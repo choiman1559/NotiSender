@@ -67,7 +67,7 @@ public class PairAcceptActivity extends AppCompatActivity {
     }
 
     public static void sendAcceptedMessage(String Device_name, String Device_id, boolean isAccepted, Context context) {
-        String Topic = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID","");
+        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID","");
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {

@@ -31,6 +31,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.kieronquinn.monetcompat.core.MonetCompat;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.ui.prefs.regex.CustomRegexActivity;
 import com.noti.main.utils.ui.ToastHelper;
@@ -97,7 +98,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.reception_preferences, rootKey);
-        prefs = mContext.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
 
         SetImportance = findPreference("importance");
         ImportanceWarning = findPreference("ImportanceWarning");
@@ -183,7 +184,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 break;
 
             case "RingtoneRunningTime":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input value");
@@ -227,7 +228,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 break;
 
             case "VibrationRunningTime":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input Vibration playing time (ms)");
@@ -282,7 +283,7 @@ public class ReceptionPreference extends PreferenceFragmentCompat {
                 break;
 
             case "ReceiveCustomDeadline":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
                 dialog.setTitle("Input value");

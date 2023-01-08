@@ -32,6 +32,7 @@ import com.application.isradeleon.notify.Notify;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.receiver.TaskerPairEventKt;
 import com.noti.main.utils.AsyncTask;
@@ -53,7 +54,7 @@ public class DataProcess {
         Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID", "");
+        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
 
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
@@ -87,7 +88,7 @@ public class DataProcess {
         Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID", "");
+        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
 
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
@@ -139,7 +140,7 @@ public class DataProcess {
         Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID", "");
+        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
 
         JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
@@ -261,7 +262,7 @@ public class DataProcess {
                     new Thread(() -> {
                         FirebaseStorage storage = FirebaseStorage.getInstance();
                         StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-                        StorageReference fileRef = storageRef.child(context.getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE).getString("UID", "") + "/" + actionArg);
+                        StorageReference fileRef = storageRef.child(context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "") + "/" + actionArg);
 
                         try {
                             if (Build.VERSION.SDK_INT < 29) {

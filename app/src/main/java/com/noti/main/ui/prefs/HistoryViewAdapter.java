@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.service.NotiListenerService;
@@ -44,7 +45,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         this.mode = mode;
         this.mContext = mContext;
         this.defaultDrawable = ContextCompat.getDrawable(mContext, R.drawable.ic_launcher_background);
-        prefs = mContext.getSharedPreferences("com.noti.main_preferences", Context.MODE_PRIVATE);
+        prefs = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
     }
 
     @NonNull
@@ -109,7 +110,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                     message += "<b>Content : </b>" + finalContent + "<br>";
                     if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
 
-                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                     builder.setTitle("Notification Details");
                     builder.setMessage(Html.fromHtml(message));
                     builder.setPositiveButton("Close", (dialog, which) -> { });
@@ -143,7 +144,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
                 message += "<b>Error Cause : </b>" + e + "<br>";
 
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 builder.setTitle("Error Details");
                 builder.setMessage(Html.fromHtml(message));
                 builder.setPositiveButton("Close", (dialog, which) -> { });
@@ -169,7 +170,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
                 message += "<b>Error Cause : </b>" + e + "<br>";
 
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 builder.setTitle("Error Details");
                 builder.setMessage(Html.fromHtml(message));
                 builder.setPositiveButton("Close", (dialog, which) -> { });
@@ -195,7 +196,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
                 if (mode == 1) message += "<b>From : </b>" + finalDevice + "<br>";
                 message += "<b>Error Cause : </b>" + e + "<br>";
 
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.MaterialAlertDialog_Material3));
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 builder.setTitle("Error Details");
                 builder.setMessage(Html.fromHtml(message));
                 builder.setPositiveButton("Close", (dialog, which) -> { });
