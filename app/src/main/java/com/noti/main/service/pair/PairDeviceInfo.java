@@ -5,6 +5,7 @@ public class PairDeviceInfo {
     private final String Device_id;
     @PairDeviceStatus.Status
     private final int Device_status;
+    private PairDeviceType deviceType;
 
     public PairDeviceInfo(String Device_name, String Device_id, @PairDeviceStatus.Status int Device_status) {
         this.Device_id = Device_id;
@@ -22,5 +23,13 @@ public class PairDeviceInfo {
 
     public int getDevice_status() {
         return Device_status;
+    }
+
+    public PairDeviceType getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(PairDeviceType deviceType) {
+        this.deviceType = deviceType;
     }
 }

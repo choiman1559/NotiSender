@@ -26,6 +26,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
+import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
 import com.noti.main.utils.ui.ToastHelper;
 
@@ -50,6 +51,7 @@ public class PairDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String Device_name = intent.getStringExtra("device_name");
         String Device_id = intent.getStringExtra("device_id");
+        String Device_type = intent.getStringExtra("device_type");
         SharedPreferences prefs = getSharedPreferences("com.noti.main_pair",MODE_PRIVATE);
         SharedPreferences deviceBlacksPrefs = getSharedPreferences("com.noti.main_device.blacklist", MODE_PRIVATE);
 
@@ -75,6 +77,7 @@ public class PairDetailActivity extends AppCompatActivity {
         String[] colorHigh = getResources().getStringArray(R.array.material_color_high);
         int randomIndex = new Random(Device_name.hashCode()).nextInt(colorHigh.length);
 
+        if(Device_type != null) icon.setImageResource(new PairDeviceType(Device_type).getDeviceTypeBitmap());
         icon.setImageTintList(ColorStateList.valueOf(Color.parseColor(colorHigh[randomIndex])));
         icon.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorLow[randomIndex])));
         deviceName.setText(Device_name);
@@ -82,7 +85,8 @@ public class PairDetailActivity extends AppCompatActivity {
 
         forgetButton.setOnClickListener(v -> {
             Set<String> list = new HashSet<>(prefs.getStringSet("paired_list", new HashSet<>()));
-            list.remove(Device_name + "|" + Device_id);
+            if(Device_type == null) list.remove(Device_name + "|" + Device_id);
+            else list.remove(Device_name + "|" + Device_id + "|" + Device_type);
             prefs.edit().putStringSet("paired_list", list).apply();
             finish();
         });

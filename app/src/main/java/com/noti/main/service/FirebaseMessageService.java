@@ -43,6 +43,7 @@ import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceStatus;
+import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
 import com.noti.main.service.pair.PairingUtils;
 import com.noti.main.ui.prefs.regex.RegexInterpreter;
@@ -229,79 +230,85 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 }
             }
 
-            if (type.startsWith("pair") && !isDeviceItself(map)) {
-                switch (type) {
-                    case "pair|request_device_list":
-                        //Target Device action
-                        //Have to Send this device info Data Now
-                        if (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false)) {
-                            pairingProcessList.add(new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing));
-                            Application.isListeningToPair = true;
-                            PairingUtils.responseDeviceInfoToFinder(map, context);
-                        }
-                        break;
+            if(prefs.getBoolean("pairToggle", false)) {
+                if (type.startsWith("pair") && !isDeviceItself(map)) {
+                    switch (type) {
+                        case "pair|request_device_list":
+                            //Target Device action
+                            //Have to Send this device info Data Now
+                            if (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false)) {
+                                PairDeviceInfo info = new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing);
+                                info.setDeviceType(new PairDeviceType(map.get("device_type")));
+                                pairingProcessList.add(info);
+                                Application.isListeningToPair = true;
+                                PairingUtils.responseDeviceInfoToFinder(map, context);
+                            }
+                            break;
 
-                    case "pair|response_device_list":
-                        //Request Device Action
-                        //Show device list here; give choice to user which device to pair
-                        if (Application.isFindingDeviceToPair && (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false))) {
-                            pairingProcessList.add(new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing));
-                            PairingUtils.onReceiveDeviceInfo(map);
-                        }
-                        break;
+                        case "pair|response_device_list":
+                            //Request Device Action
+                            //Show device list here; give choice to user which device to pair
+                            if (Application.isFindingDeviceToPair && (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false))) {
+                                PairDeviceInfo info = new PairDeviceInfo(map.get("device_name"), map.get("device_id"), PairDeviceStatus.Device_Process_Pairing);
+                                info.setDeviceType(new PairDeviceType(map.get("device_type")));
+                                pairingProcessList.add(info);
+                                PairingUtils.onReceiveDeviceInfo(map);
+                            }
+                            break;
 
-                    case "pair|request_pair":
-                        //Target Device action
-                        //Show choice notification (or activity) to user whether user wants to pair this device with another one or not
-                        if (Application.isListeningToPair && isTargetDevice(map)) {
-                            for (PairDeviceInfo info : pairingProcessList) {
-                                if (info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
-                                    PairingUtils.showPairChoiceAction(map, context);
-                                    break;
+                        case "pair|request_pair":
+                            //Target Device action
+                            //Show choice notification (or activity) to user whether user wants to pair this device with another one or not
+                            if (Application.isListeningToPair && isTargetDevice(map)) {
+                                for (PairDeviceInfo info : pairingProcessList) {
+                                    if (info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
+                                        PairingUtils.showPairChoiceAction(map, context);
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        break;
+                            break;
 
-                    case "pair|accept_pair":
-                        //Request Device Action
-                        //Check if target accepted to pair and process result here
-                        if (Application.isFindingDeviceToPair && isTargetDevice(map)) {
-                            for (PairDeviceInfo info : pairingProcessList) {
-                                if (info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
-                                    PairingUtils.checkPairResultAndRegister(map, info, context);
-                                    break;
+                        case "pair|accept_pair":
+                            //Request Device Action
+                            //Check if target accepted to pair and process result here
+                            if (Application.isFindingDeviceToPair && isTargetDevice(map)) {
+                                for (PairDeviceInfo info : pairingProcessList) {
+                                    if (info.getDevice_name().equals(map.get("device_name")) && info.getDevice_id().equals(map.get("device_id"))) {
+                                        PairingUtils.checkPairResultAndRegister(map, info, context);
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        break;
+                            break;
 
-                    case "pair|request_data":
-                        //process request normal data here sent by paired device(s).
-                        if (isTargetDevice(map) && isPairedDevice(map)) {
-                            DataProcess.onDataRequested(map, context);
-                        }
-                        break;
+                        case "pair|request_data":
+                            //process request normal data here sent by paired device(s).
+                            if (isTargetDevice(map) && isPairedDevice(map)) {
+                                DataProcess.onDataRequested(map, context);
+                            }
+                            break;
 
-                    case "pair|receive_data":
-                        //process received normal data here sent by paired device(s).
-                        if (isTargetDevice(map) && isPairedDevice(map)) {
-                            PairListener.callOnDataReceived(map);
-                        }
-                        break;
+                        case "pair|receive_data":
+                            //process received normal data here sent by paired device(s).
+                            if (isTargetDevice(map) && isPairedDevice(map)) {
+                                PairListener.callOnDataReceived(map);
+                            }
+                            break;
 
-                    case "pair|request_action":
-                        //process received action data here sent by paired device(s).
-                        if (isTargetDevice(map) && isPairedDevice(map)) {
-                            DataProcess.onActionRequested(map, context);
-                        }
-                        break;
+                        case "pair|request_action":
+                            //process received action data here sent by paired device(s).
+                            if (isTargetDevice(map) && isPairedDevice(map)) {
+                                DataProcess.onActionRequested(map, context);
+                            }
+                            break;
 
-                    case "pair|find":
-                        if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
-                            sendFindTaskNotification();
-                        }
-                        break;
+                        case "pair|find":
+                            if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
+                                sendFindTaskNotification();
+                            }
+                            break;
+                    }
                 }
             }
         }
@@ -363,7 +370,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     protected boolean isPairedDevice(Map<String, String> map) {
         String dataToFind = map.get("device_name") + "|" + map.get("device_id");
         for (String str : pairPrefs.getStringSet("paired_list", new HashSet<>())) {
-            if (str.equals(dataToFind)) return true;
+            String[] savedData = str.split("\\|");
+            if ((savedData[0] + "|" + savedData[1]).equals(dataToFind)) return true;
         }
         return false;
     }

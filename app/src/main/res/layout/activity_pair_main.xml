@@ -1,50 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:transitionGroup="true"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     tools:ignore="HardcodedText">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
+    <com.kieronquinn.monetcompat.view.MonetSwitch
+        android:id="@+id/PairingSwitch"
         android:layout_width="match_parent"
-        android:layout_height="210dp"
-        android:background="@android:color/transparent"
-        android:fitsSystemWindows="true"
-        app:elevation="0dp">
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/collapsing_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            app:maxLines="2"
-            app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
-            app:contentScrim="@color/ui_bg_toolbar"
-            app:expandedTitleMarginEnd="24dp"
-            app:expandedTitleMarginStart="24dp"
-            app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:scrimAnimationDuration="50"
-            app:scrimVisibleHeightTrigger="160dp"
-            app:statusBarScrim="@android:color/transparent"
-            app:titleCollapseMode="fade">
-
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:minHeight="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/back_btn_selector"
-                app:navigationIconTint="@color/ui_fg"
-                app:title="Connected devices" />
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="16dp"
+        android:outlineProvider="none"
+        android:text="Use Pairing" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -112,27 +83,27 @@
                 android:id="@+id/connectionPreference"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:focusable="true"
-                android:clickable="true"
                 android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:orientation="vertical"
                 android:paddingVertical="10dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
                     android:fontFamily="@font/sans"
                     android:text="Connection preferences"
-                    android:layout_marginHorizontal="24dp"
                     android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:textColor="@color/ui_fg_secondary"
                     android:layout_marginHorizontal="24dp"
-                    android:text="Find my devices, Debug options" />
+                    android:layout_marginTop="3dp"
+                    android:text="Find my devices, Debug options"
+                    android:textColor="@color/ui_fg_secondary" />
             </LinearLayout>
 
             <ImageView
@@ -155,4 +126,4 @@
                 tools:text="Visible as 'Pixel 6 Pro' to other devices" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>

@@ -101,7 +101,6 @@
                     android:backgroundTint="@color/ui_bg"
                     android:clickable="true"
                     android:focusable="true"
-                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     tools:layout_editor_absoluteX="8dp">
 
@@ -159,7 +158,6 @@
                     android:backgroundTint="@color/ui_bg"
                     android:clickable="true"
                     android:focusable="true"
-                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     tools:layout_editor_absoluteX="8dp">
 
@@ -215,7 +213,6 @@
                     android:backgroundTint="@color/ui_bg"
                     android:clickable="true"
                     android:focusable="true"
-                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     tools:layout_editor_absoluteX="8dp">
 
@@ -271,7 +268,6 @@
                     android:backgroundTint="@color/ui_bg"
                     android:clickable="true"
                     android:focusable="true"
-                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     tools:layout_editor_absoluteX="8dp">
 
@@ -327,7 +323,6 @@
                     android:backgroundTint="@color/ui_bg"
                     android:clickable="true"
                     android:focusable="true"
-                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     tools:layout_editor_absoluteX="8dp">
 
@@ -383,7 +378,6 @@
                     android:backgroundTint="@color/ui_bg"
                     android:clickable="true"
                     android:focusable="true"
-                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     tools:layout_editor_absoluteX="8dp">
 
@@ -439,7 +433,6 @@
                     android:backgroundTint="@color/ui_bg"
                     android:clickable="true"
                     android:focusable="true"
-                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     tools:layout_editor_absoluteX="8dp">
 

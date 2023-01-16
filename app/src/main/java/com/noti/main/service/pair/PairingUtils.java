@@ -64,6 +64,7 @@ public class PairingUtils {
             notificationBody.put("type","pair|response_device_list");
             notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
+            notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", map.get("device_name"));
             notificationBody.put("send_device_id", map.get("device_id"));
             notificationHead.put("to",Topic);
@@ -88,6 +89,7 @@ public class PairingUtils {
             notificationBody.put("type","pair|request_pair");
             notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
+            notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
             notificationHead.put("to",Topic);
@@ -127,6 +129,7 @@ public class PairingUtils {
         Intent notificationIntent = new Intent(context, PairAcceptActivity.class);
         notificationIntent.putExtra("device_name", map.get("device_name"));
         notificationIntent.putExtra("device_id", map.get("device_id"));
+        notificationIntent.putExtra("device_type", map.get("device_type"));
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
@@ -163,7 +166,7 @@ public class PairingUtils {
         if("true".equals(map.get("pair_accept"))) {
             SharedPreferences prefs = context.getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
             boolean isNotRegistered = true;
-            String dataToSave = map.get("device_name") + "|" + map.get("device_id");
+            String dataToSave = map.get("device_name") + "|" + map.get("device_id") + "|" + map.get("device_type");
 
             Set<String> list = new HashSet<>(prefs.getStringSet("paired_list", new HashSet<>()));
             for(String str : list) {

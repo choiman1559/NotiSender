@@ -57,6 +57,7 @@ public class AboutFragment extends Fragment {
         LinearLayout PrivacyPolicy = view.findViewById(R.id.PrivacyPolicy);
         LinearLayout DataCollection = view.findViewById(R.id.DataCollection);
         LinearLayout StoreLink = view.findViewById(R.id.StoreLink);
+        LinearLayout GetDesktopClient = view.findViewById(R.id.GetDesktopClient);
 
         TextView VersionTextView = view.findViewById(R.id.VersionTextView);
         TextView DownloadFromTextView = view.findViewById(R.id.DownloadFromTextView);
@@ -94,6 +95,7 @@ public class AboutFragment extends Fragment {
         AppVersion.setOnClickListener(v -> startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:com.noti.main"))));
         GithubRepository.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender"))));
         StoreLink.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.noti.main")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)));
+        GetDesktopClient.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-Desktop"))));
 
         OpenSource.setOnClickListener(v -> {
             MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));

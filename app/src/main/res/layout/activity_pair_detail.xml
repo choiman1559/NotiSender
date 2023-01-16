@@ -86,7 +86,7 @@
                 android:layout_marginHorizontal="12dp"
                 android:layout_marginVertical="20dp"
                 android:background="@drawable/round_corner"
-                android:backgroundTint="@color/palette_bg">
+                android:backgroundTint="@color/ui_pair_device_action_background">
 
                 <Button
                     android:id="@+id/forgetButton"

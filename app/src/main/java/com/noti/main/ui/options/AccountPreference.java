@@ -18,7 +18,9 @@ import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -250,9 +252,20 @@ public class AccountPreference extends PreferenceFragmentCompat {
     }
 
     private void recreate() {
-        FragmentActivity activity = getActivity();
-        if(activity != null) {
-            OptionActivity.attachFragment(activity, new AccountPreference());
+        if(Application.isTablet()) {
+            Fragment fragment = new AccountPreference();
+            Bundle bundle = new Bundle(0);
+            fragment.setArguments(bundle);
+
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
+        } else {
+            FragmentActivity activity = getActivity();
+            if(activity != null) {
+                OptionActivity.attachFragment(activity, new AccountPreference());
+            }
         }
     }
 

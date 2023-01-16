@@ -20,6 +20,7 @@ import com.noti.main.R;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceStatus;
+import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
 import com.noti.main.service.pair.PairingUtils;
 
@@ -46,7 +47,7 @@ public class PairingActivity extends AppCompatActivity {
         deviceListLayout = findViewById(R.id.deviceListLayout);
 
         PairListener.setOnDeviceFoundListener(map -> PairingActivity.this.runOnUiThread(() -> {
-            String[] data = {map.get("device_name"), map.get("device_id")};
+            String[] data = {map.get("device_name"), map.get("device_id"), map.get("device_type")};
             if(data[0] != null && data[1] != null) {
                 boolean isDeviceNotQueried = true;
                 for(PairDeviceInfo info : infoList) {
@@ -58,7 +59,7 @@ public class PairingActivity extends AppCompatActivity {
 
                 if(isDeviceNotQueried) {
                     infoList.add(new PairDeviceInfo(data[0], data[1], PairDeviceStatus.Device_Process_Pairing));
-                    notifyDataSetChanged(data[0], data[1]);
+                    notifyDataSetChanged(data[0], data[1], data[2]);
                 }
             }
         }));
@@ -87,7 +88,7 @@ public class PairingActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener((v) -> this.finish());
     }
 
-    public void notifyDataSetChanged(String Device_name, String Device_id) {
+    public void notifyDataSetChanged(String Device_name, String Device_id, String Device_type) {
         RelativeLayout layout = (RelativeLayout) View.inflate(PairingActivity.this, R.layout.cardview_pair_device, null);
         Holder holder = new Holder(layout);
 
@@ -96,6 +97,7 @@ public class PairingActivity extends AppCompatActivity {
         int randomIndex = new Random(Device_name.hashCode()).nextInt(colorHigh.length);
 
         holder.deviceName.setText(Device_name);
+        holder.icon.setImageResource(new PairDeviceType(Device_type).getDeviceTypeBitmap());
         holder.icon.setImageTintList(ColorStateList.valueOf(Color.parseColor(colorHigh[randomIndex])));
         holder.icon.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorLow[randomIndex])));
 

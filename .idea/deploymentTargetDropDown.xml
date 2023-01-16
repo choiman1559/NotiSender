@@ -12,14 +12,14 @@
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2023-01-08T19:00:42.099115Z" />
+    <timeTargetWasSelectedWithDropDown value="2023-01-16T16:52:05.818152Z" />
     <runningDeviceTargetsSelectedWithDialog>
       <Target>
         <type value="RUNNING_DEVICE_TARGET" />
         <deviceKey>
           <Key>
             <type value="SERIAL_NUMBER" />
-            <value value="adb-R5CR30T51RX-t7qbdt._adb-tls-connect._tcp" />
+            <value value="adb-HA1PCVMW-cOYUGf._adb-tls-connect._tcp" />
           </Key>
         </deviceKey>
       </Target>

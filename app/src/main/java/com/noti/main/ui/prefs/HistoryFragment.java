@@ -1,5 +1,7 @@
 package com.noti.main.ui.prefs;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,7 +14,6 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -24,6 +25,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.utils.ThreadProxy;
 
@@ -32,21 +34,26 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryFragment extends Fragment {
 
     private static final List<Fragment> mFragments = new ArrayList<>();
 
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_history);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_history, container, false);
+    }
 
-        mFragments.add(HistoryFragment.newInstance(0));
-        mFragments.add(HistoryFragment.newInstance(1));
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        TabLayout TabLayout = findViewById(R.id.tabs);
-        ViewPager2 viewPager = findViewById(R.id.viewpager);
-        FragmentStateAdapter adapter = new TabsPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        mFragments.add(HistoryInnerFragment.newInstance(0));
+        mFragments.add(HistoryInnerFragment.newInstance(1));
+
+        TabLayout TabLayout = view.findViewById(R.id.tabs);
+        ViewPager2 viewPager = view.findViewById(R.id.viewpager);
+        FragmentStateAdapter adapter = new TabsPagerAdapter(getChildFragmentManager(), getLifecycle());
         adapter.saveState();
 
         viewPager.setSaveEnabled(true);
@@ -67,8 +74,13 @@ public class HistoryActivity extends AppCompatActivity {
             }
         }).attach();
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener((v) -> this.finish());
+        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
+        if(Application.isTablet()) toolbar.setNavigationIcon(null);
+        toolbar.setNavigationOnClickListener((v) -> {
+            if (getActivity() != null) {
+                getActivity().finish();
+            }
+        });
     }
 
     public static class TabsPagerAdapter extends FragmentStateAdapter {
@@ -99,19 +111,19 @@ public class HistoryActivity extends AppCompatActivity {
         }
     }
 
-    public static class HistoryFragment extends Fragment {
+    public static class HistoryInnerFragment extends Fragment {
 
         Activity mContext;
         int mode;
 
-        HistoryFragment() {
+        HistoryInnerFragment() {
 
         }
 
-        public static HistoryFragment newInstance(int mode) {
-            HistoryFragment historyFragment = new HistoryFragment();
-            historyFragment.mode = mode;
-            return historyFragment;
+        public static HistoryInnerFragment newInstance(int mode) {
+            HistoryInnerFragment historyInneFragment = new HistoryInnerFragment();
+            historyInneFragment.mode = mode;
+            return historyInneFragment;
         }
 
         @Override

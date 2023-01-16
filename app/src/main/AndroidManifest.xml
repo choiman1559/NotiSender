@@ -51,7 +51,6 @@
         <activity android:name=".ui.prefs.regex.AddActionActivity"
             android:windowSoftInputMode="adjustNothing|stateHidden"/>
         <activity android:name=".ui.OptionActivity" />
-        <activity android:name=".ui.prefs.HistoryActivity" />
         <activity android:name=".ui.receive.NotificationViewActivity"
             android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.receive.SmsViewActivity"
@@ -62,7 +61,6 @@
         <activity android:name=".ui.pair.PairAcceptActivity"
             android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.pair.PairingActivity"/>
-        <activity android:name=".ui.pair.PairMainActivity"/>
         <activity android:name=".ui.pair.PairDetailActivity"/>
         <activity android:name=".ui.pair.RequestActionActivity"/>
         <activity

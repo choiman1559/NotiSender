@@ -1,6 +1,5 @@
 package com.noti.main.ui;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +7,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -17,36 +15,27 @@ import com.noti.main.ui.options.AccountPreference;
 import com.noti.main.ui.options.OtherPreference;
 import com.noti.main.ui.options.ReceptionPreference;
 import com.noti.main.ui.options.SendPreference;
+import com.noti.main.ui.pair.PairMainFragment;
+import com.noti.main.ui.prefs.HistoryFragment;
 
 public class HolderFragment extends Fragment {
 
     private String Type;
     public MaterialToolbar mToolbar;
-    private AppCompatActivity mActivity;
 
     public void setType(String type) {
         Type = type;
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof AppCompatActivity) {
-            mActivity = (AppCompatActivity) context;
-        } else {
-            throw new RuntimeException("must implement AppCompatActivity");
-        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_options, container, false);
+        view.setBackgroundColor(getResources().getColor(R.color.ui_bg_surface));
+
         mToolbar = view.findViewById(R.id.toolbar);
         mToolbar.setTitle(R.string.app_name);
         mToolbar.setNavigationIcon(null);
-        mActivity.getDelegate().setSupportActionBar(mToolbar);
-
         return view;
     }
 
@@ -77,9 +66,9 @@ public class HolderFragment extends Fragment {
                 title = "Other Options";
                 break;
 
-            case "Pair":
-                //fragment = new PairPreference();
-                title = "Connection\npreferences";
+            case "PairMain":
+                fragment = new PairMainFragment();
+                title = "Connected Devices";
                 break;
 
             case "Account":
@@ -88,7 +77,9 @@ public class HolderFragment extends Fragment {
                 break;
 
             case "History":
-                //fragment = new HistoryPreference();
+                fragment = new HistoryFragment();
+                View view = getView();
+                if(view != null) view.findViewById(R.id.app_bar_layout).setVisibility(View.GONE);
                 title = "Notification history";
                 break;
 
@@ -103,6 +94,7 @@ public class HolderFragment extends Fragment {
         }
 
         if(fragment != null) {
+            mToolbar.setTitle(title);
             Bundle bundle = new Bundle(0);
             fragment.setArguments(bundle);
 

@@ -40,6 +40,7 @@ public class PairAcceptActivity extends AppCompatActivity {
 
         String Device_name = intent.getStringExtra("device_name");
         String Device_id = intent.getStringExtra("device_id");
+        String Device_type = intent.getStringExtra("device_type");
 
         TextView info = findViewById(R.id.notiDetail);
         info.setText(Html.fromHtml("Are you sure you want to grant the pairing request?<br><b>Requested Device:</b> " + Device_name));
@@ -48,7 +49,7 @@ public class PairAcceptActivity extends AppCompatActivity {
             sendAcceptedMessage(Device_name, Device_id, true, this);
             SharedPreferences prefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
             boolean isNotRegistered = true;
-            String dataToSave = Device_name + "|" + Device_id;
+            String dataToSave = Device_name + "|" + Device_id + "|" + Device_type;
 
             Set<String> list = new HashSet<>(prefs.getStringSet("paired_list", new HashSet<>()));
             for(String str : list) {
@@ -74,6 +75,7 @@ public class PairAcceptActivity extends AppCompatActivity {
             notificationBody.put("type","pair|accept_pair");
             notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
+            notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
             notificationBody.put("pair_accept", isAccepted);

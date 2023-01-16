@@ -17,6 +17,7 @@
     <color name="ui_fg_disabled">#909090</color>
     <color name="ui_fg_secondary">#5E5E5E</color>
     <color name="ui_accent">#006C5F</color>
+    <color name="ui_menu_accent">#C1E8FF</color>
 
     <color name="launcher_fg">#464646</color>
     <color name="launcher_bg">#8DF5E3</color>

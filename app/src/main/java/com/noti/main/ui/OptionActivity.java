@@ -1,6 +1,7 @@
 package com.noti.main.ui;
 
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,8 @@ import com.noti.main.ui.options.OtherPreference;
 import com.noti.main.ui.options.PairPreference;
 import com.noti.main.ui.options.ReceptionPreference;
 import com.noti.main.ui.options.SendPreference;
+import com.noti.main.ui.pair.PairMainFragment;
+import com.noti.main.ui.prefs.HistoryFragment;
 
 public class OptionActivity extends AppCompatActivity {
 
@@ -49,13 +52,19 @@ public class OptionActivity extends AppCompatActivity {
                     title = "Connection\npreferences";
                     break;
 
+                case "PairMain":
+                    fragment = new PairMainFragment();
+                    title = "Connected Devices";
+                    break;
+
                 case "Account":
                     fragment = new AccountPreference();
                     title = "Service & Account";
                     break;
 
                 case "History":
-                    //fragment = new HistoryPreference();
+                    fragment = new HistoryFragment();
+                    findViewById(R.id.app_bar_layout).setVisibility(View.GONE);
                     title = "Notification history";
                     break;
 

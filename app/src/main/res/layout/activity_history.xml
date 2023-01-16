@@ -27,8 +27,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/back_btn_selector"
                 app:navigationIconTint="@color/ui_fg"
+                app:navigationIcon="@drawable/back_btn_selector"
                 app:title="@string/History_title" />
 
             <com.google.android.material.tabs.TabLayout

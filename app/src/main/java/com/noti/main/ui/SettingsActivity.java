@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -33,11 +34,10 @@ import com.google.firebase.installations.FirebaseInstallations;
 import com.kieronquinn.monetcompat.app.MonetCompatActivity;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.kieronquinn.monetcompat.view.MonetSwitch;
+
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
-import com.noti.main.ui.pair.PairMainActivity;
-import com.noti.main.ui.prefs.HistoryActivity;
 import com.noti.main.utils.AsyncTask;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
@@ -106,7 +106,8 @@ public class SettingsActivity extends MonetCompatActivity {
         MaterialCardView HistoryPreferences = findViewById(R.id.HistoryPreferences);
         MaterialCardView InfoPreferences = findViewById(R.id.InfoPreferences);
 
-        if (Application.isTablet) {
+        AccountIcon = findViewById(R.id.AccountIcon);
+        if (Application.isTablet()) {
             Bundle bundle = new Bundle(0);
             HolderFragment fragment = (HolderFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
             if (fragment == null) fragment = new HolderFragment();
@@ -127,64 +128,56 @@ public class SettingsActivity extends MonetCompatActivity {
 
         @SuppressLint("NonConstantResourceId")
         View.OnClickListener onClickListener = v -> {
-            String fragmentType = "";
-            Intent intent = null;
+            if(selectedCardView == null || selectedCardView.getId() != v.getId()) {
+                String fragmentType = "";
 
-            switch (v.getId()) {
-                case R.id.PairPreferences:
-                    intent = new Intent(this, PairMainActivity.class);
-                    break;
+                switch (v.getId()) {
+                    case R.id.PairPreferences:
+                        fragmentType = "PairMain";
+                        break;
 
-                case R.id.AccountPreferences:
-                    fragmentType = "Account";
-                    break;
+                    case R.id.AccountPreferences:
+                        fragmentType = "Account";
+                        break;
 
-                case R.id.SendPreferences:
-                    fragmentType = "Send";
-                    break;
+                    case R.id.SendPreferences:
+                        fragmentType = "Send";
+                        break;
 
-                case R.id.ReceptionPreferences:
-                    fragmentType = "Reception";
-                    break;
+                    case R.id.ReceptionPreferences:
+                        fragmentType = "Reception";
+                        break;
 
-                case R.id.OtherPreferences:
-                    fragmentType = "Other";
-                    break;
+                    case R.id.OtherPreferences:
+                        fragmentType = "Other";
+                        break;
 
-                case R.id.HistoryPreferences:
-                    intent = new Intent(this, HistoryActivity.class);
-                    break;
+                    case R.id.HistoryPreferences:
+                        fragmentType = "History";
+                        break;
 
-                case R.id.InfoPreferences:
-                    fragmentType = "About";
-                    break;
-            }
+                    case R.id.InfoPreferences:
+                        fragmentType = "About";
+                        break;
+                }
 
-            if (Application.isTablet && intent == null) {
-                markSelectedMenu((MaterialCardView) v);
-                Bundle bundle = new Bundle(0);
-                HolderFragment fragment = (HolderFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+                if (Application.isTablet()) {
+                    markSelectedMenu((MaterialCardView) v);
+                    Bundle bundle = new Bundle(0);
 
-                if (fragment == null) {
-                    fragment = new HolderFragment();
+                    HolderFragment fragment = new HolderFragment();
                     fragment.setArguments(bundle);
+                    fragment.setType(fragmentType);
 
                     getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.content_frame, fragment)
                             .commit();
-                }
-
-                fragment.setType(fragmentType);
-                fragment.commitFragment();
-                fragment.mToolbar.setTitle(fragmentType);
-            } else {
-                if (intent == null) {
-                    intent = new Intent(this, OptionActivity.class);
+                } else {
+                    Intent intent = new Intent(this, OptionActivity.class);
                     intent.putExtra("Type", fragmentType);
+                    startActivity(intent);
                 }
-
-                startActivity(intent);
             }
         };
 
@@ -199,6 +192,14 @@ public class SettingsActivity extends MonetCompatActivity {
         ServiceToggle = findViewById(R.id.serviceToggle);
         ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
         ServiceToggle.setOnCheckedChangeListener((v, isChecked) -> prefs.edit().putBoolean("serviceToggle", isChecked).apply());
+        ServiceToggle.setOnClickListener(v -> {
+            if(!ServiceToggle.isEnabled()) {
+                ToastHelper.show(this, "Not logined or service is not available",ToastHelper.LENGTH_SHORT);
+            }
+        });
+
+        boolean isNightMode = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        ServiceToggle.setTextColor(getResources().getColor(isNightMode ? R.color.ui_bg : R.color.ui_fg));
 
         boolean isUIDBlank = prefs.getString("UID", "").equals("");
         if (isUIDBlank) {
@@ -312,29 +313,36 @@ public class SettingsActivity extends MonetCompatActivity {
     }
 
     void markSelectedMenu(MaterialCardView cardView) {
-        if (Application.isTablet) {
+        boolean isNightMode = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        if (Application.isTablet()) {
             if (selectedCardView == null) {
                 selectedCardView = cardView;
-                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_accent));
-                ImageView icon = (ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0);
-                icon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
+                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent));
 
-                LinearLayout layout = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
-                ((TextView) layout.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
-                ((TextView) layout.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+                if(isNightMode) {
+                    ImageView icon = (ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0);
+                    icon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
+
+                    LinearLayout layout = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
+                    ((TextView) layout.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
+                    ((TextView) layout.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+                }
             } else if (selectedCardView.getId() != cardView.getId()) {
                 selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_bg));
-                ((ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_fg)));
-                LinearLayout layout1 = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
-                ((TextView) layout1.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_fg));
-                ((TextView) layout1.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_fg));
+                cardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent));
 
-                cardView.setCardBackgroundColor(getResources().getColor(R.color.ui_accent));
-                ((ImageView) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
-                LinearLayout layout2 = (LinearLayout) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(1);
-                ((TextView) layout2.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
-                ((TextView) layout2.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+                if(isNightMode) {
+                    ((ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_fg)));
+                    ((ImageView) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
 
+                    LinearLayout layout1 = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
+                    ((TextView) layout1.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_fg));
+                    ((TextView) layout1.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_fg));
+
+                    LinearLayout layout2 = (LinearLayout) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(1);
+                    ((TextView) layout2.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
+                    ((TextView) layout2.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+                }
                 selectedCardView = cardView;
             }
         }
