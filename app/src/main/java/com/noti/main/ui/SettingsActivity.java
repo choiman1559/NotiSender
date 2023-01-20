@@ -59,6 +59,7 @@ public class SettingsActivity extends MonetCompatActivity {
     @SuppressLint("StaticFieldLeak")
     public static BillingHelper mBillingHelper;
     public static MonetSwitch ServiceToggle;
+    private static String lastSelectedItem;
 
     private ImageView AccountIcon;
     private FirebaseAuth mAuth;
@@ -108,17 +109,54 @@ public class SettingsActivity extends MonetCompatActivity {
 
         AccountIcon = findViewById(R.id.AccountIcon);
         if (Application.isTablet()) {
-            Bundle bundle = new Bundle(0);
             HolderFragment fragment = (HolderFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
-            if (fragment == null) fragment = new HolderFragment();
-            fragment.setArguments(bundle);
+            if (fragment == null) {
+                fragment = new HolderFragment();
+            }
 
+            MaterialCardView lastSelectedCardView;
+            if (lastSelectedItem != null) {
+                switch (lastSelectedItem) {
+                    case "PairMain":
+                        lastSelectedCardView = PairPreferences;
+                        break;
+
+                    case "Send":
+                        lastSelectedCardView = SendPreferences;
+                        break;
+
+                    case "Reception":
+                        lastSelectedCardView = ReceptionPreferences;
+                        break;
+
+                    case "Other":
+                        lastSelectedCardView = OtherPreferences;
+                        break;
+
+                    case "History":
+                        lastSelectedCardView = HistoryPreferences;
+                        break;
+
+                    case "About":
+                        lastSelectedCardView = InfoPreferences;
+                        break;
+
+                    case "Account":
+                    default:
+                        lastSelectedCardView = AccountPreferences;
+                        break;
+                }
+
+                markSelectedMenu(lastSelectedCardView);
+                fragment.setType(lastSelectedItem);
+            } else markSelectedMenu(AccountPreferences);
+
+            Bundle bundle = new Bundle(0);
+            fragment.setArguments(bundle);
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.content_frame, fragment)
                     .commit();
-
-            markSelectedMenu(AccountPreferences);
         }
 
         AccountIcon = findViewById(R.id.AccountIcon);
@@ -128,7 +166,7 @@ public class SettingsActivity extends MonetCompatActivity {
 
         @SuppressLint("NonConstantResourceId")
         View.OnClickListener onClickListener = v -> {
-            if(selectedCardView == null || selectedCardView.getId() != v.getId()) {
+            if (selectedCardView == null || selectedCardView.getId() != v.getId()) {
                 String fragmentType = "";
 
                 switch (v.getId()) {
@@ -173,6 +211,7 @@ public class SettingsActivity extends MonetCompatActivity {
                             .beginTransaction()
                             .replace(R.id.content_frame, fragment)
                             .commit();
+                    lastSelectedItem = fragmentType;
                 } else {
                     Intent intent = new Intent(this, OptionActivity.class);
                     intent.putExtra("Type", fragmentType);
@@ -193,8 +232,8 @@ public class SettingsActivity extends MonetCompatActivity {
         ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
         ServiceToggle.setOnCheckedChangeListener((v, isChecked) -> prefs.edit().putBoolean("serviceToggle", isChecked).apply());
         ServiceToggle.setOnClickListener(v -> {
-            if(!ServiceToggle.isEnabled()) {
-                ToastHelper.show(this, "Not logined or service is not available",ToastHelper.LENGTH_SHORT);
+            if (!ServiceToggle.isEnabled()) {
+                ToastHelper.show(this, "Not logined or service is not available", ToastHelper.LENGTH_SHORT);
             }
         });
 
@@ -319,7 +358,7 @@ public class SettingsActivity extends MonetCompatActivity {
                 selectedCardView = cardView;
                 selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent));
 
-                if(isNightMode) {
+                if (isNightMode) {
                     ImageView icon = (ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0);
                     icon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
 
@@ -331,7 +370,7 @@ public class SettingsActivity extends MonetCompatActivity {
                 selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_bg));
                 cardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent));
 
-                if(isNightMode) {
+                if (isNightMode) {
                     ((ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_fg)));
                     ((ImageView) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
 
