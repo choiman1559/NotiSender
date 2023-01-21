@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ui_bg">@android:color/system_neutral1_50</color>
+    <color name="ui_bg_icon">@android:color/system_neutral1_200</color>
     <color name="ui_bg_toolbar">@android:color/system_neutral1_100</color>
     <color name="ui_bg_surface">@android:color/system_neutral1_10</color>
     <color name="ui_fg">@android:color/system_neutral1_900</color>
@@ -10,6 +11,8 @@
     <color name="ui_cardview_background">@android:color/system_accent3_100</color>
     <color name="ui_menu_accent">@android:color/system_accent1_100</color>
     <color name="ui_pair_device_action_background">@android:color/system_neutral1_10</color>
+    <color name="ui_widget_tertiary">@android:color/system_accent3_100</color>
+    <color name="ui_widget_secondary">@android:color/system_accent2_100</color>
 
     <color name="launcher_fg">@android:color/system_neutral2_700</color>
     <color name="launcher_bg">@android:color/system_accent1_100</color>

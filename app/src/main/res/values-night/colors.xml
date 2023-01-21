@@ -5,6 +5,7 @@
     <color name="toolbar">@android:color/black</color>
 
     <color name="ui_bg">#1B1B1B</color>
+    <color name="ui_bg_icon">#8F9193</color>
     <color name="ui_bg_toolbar">#464646</color>
     <color name="ui_bg_surface">#303030</color>
     <color name="ui_fg">#F0F0F0</color>
@@ -12,6 +13,8 @@
     <color name="ui_fg_secondary">#ABABAB</color>
     <color name="ui_accent">#71D8C7</color>
     <color name="ui_menu_accent">#C1E8FF</color>
+    <color name="ui_widget_tertiary">#484264</color>
+    <color name="ui_widget_secondary">#374955</color>
 
     <color name="palette_bg">#090909</color>
     <color name="palette_fg">#5e5e5e</color>

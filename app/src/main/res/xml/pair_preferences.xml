@@ -14,6 +14,13 @@
         android:icon="@drawable/ic_fluent_arrow_sync_checkmark_24_regular" />
 
     <com.noti.main.utils.ui.SwitchedPreference
+        android:defaultValue="true"
+        android:key="allowRemovePairRemotely"
+        android:title="Unpair from another device"
+        android:summary="Allow to remove pair automatically"
+        android:icon="@drawable/ic_fluent_person_delete_24_regular" />
+
+    <com.noti.main.utils.ui.SwitchedPreference
         android:defaultValue="false"
         android:key="showAlreadyConnected"
         android:summary="Display already connected devices in the search list"

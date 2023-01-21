@@ -14,4 +14,12 @@
         <item name="android:alertDialogTheme">@style/Theme.App.Palette.Dialog</item>
         <item name="alertDialogTheme">@style/Theme.App.Palette.Dialog</item>
     </style>
+
+    <style name="Theme.App.Material3" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/ui_bg</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+    </style>
 </resources>

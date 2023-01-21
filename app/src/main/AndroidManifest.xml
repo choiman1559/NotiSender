@@ -62,6 +62,8 @@
             android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.pair.PairingActivity"/>
         <activity android:name=".ui.pair.PairDetailActivity"/>
+        <activity android:name=".ui.pair.PresentationActivity"
+            android:theme="@style/Theme.App.Material3" />
         <activity android:name=".ui.pair.RequestActionActivity"/>
         <activity
             android:label="Share Data"

@@ -67,6 +67,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
@@ -279,6 +280,24 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                         break;
                                     }
                                 }
+                            }
+                            break;
+
+                        case "pair|request_remove":
+                            if (isTargetDevice(map) && isPairedDevice(map) && pairPrefs.getBoolean("allowRemovePairRemotely", true)) {
+                                String dataToFind = map.get("device_name") + "|" + map.get("device_id") + (map.containsKey("device_type") ? "|" + map.get("device_type") : "");
+                                String dataToRemove = null;
+
+                                Set<String> list = new HashSet<>(pairPrefs.getStringSet("paired_list", new HashSet<>()));
+                                for(String str : list) {
+                                    if(str.contains(dataToFind)) {
+                                        dataToRemove = str;
+                                        break;
+                                    }
+                                }
+
+                                if(dataToRemove != null) list.remove(dataToRemove);
+                                pairPrefs.edit().putStringSet("paired_list", list).apply();
                             }
                             break;
 

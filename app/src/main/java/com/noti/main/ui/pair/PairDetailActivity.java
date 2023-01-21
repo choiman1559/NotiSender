@@ -67,6 +67,7 @@ public class PairDetailActivity extends AppCompatActivity {
         LinearLayout batterySaveEnabled = findViewById(R.id.batterySaveEnabled);
         LinearLayout batteryLayout = findViewById(R.id.batteryLayout);
         LinearLayout deviceBlackListLayout = findViewById(R.id.deviceBlackListLayout);
+        LinearLayout remotePresentation = findViewById(R.id.remotePresentation);
 
         boolean isBlocked = deviceBlacksPrefs.getBoolean(Device_id, false);
         blockToggle.setChecked(isBlocked);
@@ -83,11 +84,41 @@ public class PairDetailActivity extends AppCompatActivity {
         deviceName.setText(Device_name);
         deviceIdInfo.setText("Device's unique address: " + Device_id);
 
+        remotePresentation.setVisibility(Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_DESKTOP) || Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_LAPTOP) ? View.VISIBLE : View.GONE);
+        remotePresentation.setOnClickListener(v -> {
+            Intent presentationIntent = new Intent(PairDetailActivity.this, PresentationActivity.class);
+            presentationIntent.putExtra("device_name", Device_name);
+            presentationIntent.putExtra("device_id", Device_id);
+            presentationIntent.putExtra("device_type", Device_type);
+            startActivity(presentationIntent);
+        });
+
         forgetButton.setOnClickListener(v -> {
+            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_ID = getUniqueID();
+            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID", "");
+
+            JSONObject notificationHead = new JSONObject();
+            JSONObject notificationBody = new JSONObject();
+            try {
+                notificationBody.put("type", "pair|request_remove");
+                notificationBody.put("device_name", DEVICE_NAME);
+                notificationBody.put("device_id", DEVICE_ID);
+                notificationBody.put("send_device_name", Device_name);
+                notificationBody.put("send_device_id", Device_id);
+
+                notificationHead.put("to", TOPIC);
+                notificationHead.put("data", notificationBody);
+            } catch (JSONException e) {
+                Log.e("Noti", "onCreate: " + e.getMessage());
+            }
+
+            sendNotification(notificationHead, getPackageName(), this);
             Set<String> list = new HashSet<>(prefs.getStringSet("paired_list", new HashSet<>()));
             if(Device_type == null) list.remove(Device_name + "|" + Device_id);
             else list.remove(Device_name + "|" + Device_id + "|" + Device_type);
             prefs.edit().putStringSet("paired_list", list).apply();
+
             finish();
         });
 
@@ -123,7 +154,7 @@ public class PairDetailActivity extends AppCompatActivity {
                     Objects.equals(map.get("device_name"), Device_name) &&
                     Objects.equals(map.get("device_id"), Device_id)) {
                 String[] data = Objects.requireNonNull(map.get("receive_data")).split("\\|");
-                int batteryInt = Integer.parseInt(data[0]);
+                int batteryInt = Integer.parseInt(data[0].split("\\.")[0]);
                 int resId = R.drawable.ic_fluent_battery_warning_24_regular;
 
                 if(batteryInt < 10) resId = R.drawable.ic_fluent_battery_0_24_regular;
@@ -142,7 +173,7 @@ public class PairDetailActivity extends AppCompatActivity {
                 PairDetailActivity.this.runOnUiThread(() -> {
                     if(data[2].equals("true")) batterySaveEnabled.setVisibility(View.VISIBLE);
                     batteryLayout.setVisibility(View.VISIBLE);
-                    batteryDetail.setText(data[0] + "% remaining" + (data[1].equals("true") ? ", Charging" : ""));
+                    batteryDetail.setText(batteryInt + "% remaining" + (data[1].equals("true") ? ", Charging" : ""));
                     batteryIcon.setImageDrawable(AppCompatResources.getDrawable(PairDetailActivity.this, finalResId));
                 });
             }
