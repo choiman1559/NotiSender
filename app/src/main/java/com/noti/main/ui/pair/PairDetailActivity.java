@@ -69,10 +69,12 @@ public class PairDetailActivity extends AppCompatActivity {
         LinearLayout deviceBlackListLayout = findViewById(R.id.deviceBlackListLayout);
         LinearLayout remotePresentation = findViewById(R.id.remotePresentation);
 
+        boolean isComputer = Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_DESKTOP) || Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_LAPTOP);
         boolean isBlocked = deviceBlacksPrefs.getBoolean(Device_id, false);
         blockToggle.setChecked(isBlocked);
         blockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> deviceBlacksPrefs.edit().putBoolean(Device_id, isChecked).apply());
         deviceBlackListLayout.setOnClickListener((v) -> blockToggle.setChecked(!blockToggle.isChecked()));
+        deviceBlackListLayout.setVisibility(isComputer ? View.GONE : View.VISIBLE);
 
         String[] colorLow = getResources().getStringArray(R.array.material_color_low);
         String[] colorHigh = getResources().getStringArray(R.array.material_color_high);
@@ -84,7 +86,7 @@ public class PairDetailActivity extends AppCompatActivity {
         deviceName.setText(Device_name);
         deviceIdInfo.setText("Device's unique address: " + Device_id);
 
-        remotePresentation.setVisibility(Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_DESKTOP) || Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_LAPTOP) ? View.VISIBLE : View.GONE);
+        remotePresentation.setVisibility(isComputer ? View.VISIBLE : View.GONE);
         remotePresentation.setOnClickListener(v -> {
             Intent presentationIntent = new Intent(PairDetailActivity.this, PresentationActivity.class);
             presentationIntent.putExtra("device_name", Device_name);

@@ -45,6 +45,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     Preference ResetList;
     Preference DeleteHistory;
     Preference UpdateChannel;
+    Preference SaveLastSelectedItem;
 
     @NonNull
     @Override
@@ -81,6 +82,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
         ResetList = findPreference("ResetList");
         DeleteHistory = findPreference("DeleteHistory");
         UpdateChannel = findPreference("UpdateChannel");
+        SaveLastSelectedItem = findPreference("SaveLastSelectedItem");
 
         ArrayList<String> taskerPluginList = new ArrayList<>();
         taskerPluginList.add("net.dinglisch.android.taskerm");
@@ -118,6 +120,8 @@ public class OtherPreference extends PreferenceFragmentCompat {
             UpdateChannel.setSummary("Now : " + n);
             return true;
         });
+
+        SaveLastSelectedItem.setVisible(Application.isTablet());
     }
 
     @Override

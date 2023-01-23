@@ -59,7 +59,9 @@ public class SettingsActivity extends MonetCompatActivity {
     @SuppressLint("StaticFieldLeak")
     public static BillingHelper mBillingHelper;
     public static MonetSwitch ServiceToggle;
-    private static String lastSelectedItem;
+
+    private String lastSelectedItem;
+    private static String lastSelectedItemStatic;
 
     private ImageView AccountIcon;
     private FirebaseAuth mAuth;
@@ -115,8 +117,8 @@ public class SettingsActivity extends MonetCompatActivity {
             }
 
             MaterialCardView lastSelectedCardView;
-            if (lastSelectedItem != null) {
-                switch (lastSelectedItem) {
+            if (getLastSelectedItem() != null) {
+                switch (getLastSelectedItem()) {
                     case "PairMain":
                         lastSelectedCardView = PairPreferences;
                         break;
@@ -148,7 +150,7 @@ public class SettingsActivity extends MonetCompatActivity {
                 }
 
                 markSelectedMenu(lastSelectedCardView);
-                fragment.setType(lastSelectedItem);
+                fragment.setType(getLastSelectedItem());
             } else markSelectedMenu(AccountPreferences);
 
             Bundle bundle = new Bundle(0);
@@ -202,6 +204,7 @@ public class SettingsActivity extends MonetCompatActivity {
                 if (Application.isTablet()) {
                     markSelectedMenu((MaterialCardView) v);
                     Bundle bundle = new Bundle(0);
+                    setLastSelectedItem(fragmentType);
 
                     HolderFragment fragment = new HolderFragment();
                     fragment.setArguments(bundle);
@@ -211,7 +214,6 @@ public class SettingsActivity extends MonetCompatActivity {
                             .beginTransaction()
                             .replace(R.id.content_frame, fragment)
                             .commit();
-                    lastSelectedItem = fragmentType;
                 } else {
                     Intent intent = new Intent(this, OptionActivity.class);
                     intent.putExtra("Type", fragmentType);
@@ -349,6 +351,15 @@ public class SettingsActivity extends MonetCompatActivity {
         if (mBillingHelper.isSubscribed()) {
             new RegisterForPushNotificationsAsync(this).execute();
         }
+    }
+
+    private String getLastSelectedItem() {
+        return prefs.getBoolean("SaveLastSelectedItem", false) ? lastSelectedItemStatic : lastSelectedItem;
+    }
+
+    private void setLastSelectedItem(String itemValue) {
+        lastSelectedItemStatic = itemValue;
+        lastSelectedItem = itemValue;
     }
 
     void markSelectedMenu(MaterialCardView cardView) {

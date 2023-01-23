@@ -44,6 +44,12 @@
             android:icon="@drawable/ic_fluent_channel_alert_24_regular"/>
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
+            android:key="SaveLastSelectedItem"
+            android:title="Save previously selected menu"
+            android:summary="Note: Saved selections can be cleared by the system"
+            android:icon="@drawable/ic_fluent_tray_item_add_24_regular"/>
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
             android:key="UseWiFiSleepPolicy"
             android:title="WiFi sleep policy compliance (Pushy only)"
             android:summary="Prevents wake lock by blocking the wifi sleep policy."
