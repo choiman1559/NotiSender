@@ -62,6 +62,11 @@
             android:entries="@array/uniqueIdMethod_description"
             android:entryValues="@array/uniqueIdMethod"
             android:icon="@drawable/ic_fluent_fingerprint_24_regular"/>
+        <Preference
+            android:key="TestNotification"
+            android:title="Test notification"
+            android:summary="Make sample notification to test"
+            android:icon="@drawable/ic_fluent_window_dev_tools_24_regular"/>
          <Preference
             android:key="HistoryLimit"
             android:title="Maximum number of History"

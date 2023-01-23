@@ -21,6 +21,7 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.application.isradeleon.notify.Notify;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
@@ -28,6 +29,7 @@ import com.noti.main.R;
 import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import me.pushy.sdk.Pushy;
 
@@ -91,7 +93,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
         taskerPluginList.add("com.arlosoft.macrodroid");
         int packageCount = 0;
 
-        for(String packageName : taskerPluginList) {
+        for (String packageName : taskerPluginList) {
             try {
                 mContext.getPackageManager().getPackageInfo(packageName, 0);
             } catch (PackageManager.NameNotFoundException e) {
@@ -99,7 +101,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
             }
         }
 
-        if(packageCount == taskerPluginList.size()) {
+        if (packageCount == taskerPluginList.size()) {
             UseTaskerExtension.setEnabled(false);
             UseTaskerExtension.setSummary("This option requires the Tasker-compatible app.");
         }
@@ -157,13 +159,13 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS", ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue < 1) {
-                            ToastHelper.show(mContext, "Value must be higher than 0", "DISMISS",ToastHelper.LENGTH_SHORT);
+                            ToastHelper.show(mContext, "Value must be higher than 0", "DISMISS", ToastHelper.LENGTH_SHORT);
                         } else if (IntValue > 32786) {
-                            ToastHelper.show(mContext, "Value must be lower than 32786", "DISMISS",ToastHelper.LENGTH_SHORT);
+                            ToastHelper.show(mContext, "Value must be lower than 32786", "DISMISS", ToastHelper.LENGTH_SHORT);
                         } else {
                             prefs.edit().putInt("DataLimit", IntValue).apply();
                             DataLimit.setSummary("Now : " + IntValue + (IntValue == 4096 ? " bytes (Default)" : " bytes"));
@@ -204,11 +206,11 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS", ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
                         if (IntValue > 65535) {
-                            ToastHelper.show(mContext, "Value must be lower than 65535", "DISMISS",ToastHelper.LENGTH_SHORT);
+                            ToastHelper.show(mContext, "Value must be lower than 65535", "DISMISS", ToastHelper.LENGTH_SHORT);
                         } else {
                             prefs.edit().putInt("HistoryLimit", IntValue).apply();
                             HistoryLimit.setSummary("Now : " + IntValue + (IntValue == 150 ? " pcs (Default)" : " pcs"));
@@ -235,7 +237,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                             .putString("sendLogs", "")
                             .putString("receivedLogs", "")
                             .apply();
-                    ToastHelper.show(mContext, "Task done!","OK", ToastHelper.LENGTH_SHORT);
+                    ToastHelper.show(mContext, "Task done!", "OK", ToastHelper.LENGTH_SHORT);
                 });
                 dialog.setNegativeButton("Cancel", (d, w) -> {
                 });
@@ -265,6 +267,38 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Close", (d, w) -> {
                 });
                 dialog.show();
+                break;
+
+            case "TestNotification":
+                Notify.NotifyImportance importance;
+                String value = prefs.getString("importance", "Default");
+                switch (value) {
+                    case "Default":
+                        importance = Notify.NotifyImportance.MAX;
+                        break;
+                    case "Low":
+                        importance = Notify.NotifyImportance.LOW;
+                        break;
+                    case "High":
+                        importance = Notify.NotifyImportance.HIGH;
+                        break;
+                    default:
+                        importance = Notify.NotifyImportance.MIN;
+                        break;
+                }
+
+                Notify.build(mContext)
+                        .setTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
+                        .setContent("messageTest")
+                        .setLargeIcon(R.mipmap.ic_launcher)
+                        .largeCircularIcon()
+                        .setSmallIcon(R.drawable.ic_broken_image)
+                        .setChannelName("Testing Channel")
+                        .setChannelId("Notification Test")
+                        .setImportance(importance)
+                        .enableVibration(true)
+                        .setAutoCancel(true)
+                        .show();
                 break;
         }
         return super.onPreferenceTreeClick(preference);
