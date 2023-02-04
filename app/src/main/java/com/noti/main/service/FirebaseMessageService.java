@@ -39,6 +39,7 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
+import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceInfo;
@@ -87,6 +88,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static volatile Ringtone lastPlayedRingtone;
     public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
+    public static FirebaseMessageService instance;
+    private final PushyReceiver.onPushyMessageListener onPushyMessageListener = message -> processReception(message.getData(), FirebaseMessageService.this);
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
             if (lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying())
@@ -105,6 +108,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         playingSessionMap = new HashMap<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
+        PushyReceiver.setOnPushyMessageListener(this.onPushyMessageListener);
     }
 
     @SuppressWarnings("unchecked")
@@ -135,7 +139,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         } else processReception(map, this);
     }
 
-    private void processReception(Map<String, String> map, Context context) {
+    public void processReception(Map<String, String> map, Context context) {
         String type = map.get("type");
         String mode = prefs.getString("service", "");
 
@@ -195,7 +199,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     sendFindTaskNotification();
                 }
 
-                if (type.startsWith("media") && prefs.getBoolean("UseMediaSync", true)) {
+                if (type.startsWith("media") && prefs.getBoolean("UseMediaSync", false)) {
                     manager.acquire();
                     try {
                         String raw = map.get("media_data");

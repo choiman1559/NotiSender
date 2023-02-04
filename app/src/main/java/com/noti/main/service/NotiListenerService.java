@@ -666,7 +666,7 @@ public class NotiListenerService extends NotificationListenerService {
         if (prefs == null)
             prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
-            if (!prefs.getString("AuthKey_Pushy", "").equals(""))
+            if (!prefs.getString("ApiKey_Pushy", "").equals(""))
                 sendPushyNotification(notification, PackageName, context);
         } else sendFCMNotification(notification, PackageName, context);
         System.gc();
@@ -755,7 +755,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private static void sendPushyNotification(JSONObject notification, String PackageName, Context context) {
-        final String URI = "https://api.pushy.me/push?api_key=" + prefs.getString("AuthKey_Pushy", "");
+        final String URI = "https://api.pushy.me/push?api_key=" + prefs.getString("ApiKey_Pushy", "");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";
 
