@@ -33,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.utils.AESCrypto;
@@ -310,6 +311,16 @@ public class SendPreference extends PreferenceFragmentCompat {
             FcmWhenSendImageInfo.setVisible(foo && prefs.getBoolean("UseFcmWhenSendImage", false));
             return true;
         }));
+
+        BillingHelper billingHelper = BillingHelper.getInstance();
+        if(!billingHelper.isSubscribedOrDebugBuild()) {
+            ((SwitchPreference)UseAlbumArt).setChecked(false);
+            UseAlbumArt.setEnabled(false);
+            ((SwitchPreference)UseFcmWhenSendImage).setChecked(false);
+            UseFcmWhenSendImage.setEnabled(false);
+            UseAlbumArt.setSummary("Requires Premium subscription");
+        }
+
         UseFcmWhenSendImage.setOnPreferenceChangeListener(((preference, newValue) -> {
             FcmWhenSendImageInfo.setVisible((boolean) newValue);
             return true;

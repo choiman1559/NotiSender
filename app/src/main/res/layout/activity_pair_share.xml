@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:gravity="center"
-        android:text="Waring: File is too big to send!\nMax file size is 100MB." />
+        android:text="Waring: File is too big to send!\nMax file size is 2GB." />
 
     <LinearLayout
         android:layout_width="match_parent"

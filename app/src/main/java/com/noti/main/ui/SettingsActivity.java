@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,9 +57,13 @@ import me.pushy.sdk.Pushy;
 
 public class SettingsActivity extends MonetCompatActivity {
 
-    @SuppressLint("StaticFieldLeak")
     public static BillingHelper mBillingHelper;
     public static MonetSwitch ServiceToggle;
+
+    public static onPurchasedListener onPurchasedListener;
+    public interface onPurchasedListener {
+        void onPurchased(String purchaseId);
+    }
 
     private String lastSelectedItem;
     private static String lastSelectedItemStatic;
@@ -100,6 +105,25 @@ public class SettingsActivity extends MonetCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
+
+        mBillingHelper = BillingHelper.initialize(this, new BillingHelper.BillingCallback() {
+            @Override
+            public void onPurchased(String productId) {
+                if(productId.equals(BillingHelper.SubscribeID)) {
+                    ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+                    new RegisterForPushNotificationsAsync(SettingsActivity.this).execute();
+                }
+
+                if(SettingsActivity.onPurchasedListener != null) {
+                    SettingsActivity.onPurchasedListener.onPurchased(productId);
+                }
+            }
+
+            @Override
+            public void onUpdatePrice(Double priceValue) {
+
+            }
+        });
 
         MaterialCardView PairPreferences = findViewById(R.id.PairPreferences);
         MaterialCardView AccountPreferences = findViewById(R.id.AccountPreferences);
@@ -317,36 +341,6 @@ public class SettingsActivity extends MonetCompatActivity {
                                 .setCancelable(false);
                     }
                 });
-
-        mBillingHelper = BillingHelper.initialize(this, new BillingHelper.BillingCallback() {
-            @Override
-            public void onPurchased(String productId) {
-                switch (productId) {
-                    case BillingHelper.SubscribeID:
-                        ToastHelper.show(SettingsActivity.this, "Thanks for purchase!", "OK", ToastHelper.LENGTH_SHORT);
-                        ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
-                        //Subscribe.setVisible(false);
-                        new RegisterForPushNotificationsAsync(SettingsActivity.this).execute();
-                        break;
-
-                    case BillingHelper.DonateID:
-                        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(SettingsActivity.this, R.style.Theme_App_Palette_Dialog));
-                        dialog.setTitle("Thank you for your donation!");
-                        dialog.setMessage("This donation will be used to improve Noti Sender!");
-                        dialog.setIcon(R.drawable.ic_fluent_gift_24_regular);
-                        dialog.setCancelable(false);
-                        dialog.setPositiveButton("Close", (dialogInterface, i) -> {
-                        });
-                        dialog.show();
-                        break;
-                }
-            }
-
-            @Override
-            public void onUpdatePrice(Double priceValue) {
-
-            }
-        });
 
         if (mBillingHelper.isSubscribed()) {
             new RegisterForPushNotificationsAsync(this).execute();

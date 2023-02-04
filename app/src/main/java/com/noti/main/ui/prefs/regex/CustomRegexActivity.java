@@ -26,6 +26,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.noti.main.R;
+import com.noti.main.utils.BillingHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -98,11 +99,17 @@ public class CustomRegexActivity extends AppCompatActivity {
         actionButton.setOnClickListener((v) -> {
             Intent intent;
             if(viewPager.getCurrentItem() == 0) {
-                intent = new Intent(this, AddActionActivity.class);
+                BillingHelper billingHelper = BillingHelper.getInstance();
+                if(RegexListFragment.adapter.array.length() < 3 || billingHelper.isSubscribedOrDebugBuild()) {
+                    intent = new Intent(this, AddActionActivity.class);
+                } else {
+                    intent = null;
+                    billingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only add up to 3 objects.");
+                }
             } else {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/wiki/Custom-Regular-expression-Reference"));
             }
-            startAddOptionActivity.launch(intent);
+            if(intent != null) startAddOptionActivity.launch(intent);
         });
 
         navigationView.setOnItemSelectedListener(item -> {

@@ -67,7 +67,7 @@
 
     <PreferenceCategory android:title="Media control">
         <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:icon="@drawable/ic_fluent_play_circle_24_regular"
             android:key="UseMediaSync"
             android:summary="Control media player on other device"

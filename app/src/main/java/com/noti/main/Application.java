@@ -1,7 +1,9 @@
 package com.noti.main;
 
 import android.content.res.Configuration;
+import android.util.Log;
 
+import com.google.firebase.messaging.RemoteMessage;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceType;

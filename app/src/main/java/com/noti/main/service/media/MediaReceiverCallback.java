@@ -24,21 +24,21 @@ class MediaReceiverCallback extends MediaController.Callback {
 
     @Override
     public void onPlaybackStateChanged(PlaybackState state) {
-        if(prefs.getBoolean("UseMediaSync", true)) {
+        if(prefs.getBoolean("UseMediaSync", false)) {
             plugin.sendMetadata(player);
         }
     }
 
     @Override
     public void onMetadataChanged(@Nullable MediaMetadata metadata) {
-        if(prefs.getBoolean("UseMediaSync", true)) {
+        if(prefs.getBoolean("UseMediaSync", false)) {
             plugin.sendMetadata(player);
         }
     }
 
     @Override
     public void onAudioInfoChanged(MediaController.PlaybackInfo info) {
-        if(prefs.getBoolean("UseMediaSync", true)) {
+        if(prefs.getBoolean("UseMediaSync", false)) {
             plugin.sendMetadata(player);
         }
     }

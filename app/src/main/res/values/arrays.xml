@@ -61,8 +61,8 @@
     </string-array>
 
     <string-array name="server_shown">
-        <item>Firebase Cloud Message (Free)</item>
-        <item>Pushy (Subscribe only)</item>
+        <item>Firebase Cloud Message</item>
+        <item>Pushy (Premium only)</item>
     </string-array>
 
     <string-array name="server">

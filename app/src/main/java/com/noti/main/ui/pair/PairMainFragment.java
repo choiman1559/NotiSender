@@ -11,6 +11,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.ui.OptionActivity;
+import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.HashSet;
@@ -78,7 +80,12 @@ public class PairMainFragment extends Fragment {
         deviceNameInfo.setText("Visible as \"" + Build.MODEL + "\" to other devices");
         addNewDevice.setOnClickListener(v -> {
             if(mainPrefs.getBoolean("pairToggle", false)) {
-                startActivity(new Intent(mActivity, PairingActivity.class));
+                BillingHelper billingHelper = BillingHelper.getInstance();
+                if(deviceListLayout.getChildCount() < 2 || billingHelper.isSubscribedOrDebugBuild()) {
+                    startActivity(new Intent(mActivity, PairingActivity.class));
+                } else {
+                    billingHelper.showSubscribeInfoDialog(mActivity, "Without a subscription, you can only pair up to 2 devices!");
+                }
             } else {
                 ToastHelper.show(mActivity, "Pairing is not enabled",ToastHelper.LENGTH_SHORT);
             }

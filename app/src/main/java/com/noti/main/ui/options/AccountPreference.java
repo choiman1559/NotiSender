@@ -40,6 +40,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.ui.OptionActivity;
+import com.noti.main.ui.SettingsActivity;
+import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.Date;
@@ -54,7 +56,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
     Activity mContext;
 
     ActivityResultLauncher<Intent> startAccountTask = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        if(result.getData() != null) {
+        if (result.getData() != null) {
             GoogleSignInResult loginResult = Auth.GoogleSignInApi.getSignInResultFromIntent(result.getData());
             if (loginResult != null && loginResult.isSuccess()) {
                 Log.d("Google log in", "Result : " + (loginResult.isSuccess() ? "success" : "failed") + " Status : " + loginResult.getStatus());
@@ -69,10 +71,12 @@ public class AccountPreference extends PreferenceFragmentCompat {
     Preference Service;
     Preference Server;
     Preference Subscribe;
+    Preference AlreadySubscribed;
     Preference ServerInfo;
     Preference TestRun;
 
-    public AccountPreference() { }
+    public AccountPreference() {
+    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -85,6 +89,26 @@ public class AccountPreference extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.account_preferences, rootKey);
+        SettingsActivity.onPurchasedListener = purchaseId -> {
+            switch (purchaseId) {
+                case BillingHelper.SubscribeID:
+                    ToastHelper.show(mContext, "Thanks for purchase!", "OK", ToastHelper.LENGTH_SHORT);
+                    Subscribe.setVisible(false);
+                    AlreadySubscribed.setVisible(true);
+                    break;
+
+                case BillingHelper.DonateID:
+                    MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                    dialog.setTitle("Thank you for your donation!");
+                    dialog.setMessage("This donation will be used to improve Noti Sender!");
+                    dialog.setIcon(R.drawable.ic_fluent_gift_24_regular);
+                    dialog.setCancelable(false);
+                    dialog.setPositiveButton("Close", (dialogInterface, i) -> {
+                    });
+                    dialog.show();
+                    break;
+            }
+        };
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -100,6 +124,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
         Service = findPreference("service");
         Server = findPreference("server");
         Subscribe = findPreference("Subscribe");
+        AlreadySubscribed = findPreference("AlreadySubscribed");
         ServerInfo = findPreference("ServerInfo");
 
         boolean ifUIDBlank = prefs.getString("UID", "").equals("");
@@ -110,21 +135,25 @@ public class AccountPreference extends PreferenceFragmentCompat {
                 prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
             if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
                 if (mBillingHelper.isSubscribed()) {
-                    Subscribe.setVisible(false);
                     ServiceToggle.setEnabled(true);
                 } else {
-                    Subscribe.setVisible(true);
-                    ServiceToggle.setEnabled(false);
                     ServiceToggle.setChecked(false);
+                    ServiceToggle.setEnabled(false);
                 }
             } else {
-                Subscribe.setVisible(false);
                 ServiceToggle.setEnabled(true);
             }
         } else {
-            ServiceToggle.setEnabled(false);
             ServiceToggle.setChecked(false);
-            Subscribe.setVisible(prefs.getString("server", "Firebase Cloud Message").equals("Pushy") && !mBillingHelper.isSubscribed());
+            ServiceToggle.setEnabled(false);
+        }
+
+        if (mBillingHelper.isSubscribed()) {
+            Subscribe.setVisible(false);
+            AlreadySubscribed.setVisible(true);
+        } else {
+            Subscribe.setVisible(true);
+            AlreadySubscribed.setVisible(false);
         }
 
         Service.setSummary("Now : " + prefs.getString("service", "not selected"));
@@ -139,13 +168,11 @@ public class AccountPreference extends PreferenceFragmentCompat {
             if (n.toString().equals("Pushy")) {
                 if (mBillingHelper.isSubscribed()) ServiceToggle.setEnabled(true);
                 else {
-                    Subscribe.setVisible(true);
                     ServiceToggle.setEnabled(false);
                     ServiceToggle.setChecked(false);
                 }
             } else {
                 ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
-                Subscribe.setVisible(false);
             }
             return true;
         });
@@ -175,7 +202,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
                 break;
 
             case "Subscribe":
-                mBillingHelper.Subscribe();
+                mBillingHelper.Subscribe(mContext);
                 break;
 
             case "ServerInfo":
@@ -188,19 +215,18 @@ public class AccountPreference extends PreferenceFragmentCompat {
                 dialog.show();
                 break;
 
-            case "testNoti":
-                Notify.build(mContext)
-                        .setTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
-                        .setContent("messageTest")
-                        .setLargeIcon(R.mipmap.ic_launcher)
-                        .largeCircularIcon()
-                        .setSmallIcon(R.drawable.ic_broken_image)
-                        .setChannelName("Testing Channel")
-                        .setChannelId("Notification Test")
-                        .setImportance(getImportance())
-                        .enableVibration(true)
-                        .setAutoCancel(true)
-                        .show();
+            case "PremiumInfo":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                dialog.setTitle("Premium info");
+                dialog.setMessage(getString(R.string.Premium_information));
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                dialog.setPositiveButton("Close", (d, w) -> {
+                });
+                dialog.show();
+                break;
+
+            case "Donation":
+                mBillingHelper.Donate(mContext);
                 break;
         }
         return super.onPreferenceTreeClick(preference);
@@ -252,7 +278,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
     }
 
     private void recreate() {
-        if(Application.isTablet()) {
+        if (Application.isTablet()) {
             Fragment fragment = new AccountPreference();
             Bundle bundle = new Bundle(0);
             fragment.setArguments(bundle);
@@ -263,7 +289,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
                     .commit();
         } else {
             FragmentActivity activity = getActivity();
-            if(activity != null) {
+            if (activity != null) {
                 OptionActivity.attachFragment(activity, new AccountPreference());
             }
         }
@@ -274,9 +300,9 @@ public class AccountPreference extends PreferenceFragmentCompat {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(mContext, task -> {
                     if (!task.isSuccessful()) {
-                        ToastHelper.show(mContext, "failed to login Google", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        ToastHelper.show(mContext, "failed to login Google", "DISMISS", ToastHelper.LENGTH_SHORT);
                     } else if (mAuth.getCurrentUser() != null) {
-                        ToastHelper.show(mContext, "Success to login Google", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        ToastHelper.show(mContext, "Success to login Google", "DISMISS", ToastHelper.LENGTH_SHORT);
                         prefs.edit().putString("UID", mAuth.getUid()).apply();
                         prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
                         recreate();

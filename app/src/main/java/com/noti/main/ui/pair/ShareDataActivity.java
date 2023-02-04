@@ -36,12 +36,16 @@ import com.google.firebase.storage.UploadTask;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
+import com.noti.main.utils.BillingHelper;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ShareDataActivity extends AppCompatActivity {
+
+    static boolean isNeedToFinishActivityNow = true;
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -119,9 +123,17 @@ public class ShareDataActivity extends AppCompatActivity {
                     long size = returnCursor2.getLong(sizeIndex);
                     returnCursor2.close();
 
-                    if(size > 104857600) {
-                        fileTooBigWarning.setVisibility(View.VISIBLE);
-                        ok.setEnabled(false);
+                    BillingHelper billingHelper = BillingHelper.getInstance();
+                    boolean isSubscribed = billingHelper.isSubscribedOrDebugBuild();
+
+                    if(size > (isSubscribed ? 2147483648L : 104857600)) {
+                        if(isSubscribed) {
+                            fileTooBigWarning.setVisibility(View.VISIBLE);
+                            ok.setEnabled(false);
+                        } else {
+                            billingHelper.showSubscribeInfoDialog(ShareDataActivity.this, "You have exceeded the maximum allowed file size!\nThe current limit is 100MB, but the limit increases to 2GB with a subscription.", false,(dialog12, which) -> finish());
+                            isNeedToFinishActivityNow = false;
+                        }
                     }
 
                     ok.setOnClickListener(v -> {
@@ -185,7 +197,7 @@ public class ShareDataActivity extends AppCompatActivity {
             }
         }
 
-        dialog.show();
+        if(isNeedToFinishActivityNow) dialog.show();
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.getWindow().setGravity(Gravity.BOTTOM);

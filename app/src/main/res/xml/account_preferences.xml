@@ -1,31 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference
-        android:key="Login"
-        android:summary="@string/UID_default"
-        android:title="@string/Login"
-        android:icon="@drawable/ic_fluent_inprivate_account_24_regular"/>
-    <ListPreference
-        android:defaultValue="not selected"
-        android:entries="@array/services_shown"
-        android:entryValues="@array/services"
-        android:key="service"
-        android:title="Select service"
-        android:summary="Now : reception"/>
-    <ListPreference
-        android:key="server"
-        android:defaultValue="Firebase Cloud Message"
-        android:entries="@array/server_shown"
-        android:entryValues="@array/server"
-        android:title="Select server"
-        android:summary="Now : Firebase Cloud Message"/>
-    <Preference
-        android:key="Subscribe"
-        android:summary="To use Pushy's server, you have to pay 1.49$ per month."
-        android:title="Subscribe" />
-    <Preference
-        android:key="ServerInfo"
-        android:summary="Information about server differences"
-        android:icon="@drawable/ic_info_outline_black_24dp" />
+    <PreferenceCategory
+        android:title="General">
+        <Preference
+            android:key="Login"
+            android:summary="@string/UID_default"
+            android:title="@string/Login"
+            android:icon="@drawable/ic_fluent_inprivate_account_24_regular"/>
+        <ListPreference
+            android:defaultValue="not selected"
+            android:entries="@array/services_shown"
+            android:entryValues="@array/services"
+            android:key="service"
+            android:title="Select service"
+            android:summary="Now : reception"/>
+        <ListPreference
+            android:key="server"
+            android:defaultValue="Firebase Cloud Message"
+            android:entries="@array/server_shown"
+            android:entryValues="@array/server"
+            android:title="Select server"
+            android:summary="Now : Firebase Cloud Message"/>
+        <Preference
+            android:key="ServerInfo"
+            android:summary="Information about server differences"
+            android:icon="@drawable/ic_info_outline_black_24dp" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Premium &amp; donate">
+        <Preference
+            android:key="Subscribe"
+            android:summary="Subscribe to get more features!"
+            android:title="Subscribe Premium" />
+        <Preference
+            android:key="AlreadySubscribed"
+            android:summary="You're already subscribed!"
+            android:title="Subscription activated" />
+        <Preference
+            android:key="PremiumInfo"
+            android:summary="Subscription benefit information"
+            android:icon="@drawable/ic_info_outline_black_24dp" />
+        <Preference
+            android:key="Donation"
+            android:title="Donate to developer"
+            android:summary="Please help us make the app even better!"
+            android:icon="@drawable/ic_fluent_gift_24_regular"/>
+    </PreferenceCategory>
 </PreferenceScreen>
