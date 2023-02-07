@@ -19,6 +19,7 @@ public class Application extends android.app.Application {
 
     public static final String PREFS_NAME = "com.noti.main_preferences";
     public static PairDeviceType thisDeviceType;
+    public static boolean needRebootToChangeType = false;
 
     public static boolean isTablet() {
         int screenSize = (applicationInstance.getApplicationContext().getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK);

@@ -15,6 +15,7 @@
     <color name="ui_menu_accent">#C1E8FF</color>
     <color name="ui_widget_tertiary">#484264</color>
     <color name="ui_widget_secondary">#374955</color>
+    <color name="ui_pair_device_action_background">#2E3133</color>
 
     <color name="palette_bg">#090909</color>
     <color name="palette_fg">#5e5e5e</color>

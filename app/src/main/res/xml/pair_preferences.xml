@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="Auto Detect"
+        android:entries="@array/device_type_list"
+        android:entryValues="@array/device_type_list"
+        android:key="customDeviceType"
+        android:summary="Now : Auto Detect (Default)"
+        android:title="Device type custom specification"
+        android:icon="@drawable/ic_fluent_phone_desktop_24_regular"/>
+
     <Preference
-        android:key="findPhone"
-        android:summary="Play loud sound on other devices to find"
-        android:title="Execute Find my devices"
-        android:icon="@drawable/ic_fluent_screen_search_24_regular"/>
+        android:key="deviceTypeChangeReboot"
+        android:visible="false"
+        android:summary="Reboot is required to save device type change"
+        android:icon="@drawable/ic_info_outline_black_24dp" />
 
     <com.noti.main.utils.ui.SwitchedPreference
         android:defaultValue="false"

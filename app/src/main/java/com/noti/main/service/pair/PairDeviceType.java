@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import com.microsoft.fluent.mobile.icons.R.drawable;
+import com.noti.main.Application;
 import com.noti.main.R;
 
 public class PairDeviceType {
@@ -32,6 +33,11 @@ public class PairDeviceType {
     }
 
     public static PairDeviceType getThisDeviceType(Context context) {
+        String customDeviceType = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("customDeviceType", "Auto Detect");
+        if(!customDeviceType.equals("Auto Detect")) {
+            return new PairDeviceType(customDeviceType);
+        }
+
         String deviceType;
         UiModeManager uiModeManager = (UiModeManager) context.getSystemService(UI_MODE_SERVICE);
         switch (uiModeManager.getCurrentModeType()) {

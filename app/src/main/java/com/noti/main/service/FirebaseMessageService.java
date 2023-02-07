@@ -88,7 +88,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static volatile Ringtone lastPlayedRingtone;
     public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
-    public static FirebaseMessageService instance;
     private final PushyReceiver.onPushyMessageListener onPushyMessageListener = message -> processReception(message.getData(), FirebaseMessageService.this);
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
@@ -288,7 +287,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             break;
 
                         case "pair|request_remove":
-                            if (isTargetDevice(map) && isPairedDevice(map) && pairPrefs.getBoolean("allowRemovePairRemotely", true)) {
+                            if (isTargetDevice(map) && isPairedDevice(map) && prefs.getBoolean("allowRemovePairRemotely", true)) {
                                 String dataToFind = map.get("device_name") + "|" + map.get("device_id") + (map.containsKey("device_type") ? "|" + map.get("device_type") : "");
                                 String dataToRemove = null;
 

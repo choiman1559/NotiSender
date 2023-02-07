@@ -21,6 +21,7 @@
     <color name="ui_menu_accent">#C1E8FF</color>
     <color name="ui_widget_tertiary">#E6DEFF</color>
     <color name="ui_widget_secondary">#D1E5F4</color>
+    <color name="ui_pair_device_action_background">#FCFCFF</color>
 
     <color name="launcher_fg">#464646</color>
     <color name="launcher_bg">#8DF5E3</color>

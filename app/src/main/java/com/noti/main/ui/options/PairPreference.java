@@ -18,14 +18,15 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
-import com.noti.main.service.NotiListenerService;
-import com.noti.main.utils.ui.ToastHelper;
 
 public class PairPreference extends PreferenceFragmentCompat  {
 
     Activity mContext;
     MonetCompat monet;
     SharedPreferences prefs;
+
+    Preference customDeviceType;
+    Preference deviceTypeChangeReboot;
 
     @NonNull
     @Override
@@ -53,21 +54,19 @@ public class PairPreference extends PreferenceFragmentCompat  {
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.pair_preferences, rootKey);
         prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
-    }
 
-    @Override
-    public boolean onPreferenceTreeClick(@NonNull Preference preference) {
-        switch(preference.getKey()) {
-            case "findPhone":
-                if(!prefs.getString("UID","").isEmpty()) {
-                    NotiListenerService.sendFindTaskNotification(mContext);
-                    ToastHelper.show(mContext, "Your request is posted!","OK", ToastHelper.LENGTH_SHORT);
-                } else ToastHelper.show(mContext, "Please check your account status and try again!","Dismiss", ToastHelper.LENGTH_SHORT);
-                break;
+        customDeviceType = findPreference("customDeviceType");
+        deviceTypeChangeReboot = findPreference("deviceTypeChangeReboot");
 
-            case "":
-                break;
-        }
-        return super.onPreferenceTreeClick(preference);
+        String deviceType = prefs.getString("customDeviceType", "Auto Detect");
+        customDeviceType.setSummary("Now : " + deviceType + (deviceType.equals("Auto Detect") ? " (Default)" : ""));
+        deviceTypeChangeReboot.setVisible(Application.needRebootToChangeType);
+
+        customDeviceType.setOnPreferenceChangeListener((preference, newValue) -> {
+            customDeviceType.setSummary("Now : " + newValue + (newValue.equals("Auto Detect") ? " (Default)" : ""));
+            deviceTypeChangeReboot.setVisible(true);
+            Application.needRebootToChangeType = true;
+            return true;
+        });
     }
 }

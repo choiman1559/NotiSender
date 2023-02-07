@@ -100,6 +100,19 @@
         <item>Run terminal command</item>
     </string-array>
 
+    <string-array name="device_type_list">
+        <item>Auto Detect</item>
+        <item>Phone</item>
+        <item>Tablet</item>
+        <item>Television</item>
+        <item>Desktop</item>
+        <item>Laptop</item>
+        <item>Smartwatch</item>
+        <item>IOT_Device</item>
+        <item>VR_Gear</item>
+        <item>Automobile</item>
+    </string-array>
+
     <string-array name="material_color_low"
         tools:ignore="Typos">
         <item>#FFCDD2</item>
