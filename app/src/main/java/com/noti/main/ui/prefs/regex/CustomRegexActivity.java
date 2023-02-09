@@ -27,6 +27,7 @@ import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.noti.main.R;
 import com.noti.main.utils.BillingHelper;
+import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,7 +83,7 @@ public class CustomRegexActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                switch(position) {
+                switch (position) {
                     case 0:
                         navigationView.getMenu().findItem(R.id.page_1).setChecked(true);
                         actionButton.setImageResource(R.drawable.ic_fluent_add_24_regular);
@@ -97,23 +98,26 @@ public class CustomRegexActivity extends AppCompatActivity {
         });
 
         actionButton.setOnClickListener((v) -> {
-            Intent intent;
-            if(viewPager.getCurrentItem() == 0) {
-                BillingHelper billingHelper = BillingHelper.getInstance();
-                if(RegexListFragment.adapter.array.length() < 3 || billingHelper.isSubscribedOrDebugBuild()) {
-                    intent = new Intent(this, AddActionActivity.class);
-                } else {
-                    intent = null;
-                    billingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only add up to 3 objects.");
+            Intent intent = null;
+            if (viewPager.getCurrentItem() == 0) {
+                try {
+                    BillingHelper billingHelper = BillingHelper.getInstance();
+                    if (RegexListFragment.adapter.array.length() < 3 || billingHelper.isSubscribedOrDebugBuild()) {
+                        intent = new Intent(this, AddActionActivity.class);
+                    } else {
+                        BillingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only add up to 3 objects.");
+                    }
+                } catch (IllegalStateException e) {
+                    ToastHelper.show(this, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
                 }
             } else {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/wiki/Custom-Regular-expression-Reference"));
             }
-            if(intent != null) startAddOptionActivity.launch(intent);
+            if (intent != null) startAddOptionActivity.launch(intent);
         });
 
         navigationView.setOnItemSelectedListener(item -> {
-            switch(item.getItemId()) {
+            switch (item.getItemId()) {
                 case R.id.page_1:
                     viewPager.setCurrentItem(0);
                     break;

@@ -123,17 +123,22 @@ public class ShareDataActivity extends AppCompatActivity {
                     long size = returnCursor2.getLong(sizeIndex);
                     returnCursor2.close();
 
-                    BillingHelper billingHelper = BillingHelper.getInstance();
-                    boolean isSubscribed = billingHelper.isSubscribedOrDebugBuild();
+                    try {
+                        BillingHelper billingHelper = BillingHelper.getInstance();
+                        boolean isSubscribed = billingHelper.isSubscribedOrDebugBuild();
 
-                    if(size > (isSubscribed ? 2147483648L : 104857600)) {
-                        if(isSubscribed) {
-                            fileTooBigWarning.setVisibility(View.VISIBLE);
-                            ok.setEnabled(false);
-                        } else {
-                            billingHelper.showSubscribeInfoDialog(ShareDataActivity.this, "You have exceeded the maximum allowed file size!\nThe current limit is 100MB, but the limit increases to 2GB with a subscription.", false,(dialog12, which) -> finish());
-                            isNeedToFinishActivityNow = false;
+                        if (size > (isSubscribed ? 2147483648L : 104857600)) {
+                            if (isSubscribed) {
+                                fileTooBigWarning.setVisibility(View.VISIBLE);
+                                ok.setEnabled(false);
+                            } else {
+                                BillingHelper.showSubscribeInfoDialog(ShareDataActivity.this, "You have exceeded the maximum allowed file size!\nThe current limit is 100MB, but the limit increases to 2GB with a subscription.", false, (dialog12, which) -> finish());
+                                isNeedToFinishActivityNow = false;
+                            }
                         }
+                    } catch (IllegalStateException e) {
+                        BillingHelper.showSubscribeInfoDialog(ShareDataActivity.this, "Error: Can't get purchase information! Please contact developer.", false, (dialog12, which) -> finish());
+                        isNeedToFinishActivityNow = false;
                     }
 
                     ok.setOnClickListener(v -> {

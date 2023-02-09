@@ -5,7 +5,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.anjlab.android.iab.v3.BillingProcessor;
@@ -33,7 +32,7 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
         void onUpdatePrice(Double priceValue);
     }
 
-    public static BillingHelper getInstance() {
+    public static BillingHelper getInstance() throws IllegalStateException {
         if (instance != null) return instance;
         else throw new IllegalStateException("BillingHelper is not initialized");
     }
@@ -63,12 +62,12 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
         return BuildConfig.DEBUG || isSubscribed();
     }
 
-    public void showSubscribeInfoDialog(Activity mContext, String cause) {
+    public static void showSubscribeInfoDialog(Activity mContext, String cause) {
         showSubscribeInfoDialog(mContext, cause, true,(d, w) -> {
         });
     }
 
-    public void showSubscribeInfoDialog(Activity mContext, String cause, boolean isCancelable, android.content.DialogInterface.OnClickListener okButtonListener) {
+    public static void showSubscribeInfoDialog(Activity mContext, String cause, boolean isCancelable, android.content.DialogInterface.OnClickListener okButtonListener) {
         MaterialAlertDialogBuilder dialog;
         dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
         dialog.setTitle("Subscription Information");

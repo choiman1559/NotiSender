@@ -80,11 +80,15 @@ public class PairMainFragment extends Fragment {
         deviceNameInfo.setText("Visible as \"" + Build.MODEL + "\" to other devices");
         addNewDevice.setOnClickListener(v -> {
             if(mainPrefs.getBoolean("pairToggle", false)) {
-                BillingHelper billingHelper = BillingHelper.getInstance();
-                if(deviceListLayout.getChildCount() < 2 || billingHelper.isSubscribedOrDebugBuild()) {
-                    startActivity(new Intent(mActivity, PairingActivity.class));
-                } else {
-                    billingHelper.showSubscribeInfoDialog(mActivity, "Without a subscription, you can only pair up to 2 devices!");
+                try {
+                    BillingHelper billingHelper = BillingHelper.getInstance();
+                    if(deviceListLayout.getChildCount() < 2 || billingHelper.isSubscribedOrDebugBuild()) {
+                        startActivity(new Intent(mActivity, PairingActivity.class));
+                    } else {
+                        BillingHelper.showSubscribeInfoDialog(mActivity, "Without a subscription, you can only pair up to 2 devices!");
+                    }
+                } catch (IllegalStateException e) {
+                    ToastHelper.show(mActivity, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
                 }
             } else {
                 ToastHelper.show(mActivity, "Pairing is not enabled",ToastHelper.LENGTH_SHORT);

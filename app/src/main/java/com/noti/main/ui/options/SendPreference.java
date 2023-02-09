@@ -312,11 +312,20 @@ public class SendPreference extends PreferenceFragmentCompat {
             return true;
         }));
 
-        BillingHelper billingHelper = BillingHelper.getInstance();
-        if(!billingHelper.isSubscribedOrDebugBuild()) {
-            ((SwitchPreference)UseAlbumArt).setChecked(false);
+        try {
+            BillingHelper billingHelper = BillingHelper.getInstance();
+            if (!billingHelper.isSubscribedOrDebugBuild()) {
+                ((SwitchPreference) UseAlbumArt).setChecked(false);
+                UseAlbumArt.setEnabled(false);
+                ((SwitchPreference) UseFcmWhenSendImage).setChecked(false);
+                UseFcmWhenSendImage.setEnabled(false);
+                UseAlbumArt.setSummary("Requires Premium subscription");
+            }
+        } catch (IllegalStateException e) {
+            ToastHelper.show(mContext, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
+            ((SwitchPreference) UseAlbumArt).setChecked(false);
             UseAlbumArt.setEnabled(false);
-            ((SwitchPreference)UseFcmWhenSendImage).setChecked(false);
+            ((SwitchPreference) UseFcmWhenSendImage).setChecked(false);
             UseFcmWhenSendImage.setEnabled(false);
             UseAlbumArt.setSummary("Requires Premium subscription");
         }

@@ -1,5 +1,6 @@
 package com.noti.main.ui.pair;
 
+import static com.noti.main.Application.PREFS_NAME;
 import static com.noti.main.Application.pairingProcessList;
 
 import android.annotation.SuppressLint;
@@ -49,10 +50,17 @@ public class PairAcceptActivity extends AppCompatActivity {
         TextView info = findViewById(R.id.notiDetail);
         info.setText(Html.fromHtml("Are you sure you want to grant the pairing request?<br><b>Requested Device:</b> " + Device_name));
 
-        BillingHelper billingHelper = BillingHelper.getInstance();
-        if (prefs.getStringSet("paired_list", new HashSet<>()).size() >= 2 && !billingHelper.isSubscribedOrDebugBuild()) {
-            AcceptButton.setEnabled(false);
-            billingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only pair up to 2 devices!", false, ((dialog, which) -> {}));
+        try {
+            BillingHelper billingHelper = BillingHelper.getInstance();
+            if (prefs.getStringSet("paired_list", new HashSet<>()).size() >= 2 && !billingHelper.isSubscribedOrDebugBuild()) {
+                AcceptButton.setEnabled(false);
+                BillingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only pair up to 2 devices!", false, ((dialog, which) -> {}));
+            }
+        } catch (IllegalStateException e) {
+            if (prefs.getStringSet("paired_list", new HashSet<>()).size() >= 2) {
+                AcceptButton.setEnabled(false);
+                BillingHelper.showSubscribeInfoDialog(this, "Error: Can't get purchase information! Please contact developer.", false, ((dialog, which) -> {}));
+            }
         }
 
         AcceptButton.setOnClickListener(v -> {

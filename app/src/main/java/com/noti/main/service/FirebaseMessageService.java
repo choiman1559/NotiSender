@@ -457,15 +457,17 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         if (lastPlayedRingtone != null && lastPlayedRingtone.isPlaying()) lastPlayedRingtone.stop();
         lastPlayedRingtone = RingtoneManager.getRingtone(this, RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE));
-        if (Build.VERSION.SDK_INT >= 28) {
-            AudioAttributes.Builder audioAttributes = new AudioAttributes.Builder();
-            audioAttributes.setUsage(AudioAttributes.USAGE_ALARM);
-            audioAttributes.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
+        if(lastPlayedRingtone != null) {
+            if (Build.VERSION.SDK_INT >= 28) {
+                AudioAttributes.Builder audioAttributes = new AudioAttributes.Builder();
+                audioAttributes.setUsage(AudioAttributes.USAGE_ALARM);
+                audioAttributes.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
 
-            lastPlayedRingtone.setLooping(true);
-            lastPlayedRingtone.setAudioAttributes(audioAttributes.build());
-            lastPlayedRingtone.play();
-        } else ringtonePlayedThread.start();
+                lastPlayedRingtone.setLooping(true);
+                lastPlayedRingtone.setAudioAttributes(audioAttributes.build());
+                lastPlayedRingtone.play();
+            } else ringtonePlayedThread.start();
+        }
     }
 
     protected void sendTelecomNotification(Map<String, String> map) {
