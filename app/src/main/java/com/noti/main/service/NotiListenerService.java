@@ -306,42 +306,6 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    public static void sendFindTaskNotification(Context context) {
-        boolean isLogging = BuildConfig.DEBUG;
-        Date date = Calendar.getInstance().getTime();
-        if (prefs == null)
-            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
-        int timeInterval = prefs.getInt("IntervalTime", 150);
-
-        if (isLogging)
-            Log.d("IntervalCalculate", "Package " + context.getPackageName() + "/Calculated(ms):" + (date.getTime() - intervalTimestamp));
-        if (intervalTimestamp != 0 && date.getTime() - intervalTimestamp <= timeInterval) {
-            intervalTimestamp = date.getTime();
-            return;
-        }
-        intervalTimestamp = date.getTime();
-
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-        String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + prefs.getString("UID", "");
-
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
-        try {
-            notificationBody.put("type", "send|find");
-            notificationBody.put("device_name", DEVICE_NAME);
-            notificationBody.put("device_id", DEVICE_ID);
-            notificationBody.put("date", date);
-
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
-        } catch (JSONException e) {
-            if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
-        }
-        if (isLogging) Log.d("data", notificationHead.toString());
-        sendNotification(notificationHead, context.getPackageName(), context);
-    }
-
     private void sendTelecomNotification(Boolean isLogging, String PackageName, Date time) {
         Cursor cursor = getContentResolver().query(android.provider.CallLog.Calls.CONTENT_URI, null, android.provider.CallLog.Calls.TYPE + "=" + CallLog.Calls.INCOMING_TYPE, null, null);
         cursor.moveToFirst();

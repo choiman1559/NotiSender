@@ -20,6 +20,7 @@ public class MediaBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if(!context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getBoolean("UseMediaSync", true)) return;
+        if(FirebaseMessageService.playingSessionMap == null) return;
 
         com.noti.main.receiver.media.MediaSession mMediaSession = FirebaseMessageService.playingSessionMap.get(intent.getStringExtra(EXTRA_DEVICE_ID));
         if (mMediaSession == null) return;
@@ -31,8 +32,6 @@ public class MediaBroadcastReceiver extends BroadcastReceiver {
         } else {
             MediaPlayer player = mMediaSession.getPlayer();
             if (player == null) return;
-
-            Log.d("intent", intent.getAction());
 
             switch (intent.getAction()) {
                 case ACTION_PLAY:
