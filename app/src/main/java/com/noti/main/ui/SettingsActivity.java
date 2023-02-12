@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,7 +21,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -61,6 +59,7 @@ public class SettingsActivity extends MonetCompatActivity {
     public static MonetSwitch ServiceToggle;
 
     public static onPurchasedListener onPurchasedListener;
+
     public interface onPurchasedListener {
         void onPurchased(String purchaseId);
     }
@@ -106,15 +105,19 @@ public class SettingsActivity extends MonetCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        mBillingHelper = BillingHelper.initialize(this, new BillingHelper.BillingCallback() {
+        if(BillingHelper.getInstance(false) == null) {
+            mBillingHelper = BillingHelper.initialize(this);
+        } else mBillingHelper = BillingHelper.getInstance();
+
+        mBillingHelper.setBillingCallback(new BillingHelper.BillingCallback() {
             @Override
             public void onPurchased(String productId) {
-                if(productId.equals(BillingHelper.SubscribeID)) {
+                if (productId.equals(BillingHelper.SubscribeID)) {
                     ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
                     new RegisterForPushNotificationsAsync(SettingsActivity.this).execute();
                 }
 
-                if(SettingsActivity.onPurchasedListener != null) {
+                if (SettingsActivity.onPurchasedListener != null) {
                     SettingsActivity.onPurchasedListener.onPurchased(productId);
                 }
             }

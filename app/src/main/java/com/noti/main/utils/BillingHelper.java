@@ -33,19 +33,28 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
     }
 
     public static BillingHelper getInstance() throws IllegalStateException {
-        if (instance != null) return instance;
-        else throw new IllegalStateException("BillingHelper is not initialized");
+        return getInstance(true);
     }
 
-    public static BillingHelper initialize(Activity mContext, BillingCallback billingCallback) {
+    @Nullable
+    public static BillingHelper getInstance(boolean needThrow) throws IllegalStateException {
+        if (instance != null) return instance;
+        else if(needThrow) throw new IllegalStateException("BillingHelper is not initialized");
+        else return null;
+    }
+
+    public static BillingHelper initialize(Context mContext) {
         String APIKey = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("ApiKey_Billing", "");
         BillingHelper billingHelper = new BillingHelper();
-        billingHelper.mBillingCallback = billingCallback;
         billingHelper.mBillingProcessor = new BillingProcessor(mContext, APIKey, billingHelper);
         billingHelper.mBillingProcessor.initialize();
 
         instance = billingHelper;
         return billingHelper;
+    }
+
+    public void setBillingCallback(BillingCallback callback) {
+        this.mBillingCallback = callback;
     }
 
     public void Subscribe(Activity mContext) {
@@ -59,7 +68,7 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
     }
 
     public boolean isSubscribedOrDebugBuild() {
-        return BuildConfig.DEBUG || isSubscribed();
+        return  isSubscribed() || BuildConfig.DEBUG;
     }
 
     public static void showSubscribeInfoDialog(Activity mContext, String cause) {
