@@ -102,6 +102,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
                     tools:layout_editor_absoluteX="8dp">
 
                     <RelativeLayout
@@ -159,6 +160,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
                     tools:layout_editor_absoluteX="8dp">
 
                     <RelativeLayout
@@ -214,6 +216,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
                     tools:layout_editor_absoluteX="8dp">
 
                     <RelativeLayout
@@ -269,6 +272,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
                     tools:layout_editor_absoluteX="8dp">
 
                     <RelativeLayout
@@ -324,6 +328,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
                     tools:layout_editor_absoluteX="8dp">
 
                     <RelativeLayout
@@ -379,6 +384,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
                     tools:layout_editor_absoluteX="8dp">
 
                     <RelativeLayout
@@ -434,6 +440,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     app:cardElevation="0dp"
+                    app:cardCornerRadius="24dp"
                     tools:layout_editor_absoluteX="8dp">
 
                     <RelativeLayout

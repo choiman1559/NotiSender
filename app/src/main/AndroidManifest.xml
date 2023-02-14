@@ -28,7 +28,7 @@
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
 
-    <!-- Additional permissions for acquire notification access permission on android 13+ devices when app is sideloaded -->
+    <!-- Additional permissions for acquire notification access permission on android 13+ devices when app is side-loaded -->
     <uses-permission android:name="android.permission.ACCESS_RESTRICTED_SETTINGS"/>
 
     <application

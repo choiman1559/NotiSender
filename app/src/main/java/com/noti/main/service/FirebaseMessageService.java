@@ -88,7 +88,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static volatile Ringtone lastPlayedRingtone;
     public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
-    private final PushyReceiver.onPushyMessageListener onPushyMessageListener = message -> processReception(message.getData(), FirebaseMessageService.this);
+    private final PushyReceiver.onPushyMessageListener onPushyMessageListener = message -> preProcessReception(message.getData(), FirebaseMessageService.this);
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
             if (lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying())
@@ -110,14 +110,17 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         PushyReceiver.setOnPushyMessageListener(this.onPushyMessageListener);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         manager.acquire();
 
         if (BuildConfig.DEBUG) Log.d(remoteMessage.getMessageId(), remoteMessage.toString());
         Map<String, String> map = remoteMessage.getData();
+        preProcessReception(map, this);
+    }
 
+    @SuppressWarnings("unchecked")
+    public void preProcessReception(Map <String, String> map, Context context) {
         String rawPassword = prefs.getString("EncryptionPassword", "");
         if ("true".equals(map.get("encrypted"))) {
             if (prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
@@ -126,16 +129,16 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     if (uid != null) {
                         JSONObject object = new JSONObject(AESCrypto.decrypt(CompressStringUtil.decompressString(map.get("encryptedData")), AESCrypto.parseAESToken(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)))));
                         Map<String, String> newMap = new ObjectMapper().readValue(object.toString(), Map.class);
-                        processReception(newMap, this);
+                        processReception(newMap, context);
                     }
                 } catch (GeneralSecurityException e) {
                     Handler mHandler = new Handler(Looper.getMainLooper());
-                    mHandler.postDelayed(() -> Toast.makeText(this, "Error occurred while decrypting data!\nPlease check password and try again!", Toast.LENGTH_SHORT).show(), 0);
+                    mHandler.postDelayed(() -> Toast.makeText(context, "Error occurred while decrypting data!\nPlease check password and try again!", Toast.LENGTH_SHORT).show(), 0);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        } else processReception(map, this);
+        } else processReception(map, context);
     }
 
     public void processReception(Map<String, String> map, Context context) {

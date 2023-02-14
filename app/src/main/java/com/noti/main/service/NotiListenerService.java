@@ -212,7 +212,7 @@ public class NotiListenerService extends NotificationListenerService {
         super.onNotificationPosted(sbn);
 
         Log.d("ddd", sbn.getPackageName());
-        if(manager == null) manager = PowerUtils.getInstance(this);
+        if (manager == null) manager = PowerUtils.getInstance(this);
         manager.acquire();
         synchronized (pastNotificationLock) {
             if (sbn.equals(pastNotification)) {
@@ -234,7 +234,7 @@ public class NotiListenerService extends NotificationListenerService {
                     String TITLE = extra.getString(Notification.EXTRA_TITLE) + "";
                     String TEXT = extra.getString(Notification.EXTRA_TEXT) + "";
                     String TEXT_LINES = extra.getString(Notification.EXTRA_TEXT_LINES) + "";
-                    if(!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
+                    if (!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
                     String PackageName = sbn.getPackageName();
 
                     if (PackageName.equals(getPackageName()) && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))) {
@@ -629,20 +629,7 @@ public class NotiListenerService extends NotificationListenerService {
     public static void sendNotification(JSONObject notification, String PackageName, Context context) {
         if (prefs == null)
             prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
-        if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
-            if (!prefs.getString("ApiKey_Pushy", "").equals(""))
-                sendPushyNotification(notification, PackageName, context);
-        } else sendFCMNotification(notification, PackageName, context);
-        System.gc();
-    }
-
-    private static void sendFCMNotification(JSONObject notification, String PackageName, Context context) {
-        final String FCM_API = "https://fcm.googleapis.com/fcm/send";
-        final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
-        final String contentType = "application/json";
-        final String TAG = "NOTIFICATION TAG";
-
-        if(manager == null) manager = PowerUtils.getInstance(context);
+        if (manager == null) manager = PowerUtils.getInstance(context);
         manager.acquire();
 
         if (prefs.getBoolean("UseSplitData", false)) {
@@ -650,7 +637,7 @@ public class NotiListenerService extends NotificationListenerService {
                 String rawData = notification.getString("data");
                 if (rawData.length() > 3072) {
                     String[] arr = rawData.split("(?<=\\G.{1024})");
-                    for(int i = 0;i < arr.length;i++) {
+                    for (int i = 0; i < arr.length; i++) {
                         String str = arr[i];
                         JSONObject obj = new JSONObject();
                         obj.put("type", "split_data");
@@ -660,7 +647,7 @@ public class NotiListenerService extends NotificationListenerService {
                         obj.put("device_name", Build.MANUFACTURER + " " + Build.MODEL);
                         obj.put("device_id", getUniqueID());
                         Log.d("unique_id", "id: " + rawData.hashCode());
-                        sendFCMNotification(notification.put("data", obj), PackageName, context);
+                        sendNotification(notification.put("data", obj), PackageName, context);
                     }
                     return;
                 }
@@ -696,6 +683,19 @@ public class NotiListenerService extends NotificationListenerService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
+            if (!prefs.getString("ApiKey_Pushy", "").equals(""))
+                sendPushyNotification(notification, PackageName, context);
+        } else sendFCMNotification(notification, PackageName, context);
+        System.gc();
+    }
+
+    private static void sendFCMNotification(JSONObject notification, String PackageName, Context context) {
+        final String FCM_API = "https://fcm.googleapis.com/fcm/send";
+        final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
+        final String contentType = "application/json";
+        final String TAG = "NOTIFICATION TAG";
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, FCM_API, notification,
                 response -> {
