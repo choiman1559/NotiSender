@@ -48,6 +48,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     Preference DeleteHistory;
     Preference UpdateChannel;
     Preference SaveLastSelectedItem;
+    Preference NewCardRadius;
 
     @NonNull
     @Override
@@ -85,6 +86,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
         DeleteHistory = findPreference("DeleteHistory");
         UpdateChannel = findPreference("UpdateChannel");
         SaveLastSelectedItem = findPreference("SaveLastSelectedItem");
+        NewCardRadius = findPreference("NewCardRadius");
 
         ArrayList<String> taskerPluginList = new ArrayList<>();
         taskerPluginList.add("net.dinglisch.android.taskerm");
@@ -123,7 +125,13 @@ public class OtherPreference extends PreferenceFragmentCompat {
             return true;
         });
 
-        SaveLastSelectedItem.setVisible(Application.isTablet());
+        if(Application.isTablet()) {
+            SaveLastSelectedItem.setVisible(true);
+            NewCardRadius.setVisible(false);
+        } else {
+            SaveLastSelectedItem.setVisible(false);
+            NewCardRadius.setVisible(true);
+        }
     }
 
     @Override

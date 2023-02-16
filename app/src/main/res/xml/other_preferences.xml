@@ -1,79 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:title="Clear Data">
+    <PreferenceCategory android:title="Clear Data">
         <Preference
             android:key="ResetList"
-            android:title="Reset Black/White list"
-            android:summary="Clear saved black/white list" />
+            android:summary="Clear saved black/white list"
+            android:title="Reset Black/White list" />
         <Preference
             android:key="DeleteHistory"
-            android:title="Delete Notification history"
-            android:summary="Clear Notification send/receive history." />
+            android:summary="Clear Notification send/receive history."
+            android:title="Delete Notification history" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Tasker Plug-in">
+    <PreferenceCategory android:title="Tasker Plug-in">
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_star_settings_24_regular"
             android:key="UseTaskerExtension"
-            android:title="Enable Tasker Plugin"
             android:summary="Activate the Tasker extension plugin"
-            android:icon="@drawable/ic_fluent_star_settings_24_regular"/>
+            android:title="Enable Tasker Plugin" />
         <Preference
+            android:icon="@drawable/ic_info_outline_black_24dp"
             android:key="TaskerCompatibleInfo"
-            android:summary="Show list of Tasker compatible apps"
-            android:icon="@drawable/ic_info_outline_black_24dp"/>
+            android:summary="Show list of Tasker compatible apps" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Others">
-        <ListPreference
-        android:key="UpdateChannel"
-        android:title="Select update channel"
-        android:summary="Now : Automatically specified"
-        android:entries="@array/updateChannel"
-        android:entryValues="@array/updateChannel"
-        android:defaultValue="Automatically specified"
-        android:icon="@drawable/ic_fluent_phone_update_checkmark_24_regular"/>
+    <PreferenceCategory android:title="Interface">
         <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_channel_alert_24_regular"
             android:key="UseToastInstead"
-            android:defaultValue="false"
-            android:title="Use Toast instead of Snackbar"
             android:summary="Using Toast to display messages such as warnings within the app"
-            android:icon="@drawable/ic_fluent_channel_alert_24_regular"/>
+            android:title="Use Toast instead of Snackbar" />
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_tray_item_add_24_regular"
             android:key="SaveLastSelectedItem"
-            android:title="Save previously selected menu"
             android:summary="Note: Saved selections can be cleared by the system"
-            android:icon="@drawable/ic_fluent_tray_item_add_24_regular"/>
+            android:title="Save previously selected menu"
+            android:visible="false" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_fluent_circle_edit_24_regular"
+            android:key="NewCardRadius"
+            android:summary="Apply Android-14 style card view to main menu"
+            android:title="Use rounded corner cards"
+            android:visible="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Others">
+        <ListPreference
+            android:defaultValue="Automatically specified"
+            android:entries="@array/updateChannel"
+            android:entryValues="@array/updateChannel"
+            android:icon="@drawable/ic_fluent_phone_update_checkmark_24_regular"
+            android:key="UpdateChannel"
+            android:summary="Now : Automatically specified"
+            android:title="Select update channel" />
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_alert_snooze_24_regular"
             android:key="UseWiFiSleepPolicy"
-            android:title="WiFi sleep policy compliance (Pushy only)"
             android:summary="Prevents wake lock by blocking the wifi sleep policy."
-            android:icon="@drawable/ic_fluent_alert_snooze_24_regular"/>
+            android:title="WiFi sleep policy compliance (Pushy only)" />
         <ListPreference
-            android:key="uniqueIdMethod"
             android:defaultValue="Globally-Unique ID"
-            android:title="Select method to get device identifiers"
-            android:summary="Choose how to get the unique ID needed to identify your device"
             android:entries="@array/uniqueIdMethod_description"
             android:entryValues="@array/uniqueIdMethod"
-            android:icon="@drawable/ic_fluent_fingerprint_24_regular"/>
+            android:icon="@drawable/ic_fluent_fingerprint_24_regular"
+            android:key="uniqueIdMethod"
+            android:summary="Choose how to get the unique ID needed to identify your device"
+            android:title="Select method to get device identifiers" />
         <Preference
+            android:icon="@drawable/ic_fluent_window_dev_tools_24_regular"
             android:key="TestNotification"
-            android:title="Test notification"
             android:summary="Make sample notification to test"
-            android:icon="@drawable/ic_fluent_window_dev_tools_24_regular"/>
-         <Preference
+            android:title="Test notification" />
+        <Preference
             android:key="HistoryLimit"
-            android:title="Maximum number of History"
-            android:summary="Now : 150 pcs (Default)" />
+            android:summary="Now : 150 pcs (Default)"
+            android:title="Maximum number of History" />
         <Preference
             android:key="DataLimit"
-            android:title="Data length limit (debug purpose)"
-            android:summary="Now : 4092 bytes (Default)" />
+            android:summary="Now : 4092 bytes (Default)"
+            android:title="Data length limit (debug purpose)" />
     </PreferenceCategory>
 </PreferenceScreen>

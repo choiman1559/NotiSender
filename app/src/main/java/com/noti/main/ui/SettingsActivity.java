@@ -73,11 +73,21 @@ public class SettingsActivity extends MonetCompatActivity {
     private SharedPreferences prefs;
     private MaterialCardView selectedCardView;
 
+    MaterialCardView PairPreferences;
+    MaterialCardView AccountPreferences;
+    MaterialCardView SendPreferences;
+    MaterialCardView ReceptionPreferences;
+    MaterialCardView OtherPreferences;
+    MaterialCardView HistoryPreferences;
+    MaterialCardView InfoPreferences;
+
     SharedPreferences.OnSharedPreferenceChangeListener prefsListener = (p, k) -> {
         if (k.equals("serviceToggle")) {
             ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
         } else if (k.equals("UID")) {
             updateProfileImage();
+        } else if (k.equals("NewCardRadius") && !Application.isTablet()) {
+            setCardViewRadius();
         }
     };
 
@@ -105,7 +115,7 @@ public class SettingsActivity extends MonetCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        if(BillingHelper.getInstance(false) == null) {
+        if (BillingHelper.getInstance(false) == null) {
             mBillingHelper = BillingHelper.initialize(this);
         } else mBillingHelper = BillingHelper.getInstance();
 
@@ -128,13 +138,13 @@ public class SettingsActivity extends MonetCompatActivity {
             }
         });
 
-        MaterialCardView PairPreferences = findViewById(R.id.PairPreferences);
-        MaterialCardView AccountPreferences = findViewById(R.id.AccountPreferences);
-        MaterialCardView SendPreferences = findViewById(R.id.SendPreferences);
-        MaterialCardView ReceptionPreferences = findViewById(R.id.ReceptionPreferences);
-        MaterialCardView OtherPreferences = findViewById(R.id.OtherPreferences);
-        MaterialCardView HistoryPreferences = findViewById(R.id.HistoryPreferences);
-        MaterialCardView InfoPreferences = findViewById(R.id.InfoPreferences);
+        PairPreferences = findViewById(R.id.PairPreferences);
+        AccountPreferences = findViewById(R.id.AccountPreferences);
+        SendPreferences = findViewById(R.id.SendPreferences);
+        ReceptionPreferences = findViewById(R.id.ReceptionPreferences);
+        OtherPreferences = findViewById(R.id.OtherPreferences);
+        HistoryPreferences = findViewById(R.id.HistoryPreferences);
+        InfoPreferences = findViewById(R.id.InfoPreferences);
 
         AccountIcon = findViewById(R.id.AccountIcon);
         if (Application.isTablet()) {
@@ -186,7 +196,7 @@ public class SettingsActivity extends MonetCompatActivity {
                     .beginTransaction()
                     .replace(R.id.content_frame, fragment)
                     .commit();
-        }
+        } else setCardViewRadius();
 
         AccountIcon = findViewById(R.id.AccountIcon);
         AccountIcon.setVisibility(View.GONE);
@@ -357,6 +367,22 @@ public class SettingsActivity extends MonetCompatActivity {
     private void setLastSelectedItem(String itemValue) {
         lastSelectedItemStatic = itemValue;
         lastSelectedItem = itemValue;
+    }
+
+    void setCardViewRadius() {
+        final float squareRadius = 0f;
+        final float roundRadius = 24f;
+
+        float radiusInDP = Application.isTablet() || prefs.getBoolean("NewCardRadius", true) ? roundRadius : squareRadius;
+        float radiusInPX =  Math.round(radiusInDP * getResources().getDisplayMetrics().density);
+
+        PairPreferences.setRadius(radiusInPX);
+        AccountPreferences.setRadius(radiusInPX);
+        SendPreferences.setRadius(radiusInPX);
+        ReceptionPreferences.setRadius(radiusInPX);
+        OtherPreferences.setRadius(radiusInPX);
+        HistoryPreferences.setRadius(radiusInPX);
+        InfoPreferences.setRadius(radiusInPX);
     }
 
     void markSelectedMenu(MaterialCardView cardView) {
