@@ -18,14 +18,12 @@ import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
-import com.application.isradeleon.notify.Notify;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -43,8 +41,6 @@ import com.noti.main.ui.OptionActivity;
 import com.noti.main.ui.SettingsActivity;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
-
-import java.util.Date;
 
 import me.pushy.sdk.Pushy;
 
@@ -232,20 +228,6 @@ public class AccountPreference extends PreferenceFragmentCompat {
         return super.onPreferenceTreeClick(preference);
     }
 
-    private Notify.NotifyImportance getImportance() {
-        String value = prefs.getString("importance", "Default");
-        switch (value) {
-            case "Default":
-                return Notify.NotifyImportance.MAX;
-            case "Low":
-                return Notify.NotifyImportance.LOW;
-            case "High":
-                return Notify.NotifyImportance.HIGH;
-            default:
-                return Notify.NotifyImportance.MIN;
-        }
-    }
-
     private void accountTask() {
         if (prefs.getString("UID", "").equals("")) {
             ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -305,6 +287,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
                         ToastHelper.show(mContext, "Success to login Google", "DISMISS", ToastHelper.LENGTH_SHORT);
                         prefs.edit().putString("UID", mAuth.getUid()).apply();
                         prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
+                        SettingsActivity.getAPIKeyFromCloud(mContext);
                         recreate();
                     }
                 });

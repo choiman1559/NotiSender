@@ -1,6 +1,7 @@
 package com.noti.main.ui;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -333,13 +334,20 @@ public class SettingsActivity extends MonetCompatActivity {
             }
         }
 
+        getAPIKeyFromCloud(this);
+        if (mBillingHelper.isSubscribed()) {
+            new RegisterForPushNotificationsAsync(this).execute();
+        }
+    }
+
+    public static void getAPIKeyFromCloud(Activity mContext) {
         FirebaseFirestore mFirebaseFireStore = FirebaseFirestore.getInstance();
         mFirebaseFireStore.collection("ApiKey")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            prefs.edit()
+                            mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).edit()
                                     .putString("Latest_Version_Play", document.getString("Version_Play"))
                                     .putString("ApiKey_FCM", document.getString("FCM"))
                                     .putString("ApiKey_Pushy", document.getString("Pushy"))
@@ -347,17 +355,13 @@ public class SettingsActivity extends MonetCompatActivity {
                                     .apply();
                         }
                     } else {
-                        new MaterialAlertDialogBuilder(this)
+                        new MaterialAlertDialogBuilder(mContext)
                                 .setTitle("Error occurred!")
                                 .setMessage("Error occurred while initializing client token.\nplease check your internet connection and try again.")
-                                .setPositiveButton("OK", (dialog, which) -> finishAndRemoveTask())
+                                .setPositiveButton("OK", (dialog, which) -> mContext.finishAndRemoveTask())
                                 .setCancelable(false);
                     }
                 });
-
-        if (mBillingHelper.isSubscribed()) {
-            new RegisterForPushNotificationsAsync(this).execute();
-        }
     }
 
     private String getLastSelectedItem() {
