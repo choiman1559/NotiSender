@@ -23,6 +23,11 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+    <permission android:name="com.noti.plugin.DATA_TRANSFER_PLUGIN" />
+    <uses-permission android:name="com.noti.plugin.DATA_TRANSFER_PLUGIN" />
+    <permission android:name="com.noti.plugin.DATA_TRANSFER_HOST" />
+    <uses-permission android:name="com.noti.plugin.DATA_TRANSFER_HOST" />
+
     <!-- In builds released on Google Play, Telephony-related permissions are removed. -->
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
@@ -158,6 +163,15 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+
+        <receiver
+            android:name=".receiver.plugin.PluginReceiver"
+            android:exported="true"
+            android:permission="com.noti.plugin.DATA_TRANSFER_HOST">
+            <intent-filter>
+                <action android:name="com.noti.plugin.DATA_TRANSFER_HOST" />
+            </intent-filter>
+        </receiver>
 
         <receiver android:name=".receiver.PushyReceiver" android:exported="false">
             <intent-filter>

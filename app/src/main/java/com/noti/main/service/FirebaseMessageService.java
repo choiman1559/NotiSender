@@ -41,6 +41,8 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
+import com.noti.main.receiver.plugin.PluginActions;
+import com.noti.main.receiver.plugin.PluginConst;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceStatus;
@@ -331,6 +333,29 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         case "pair|find":
                             if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                                 sendFindTaskNotification();
+                            }
+                            break;
+
+                        case "pair|plugin":
+                            if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceivePlugin", false)) {
+                                String actionType = map.get("plugin_action_type");
+                                String actionName = map.get("plugin_action_name");
+                                String pluginPackage = map.get("plugin_package");
+                                String extraData = map.get("plugin_extra_data");
+
+                               if(actionType != null) switch (actionType) {
+                                   case PluginConst.ACTION_REQUEST_REMOTE_ACTION:
+                                       PluginActions.requestAction(context, actionName, pluginPackage, extraData);
+                                       break;
+
+                                   case PluginConst.ACTION_REQUEST_REMOTE_DATA:
+                                       PluginActions.requestData(context, pluginPackage, actionName);
+                                       break;
+
+                                   case PluginConst.ACTION_RESPONSE_REMOTE_DATA:
+                                       PluginActions.responseData(context, pluginPackage, actionName, extraData);
+                                       break;
+                               }
                             }
                             break;
                     }

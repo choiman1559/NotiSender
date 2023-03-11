@@ -66,6 +66,7 @@ public class CustomRegexActivity extends AppCompatActivity {
             }
         });
 
+        mFragments.add(new PluginFragment());
         mFragments.add(new RegexListFragment());
         mFragments.add(new PlaygroundFragment());
 
@@ -85,11 +86,16 @@ public class CustomRegexActivity extends AppCompatActivity {
                 super.onPageSelected(position);
                 switch (position) {
                     case 0:
+                        navigationView.getMenu().findItem(R.id.page_0).setChecked(true);
+                        actionButton.setImageResource(R.drawable.ic_fluent_developer_board_search_24_regular);
+                        break;
+
+                    case 1:
                         navigationView.getMenu().findItem(R.id.page_1).setChecked(true);
                         actionButton.setImageResource(R.drawable.ic_fluent_add_24_regular);
                         break;
 
-                    case 1:
+                    case 2:
                         navigationView.getMenu().findItem(R.id.page_2).setChecked(true);
                         actionButton.setImageResource(R.drawable.ic_fluent_question_24_filled);
                         break;
@@ -99,31 +105,42 @@ public class CustomRegexActivity extends AppCompatActivity {
 
         actionButton.setOnClickListener((v) -> {
             Intent intent = null;
-            if (viewPager.getCurrentItem() == 0) {
-                try {
-                    BillingHelper billingHelper = BillingHelper.getInstance();
-                    if (RegexListFragment.adapter.array.length() < 3 || billingHelper.isSubscribedOrDebugBuild()) {
-                        intent = new Intent(this, AddActionActivity.class);
-                    } else {
-                        BillingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only add up to 3 objects.");
+            switch (viewPager.getCurrentItem()) {
+                case 0:
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-PluginLibrary"));
+                break;
+
+                case 1:
+                    try {
+                        BillingHelper billingHelper = BillingHelper.getInstance();
+                        if (RegexListFragment.adapter.array.length() < 3 || billingHelper.isSubscribedOrDebugBuild()) {
+                            intent = new Intent(this, AddActionActivity.class);
+                        } else {
+                            BillingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only add up to 3 objects.");
+                        }
+                    } catch (IllegalStateException e) {
+                        ToastHelper.show(this, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
                     }
-                } catch (IllegalStateException e) {
-                    ToastHelper.show(this, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
-                }
-            } else {
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/wiki/Custom-Regular-expression-Reference"));
+                    break;
+
+                case 2:
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/wiki/Custom-Regular-expression-Reference"));
+                    break;
             }
             if (intent != null) startAddOptionActivity.launch(intent);
         });
 
         navigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
-                case R.id.page_1:
+                case R.id.page_0:
                     viewPager.setCurrentItem(0);
+
+                case R.id.page_1:
+                    viewPager.setCurrentItem(1);
                     break;
 
                 case R.id.page_2:
-                    viewPager.setCurrentItem(1);
+                    viewPager.setCurrentItem(2);
                     break;
             }
             return true;
@@ -141,7 +158,7 @@ public class CustomRegexActivity extends AppCompatActivity {
 
         @Override
         public boolean containsItem(long itemId) {
-            return (long) mFragments.hashCode() == itemId || (long) mFragments.get(0).hashCode() == itemId || (long) mFragments.get(1).hashCode() == itemId;
+            return (long) mFragments.hashCode() == itemId || (long) mFragments.get(0).hashCode() == itemId || (long) mFragments.get(1).hashCode() == itemId || (long) mFragments.get(2).hashCode() == itemId;
         }
 
         @NonNull
@@ -152,7 +169,7 @@ public class CustomRegexActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return 2;
+            return 3;
         }
 
         @Override

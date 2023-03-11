@@ -241,7 +241,7 @@ public class NotiListenerService extends NotificationListenerService {
                         manager.release();
                         return;
                     } else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
-                        sendSmsNotification(isLogging, PackageName, time);
+                        sendSmsNotification(isLogging, PackageName);
                     } else if (prefs.getBoolean("UseReplyTelecom", false) && getSystemDialerApp(this).equals(PackageName)) {
                         if (prefs.getBoolean("UseCallLog", false))
                             sendTelecomNotification(isLogging, PackageName, time);
@@ -372,13 +372,19 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    private void sendSmsNotification(Boolean isLogging, String PackageName, Date time) {
+    private void sendSmsNotification(Boolean isLogging, String PackageName) {
         Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
         cursor.moveToFirst();
         String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
         String message = cursor.getString(cursor.getColumnIndexOrThrow("body"));
-        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow("date")))));
+        Date time = new Date(Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow("date"))));
         cursor.close();
+
+        sendSmsNotification(isLogging, PackageName, address, message, time);
+    }
+
+    public void sendSmsNotification(Boolean isLogging, String PackageName, String address, String message, Date time) {
+        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
 
         if (isSmsIntervalGaped(address, message, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
@@ -391,7 +397,6 @@ public class NotiListenerService extends NotificationListenerService {
                 notificationBody.put("type", "send|sms");
                 notificationBody.put("message", message);
                 notificationBody.put("address", address);
-                notificationBody.put("package", PackageName);
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
                 notificationBody.put("date", date);

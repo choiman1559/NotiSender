@@ -50,6 +50,36 @@ import java.util.Date;
 import java.util.Map;
 
 public class DataProcess {
+    public static void pushPluginRemoteAction(Context context, String Device_name, String Device_id, String pluginPackage, String actionType, String actionName, String args) {
+        Date date = Calendar.getInstance().getTime();
+        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_ID = getUniqueID();
+        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
+
+        JSONObject notificationHead = new JSONObject();
+        JSONObject notificationBody = new JSONObject();
+        try {
+            notificationBody.put("type", "pair|plugin");
+            notificationBody.put("device_name", DEVICE_NAME);
+            notificationBody.put("device_id", DEVICE_ID);
+            notificationBody.put("send_device_name", Device_name);
+            notificationBody.put("send_device_id", Device_id);
+            notificationBody.put("date", date);
+
+            notificationBody.put("plugin_action_type", actionType);
+            notificationBody.put("plugin_action_name", actionName);
+            notificationBody.put("plugin_extra_data", args);
+            notificationBody.put("plugin_package", pluginPackage);
+
+            notificationHead.put("to", TOPIC);
+            notificationHead.put("priority", "high");
+            notificationHead.put("data", notificationBody);
+        } catch (JSONException e) {
+            Log.e("Noti", "onCreate: " + e.getMessage());
+        }
+        sendNotification(notificationHead, context.getPackageName(), context);
+    }
+
     public static void requestData(Context context, String Device_name, String Device_id, String dataType) {
         Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;

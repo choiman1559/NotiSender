@@ -48,6 +48,7 @@
     <string name="ServiceToggle">Service On/Off</string>
     <string name="edit_item">Edit Items</string>
     <string name="playground">Playground</string>
+    <string name="plugin">Plugin</string>
 
     <string name="media_play">Play</string>
     <string name="media_pause">Pause</string>
