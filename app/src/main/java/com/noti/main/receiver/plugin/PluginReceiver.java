@@ -44,15 +44,15 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_REQUEST_REMOTE_ACTION:
-                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_REQUEST_REMOTE_ACTION, data[2], data[3]);
+                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_REQUEST_REMOTE_ACTION, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[3]);
                         break;
 
                     case PluginConst.ACTION_REQUEST_REMOTE_DATA:
-                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_REQUEST_REMOTE_DATA, data[2], "");
+                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_REQUEST_REMOTE_DATA, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), "");
                         break;
 
                     case PluginConst.ACTION_REQUEST_PREFS:
-                        PluginActions.responsePreferences(context, packageName, data[0]);
+                        PluginActions.responsePreferences(context, packageName, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME));
                         break;
 
                     case PluginConst.ACTION_REQUEST_SERVICE_STATUS:
@@ -68,7 +68,7 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_RESPONSE_REMOTE_DATA:
-                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_RESPONSE_REMOTE_DATA, data[2], data[3]);
+                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_RESPONSE_REMOTE_DATA, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[3]);
                         break;
 
                     default:

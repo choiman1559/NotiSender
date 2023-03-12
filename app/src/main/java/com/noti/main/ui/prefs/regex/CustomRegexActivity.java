@@ -134,6 +134,7 @@ public class CustomRegexActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.page_0:
                     viewPager.setCurrentItem(0);
+                    break;
 
                 case R.id.page_1:
                     viewPager.setCurrentItem(1);

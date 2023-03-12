@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -96,10 +97,16 @@ public class PluginFragment extends Fragment {
                     holder.pluginEnabled.setChecked(pluginPrefs.getBoolean(packageName, false));
                 } else {
                     holder.pluginDescription.setText("Plugin not ready. Please open setting!");
+                    holder.pluginDescription.setTextColor(Color.RED);
                 }
 
                 holder.pluginActionMenuLayout.setVisibility(View.GONE);
-                holder.Parent.setOnClickListener((v) -> holder.pluginActionMenuLayout.setVisibility(holder.pluginActionMenuLayout.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
+                holder.Parent.setOnClickListener((v) -> {
+                    boolean isDetailGone = holder.pluginActionMenuLayout.getVisibility() == View.GONE;
+                    holder.pluginActionMenuLayout.setVisibility(isDetailGone ? View.VISIBLE : View.GONE);
+                    holder.pluginTitle.setSingleLine(!isDetailGone);
+                    holder.pluginDescription.setSingleLine(!isDetailGone);
+                });
                 holder.settingButton.setOnClickListener((v) -> startActivity(new Intent().setComponent(new ComponentName(packageName, data.getString(PluginConst.DATA_KEY_SETTING_ACTIVITY)))));
                 holder.infoButton.setOnClickListener((v) -> startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:" + packageName))));
             } catch (PackageManager.NameNotFoundException e) {

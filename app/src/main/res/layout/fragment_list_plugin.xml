@@ -1,155 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:ignore="HardcodedText">
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/pluginListLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="30dp"
-            android:text="Installed Plugin"
-            android:textColor="@color/ui_accent" />
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/pluginSuggestLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="30dp"
-            android:text="Recommended"
-            android:textColor="@color/ui_accent" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/TelephonyPluginSuggest"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/pluginListLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:backgroundTint="@color/ui_bg_surface"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="3dp">
+            android:orientation="vertical">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="30dp"
+                android:text="Installed Plugin"
+                android:textColor="@color/ui_accent" />
 
-                <ImageView
-                    android:id="@+id/TelephonyPluginSuggestIcon"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="10dp"
-                    android:src="@drawable/ic_fluent_video_person_call_24_regular"
-                    tools:ignore="ContentDescription" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <LinearLayout
-                    android:layout_toEndOf="@id/TelephonyPluginSuggestIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="24dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="NotiSender Telephony Plugin"
-                        android:textAppearance="?attr/textAppearanceTitleLarge"
-                        android:textSize="20sp"
-                        android:singleLine="true"
-                        android:maxEms="20"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Plugin for Call &amp; Message Synchronization"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textSize="15sp"
-                        android:singleLine="true"
-                        android:maxEms="20"/>
-                </LinearLayout>
-            </RelativeLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/LibraryTestPluginSuggest"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/pluginSuggestLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:backgroundTint="@color/ui_bg_surface"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="3dp">
+            android:orientation="vertical">
 
-            <RelativeLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="30dp"
+                android:text="Recommended"
+                android:textColor="@color/ui_accent" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/TelephonyPluginSuggest"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="16dp">
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:theme="@style/Theme.App.Palette"
+                android:backgroundTint="@color/ui_bg_surface"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="3dp">
 
-                <ImageView
-                    android:id="@+id/LibraryTestPluginSuggestIcon"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="10dp"
-                    android:src="@drawable/ic_fluent_window_dev_tools_24_regular"
-                    tools:ignore="ContentDescription" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginVertical="16dp"
+                    android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_toEndOf="@id/LibraryTestPluginSuggestIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="24dp">
+                    <ImageView
+                        android:id="@+id/TelephonyPluginSuggestIcon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="10dp"
+                        android:src="@drawable/ic_fluent_video_person_call_24_regular"
+                        tools:ignore="ContentDescription" />
 
-                    <TextView
-                        android:id="@+id/Title"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="PluginLibrary Showcase"
-                        android:textAppearance="?attr/textAppearanceTitleLarge"
-                        android:textSize="20sp"
-                        android:singleLine="true"
-                        android:maxEms="20"/>
+                        android:layout_marginStart="24dp"
+                        android:layout_toEndOf="@id/TelephonyPluginSuggestIcon"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/taskDescription"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxEms="20"
+                            android:singleLine="true"
+                            android:text="NotiSender Telephony Plugin"
+                            android:textAppearance="?attr/textAppearanceTitleLarge"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxEms="20"
+                            android:singleLine="true"
+                            android:text="Plugin for Call &amp; Message Synchronization"
+                            android:textAppearance="?attr/textAppearanceSubtitle1"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/LibraryTestPluginSuggest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:theme="@style/Theme.App.Palette"
+                android:backgroundTint="@color/ui_bg_surface"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginVertical="16dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/LibraryTestPluginSuggestIcon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="10dp"
+                        android:src="@drawable/ic_fluent_window_dev_tools_24_regular"
+                        tools:ignore="ContentDescription" />
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Example application for plugin development"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textSize="15sp"
-                        android:singleLine="true"
-                        android:maxEms="20"/>
-                </LinearLayout>
-            </RelativeLayout>
-        </com.google.android.material.card.MaterialCardView>
+                        android:layout_marginStart="24dp"
+                        android:layout_toEndOf="@id/LibraryTestPluginSuggestIcon"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxEms="20"
+                            android:singleLine="true"
+                            android:text="PluginLibrary Showcase"
+                            android:textAppearance="?attr/textAppearanceTitleLarge"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/taskDescription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxEms="20"
+                            android:singleLine="true"
+                            android:text="Example application for plugin development"
+                            android:textAppearance="?attr/textAppearanceSubtitle1"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.appcompat.widget.LinearLayoutCompat>
-</androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.core.widget.NestedScrollView>

@@ -1,6 +1,7 @@
 package com.noti.main.receiver.plugin;
 
 public class PluginConst {
+    public static final String RECEIVER_CLASS_NAME = "com.noti.plugin.process.DataReceiver";
     public static final String RECEIVER_ACTION_NAME = "com.noti.plugin.DATA_TRANSFER_PLUGIN";
     public static final String SENDER_ACTION_NAME = "com.noti.plugin.DATA_TRANSFER_HOST";
 

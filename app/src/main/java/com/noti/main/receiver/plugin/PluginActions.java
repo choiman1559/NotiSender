@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.noti.main.Application;
+import com.noti.main.BuildConfig;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,6 +57,7 @@ public class PluginActions {
     public static void responsePreferences(Context context, String packageName, String keyToFind) {
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_PREFS);
+        extras.putString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME, keyToFind);
         extras.putString(PluginConst.DATA_KEY_EXTRA_DATA, context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString(keyToFind, ""));
         sendBroadcast(context, packageName, extras);
     }
@@ -85,8 +87,8 @@ public class PluginActions {
         intent.setAction(PluginConst.RECEIVER_ACTION_NAME);
         intent.putExtras(extras);
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        intent.setComponent(new ComponentName(packageName,"com.noti.plugin.DataReceiver"));
+        intent.setComponent(new ComponentName(packageName,PluginConst.RECEIVER_CLASS_NAME));
         context.sendBroadcast(intent);
-        Log.d("sent", packageName + extras.getString(PluginConst.DATA_KEY_TYPE));
+        if(BuildConfig.DEBUG) Log.d("sent", packageName + " " + extras.getString(PluginConst.DATA_KEY_TYPE));
     }
 }
