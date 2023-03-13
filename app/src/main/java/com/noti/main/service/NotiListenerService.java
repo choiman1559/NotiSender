@@ -13,11 +13,9 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.CallLog;
-import android.provider.Telephony;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
@@ -240,8 +238,6 @@ public class NotiListenerService extends NotificationListenerService {
                     if (PackageName.equals(getPackageName()) && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))) {
                         manager.release();
                         return;
-                    } else if (prefs.getBoolean("UseReplySms", false) && Telephony.Sms.getDefaultSmsPackage(this).equals(PackageName)) {
-                        sendSmsNotification(isLogging, PackageName);
                     } else if (prefs.getBoolean("UseReplyTelecom", false) && getSystemDialerApp(this).equals(PackageName)) {
                         if (prefs.getBoolean("UseCallLog", false))
                             sendTelecomNotification(isLogging, PackageName, time);
@@ -370,17 +366,6 @@ public class NotiListenerService extends NotificationListenerService {
                 sendNotification(notificationHead, PackageName, context);
             }
         }
-    }
-
-    private void sendSmsNotification(Boolean isLogging, String PackageName) {
-        Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
-        cursor.moveToFirst();
-        String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
-        String message = cursor.getString(cursor.getColumnIndexOrThrow("body"));
-        Date time = new Date(Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow("date"))));
-        cursor.close();
-
-        sendSmsNotification(isLogging, PackageName, address, message, time);
     }
 
     public void sendSmsNotification(Boolean isLogging, String PackageName, String address, String message, Date time) {

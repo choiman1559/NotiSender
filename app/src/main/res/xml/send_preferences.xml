@@ -46,23 +46,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Telephony Reply">
-        <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_fluent_chat_24_regular"
-            android:key="UseReplySms"
-            android:summary="need sms permission"
-            android:title="Check SMS from other devices" />
-        <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_fluent_call_inbound_24_regular"
-            android:key="UseReplyTelecom"
-            android:summary="Reply as SMS or opens dialer app"
-            android:title="Send incoming call information" />
-        <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="false"
-            android:key="UseCallLog"
-            android:summary="Use CallLog instead of TelephonyManager (Debug purpose)"
-            android:title="Detect incoming calls by other method" />
+        <Preference
+            android:key="TelephonyMoved"
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:title="Telephony menu moved."
+            android:summary="Telephony Reply is now separated as a plugin.\nCheck the 'Plugins and User Scripts' menu on the Other Options screen." />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Media control">

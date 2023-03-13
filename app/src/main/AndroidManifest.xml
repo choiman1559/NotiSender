@@ -28,11 +28,6 @@
     <permission android:name="com.noti.plugin.DATA_TRANSFER_HOST" />
     <uses-permission android:name="com.noti.plugin.DATA_TRANSFER_HOST" />
 
-    <!-- In builds released on Google Play, Telephony-related permissions are removed. -->
-    <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
-
     <!-- Additional permissions for acquire notification access permission on android 13+ devices when app is side-loaded -->
     <uses-permission android:name="android.permission.ACCESS_RESTRICTED_SETTINGS"/>
 
@@ -50,10 +45,10 @@
 
         <activity android:name=".StartActivity" />
         <activity android:name=".ui.prefs.BlacklistActivity" />
-        <activity android:name=".ui.prefs.regex.CustomRegexActivity"
+        <activity android:name=".ui.prefs.custom.CustomActivity"
             android:theme="@style/Theme.App.Material3"
             android:windowSoftInputMode="adjustNothing|stateHidden"/>
-        <activity android:name=".ui.prefs.regex.AddActionActivity"
+        <activity android:name=".ui.prefs.custom.AddActionActivity"
             android:windowSoftInputMode="adjustNothing|stateHidden"/>
         <activity android:name=".ui.OptionActivity" />
         <activity android:name=".ui.receive.NotificationViewActivity"
@@ -196,13 +191,6 @@
             android:exported="true">
             <intent-filter android:priority="10000">
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name=".receiver.TelecomReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
 

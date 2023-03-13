@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Customizing">
+        <Preference
+            android:key="StartRegexAction"
+            android:title="Plugin &amp; User scripts"
+            android:summary="Custom plugins and regular expressions"
+            android:icon="@drawable/ic_fluent_puzzle_cube_24_regular"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Clear Data">
         <Preference
             android:key="ResetList"

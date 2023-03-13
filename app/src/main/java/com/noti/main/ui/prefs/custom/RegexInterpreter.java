@@ -1,4 +1,4 @@
-package com.noti.main.ui.prefs.regex;
+package com.noti.main.ui.prefs.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

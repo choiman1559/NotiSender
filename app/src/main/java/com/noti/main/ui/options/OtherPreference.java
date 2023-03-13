@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.ui.prefs.custom.CustomActivity;
 import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.ArrayList;
@@ -307,6 +309,10 @@ public class OtherPreference extends PreferenceFragmentCompat {
                         .enableVibration(true)
                         .setAutoCancel(true)
                         .show();
+                break;
+
+            case "StartRegexAction":
+                mContext.startActivity(new Intent(mContext, CustomActivity.class));
                 break;
         }
         return super.onPreferenceTreeClick(preference);

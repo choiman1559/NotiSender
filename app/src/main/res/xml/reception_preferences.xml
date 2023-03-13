@@ -47,14 +47,6 @@
             android:summary="Now : 5 min (Default)" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Customizing">
-        <Preference
-            android:key="StartRegexAction"
-            android:title="Regex Customizing"
-            android:summary="Customizing reception options via regular expressions"
-            android:icon="@drawable/ic_fluent_puzzle_cube_24_regular"/>
-    </PreferenceCategory>
-
     <PreferenceCategory
         android:title="Find my device">
         <com.noti.main.utils.ui.SwitchedPreference

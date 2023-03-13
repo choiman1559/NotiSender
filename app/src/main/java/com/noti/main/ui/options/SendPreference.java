@@ -2,13 +2,10 @@ package com.noti.main.ui.options;
 
 import static android.content.Context.MODE_PRIVATE;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -19,8 +16,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
@@ -37,7 +32,6 @@ import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.utils.AESCrypto;
-import com.noti.main.utils.DetectAppSource;
 
 public class SendPreference extends PreferenceFragmentCompat {
 
@@ -60,11 +54,6 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference IntervalType;
     Preference IntervalInfo;
     Preference IntervalQueryGCTrigger;
-
-    Preference UseReplySms;
-    Preference UseReplyTelecom;
-    Preference UseCallLog;
-
     Preference UseBannedOption;
     Preference BannedWords;
 
@@ -80,67 +69,6 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference UseAlbumArt;
     Preference UseFcmWhenSendImage;
     Preference FcmWhenSendImageInfo;
-
-    ActivityResultLauncher<String> startCallLogPermit = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-        if(!isGranted) {
-            int SourceCode = DetectAppSource.detectSource(mContext);
-            if(SourceCode == 1 || SourceCode == 2) {
-                ToastHelper.show(mContext, "require read phone state permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-            } else if (SourceCode == 3) {
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
-                builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
-                builder.setNegativeButton("Close", (d, w) -> { }).show();
-            } else {
-                ToastHelper.show(mContext, "Error while getting SHA-1 hash!", "OK",ToastHelper.LENGTH_SHORT);
-            }
-
-            ((SwitchPreference) UseCallLog).setChecked(false);
-        }
-    });
-
-    ActivityResultLauncher<String[]> startReplyTelecomPermit = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-        for(Boolean isGranted : result.values()) {
-            if(!isGranted) {
-                int SourceCode = DetectAppSource.detectSource(mContext);
-                if(SourceCode == 1 || SourceCode == 2) {
-                    ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-                } else if (SourceCode == 3) {
-                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                    builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
-                    builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
-                    builder.setNegativeButton("Close", (d, w) -> { }).show();
-                } else {
-                    ToastHelper.show(mContext, "require read call log permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-                }
-
-                ((SwitchPreference) UseReplyTelecom).setChecked(false);
-                UseCallLog.setVisible(false);
-                break;
-            }
-        }
-    });
-
-    ActivityResultLauncher<String[]> startSmsRwPermit = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-        for(Boolean isGranted : result.values()) {
-            if(!isGranted) {
-                int SourceCode = DetectAppSource.detectSource(mContext);
-                if(SourceCode == 1 || SourceCode == 2) {
-                    ToastHelper.show(mContext, "require read sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-                } else if (SourceCode == 3) {
-                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                    builder.setTitle("Information").setMessage(getString(R.string.Dialog_rather_github));
-                    builder.setPositiveButton("Go to github", (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender/releases/latest"))));
-                    builder.setNegativeButton("Close", (d, w) -> { }).show();
-                } else {
-                    ToastHelper.show(mContext, "require read sms permission!", "DISMISS", ToastHelper.LENGTH_SHORT);
-                }
-
-                ((SwitchPreference) UseReplySms).setChecked(false);
-                break;
-            }
-        }
-    });
 
     @NonNull
     @Override
@@ -178,10 +106,6 @@ public class SendPreference extends PreferenceFragmentCompat {
         IconEnabled = findPreference("SendIcon");
         IconWarning = findPreference("IconWaring");
         IconUseNotification = findPreference("IconUseNotification");
-
-        UseReplySms = findPreference("UseReplySms");
-        UseReplyTelecom = findPreference("UseReplyTelecom");
-        UseCallLog = findPreference("UseCallLog");
 
         UseInterval = findPreference("UseInterval");
         IntervalTime = findPreference("IntervalTime");
@@ -293,12 +217,6 @@ public class SendPreference extends PreferenceFragmentCompat {
                 return true;
             });
         }
-
-        UseCallLog.setVisible(prefs.getBoolean("UseReplyTelecom", false));
-        UseReplyTelecom.setOnPreferenceChangeListener((preference, newValue) -> {
-            UseCallLog.setVisible((boolean) newValue);
-            return true;
-        });
 
         boolean isUseMediaSync = prefs.getBoolean("UseMediaSync", false);
         UseFcmWhenSendImage.setVisible(isUseMediaSync);
@@ -480,34 +398,6 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setNegativeButton("Cancel", (d, w) -> {
                 });
                 dialog.show();
-                break;
-
-            case "UseReplySms":
-                SwitchPreference UseSMS = (SwitchPreference) UseReplySms;
-                if (UseSMS.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (mContext.checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED
-                            || mContext.checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-                        startSmsRwPermit.launch(new String[]{Manifest.permission.READ_SMS, Manifest.permission.SEND_SMS});
-                    }
-                }
-                break;
-
-            case "UseReplyTelecom":
-                SwitchPreference UseTelecom = (SwitchPreference) UseReplyTelecom;
-                if (UseTelecom.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED || mContext.checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
-                        startReplyTelecomPermit.launch(new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_CALL_LOG});
-                    }
-                }
-                break;
-
-            case "UseCallLog":
-                SwitchPreference CallLogSwitch = (SwitchPreference) UseCallLog;
-                if(CallLogSwitch.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if(mContext.checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
-                        startCallLogPermit.launch(Manifest.permission.READ_CALL_LOG);
-                    }
-                }
                 break;
 
             case "DefaultTitle":

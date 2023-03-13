@@ -1,7 +1,6 @@
-package com.noti.main.ui.prefs.regex;
+package com.noti.main.ui.prefs.custom;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;

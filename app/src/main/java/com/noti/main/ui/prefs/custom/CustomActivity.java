@@ -1,4 +1,4 @@
-package com.noti.main.ui.prefs.regex;
+package com.noti.main.ui.prefs.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -35,7 +35,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomRegexActivity extends AppCompatActivity {
+public class CustomActivity extends AppCompatActivity {
 
     private static final List<Fragment> mFragments = new ArrayList<>();
     public static ActivityResultLauncher<Intent> startAddOptionActivity;

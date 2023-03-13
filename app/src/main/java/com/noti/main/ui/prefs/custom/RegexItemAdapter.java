@@ -1,4 +1,4 @@
-package com.noti.main.ui.prefs.regex;
+package com.noti.main.ui.prefs.custom;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -88,7 +88,7 @@ public class RegexItemAdapter extends RecyclerView.Adapter<RegexItemAdapter.Rege
         holder.Parent.setOnClickListener((v) -> {
             Intent intent = new Intent(mContext, AddActionActivity.class);
             intent.putExtra("index", position);
-            CustomRegexActivity.startAddOptionActivity.launch(intent);
+            CustomActivity.startAddOptionActivity.launch(intent);
         });
     }
 

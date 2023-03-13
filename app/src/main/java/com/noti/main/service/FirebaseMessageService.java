@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Vibrator;
 import android.provider.MediaStore;
-import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -49,7 +48,7 @@ import com.noti.main.service.pair.PairDeviceStatus;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
 import com.noti.main.service.pair.PairingUtils;
-import com.noti.main.ui.prefs.regex.RegexInterpreter;
+import com.noti.main.ui.prefs.custom.RegexInterpreter;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
 import com.noti.main.ui.receive.TelecomViewActivity;
@@ -441,9 +440,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     protected void startNewRemoteSms(Map<String, String> map) {
         if (map.get("address") != null && map.get("message") != null) {
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(map.get("address"), null, map.get("message"), null, null);
-            new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Reply message by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+            PluginActions.requestAction(this, "com.noti.plugin.telephony", "send_sms",  map.get("address") + "|" + map.get("messgae") + "|" + map.get("device_name"));
         }
     }
 
