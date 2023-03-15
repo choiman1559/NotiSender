@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -29,16 +28,18 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
+import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.receiver.plugin.PluginReceiver;
+import com.noti.main.updater.tasks.Version;
 
 import java.util.List;
 
 public class PluginFragment extends Fragment {
     AppCompatActivity mContext;
-    SharedPreferences pluginPrefs;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -58,7 +59,6 @@ public class PluginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         PackageManager packageManager = mContext.getPackageManager();
-        pluginPrefs = mContext.getSharedPreferences("com.noti.main_plugin", Context.MODE_PRIVATE);
         mContext.findViewById(R.id.progress).setVisibility(View.GONE);
 
         LinearLayoutCompat pluginListLayout = view.findViewById(R.id.pluginListLayout);
@@ -84,22 +84,35 @@ public class PluginFragment extends Fragment {
         PluginReceiver.receivePluginInformation = data -> {
             CoordinatorLayout layout = (CoordinatorLayout) View.inflate(mContext, R.layout.cardview_plugin_item, null);
             PluginAppHolder holder = new PluginAppHolder(layout);
-            String packageName = data.getString(PluginConst.DATA_KEY_PLUGIN_PACKAGE_NAME);
+            String packageName = data.getString(PluginConst.PLUGIN_PACKAGE_NAME);
+            PluginPrefs pluginPrefs = new PluginPrefs(mContext, packageName);
+            pluginPrefs.setRequireSensitiveAPI(data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API, false)).apply();
 
             try {
+                String title = data.getString(PluginConst.PLUGIN_TITLE);
+                Version requireVersion = new Version(data.getString(PluginConst.PLUGIN_REQUIRE_VERSION));
+                Version currentVersion = new Version(BuildConfig.VERSION_NAME);
+
                 PackageInfo packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_META_DATA);
-                holder.pluginTitle.setText(packageInfo.applicationInfo.loadLabel(packageManager));
+                holder.pluginTitle.setText(title.isEmpty() ? packageInfo.applicationInfo.loadLabel(packageManager) : title);
                 holder.pluginIcon.setImageDrawable(packageInfo.applicationInfo.loadIcon(mContext.getPackageManager()));
 
-                if(data.getBoolean(PluginConst.DATA_KEY_PLUGIN_READY)) {
-                    holder.pluginDescription.setText(data.getString(PluginConst.DATA_KEY_PLUGIN_DESCRIPTION));
-                    holder.pluginEnabled.setEnabled(true);
-                    holder.pluginEnabled.setChecked(pluginPrefs.getBoolean(packageName, false));
+                if(currentVersion.compareTo(requireVersion) >= 0) {
+                    if(data.getBoolean(PluginConst.PLUGIN_READY)) {
+                        String description = data.getString(PluginConst.PLUGIN_DESCRIPTION);
+                        holder.pluginDescription.setText(description.isEmpty() ? "Description is not available." : description);
+                        holder.pluginEnabled.setEnabled(true);
+                        holder.pluginEnabled.setChecked(pluginPrefs.isPluginEnabled());
+                    } else {
+                        holder.pluginDescription.setText("Plugin not ready. Please open setting!");
+                        holder.pluginDescription.setTextColor(Color.RED);
+                    }
                 } else {
-                    holder.pluginDescription.setText("Plugin not ready. Please open setting!");
+                    holder.pluginDescription.setText("Not compatible with this version of NotiSender");
                     holder.pluginDescription.setTextColor(Color.RED);
                 }
 
+                holder.pluginEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> pluginPrefs.setPluginEnabled(isChecked).apply());
                 holder.pluginActionMenuLayout.setVisibility(View.GONE);
                 holder.Parent.setOnClickListener((v) -> {
                     boolean isDetailGone = holder.pluginActionMenuLayout.getVisibility() == View.GONE;
@@ -107,7 +120,7 @@ public class PluginFragment extends Fragment {
                     holder.pluginTitle.setSingleLine(!isDetailGone);
                     holder.pluginDescription.setSingleLine(!isDetailGone);
                 });
-                holder.settingButton.setOnClickListener((v) -> startActivity(new Intent().setComponent(new ComponentName(packageName, data.getString(PluginConst.DATA_KEY_SETTING_ACTIVITY)))));
+                holder.settingButton.setOnClickListener((v) -> startActivity(new Intent().setComponent(new ComponentName(packageName, data.getString(PluginConst.PLUGIN_SETTING_ACTIVITY)))));
                 holder.infoButton.setOnClickListener((v) -> startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:" + packageName))));
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();

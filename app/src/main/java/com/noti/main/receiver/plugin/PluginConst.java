@@ -5,15 +5,19 @@ public class PluginConst {
     public static final String RECEIVER_ACTION_NAME = "com.noti.plugin.DATA_TRANSFER_PLUGIN";
     public static final String SENDER_ACTION_NAME = "com.noti.plugin.DATA_TRANSFER_HOST";
 
+    public static final String PLUGIN_TITLE = "title";
+    public static final String PLUGIN_DESCRIPTION = "description";
+    public static final String PLUGIN_PACKAGE_NAME = "package_name";
+    public static final String PLUGIN_READY = "is_plugin_ready";
+    public static final String PLUGIN_SETTING_ACTIVITY = "setting_activity";
+    public static final String PLUGIN_REQUIRE_SENSITIVE_API = "require_sensitive_api";
+    public static final String PLUGIN_REQUIRE_VERSION = "require_host_version";
+
     public static final String DATA_KEY_TYPE = "type";
     public static final String DATA_KEY_IS_SERVICE_RUNNING = "is_running";
     public static final String DATA_KEY_DEVICE_LIST = "device_list";
     public static final String DATA_KEY_EXTRA_DATA = "extra_data";
     public static final String DATA_KEY_REMOTE_ACTION_NAME = "remote_action_name";
-    public static final String DATA_KEY_PLUGIN_PACKAGE_NAME = "package_name";
-    public static final String DATA_KEY_PLUGIN_DESCRIPTION = "description";
-    public static final String DATA_KEY_PLUGIN_READY = "is_plugin_ready";
-    public static final String DATA_KEY_SETTING_ACTIVITY = "setting_activity";
 
     public static final String ACTION_REQUEST_INFO = "request_plugin_info";
     public static final String ACTION_REQUEST_DEVICE_LIST = "request_device_list";

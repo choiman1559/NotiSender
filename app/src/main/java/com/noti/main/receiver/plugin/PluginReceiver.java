@@ -3,7 +3,6 @@ package com.noti.main.receiver.plugin;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.noti.main.BuildConfig;
@@ -14,7 +13,6 @@ import java.util.Calendar;
 
 public class PluginReceiver extends BroadcastReceiver {
     public static onReceivePluginInformation receivePluginInformation;
-    public static SharedPreferences pluginPrefs;
 
     public interface onReceivePluginInformation {
         void onReceive(Bundle data);
@@ -22,22 +20,19 @@ public class PluginReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(pluginPrefs == null) {
-            pluginPrefs = context.getSharedPreferences("com.noti.main_plugin", Context.MODE_PRIVATE);
-        }
-
         if (intent.getAction().equals(PluginConst.SENDER_ACTION_NAME)) {
             Bundle rawData = intent.getExtras();
             String dataType = rawData.getString(PluginConst.DATA_KEY_TYPE);
-            String packageName = rawData.getString(PluginConst.DATA_KEY_PLUGIN_PACKAGE_NAME);
+            String packageName = rawData.getString(PluginConst.PLUGIN_PACKAGE_NAME);
             String extra_data = rawData.getString(PluginConst.DATA_KEY_EXTRA_DATA);
             String[] data = extra_data == null ? new String[0] : extra_data.split("\\|");
+            PluginPrefs pluginPrefs = new PluginPrefs(context, packageName);
 
             if (dataType.equals(PluginConst.ACTION_RESPONSE_INFO)) {
                 if (receivePluginInformation != null) {
                     receivePluginInformation.onReceive(rawData);
                 }
-            } else if(pluginPrefs.getBoolean(packageName, false)) {
+            } else if(pluginPrefs.isPluginEnabled()) {
                 switch (dataType) {
                     case PluginConst.ACTION_REQUEST_DEVICE_LIST:
                         PluginActions.responseDeviceList(context, packageName);
@@ -52,7 +47,9 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_REQUEST_PREFS:
-                        PluginActions.responsePreferences(context, packageName, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME));
+                        if(pluginPrefs.isRequireSensitiveAPI()) {
+                            PluginActions.responsePreferences(context, packageName, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME));
+                        } else PluginActions.pushException(context, packageName, new IllegalAccessException("ACTION_REQUEST_PREFS requires sensitiveAPI=true" + packageName));
                         break;
 
                     case PluginConst.ACTION_REQUEST_SERVICE_STATUS:
