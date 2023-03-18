@@ -17,7 +17,9 @@ public class PluginConst {
     public static final String DATA_KEY_IS_SERVICE_RUNNING = "is_running";
     public static final String DATA_KEY_DEVICE_LIST = "device_list";
     public static final String DATA_KEY_EXTRA_DATA = "extra_data";
+    public static final String DATA_KEY_EXCEPTION = "exception";
     public static final String DATA_KEY_REMOTE_ACTION_NAME = "remote_action_name";
+    public static final String DATA_KEY_REMOTE_TARGET_DEVICE = "remote_target_device";
 
     public static final String ACTION_REQUEST_INFO = "request_plugin_info";
     public static final String ACTION_REQUEST_DEVICE_LIST = "request_device_list";

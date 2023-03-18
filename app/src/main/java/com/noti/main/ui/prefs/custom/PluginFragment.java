@@ -78,7 +78,7 @@ public class PluginFragment extends Fragment {
         }
 
         TelephonyPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-TelephonyPlugin"))));
-        LibraryTestPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-PluginLibrary"))));
+        LibraryTestPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-PluginShowcase"))));
 
         loadPluginList(packageManager);
         PluginReceiver.receivePluginInformation = data -> {

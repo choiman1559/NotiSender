@@ -39,7 +39,7 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_REQUEST_REMOTE_ACTION:
-                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_REQUEST_REMOTE_ACTION, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[3]);
+                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_REQUEST_REMOTE_ACTION, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[2]);
                         break;
 
                     case PluginConst.ACTION_REQUEST_REMOTE_DATA:
@@ -65,7 +65,7 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_RESPONSE_REMOTE_DATA:
-                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_RESPONSE_REMOTE_DATA, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[3]);
+                        DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_RESPONSE_REMOTE_DATA, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[2]);
                         break;
 
                     default:

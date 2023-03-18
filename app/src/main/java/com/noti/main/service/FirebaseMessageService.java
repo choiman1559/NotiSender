@@ -341,14 +341,15 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                 String actionName = map.get("plugin_action_name");
                                 String pluginPackage = map.get("plugin_package");
                                 String extraData = map.get("plugin_extra_data");
+                                String targetDevice = map.get("device_name") + "|" + map.get("device_id");
 
                                if(actionType != null) switch (actionType) {
                                    case PluginConst.ACTION_REQUEST_REMOTE_ACTION:
-                                       PluginActions.requestAction(context, actionName, pluginPackage, extraData);
+                                       PluginActions.requestAction(context, targetDevice, pluginPackage, actionName, extraData);
                                        break;
 
                                    case PluginConst.ACTION_REQUEST_REMOTE_DATA:
-                                       PluginActions.requestData(context, pluginPackage, actionName);
+                                       PluginActions.requestData(context, targetDevice, pluginPackage, actionName);
                                        break;
 
                                    case PluginConst.ACTION_RESPONSE_REMOTE_DATA:
@@ -440,7 +441,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     protected void startNewRemoteSms(Map<String, String> map) {
         if (map.get("address") != null && map.get("message") != null) {
-            PluginActions.requestAction(this, "com.noti.plugin.telephony", "send_sms",  map.get("address") + "|" + map.get("messgae") + "|" + map.get("device_name"));
+            PluginActions.requestAction(this, map.get("device_name") + "|" + map.get("device_id"),"com.noti.plugin.telephony", "send_sms",  map.get("address") + "|" + map.get("message") + "|" + map.get("device_name"));
         }
     }
 

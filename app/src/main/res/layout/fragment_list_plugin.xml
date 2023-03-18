@@ -25,9 +25,6 @@
                 android:layout_marginTop="30dp"
                 android:text="Installed Plugin"
                 android:textColor="@color/ui_accent" />
-
-
-
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat

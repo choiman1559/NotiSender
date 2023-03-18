@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -23,18 +24,20 @@ public class PluginActions {
         sendBroadcast(context, packageName, extras);
     }
 
-    public static void requestAction(Context context, String packageName, String type, String extra) {
+    public static void requestAction(Context context, String device, String packageName, String type, String extra) {
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_REQUEST_REMOTE_ACTION);
         extras.putString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME, type);
         extras.putString(PluginConst.DATA_KEY_EXTRA_DATA, extra);
+        extras.putString(PluginConst.DATA_KEY_REMOTE_TARGET_DEVICE, device);
         sendBroadcast(context, packageName, extras);
     }
 
-    public static void requestData(Context context, String packageName, String type) {
+    public static void requestData(Context context, String device, String packageName, String type) {
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_REQUEST_REMOTE_DATA);
         extras.putString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME, type);
+        extras.putString(PluginConst.DATA_KEY_REMOTE_TARGET_DEVICE, device);
         sendBroadcast(context, packageName, extras);
     }
 
@@ -55,10 +58,37 @@ public class PluginActions {
     }
 
     public static void responsePreferences(Context context, String packageName, String keyToFind) {
+        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
+
+        if (!prefs.contains(keyToFind)) {
+            PluginActions.pushException(context, packageName, new Exception("Preference not found: " + keyToFind));
+            return;
+        }
+
+        if (keyToFind.startsWith("com.noti.main_preferences")) {
+            PluginActions.pushException(context, packageName, new Exception("Preference not allowed due to data security reason: " + keyToFind));
+            return;
+        }
+
+        String[] notAllowedPrefs = {"FirebaseIIDPrefix", "GUIDPrefix", "MacIDPrefix", "AndroidIDPrefix", "ApiKey_Billing", "ApiKey_FCM", "ApiKey_Pushy", "UID", "EncryptionPassword"};
+        for (String notAllowedPref : notAllowedPrefs) {
+            if (notAllowedPref.equalsIgnoreCase(keyToFind)) {
+                PluginActions.pushException(context, packageName, new Exception("Preference not allowed due to data security reason: " + keyToFind));
+                return;
+            }
+        }
+
+        String data;
+        try {
+            data = prefs.getString(keyToFind, "");
+        } catch (ClassCastException e) {
+            data = prefs.getBoolean(keyToFind, false) + "";
+        }
+
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_PREFS);
         extras.putString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME, keyToFind);
-        extras.putString(PluginConst.DATA_KEY_EXTRA_DATA, context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString(keyToFind, ""));
+        extras.putString(PluginConst.DATA_KEY_EXTRA_DATA, data);
         sendBroadcast(context, packageName, extras);
     }
 
@@ -71,14 +101,14 @@ public class PluginActions {
 
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_SERVICE_STATUS);
-        extras.putBoolean(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, isRunning);
+        extras.putString(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, isRunning + "");
         sendBroadcast(context, packageName, extras);
     }
 
     public static void pushException(Context context, String packageName, Exception exception) {
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_PUSH_EXCEPTION);
-        extras.putSerializable(PluginConst.DATA_KEY_EXTRA_DATA, exception);
+        extras.putSerializable(PluginConst.DATA_KEY_EXCEPTION, exception);
         sendBroadcast(context, packageName, extras);
     }
 
@@ -87,8 +117,9 @@ public class PluginActions {
         intent.setAction(PluginConst.RECEIVER_ACTION_NAME);
         intent.putExtras(extras);
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        intent.setComponent(new ComponentName(packageName,PluginConst.RECEIVER_CLASS_NAME));
+        intent.setComponent(new ComponentName(packageName, PluginConst.RECEIVER_CLASS_NAME));
         context.sendBroadcast(intent);
-        if(BuildConfig.DEBUG) Log.d("sent", packageName + " " + extras.getString(PluginConst.DATA_KEY_TYPE));
+        if (BuildConfig.DEBUG)
+            Log.d("sent", packageName + " " + extras.getString(PluginConst.DATA_KEY_TYPE));
     }
 }
