@@ -9,6 +9,9 @@
 
 Send notifications to other android devices easily 
 
+**Plugin for NotiSender is now Available!**<br>
+Check full library document at [here](https://github.com/choiman1559/NotiSender-PluginLibrary)
+
 ## Awards
 
 **Bronze Prize Winner of the 16th Open Software Competition in Korea**
