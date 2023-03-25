@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -51,13 +52,17 @@ public class RegexListFragment extends Fragment {
         regexPrefs = mContext.getSharedPreferences("com.noti.main_regex", Context.MODE_PRIVATE);
         ProgressBar progress = mContext.findViewById(R.id.progress);
         RecyclerView listView = view.findViewById(R.id.listView);
+        LinearLayoutCompat itemNotAvailableLayout = view.findViewById(R.id.itemNotAvailableLayout);
 
         progress.setVisibility(View.GONE);
         mContext.runOnUiThread(() -> {
             JSONArray array = new JSONArray();
             try {
                 String data = regexPrefs.getString("RegexData", "");
-                if(!data.isEmpty()) array = new JSONArray(data);
+                if(!data.isEmpty()) {
+                    array = new JSONArray(data);
+                    if(array.length() > 0) itemNotAvailableLayout.setVisibility(View.GONE);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }

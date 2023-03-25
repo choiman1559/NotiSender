@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
@@ -27,10 +26,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
-import com.noti.main.ui.prefs.custom.CustomActivity;
+import com.noti.main.ui.prefs.custom.CustomFragment;
 import com.noti.main.utils.ui.ToastHelper;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import me.pushy.sdk.Pushy;
@@ -41,8 +39,6 @@ public class OtherPreference extends PreferenceFragmentCompat {
     MonetCompat monet;
     Activity mContext;
 
-    Preference UseTaskerExtension;
-    Preference TaskerCompatibleInfo;
     Preference UseWiFiSleepPolicy;
     Preference HistoryLimit;
     Preference DataLimit;
@@ -79,8 +75,6 @@ public class OtherPreference extends PreferenceFragmentCompat {
         setPreferencesFromResource(R.xml.other_preferences, rootKey);
         prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
 
-        UseTaskerExtension = findPreference("UseTaskerExtension");
-        TaskerCompatibleInfo = findPreference("TaskerCompatibleInfo");
         UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
         HistoryLimit = findPreference("HistoryLimit");
         DataLimit = findPreference("DataLimit");
@@ -89,26 +83,6 @@ public class OtherPreference extends PreferenceFragmentCompat {
         UpdateChannel = findPreference("UpdateChannel");
         SaveLastSelectedItem = findPreference("SaveLastSelectedItem");
         NewCardRadius = findPreference("NewCardRadius");
-
-        ArrayList<String> taskerPluginList = new ArrayList<>();
-        taskerPluginList.add("net.dinglisch.android.taskerm");
-        taskerPluginList.add("com.llamalab.automate");
-        taskerPluginList.add("com.twofortyfouram.locale.x");
-        taskerPluginList.add("com.arlosoft.macrodroid");
-        int packageCount = 0;
-
-        for (String packageName : taskerPluginList) {
-            try {
-                mContext.getPackageManager().getPackageInfo(packageName, 0);
-            } catch (PackageManager.NameNotFoundException e) {
-                packageCount++;
-            }
-        }
-
-        if (packageCount == taskerPluginList.size()) {
-            UseTaskerExtension.setEnabled(false);
-            UseTaskerExtension.setSummary("This option requires the Tasker-compatible app.");
-        }
 
         UseWiFiSleepPolicy.setOnPreferenceChangeListener((p, n) -> {
             Pushy.toggleWifiPolicyCompliance((boolean) n, mContext);
@@ -269,16 +243,6 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.show();
                 break;
 
-            case "TaskerCompatibleInfo":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                dialog.setTitle("Tasker compatible apps");
-                dialog.setMessage(getString(R.string.Dialog_Tasker_compatible));
-                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-                dialog.setPositiveButton("Close", (d, w) -> {
-                });
-                dialog.show();
-                break;
-
             case "TestNotification":
                 Notify.NotifyImportance importance;
                 String value = prefs.getString("importance", "Default");
@@ -312,7 +276,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 break;
 
             case "StartRegexAction":
-                mContext.startActivity(new Intent(mContext, CustomActivity.class));
+                mContext.startActivity(new Intent(mContext, CustomFragment.class));
                 break;
         }
         return super.onPreferenceTreeClick(preference);

@@ -14,6 +14,7 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -121,9 +122,9 @@ public class HistoryFragment extends Fragment {
         }
 
         public static HistoryInnerFragment newInstance(int mode) {
-            HistoryInnerFragment historyInneFragment = new HistoryInnerFragment();
-            historyInneFragment.mode = mode;
-            return historyInneFragment;
+            HistoryInnerFragment historyInnerFragment = new HistoryInnerFragment();
+            historyInnerFragment.mode = mode;
+            return historyInnerFragment;
         }
 
         @Override
@@ -140,7 +141,7 @@ public class HistoryFragment extends Fragment {
             SharedPreferences prefs = mContext.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
             ProgressBar progress = mContext.findViewById(R.id.progress);
             RecyclerView listView = view.findViewById(R.id.listView);
-            LinearLayout layout = view.findViewById(R.id.noneLayout);
+            LinearLayoutCompat layout = view.findViewById(R.id.noneLayout);
 
             String list_data = prefs.getString(mode == 0 ? "sendLogs" : "receivedLogs", "");
             if (!list_data.equals("")) {

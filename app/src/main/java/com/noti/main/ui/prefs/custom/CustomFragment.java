@@ -1,6 +1,7 @@
 package com.noti.main.ui.prefs.custom;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,12 +9,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -23,8 +26,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
@@ -35,20 +38,32 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomActivity extends AppCompatActivity {
+public class CustomFragment extends Fragment {
 
     private static final List<Fragment> mFragments = new ArrayList<>();
     public static ActivityResultLauncher<Intent> startAddOptionActivity;
     SharedPreferences regexPrefs;
+    Activity mContext;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_regex, container, false);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof Activity) mContext = (Activity) context;
+        else throw new RuntimeException("Can't get Activity instanceof Context!");
+    }
 
     @SuppressLint({"NonConstantResourceId", "NotifyDataSetChanged"})
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DynamicColors.applyToActivityIfAvailable(this);
-        setContentView(R.layout.activity_regex);
 
-        regexPrefs = getSharedPreferences("com.noti.main_regex", Context.MODE_PRIVATE);
+        regexPrefs = mContext.getSharedPreferences("com.noti.main_regex", Context.MODE_PRIVATE);
         startAddOptionActivity = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             try {
                 Intent data = result.getData();
@@ -56,9 +71,9 @@ public class CustomActivity extends AppCompatActivity {
                     RegexListFragment.adapter.array = new JSONArray(regexPrefs.getString("RegexData", ""));
                     int index = data.getIntExtra("index", -1);
                     if (index > -1)
-                        new Handler(getMainLooper()).post(() -> RegexListFragment.adapter.notifyItemChanged(index));
+                        new Handler(mContext.getMainLooper()).post(() -> RegexListFragment.adapter.notifyItemChanged(index));
                     else
-                        new Handler(getMainLooper()).post(() -> RegexListFragment.adapter.notifyDataSetChanged());
+                        new Handler(mContext.getMainLooper()).post(() -> RegexListFragment.adapter.notifyDataSetChanged());
                     Log.d("ddd", index + "");
                 }
             } catch (JSONException e) {
@@ -70,11 +85,11 @@ public class CustomActivity extends AppCompatActivity {
         mFragments.add(new RegexListFragment());
         mFragments.add(new PlaygroundFragment());
 
-        BottomNavigationView navigationView = findViewById(R.id.bottom_navigation);
-        ViewPager2 viewPager = findViewById(R.id.viewpager);
-        FloatingActionButton actionButton = findViewById(R.id.Button_Action);
+        BottomNavigationView navigationView = view.findViewById(R.id.bottom_navigation);
+        ViewPager2 viewPager = view.findViewById(R.id.viewpager);
+        FloatingActionButton actionButton = view.findViewById(R.id.Button_Action);
 
-        FragmentStateAdapter adapter = new TabsPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        FragmentStateAdapter adapter = new TabsPagerAdapter(getChildFragmentManager(), getLifecycle());
         adapter.saveState();
 
         viewPager.setSaveEnabled(true);
@@ -114,12 +129,12 @@ public class CustomActivity extends AppCompatActivity {
                     try {
                         BillingHelper billingHelper = BillingHelper.getInstance();
                         if (RegexListFragment.adapter.array.length() < 3 || billingHelper.isSubscribedOrDebugBuild()) {
-                            intent = new Intent(this, AddActionActivity.class);
+                            intent = new Intent(mContext, AddActionActivity.class);
                         } else {
-                            BillingHelper.showSubscribeInfoDialog(this, "Without a subscription, you can only add up to 3 objects.");
+                            BillingHelper.showSubscribeInfoDialog(mContext, "Without a subscription, you can only add up to 3 objects.");
                         }
                     } catch (IllegalStateException e) {
-                        ToastHelper.show(this, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
+                        ToastHelper.show(mContext, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
                     }
                     break;
 
@@ -147,8 +162,13 @@ public class CustomActivity extends AppCompatActivity {
             return true;
         });
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener((v) -> this.finish());
+        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
+        if(Application.isTablet()) toolbar.setNavigationIcon(null);
+        toolbar.setNavigationOnClickListener((v) -> {
+            if (getActivity() != null) {
+                getActivity().finish();
+            }
+        });
     }
 
     public static class TabsPagerAdapter extends FragmentStateAdapter {

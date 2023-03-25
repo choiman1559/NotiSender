@@ -88,8 +88,9 @@ public class RegexItemAdapter extends RecyclerView.Adapter<RegexItemAdapter.Rege
         holder.Parent.setOnClickListener((v) -> {
             Intent intent = new Intent(mContext, AddActionActivity.class);
             intent.putExtra("index", position);
-            CustomActivity.startAddOptionActivity.launch(intent);
+            CustomFragment.startAddOptionActivity.launch(intent);
         });
+        onChangedItem();
     }
 
     @Override
@@ -114,6 +115,8 @@ public class RegexItemAdapter extends RecyclerView.Adapter<RegexItemAdapter.Rege
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        onChangedItem();
     }
 
     @Override
@@ -121,6 +124,7 @@ public class RegexItemAdapter extends RecyclerView.Adapter<RegexItemAdapter.Rege
         array.remove(position);
         regexPrefs.edit().putString("RegexData", array.toString()).apply();
         new Handler().post(() -> notifyItemRemoved(position));
+        onChangedItem();
     }
 
     public static class RegexItemHolder extends RecyclerView.ViewHolder implements ItemTouchCallback.ItemTouchEvent {
@@ -145,5 +149,9 @@ public class RegexItemAdapter extends RecyclerView.Adapter<RegexItemAdapter.Rege
         public void onItemClear() {
             itemView.setBackgroundColor(Color.TRANSPARENT);
         }
+    }
+
+    void onChangedItem() {
+        mContext.findViewById(R.id.itemNotAvailableLayout).setVisibility(array.length() > 0 ? View.GONE : View.VISIBLE);
     }
 }

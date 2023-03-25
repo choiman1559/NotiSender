@@ -38,7 +38,7 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
 
     @Nullable
     public static BillingHelper getInstance(boolean needThrow) throws IllegalStateException {
-        if (instance != null) return instance;
+        if (instance != null && instance.mBillingProcessor.isConnected()) return instance;
         else if(needThrow) throw new IllegalStateException("BillingHelper is not initialized");
         else return null;
     }

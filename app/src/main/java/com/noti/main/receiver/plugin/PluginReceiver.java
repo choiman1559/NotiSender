@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
@@ -39,6 +42,14 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_REQUEST_REMOTE_ACTION:
+                        if(BuildConfig.DEBUG && rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME).equals("request_purchase")) {
+                            @VisibleForTesting
+                            Intent iap = new Intent(context, IAPTestActivity.class);
+                            iap.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(iap);
+                            break;
+                        }
+
                         DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_REQUEST_REMOTE_ACTION, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[2]);
                         break;
 
@@ -61,7 +72,7 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_PUSH_MESSAGE_DATA:
-                        NotiListenerService.getInstance().sendSmsNotification(BuildConfig.DEBUG, "noti.func", data[0], data[1], Calendar.getInstance().getTime());
+                        NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data[1], Calendar.getInstance().getTime());
                         break;
 
                     case PluginConst.ACTION_RESPONSE_REMOTE_DATA:

@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="Customizing">
-        <Preference
-            android:key="StartRegexAction"
-            android:title="Plugin &amp; User scripts"
-            android:summary="Custom plugins and regular expressions"
-            android:icon="@drawable/ic_fluent_puzzle_cube_24_regular"/>
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="Clear Data">
         <Preference
             android:key="ResetList"
@@ -19,26 +11,13 @@
             android:title="Delete Notification history" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Tasker Plug-in">
-        <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_fluent_star_settings_24_regular"
-            android:key="UseTaskerExtension"
-            android:summary="Activate the Tasker extension plugin"
-            android:title="Enable Tasker Plugin" />
-        <Preference
-            android:icon="@drawable/ic_info_outline_black_24dp"
-            android:key="TaskerCompatibleInfo"
-            android:summary="Show list of Tasker compatible apps" />
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="Interface">
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_channel_alert_24_regular"
             android:key="UseToastInstead"
             android:summary="Using Toast to display messages such as warnings within the app"
-            android:title="Use Toast instead of Snackbar" />
+            android:title="Use Toast instead of SnackBar" />
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_tray_item_add_24_regular"

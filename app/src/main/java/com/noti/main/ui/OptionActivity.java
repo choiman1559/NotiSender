@@ -1,14 +1,16 @@
 package com.noti.main.ui;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.color.DynamicColors;
 import com.noti.main.R;
 import com.noti.main.ui.options.AccountPreference;
 import com.noti.main.ui.options.OtherPreference;
@@ -17,19 +19,21 @@ import com.noti.main.ui.options.ReceptionPreference;
 import com.noti.main.ui.options.SendPreference;
 import com.noti.main.ui.pair.PairMainFragment;
 import com.noti.main.ui.prefs.HistoryFragment;
+import com.noti.main.ui.prefs.custom.CustomFragment;
 
 public class OptionActivity extends AppCompatActivity {
+
+    boolean hideDefaultTitleBar = false;
 
     private static String title = "Default Message";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_options);
 
         Fragment fragment;
-
         fragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+
         if(savedInstanceState == null || fragment == null) {
             switch (getIntent().getStringExtra("Type")) {
                 case "Send":
@@ -62,9 +66,15 @@ public class OptionActivity extends AppCompatActivity {
                     title = "Service & Account";
                     break;
 
+                case "Customize":
+                    fragment = new CustomFragment();
+                    hideDefaultTitleBar = true;
+                    title = "Plugin & User scripts";
+                    break;
+
                 case "History":
                     fragment = new HistoryFragment();
-                    findViewById(R.id.app_bar_layout).setVisibility(View.GONE);
+                    hideDefaultTitleBar = true;
                     title = "Notification history";
                     break;
 
@@ -80,6 +90,9 @@ public class OptionActivity extends AppCompatActivity {
             }
         }
 
+        setContentView(hideDefaultTitleBar ? R.layout.activity_options_notitle : R.layout.activity_options);
+        DynamicColors.applyToActivityIfAvailable(this);
+
         Bundle bundle = new Bundle(0);
         if(fragment != null) {
             fragment.setArguments(bundle);
@@ -89,9 +102,17 @@ public class OptionActivity extends AppCompatActivity {
                     .commit();
         }
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(title);
-        toolbar.setNavigationOnClickListener((v) -> this.finish());
+        if(!hideDefaultTitleBar) {
+            MaterialToolbar toolbar = findViewById(R.id.toolbar);
+            toolbar.setTitle(title);
+            toolbar.setNavigationOnClickListener((v) -> this.finish());
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setContentView(hideDefaultTitleBar ? R.layout.activity_options_notitle : R.layout.activity_options);
     }
 
     public static void attachFragment(FragmentActivity activity, Fragment fragment) {

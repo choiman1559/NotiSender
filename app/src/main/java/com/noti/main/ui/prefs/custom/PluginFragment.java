@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -22,12 +23,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.receiver.plugin.PluginActions;
@@ -36,6 +40,7 @@ import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.receiver.plugin.PluginReceiver;
 import com.noti.main.updater.tasks.Version;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PluginFragment extends Fragment {
@@ -61,10 +66,61 @@ public class PluginFragment extends Fragment {
         PackageManager packageManager = mContext.getPackageManager();
         mContext.findViewById(R.id.progress).setVisibility(View.GONE);
 
+        LinearLayoutCompat itemNotAvailableLayout = view.findViewById(R.id.itemNotAvailableLayout);
         LinearLayoutCompat pluginListLayout = view.findViewById(R.id.pluginListLayout);
         LinearLayoutCompat pluginSuggestLayout = view.findViewById(R.id.pluginSuggestLayout);
         MaterialCardView TelephonyPluginSuggest = view.findViewById(R.id.TelephonyPluginSuggest);
         MaterialCardView LibraryTestPluginSuggest = view.findViewById(R.id.LibraryTestPluginSuggest);
+
+        SharedPreferences prefs = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
+        MaterialCardView taskerPluginParent = view.findViewById(R.id.taskerPluginParent);
+        SwitchMaterial taskerPluginEnabled = view.findViewById(R.id.taskerPluginEnabled);
+        RelativeLayout taskerActionMenuLayout = view.findViewById(R.id.taskerActionMenuLayout);
+        TextView taskerDescriptionText = view.findViewById(R.id.taskerDescriptionText);
+        Button taskerPluginInfo = view.findViewById(R.id.taskerPluginInfo);
+
+        ArrayList<String> taskerPluginList = new ArrayList<>();
+        taskerPluginList.add("net.dinglisch.android.taskerm");
+        taskerPluginList.add("com.llamalab.automate");
+        taskerPluginList.add("com.twofortyfouram.locale.x");
+        taskerPluginList.add("com.arlosoft.macrodroid");
+        int packageCount = 0;
+
+        for (String packageName : taskerPluginList) {
+            try {
+                mContext.getPackageManager().getPackageInfo(packageName, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                packageCount++;
+            }
+        }
+
+        if (packageCount == taskerPluginList.size()) {
+            taskerPluginEnabled.setEnabled(false);
+            taskerPluginEnabled.setChecked(false);
+            taskerDescriptionText.setText("This option requires the Tasker-compatible app.");
+            taskerDescriptionText.setTextColor(Color.RED);
+        } else {
+            taskerPluginEnabled.setEnabled(true);
+            taskerPluginEnabled.setChecked(prefs.getBoolean("UseTaskerExtension", false));
+        }
+
+        taskerPluginEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> prefs.edit().putBoolean("UseTaskerExtension", isChecked).apply());
+        taskerActionMenuLayout.setVisibility(View.GONE);
+        taskerPluginParent.setOnClickListener(v -> {
+            boolean isDetailGone = taskerActionMenuLayout.getVisibility() == View.GONE;
+            taskerActionMenuLayout.setVisibility(isDetailGone ? View.VISIBLE : View.GONE);
+            taskerDescriptionText.setSingleLine(!isDetailGone);
+        });
+
+        taskerPluginInfo.setOnClickListener(v -> {
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+            dialog.setTitle("Tasker compatible apps");
+            dialog.setMessage(getString(R.string.Dialog_Tasker_compatible));
+            dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+            dialog.setPositiveButton("Close", (d, w) -> {
+            });
+            dialog.show();
+        });
 
         boolean isTelephonyPluginInstalled = isAppInstalled("com.noti.plugin.telephony");
         boolean isLibraryTestPluginInstalled = isAppInstalled("com.noti.plugin.showcase");
@@ -77,11 +133,12 @@ public class PluginFragment extends Fragment {
             LibraryTestPluginSuggest.setVisibility(View.GONE);
         }
 
-        TelephonyPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-TelephonyPlugin"))));
-        LibraryTestPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-PluginShowcase"))));
+        TelephonyPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-TelephonyPlugin/releases/latest"))));
+        LibraryTestPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-PluginShowcase/releases/latest"))));
 
         loadPluginList(packageManager);
         PluginReceiver.receivePluginInformation = data -> {
+            itemNotAvailableLayout.setVisibility(View.GONE);
             CoordinatorLayout layout = (CoordinatorLayout) View.inflate(mContext, R.layout.cardview_plugin_item, null);
             PluginAppHolder holder = new PluginAppHolder(layout);
             String packageName = data.getString(PluginConst.PLUGIN_PACKAGE_NAME);

@@ -22,8 +22,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 1011900
-        versionName "1.19.0"
+        versionCode 1011901
+        versionName "1.19.1"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -64,7 +64,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.google.android.material:material:1.9.0-alpha02'
+    implementation 'com.google.android.material:material:1.9.0-beta01'
     implementation 'com.google.android.gms:play-services-auth:20.4.1'
 
     implementation platform('com.google.firebase:firebase-bom:30.4.1')
@@ -83,7 +83,7 @@ dependencies {
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.2'
     implementation 'com.microsoft.design:fluent-system-icons:1.1.184@aar'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0'
 }
 
 repositories {

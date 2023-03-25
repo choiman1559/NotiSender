@@ -17,6 +17,7 @@ import com.noti.main.ui.options.ReceptionPreference;
 import com.noti.main.ui.options.SendPreference;
 import com.noti.main.ui.pair.PairMainFragment;
 import com.noti.main.ui.prefs.HistoryFragment;
+import com.noti.main.ui.prefs.custom.CustomFragment;
 
 public class HolderFragment extends Fragment {
 
@@ -76,10 +77,17 @@ public class HolderFragment extends Fragment {
                 title = "Service & Account";
                 break;
 
-            case "History":
-                fragment = new HistoryFragment();
+            case "Customize":
+                fragment = new CustomFragment();
                 View view = getView();
                 if(view != null) view.findViewById(R.id.app_bar_layout).setVisibility(View.GONE);
+                title = "Plugin & User scripts";
+                break;
+
+            case "History":
+                fragment = new HistoryFragment();
+                View view2 = getView();
+                if(view2 != null) view2.findViewById(R.id.app_bar_layout).setVisibility(View.GONE);
                 title = "Notification history";
                 break;
 

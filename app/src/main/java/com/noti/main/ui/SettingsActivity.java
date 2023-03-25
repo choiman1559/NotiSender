@@ -79,6 +79,7 @@ public class SettingsActivity extends MonetCompatActivity {
     MaterialCardView SendPreferences;
     MaterialCardView ReceptionPreferences;
     MaterialCardView OtherPreferences;
+    MaterialCardView CustomizePreferences;
     MaterialCardView HistoryPreferences;
     MaterialCardView InfoPreferences;
 
@@ -144,6 +145,7 @@ public class SettingsActivity extends MonetCompatActivity {
         SendPreferences = findViewById(R.id.SendPreferences);
         ReceptionPreferences = findViewById(R.id.ReceptionPreferences);
         OtherPreferences = findViewById(R.id.OtherPreferences);
+        CustomizePreferences = findViewById(R.id.CustomizePreferences);
         HistoryPreferences = findViewById(R.id.HistoryPreferences);
         InfoPreferences = findViewById(R.id.InfoPreferences);
 
@@ -171,6 +173,10 @@ public class SettingsActivity extends MonetCompatActivity {
 
                     case "Other":
                         lastSelectedCardView = OtherPreferences;
+                        break;
+
+                    case "Customize":
+                        lastSelectedCardView = CustomizePreferences;
                         break;
 
                     case "History":
@@ -230,6 +236,10 @@ public class SettingsActivity extends MonetCompatActivity {
                         fragmentType = "Other";
                         break;
 
+                    case R.id.CustomizePreferences:
+                        fragmentType = "Customize";
+                        break;
+
                     case R.id.HistoryPreferences:
                         fragmentType = "History";
                         break;
@@ -265,6 +275,7 @@ public class SettingsActivity extends MonetCompatActivity {
         SendPreferences.setOnClickListener(onClickListener);
         ReceptionPreferences.setOnClickListener(onClickListener);
         OtherPreferences.setOnClickListener(onClickListener);
+        CustomizePreferences.setOnClickListener(onClickListener);
         HistoryPreferences.setOnClickListener(onClickListener);
         InfoPreferences.setOnClickListener(onClickListener);
 
@@ -378,13 +389,14 @@ public class SettingsActivity extends MonetCompatActivity {
         final float roundRadius = 24f;
 
         float radiusInDP = Application.isTablet() || prefs.getBoolean("NewCardRadius", true) ? roundRadius : squareRadius;
-        float radiusInPX =  Math.round(radiusInDP * getResources().getDisplayMetrics().density);
+        float radiusInPX = Math.round(radiusInDP * getResources().getDisplayMetrics().density);
 
         PairPreferences.setRadius(radiusInPX);
         AccountPreferences.setRadius(radiusInPX);
         SendPreferences.setRadius(radiusInPX);
         ReceptionPreferences.setRadius(radiusInPX);
         OtherPreferences.setRadius(radiusInPX);
+        CustomizePreferences.setRadius(radiusInPX);
         HistoryPreferences.setRadius(radiusInPX);
         InfoPreferences.setRadius(radiusInPX);
     }
