@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -15,7 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.CallLog;
+import android.provider.Telephony;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
@@ -205,6 +204,10 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
+    private boolean isTelephonyApp(String packageName) {
+       return Telephony.Sms.getDefaultSmsPackage(this).equals(packageName) || getSystemDialerApp(this).equals(packageName);
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
@@ -238,13 +241,9 @@ public class NotiListenerService extends NotificationListenerService {
                     if (PackageName.equals(getPackageName()) && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))) {
                         manager.release();
                         return;
-                    } else if (prefs.getBoolean("UseReplyTelecom", false) && getSystemDialerApp(this).equals(PackageName)) {
-                        if (prefs.getBoolean("UseCallLog", false))
-                            sendTelecomNotification(isLogging, PackageName, time);
-                        else {
-                            manager.release();
-                            return;
-                        }
+                    } else if(isTelephonyApp(PackageName)) {
+                        manager.release();
+                        return;
                     } else if (isWhitelist(PackageName)) {
                         if (prefs.getBoolean("IgnoreOngoing", false) &&
                                 (notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0 ||
@@ -302,12 +301,14 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    private void sendTelecomNotification(Boolean isLogging, String PackageName, Date time) {
-        Cursor cursor = getContentResolver().query(android.provider.CallLog.Calls.CONTENT_URI, null, android.provider.CallLog.Calls.TYPE + "=" + CallLog.Calls.INCOMING_TYPE, null, null);
-        cursor.moveToFirst();
-        String address = cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER));
-        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(Long.parseLong(cursor.getString(cursor.getColumnIndexOrThrow(CallLog.Calls.DATE)))));
-        cursor.close();
+    public void sendTelecomNotification(Context context, Boolean isLogging, String address) {
+        if (prefs == null) {
+            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
+        }
+
+        Date time = Calendar.getInstance().getTime();
+        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
+        String PackageName = getSystemDialerApp(context);
 
         if (isTelecomIntervalGaped(address, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
@@ -330,48 +331,14 @@ public class NotiListenerService extends NotificationListenerService {
                 if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
             }
             if (isLogging) Log.d("data", notificationHead.toString());
-            sendNotification(notificationHead, PackageName, this);
+            sendNotification(notificationHead, PackageName, context);
         }
     }
 
-    public void sendTelecomNotification(Context context, Boolean isLogging, String address) {
-        if (prefs == null)
-            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
-        if (prefs.getBoolean("UseReplyTelecom", false) && !prefs.getBoolean("UseCallLog", false)) {
-            Date time = Calendar.getInstance().getTime();
-            String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
-            String PackageName = getSystemDialerApp(context);
-
-            if (isTelecomIntervalGaped(address, time)) {
-                String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-                String DEVICE_ID = getUniqueID();
-                String TOPIC = "/topics/" + prefs.getString("UID", "");
-
-                JSONObject notificationHead = new JSONObject();
-                JSONObject notificationBody = new JSONObject();
-                try {
-                    notificationBody.put("type", "send|telecom");
-                    notificationBody.put("address", address);
-                    notificationBody.put("package", PackageName);
-                    notificationBody.put("device_name", DEVICE_NAME);
-                    notificationBody.put("device_id", DEVICE_ID);
-                    notificationBody.put("date", date);
-
-                    notificationHead.put("to", TOPIC);
-                    notificationHead.put("data", notificationBody);
-                } catch (JSONException e) {
-                    if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
-                }
-                if (isLogging) Log.d("data", notificationHead.toString());
-                sendNotification(notificationHead, PackageName, context);
-            }
-        }
-    }
-
-    public void sendSmsNotification(Boolean isLogging, String PackageName, String address, String message, Date time) {
+    public void sendSmsNotification(Context context, Boolean isLogging, String PackageName, String address, String message, Date time) {
         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
 
-        if (isSmsIntervalGaped(address, message, time)) {
+        if (isSmsIntervalGaped(context, address, message, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
             String TOPIC = "/topics/" + prefs.getString("UID", "");
@@ -392,7 +359,7 @@ public class NotiListenerService extends NotificationListenerService {
                 if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
             }
             if (isLogging) Log.d("data", notificationHead.toString());
-            sendNotification(notificationHead, PackageName, this);
+            sendNotification(notificationHead, PackageName, context);
         }
     }
 
@@ -543,7 +510,9 @@ public class NotiListenerService extends NotificationListenerService {
         return true;
     }
 
-    private boolean isSmsIntervalGaped(String Number, String Content, Date time) {
+    private boolean isSmsIntervalGaped(Context context, String Number, String Content, Date time) {
+        if (prefs == null)
+            prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         if (prefs.getBoolean("UseInterval", false)) {
             int timeInterval = prefs.getInt("IntervalTime", 150);
             SmsQuery query = new SmsQuery();
