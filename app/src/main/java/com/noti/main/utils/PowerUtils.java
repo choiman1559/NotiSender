@@ -26,8 +26,8 @@ public class PowerUtils {
 
     public void acquire() {
         if (!isHeld()) {
-            //10 minutes timeout for battery save
-            wakeLock.acquire(10 * 60 * 1000L);
+            //30 second timeout for battery save
+            wakeLock.acquire(30 * 1000L);
         }
     }
 
