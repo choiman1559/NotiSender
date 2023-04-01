@@ -499,6 +499,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     protected void sendTelecomNotification(Map<String, String> map) {
         String address = map.get("address");
         String Package = map.get("package");
+        String nickname = map.get("nickname");
         String Device_name = map.get("device_name");
         String Device_id = map.get("device_id");
         String Date = map.get("date");
@@ -506,6 +507,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         Intent notificationIntent = new Intent(FirebaseMessageService.this, TelecomViewActivity.class);
         notificationIntent.putExtra("device_id", Device_id);
         notificationIntent.putExtra("address", address);
+        notificationIntent.putExtra("nickname", nickname);
         notificationIntent.putExtra("device_name", Device_name);
         notificationIntent.putExtra("date", Date);
         notificationIntent.putExtra("package", Package);
@@ -525,7 +527,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))
-                .setContentTitle("New call inbound from " + address)
+                .setContentTitle("New call inbound from " + address + (nickname == null || nickname.isEmpty() ? "" : " (" + nickname + ")"))
                 .setContentText("click here to reply or open dialer")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
@@ -551,6 +553,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     protected void sendSmsNotification(Map<String, String> map) {
         String address = map.get("address");
+        String nickname = map.get("nickname");
         String message = map.get("message");
         String Package = map.get("package");
         String Device_name = map.get("device_name");
@@ -561,6 +564,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationIntent.putExtra("device_id", Device_id);
         notificationIntent.putExtra("message", message);
         notificationIntent.putExtra("address", address);
+        notificationIntent.putExtra("nickname", nickname);
         notificationIntent.putExtra("device_name", Device_name);
         notificationIntent.putExtra("date", Date);
         notificationIntent.putExtra("package", Package);
@@ -580,7 +584,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))
-                .setContentTitle("New message from " + address)
+                .setContentTitle("New message from " + address + (nickname == null || nickname.isEmpty() ? "" : " (" + nickname + ")"))
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)

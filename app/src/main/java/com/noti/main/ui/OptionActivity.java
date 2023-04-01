@@ -26,6 +26,7 @@ public class OptionActivity extends AppCompatActivity {
     boolean hideDefaultTitleBar = false;
 
     private static String title = "Default Message";
+    private static String lastType = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,8 +35,11 @@ public class OptionActivity extends AppCompatActivity {
         Fragment fragment;
         fragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
 
-        if(savedInstanceState == null || fragment == null) {
-            switch (getIntent().getStringExtra("Type")) {
+        if (savedInstanceState == null || fragment == null) {
+            String type = getIntent().getStringExtra("Type");
+            if (type != null) lastType = type;
+
+            switch (lastType) {
                 case "Send":
                     fragment = new SendPreference();
                     title = "Send Options";
@@ -94,7 +98,7 @@ public class OptionActivity extends AppCompatActivity {
         DynamicColors.applyToActivityIfAvailable(this);
 
         Bundle bundle = new Bundle(0);
-        if(fragment != null) {
+        if (fragment != null) {
             fragment.setArguments(bundle);
             getSupportFragmentManager()
                     .beginTransaction()
@@ -102,7 +106,7 @@ public class OptionActivity extends AppCompatActivity {
                     .commit();
         }
 
-        if(!hideDefaultTitleBar) {
+        if (!hideDefaultTitleBar) {
             MaterialToolbar toolbar = findViewById(R.id.toolbar);
             toolbar.setTitle(title);
             toolbar.setNavigationOnClickListener((v) -> this.finish());

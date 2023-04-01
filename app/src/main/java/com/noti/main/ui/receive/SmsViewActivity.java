@@ -30,6 +30,7 @@ public class SmsViewActivity extends Activity {
 
         String Topic = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID","");
         String address = i.getStringExtra("address");
+        String nickname = i.getStringExtra("nickname");
         String message = i.getStringExtra("message");
         String Device_name = i.getStringExtra("device_name");
         String Date = i.getStringExtra("date");
@@ -42,7 +43,7 @@ public class SmsViewActivity extends Activity {
         TextView TitleView = findViewById(R.id.titleDetail);
 
         String content = "";
-        content += "<b>From</b> : " + address + "<br>";
+        content += "<b>From</b> : " + address + (nickname == null || nickname.isEmpty() ? "" : " (" + nickname + ")") + "<br>";
         content += "<b>Date</b> : " +  Date + "<br>";
         content += "<b>Sent device</b> : " + Device_name + "<br>";
         content += "<b>Message</b> : " + message;

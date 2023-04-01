@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -68,11 +67,11 @@ public class PluginReceiver extends BroadcastReceiver {
                         break;
 
                     case PluginConst.ACTION_PUSH_CALL_DATA:
-                        NotiListenerService.getInstance().sendTelecomNotification(context, BuildConfig.DEBUG, rawData.getString(PluginConst.DATA_KEY_EXTRA_DATA));
+                        NotiListenerService.getInstance().sendTelecomNotification(context, BuildConfig.DEBUG, data[0], data.length > 1 ? data[1] : "");
                         break;
 
                     case PluginConst.ACTION_PUSH_MESSAGE_DATA:
-                        NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data[1], Calendar.getInstance().getTime());
+                        NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data[1], data[2], Calendar.getInstance().getTime());
                         break;
 
                     case PluginConst.ACTION_RESPONSE_REMOTE_DATA:

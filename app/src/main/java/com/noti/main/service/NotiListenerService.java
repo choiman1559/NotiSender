@@ -204,15 +204,15 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    private boolean isTelephonyApp(String packageName) {
-       return Telephony.Sms.getDefaultSmsPackage(this).equals(packageName) || getSystemDialerApp(this).equals(packageName);
+    private boolean isTelephonyApp(Context context, String packageName) {
+       return Telephony.Sms.getDefaultSmsPackage(context).equals(packageName) || getSystemDialerApp(context).equals(packageName);
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
 
-        Log.d("ddd", sbn.getPackageName());
+        if(BuildConfig.DEBUG) Log.d("ddd", sbn.getPackageName());
         if (manager == null) manager = PowerUtils.getInstance(this);
         manager.acquire();
         synchronized (pastNotificationLock) {
@@ -241,7 +241,7 @@ public class NotiListenerService extends NotificationListenerService {
                     if (PackageName.equals(getPackageName()) && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))) {
                         manager.release();
                         return;
-                    } else if(isTelephonyApp(PackageName)) {
+                    } else if(isTelephonyApp(this, PackageName)) {
                         manager.release();
                         return;
                     } else if (isWhitelist(PackageName)) {
@@ -301,7 +301,7 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    public void sendTelecomNotification(Context context, Boolean isLogging, String address) {
+    public void sendTelecomNotification(Context context, Boolean isLogging, String address, String nickname) {
         if (prefs == null) {
             prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         }
@@ -320,6 +320,7 @@ public class NotiListenerService extends NotificationListenerService {
             try {
                 notificationBody.put("type", "send|telecom");
                 notificationBody.put("address", address);
+                notificationBody.put("nickname", nickname);
                 notificationBody.put("package", PackageName);
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
@@ -335,7 +336,7 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    public void sendSmsNotification(Context context, Boolean isLogging, String PackageName, String address, String message, Date time) {
+    public void sendSmsNotification(Context context, Boolean isLogging, String PackageName, String address, String nickname, String message, Date time) {
         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
 
         if (isSmsIntervalGaped(context, address, message, time)) {
@@ -349,6 +350,7 @@ public class NotiListenerService extends NotificationListenerService {
                 notificationBody.put("type", "send|sms");
                 notificationBody.put("message", message);
                 notificationBody.put("address", address);
+                notificationBody.put("nickname", nickname);
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
                 notificationBody.put("date", date);
