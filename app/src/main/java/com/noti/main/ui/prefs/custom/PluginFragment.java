@@ -45,6 +45,7 @@ import java.util.List;
 
 public class PluginFragment extends Fragment {
     AppCompatActivity mContext;
+    ArrayList<PluginAppHolder> pluginAppHolderArrayList = new ArrayList<>();
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -108,6 +109,13 @@ public class PluginFragment extends Fragment {
         taskerActionMenuLayout.setVisibility(View.GONE);
         taskerPluginParent.setOnClickListener(v -> {
             boolean isDetailGone = taskerActionMenuLayout.getVisibility() == View.GONE;
+
+            if(isDetailGone) {
+                for(PluginAppHolder holder1 : pluginAppHolderArrayList) {
+                    setDetailVisibility(holder1, false);
+                }
+            }
+
             taskerActionMenuLayout.setVisibility(isDetailGone ? View.VISIBLE : View.GONE);
             taskerDescriptionText.setSingleLine(!isDetailGone);
         });
@@ -172,10 +180,17 @@ public class PluginFragment extends Fragment {
                 holder.pluginEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> pluginPrefs.setPluginEnabled(isChecked).apply());
                 holder.pluginActionMenuLayout.setVisibility(View.GONE);
                 holder.Parent.setOnClickListener((v) -> {
-                    boolean isDetailGone = holder.pluginActionMenuLayout.getVisibility() == View.GONE;
-                    holder.pluginActionMenuLayout.setVisibility(isDetailGone ? View.VISIBLE : View.GONE);
-                    holder.pluginTitle.setSingleLine(!isDetailGone);
-                    holder.pluginDescription.setSingleLine(!isDetailGone);
+                    boolean isVisible = holder.pluginActionMenuLayout.getVisibility() == View.VISIBLE;
+                    if(!isVisible) {
+                        taskerActionMenuLayout.setVisibility(View.GONE);
+                        taskerDescriptionText.setSingleLine(true);
+
+                        for(PluginAppHolder holder1 : pluginAppHolderArrayList) {
+                            setDetailVisibility(holder1, false);
+                        }
+                    }
+
+                    setDetailVisibility(holder, !isVisible);
                 });
                 holder.settingButton.setOnClickListener((v) -> startActivity(new Intent().setComponent(new ComponentName(packageName, data.getString(PluginConst.PLUGIN_SETTING_ACTIVITY)))));
                 holder.infoButton.setOnClickListener((v) -> startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:" + packageName))));
@@ -183,8 +198,15 @@ public class PluginFragment extends Fragment {
                 e.printStackTrace();
             }
 
+            pluginAppHolderArrayList.add(holder);
             pluginListLayout.addView(layout);
         };
+    }
+
+    void setDetailVisibility(PluginAppHolder holder, boolean isVisible) {
+        holder.pluginActionMenuLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        holder.pluginTitle.setSingleLine(!isVisible);
+        holder.pluginDescription.setSingleLine(!isVisible);
     }
 
     void loadPluginList(PackageManager packageManager) {
