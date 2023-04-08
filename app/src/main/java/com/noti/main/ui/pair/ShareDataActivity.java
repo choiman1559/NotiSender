@@ -124,7 +124,8 @@ public class ShareDataActivity extends AppCompatActivity {
                     returnCursor2.close();
 
                     try {
-                        BillingHelper billingHelper = BillingHelper.getInstance();
+                        BillingHelper billingHelper = BillingHelper.getInstance(false);
+                        if(billingHelper == null) billingHelper = BillingHelper.initialize(this);
                         boolean isSubscribed = billingHelper.isSubscribedOrDebugBuild();
 
                         if (size > (isSubscribed ? 2147483648L : 104857600)) {
@@ -139,6 +140,7 @@ public class ShareDataActivity extends AppCompatActivity {
                     } catch (IllegalStateException e) {
                         BillingHelper.showSubscribeInfoDialog(ShareDataActivity.this, "Error: Can't get purchase information! Please contact developer.", false, (dialog12, which) -> finish());
                         isNeedToFinishActivityNow = false;
+                        e.printStackTrace();
                     }
 
                     ok.setOnClickListener(v -> {
