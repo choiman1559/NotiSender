@@ -3,9 +3,11 @@ package com.noti.main.ui.options;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -19,6 +21,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
@@ -32,6 +35,8 @@ import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 import com.noti.main.utils.AESCrypto;
+
+import java.util.Set;
 
 public class SendPreference extends PreferenceFragmentCompat {
 
@@ -252,6 +257,17 @@ public class SendPreference extends PreferenceFragmentCompat {
             FcmWhenSendImageInfo.setVisible((boolean) newValue);
             return true;
         }));
+
+        if(!isAlarmPermissionGranted()) {
+            ToastHelper.show(mContext, "Options in this menu do not work because you do not have Alarm access permission.", "Okay",ToastHelper.LENGTH_SHORT);
+        }
+    }
+
+    boolean isAlarmPermissionGranted() {
+        UiModeManager uiModeManager = (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
+        boolean isTelevisionsEnabled = uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+        Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(mContext);
+        return !isTelevisionsEnabled && sets.contains(mContext.getPackageName());
     }
 
     @Override

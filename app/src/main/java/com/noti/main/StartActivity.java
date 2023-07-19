@@ -35,6 +35,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -60,6 +61,7 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_Alarm;
     MaterialButton Permit_Privacy;
     MaterialButton Permit_Collect_Data;
+    MaterialCheckBox Skip_Alarm;
 
     ActivityResultLauncher<Intent> startOverlayPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if(Build.VERSION.SDK_INT < 29 || Settings.canDrawOverlays(this)) {
@@ -102,6 +104,7 @@ public class StartActivity extends AppCompatActivity {
         Permit_Alarm = findViewById(R.id.Permit_Alarm);
         Permit_Privacy = findViewById(R.id.Permit_Privacy);
         Permit_Collect_Data = findViewById(R.id.Permit_Collect_Data);
+        Skip_Alarm = findViewById(R.id.Skip_Alarm);
         Start_App = findViewById(R.id.Start_App);
 
         int count = 0;
@@ -131,6 +134,11 @@ public class StartActivity extends AppCompatActivity {
         Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
         if (isTelevisionsEnabled || sets.contains(getPackageName())) {
             setButtonCompleted(this, Permit_Alarm);
+            count++;
+        }
+
+        if(prefs.getBoolean("SkipAlarmAccessPermission", false)) {
+            Skip_Alarm.setChecked(true);
             count++;
         }
 
@@ -232,8 +240,12 @@ public class StartActivity extends AppCompatActivity {
             dialog.setNegativeButton("Deny", (dialog1, which) -> { });
             dialog.show();
         });
+        Skip_Alarm.setOnCheckedChangeListener((compoundButton, b) -> {
+            checkPermissionsAndEnableComplete();
+            prefs.edit().putBoolean("SkipAlarmAccessPermission", (boolean)b).apply();
+        });
         Start_App.setOnClickListener((v) -> {
-            if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || Permit_Alarm.isEnabled() || Permit_Privacy.isEnabled()) {
+            if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || (Permit_Alarm.isEnabled() && !Skip_Alarm.isChecked()) || Permit_Privacy.isEnabled()) {
                 ToastHelper.show(this, "Please complete all section!", ToastHelper.LENGTH_SHORT);
             } else {
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -249,9 +261,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
     void checkPermissionsAndEnableComplete() {
-        if(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && !Permit_Alarm.isEnabled() && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled()) {
-            Start_App.setEnabled(true);
-        }
+        Start_App.setEnabled(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && (!Permit_Alarm.isEnabled() || Skip_Alarm.isChecked()) && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled());
     }
 
     @Override

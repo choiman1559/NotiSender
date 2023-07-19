@@ -144,7 +144,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     public void processReception(Map<String, String> map, Context context) {
         String type = map.get("type");
-        String mode = prefs.getString("service", "");
+        String mode = prefs.getString("service", "reception");
 
         if (type != null && !prefs.getString("UID", "").equals("")) {
             if (prefs.getBoolean("serviceToggle", false)) {
@@ -227,7 +227,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
                                 case "media|action":
                                     if (isTargetDevice(map)) {
-                                        NotiListenerService.mediaReceiver.onDataReceived(object);
+                                        NotiListenerService.getInstance().mediaReceiver.onDataReceived(object);
                                     }
                                     break;
                             }

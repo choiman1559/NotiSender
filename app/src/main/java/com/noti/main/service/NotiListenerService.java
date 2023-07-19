@@ -52,12 +52,10 @@ import java.util.Map;
 public class NotiListenerService extends NotificationListenerService {
 
     private static NotiListenerService instance;
-    private static SharedPreferences prefs;
-    private static SharedPreferences logPrefs;
-    private static PowerUtils manager;
-
-    @SuppressLint("StaticFieldLeak")
-    public static MediaReceiver mediaReceiver;
+    private SharedPreferences prefs;
+    private SharedPreferences logPrefs;
+    private PowerUtils manager;
+    public MediaReceiver mediaReceiver;
 
     private static final Object pastNotificationLock = new Object();
     private volatile StatusBarNotification pastNotification = null;
@@ -75,17 +73,32 @@ public class NotiListenerService extends NotificationListenerService {
         return instance;
     }
 
+    public static SharedPreferences getPrefs() {
+        return getInstance().prefs;
+    }
+
     public static String getTopic() {
+        SharedPreferences prefs = getPrefs();
         return prefs == null ? "" : "/topics/" + prefs.getString("UID", "");
+    }
+
+    public NotiListenerService() {
+        initService(Application.getApplicationInstance().getApplicationContext());
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        prefs = this.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
-        logPrefs = this.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
-        manager = PowerUtils.getInstance(this);
-        mediaReceiver = new MediaReceiver(this);
+        if(instance == null) initService(this);
+    }
+
+    void initService(Context context) {
+        prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
+        logPrefs = context.getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
+        manager = PowerUtils.getInstance(context);
+        mediaReceiver = new MediaReceiver(context);
+
+        instance = this;
     }
 
     @Override
@@ -123,7 +136,9 @@ public class NotiListenerService extends NotificationListenerService {
 
     @SuppressLint("HardwareIds")
     public static String getUniqueID() {
+        SharedPreferences prefs = getPrefs();
         String str = "";
+
         if (prefs != null) {
             switch (prefs.getString("uniqueIdMethod", "Globally-Unique ID")) {
                 case "Globally-Unique ID":
@@ -199,7 +214,7 @@ public class NotiListenerService extends NotificationListenerService {
             return ((TelecomManager) context.getSystemService(Context.TELECOM_SERVICE)).getDefaultDialerPackage();
         } else {
             Intent dialerIntent = new Intent(Intent.ACTION_DIAL).addCategory(Intent.CATEGORY_DEFAULT);
-            @SuppressWarnings("deprecation") List<ResolveInfo> mResolveInfoList = context.getPackageManager().queryIntentActivities(dialerIntent, 0);
+            List<ResolveInfo> mResolveInfoList = context.getPackageManager().queryIntentActivities(dialerIntent, 0);
             return mResolveInfoList.get(0).activityInfo.packageName;
         }
     }
@@ -230,7 +245,7 @@ public class NotiListenerService extends NotificationListenerService {
             boolean isLogging = BuildConfig.DEBUG;
 
             if (!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
-                String mode = prefs.getString("service", "");
+                String mode = prefs.getString("service", "reception");
                 if (mode.equals("send") || mode.equals("hybrid")) {
                     String TITLE = extra.getString(Notification.EXTRA_TITLE) + "";
                     String TEXT = extra.getString(Notification.EXTRA_TEXT) + "";
@@ -588,6 +603,9 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     public static void sendNotification(JSONObject notification, String PackageName, Context context) {
+        SharedPreferences prefs = getPrefs();
+        PowerUtils manager = getInstance().manager;
+
         if (prefs == null)
             prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         if (manager == null) manager = PowerUtils.getInstance(context);
@@ -653,6 +671,9 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private static void sendFCMNotification(JSONObject notification, String PackageName, Context context) {
+        SharedPreferences prefs = getPrefs();
+        PowerUtils manager = getInstance().manager;
+
         final String FCM_API = "https://fcm.googleapis.com/fcm/send";
         final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
         final String contentType = "application/json";
@@ -680,6 +701,9 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private static void sendPushyNotification(JSONObject notification, String PackageName, Context context) {
+        SharedPreferences prefs = getPrefs();
+        PowerUtils manager = getInstance().manager;
+
         final String URI = "https://api.pushy.me/push?api_key=" + prefs.getString("ApiKey_Pushy", "");
         final String contentType = "application/json";
         final String TAG = "NOTIFICATION TAG";

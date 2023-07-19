@@ -15,15 +15,15 @@ android {
         }
     }
 
-    compileSdkVersion 33
-    buildToolsVersion '33.0.2'
+    compileSdkVersion 34
+    buildToolsVersion '34.0.0'
 
     defaultConfig {
         applicationId "com.noti.main"
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 1011904
-        versionName "1.19.4"
+        targetSdkVersion 34
+        versionCode 1011905
+        versionName "1.19.5"
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -44,7 +44,8 @@ android {
         includeInApk false
         includeInBundle false
     }
-    ndkVersion '21.1.6352462'
+    ndkVersion '25.2.9519653'
+    namespace 'com.noti.main'
     flavorDimensions
 }
 
@@ -54,20 +55,20 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.6.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.6.0'
     implementation "androidx.documentfile:documentfile:1.0.1"
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.google.android.material:material:1.9.0-beta01'
-    implementation 'com.google.android.gms:play-services-auth:20.4.1'
+    implementation 'com.google.android.material:material:1.11.0-alpha01'
+    implementation 'com.google.android.gms:play-services-auth:20.6.0'
 
-    implementation platform('com.google.firebase:firebase-bom:31.4.0')
+    implementation platform('com.google.firebase:firebase-bom:32.2.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
@@ -76,14 +77,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-config'
     implementation 'com.google.firebase:firebase-storage'
 
-    implementation 'me.pushy:sdk:1.0.90'
+    implementation 'me.pushy:sdk:1.0.93'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.anjlab.android.iab.v3:library:2.0.3'
     implementation 'com.github.isradeleon:Notify-Android:1.0.4'
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.7'
-    implementation 'com.microsoft.design:fluent-system-icons:1.1.199@aar'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20'
+    implementation 'com.microsoft.design:fluent-system-icons:1.1.204@aar'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0'
 }
 
 repositories {

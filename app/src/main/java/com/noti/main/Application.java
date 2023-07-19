@@ -24,6 +24,10 @@ public class Application extends android.app.Application {
         return screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE || screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
+    public static Application getApplicationInstance() {
+        return applicationInstance;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

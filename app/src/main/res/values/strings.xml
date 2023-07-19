@@ -39,6 +39,7 @@
     <string name="Dialog_Tasker_compatible">Plugins are available in the apps shown below.\n\n - Tasker\n(net.dinglisch.android.taskerm)\n\n - Automate\n(com.llamalab.automate)\n\n - Locale X\n(com.twofortyfouram.locale.x)\n\n - MacroDroid\n(com.arlosoft.macrodroid)</string>
     <string name="Premium_information">NotiSender Premium comes with the following benefits:\n\n - Increased the file size limit to 2GB when transferring files to other devices\n - Can pair more than 3 devices\n - Use album art when remotely controlling media\n - Can add 3 or more custom regex objects\n - Use Pushy server for data transfer\n\nBenefits may be added or reduced without notice and do not apply to NotiSender for desktop.</string>
     <string name="Premium_waring">\n\nPlease subscribe NotiSender Premium and try again!\n\nTip: You can subscribe at \"Service &amp; Account\" menu.</string>
+    <string name="Lack_Alarm_Permission_waring">Changing the service type is possible only when notification access is granted.\n\nAnd, If there is no notification access permission, it is fixed to reception-only mode.</string>
 
     <string name="updater_loading">Loading… Please wait</string>
     <string name="updater_checkupdate">Checking update…</string>

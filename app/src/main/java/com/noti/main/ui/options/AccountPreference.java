@@ -7,9 +7,11 @@ import static com.noti.main.ui.SettingsActivity.mBillingHelper;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
@@ -42,6 +45,8 @@ import com.noti.main.ui.SettingsActivity;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 
+import java.util.Set;
+
 import me.pushy.sdk.Pushy;
 
 public class AccountPreference extends PreferenceFragmentCompat {
@@ -50,6 +55,16 @@ public class AccountPreference extends PreferenceFragmentCompat {
     private FirebaseAuth mAuth;
     SharedPreferences prefs;
     Activity mContext;
+
+    Preference Login;
+    Preference Service;
+    Preference AlarmAccessWarning;
+    Preference AlarmAccessInfo;
+    Preference Server;
+    Preference Subscribe;
+    Preference AlreadySubscribed;
+    Preference ServerInfo;
+    Preference TestRun;
 
     ActivityResultLauncher<Intent> startAccountTask = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getData() != null) {
@@ -63,13 +78,13 @@ public class AccountPreference extends PreferenceFragmentCompat {
         }
     });
 
-    Preference Login;
-    Preference Service;
-    Preference Server;
-    Preference Subscribe;
-    Preference AlreadySubscribed;
-    Preference ServerInfo;
-    Preference TestRun;
+    ActivityResultLauncher<Intent> startAlarmAccessPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (isAlarmPermissionGranted()) {
+            Service.setEnabled(true);
+            AlarmAccessWarning.setVisible(false);
+            AlarmAccessInfo.setVisible(false);
+        }
+    });
 
     public AccountPreference() {
     }
@@ -118,6 +133,8 @@ public class AccountPreference extends PreferenceFragmentCompat {
         Login = findPreference("Login");
         TestRun = findPreference("testNoti");
         Service = findPreference("service");
+        AlarmAccessWarning = findPreference("AlarmAccessWarning");
+        AlarmAccessInfo = findPreference("AlarmAccessInfo");
         Server = findPreference("server");
         Subscribe = findPreference("Subscribe");
         AlreadySubscribed = findPreference("AlreadySubscribed");
@@ -152,11 +169,20 @@ public class AccountPreference extends PreferenceFragmentCompat {
             AlreadySubscribed.setVisible(false);
         }
 
-        Service.setSummary("Now : " + prefs.getString("service", "not selected"));
+        Service.setSummary("Now : " + prefs.getString("service", "reception"));
         Service.setOnPreferenceChangeListener((p, n) -> {
             p.setSummary("Now : " + n.toString());
             return true;
         });
+
+        if(isAlarmPermissionGranted()) {
+            AlarmAccessWarning.setVisible(false);
+            AlarmAccessInfo.setVisible(false);
+        } else {
+            Service.setEnabled(false);
+            AlarmAccessWarning.setVisible(true);
+            AlarmAccessInfo.setVisible(true);
+        }
 
         Server.setSummary("Now : " + prefs.getString("server", "Firebase Cloud Message"));
         Server.setOnPreferenceChangeListener((p, n) -> {
@@ -174,6 +200,13 @@ public class AccountPreference extends PreferenceFragmentCompat {
         });
     }
 
+    boolean isAlarmPermissionGranted() {
+        UiModeManager uiModeManager = (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
+        boolean isTelevisionsEnabled = uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+        Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(mContext);
+        return !isTelevisionsEnabled && sets.contains(mContext.getPackageName());
+    }
+
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
         MaterialAlertDialogBuilder dialog;
@@ -184,17 +217,32 @@ public class AccountPreference extends PreferenceFragmentCompat {
                 break;
 
             case "service":
-                String UID = prefs.getString("UID", "");
-                if (!UID.equals("")) {
-                    FirebaseMessaging.getInstance().subscribeToTopic(UID);
-                    new Thread(() -> {
-                        try {
-                            Pushy.subscribe(UID, mContext);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }).start();
+                if(isAlarmPermissionGranted()) {
+                    String UID = prefs.getString("UID", "");
+                    if (!UID.equals("")) {
+                        FirebaseMessaging.getInstance().subscribeToTopic(UID);
+                        new Thread(() -> {
+                            try {
+                                Pushy.subscribe(UID, mContext);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+                    }
                 }
+                break;
+
+            case "AlarmAccessWarning":
+                startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+                break;
+
+            case "AlarmAccessInfo":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                dialog.setTitle("Can't change type");
+                dialog.setMessage(getString(R.string.Lack_Alarm_Permission_waring));
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                dialog.setPositiveButton("Close", (d, w) -> { });
+                dialog.show();
                 break;
 
             case "Subscribe":

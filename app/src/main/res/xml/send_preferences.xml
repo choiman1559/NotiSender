@@ -50,7 +50,7 @@
             android:key="TelephonyMoved"
             android:icon="@drawable/ic_info_outline_black_24dp"
             android:title="Telephony menu moved."
-            android:summary="Telephony Reply is now separated as a plugin.\nCheck the 'Plugins and User Scripts' menu on the Other Options screen." />
+            android:summary="Telephony Reply is now separated as a plugin due to the Google play policy.\n\nCheck the 'Plugins and User Scripts' menu on the Other Options screen." />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Media control">

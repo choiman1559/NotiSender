@@ -9,12 +9,21 @@
             android:title="@string/Login"
             android:icon="@drawable/ic_fluent_inprivate_account_24_regular"/>
         <ListPreference
-            android:defaultValue="not selected"
+            android:defaultValue="reception"
             android:entries="@array/services_shown"
             android:entryValues="@array/services"
             android:key="service"
             android:title="Select service"
             android:summary="Now : reception"/>
+        <Preference
+            android:key="AlarmAccessInfo"
+            android:summary="Why I can't change service type?"
+            android:icon="@drawable/ic_info_outline_black_24dp" />
+        <Preference
+            android:key="AlarmAccessWarning"
+            android:title="Alarm access permission not granted"
+            android:summary="Click here to permit alarm access permission"
+            android:icon="@drawable/ic_fluent_warning_24_regular" />
         <ListPreference
             android:key="server"
             android:defaultValue="Firebase Cloud Message"
