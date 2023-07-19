@@ -38,6 +38,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.messaging.FirebaseMessaging;
+
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.ui.OptionActivity;
@@ -45,6 +46,7 @@ import com.noti.main.ui.SettingsActivity;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 
+import java.util.Objects;
 import java.util.Set;
 
 import me.pushy.sdk.Pushy;
@@ -106,6 +108,19 @@ public class AccountPreference extends PreferenceFragmentCompat {
                     ToastHelper.show(mContext, "Thanks for purchase!", "OK", ToastHelper.LENGTH_SHORT);
                     Subscribe.setVisible(false);
                     AlreadySubscribed.setVisible(true);
+
+                    String UID = prefs.getString("UID", "");
+                    if (!UID.equals("")) {
+                        new Thread(() -> {
+                            try {
+                                Pushy.subscribe(UID, mContext);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+                    }
+
+                    prefs.edit().putBoolean("IsPushyTopicSubscribed", true).apply();
                     break;
 
                 case BillingHelper.DonateID:
@@ -216,22 +231,6 @@ public class AccountPreference extends PreferenceFragmentCompat {
                 accountTask();
                 break;
 
-            case "service":
-                if(isAlarmPermissionGranted()) {
-                    String UID = prefs.getString("UID", "");
-                    if (!UID.equals("")) {
-                        FirebaseMessaging.getInstance().subscribeToTopic(UID);
-                        new Thread(() -> {
-                            try {
-                                Pushy.subscribe(UID, mContext);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }).start();
-                    }
-                }
-                break;
-
             case "AlarmAccessWarning":
                 startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
                 break;
@@ -335,7 +334,13 @@ public class AccountPreference extends PreferenceFragmentCompat {
                         ToastHelper.show(mContext, "Success to login Google", "DISMISS", ToastHelper.LENGTH_SHORT);
                         prefs.edit().putString("UID", mAuth.getUid()).apply();
                         prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
+
                         SettingsActivity.getAPIKeyFromCloud(mContext);
+                        FirebaseMessaging.getInstance().subscribeToTopic(Objects.requireNonNull(mAuth.getUid())).addOnCompleteListener(task1 -> {
+                            if(task1.isSuccessful()) {
+                                prefs.edit().putBoolean("IsFcmTopicSubscribed", true).apply();
+                            }
+                        });
                         recreate();
                     }
                 });

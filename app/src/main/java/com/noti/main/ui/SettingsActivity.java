@@ -31,6 +31,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.installations.FirebaseInstallations;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.kieronquinn.monetcompat.app.MonetCompatActivity;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.kieronquinn.monetcompat.view.MonetSwitch;
@@ -50,6 +51,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import me.pushy.sdk.Pushy;
@@ -346,6 +348,27 @@ public class SettingsActivity extends MonetCompatActivity {
         }
 
         getAPIKeyFromCloud(this);
+        if(!prefs.getBoolean("IsFcmTopicSubscribed", false) && !(mAuth.getUid() == null ? "" : mAuth.getUid()).isEmpty()) {
+            FirebaseMessaging.getInstance().subscribeToTopic(Objects.requireNonNull(mAuth.getUid()));
+        }
+
+        try {
+            if (!prefs.getBoolean("IsPushyTopicSubscribed", false) && BillingHelper.getInstance().isSubscribedOrDebugBuild()) {
+                String UID = prefs.getString("UID", "");
+                if (!UID.equals("")) {
+                    new Thread(() -> {
+                        try {
+                            Pushy.subscribe(UID, this);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+
         if (mBillingHelper.isSubscribed()) {
             new RegisterForPushNotificationsAsync(this).execute();
         }

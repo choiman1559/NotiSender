@@ -1,6 +1,5 @@
 package com.noti.main.ui.pair;
 
-import static com.noti.main.Application.PREFS_NAME;
 import static com.noti.main.Application.pairingProcessList;
 
 import android.annotation.SuppressLint;
@@ -61,6 +60,7 @@ public class PairAcceptActivity extends AppCompatActivity {
                 AcceptButton.setEnabled(false);
                 BillingHelper.showSubscribeInfoDialog(this, "Error: Can't get purchase information! Please contact developer.", false, ((dialog, which) -> {}));
             }
+            e.printStackTrace();
         }
 
         AcceptButton.setOnClickListener(v -> {
