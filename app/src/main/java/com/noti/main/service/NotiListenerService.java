@@ -89,7 +89,7 @@ public class NotiListenerService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(instance == null) initService(this);
+        if (instance == null) initService(this);
     }
 
     void initService(Context context) {
@@ -220,14 +220,16 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private boolean isTelephonyApp(Context context, String packageName) {
-       return Telephony.Sms.getDefaultSmsPackage(context).equals(packageName) || getSystemDialerApp(context).equals(packageName);
+        String defaultSms = Telephony.Sms.getDefaultSmsPackage(context);
+        String defaultTelephony = getSystemDialerApp(context);
+        return (defaultSms != null && defaultSms.equals(packageName)) || (defaultTelephony != null && defaultTelephony.equals(packageName));
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
 
-        if(BuildConfig.DEBUG) Log.d("ddd", sbn.getPackageName());
+        if (BuildConfig.DEBUG) Log.d("ddd", sbn.getPackageName());
         if (manager == null) manager = PowerUtils.getInstance(this);
         manager.acquire();
         synchronized (pastNotificationLock) {
@@ -256,7 +258,7 @@ public class NotiListenerService extends NotificationListenerService {
                     if (PackageName.equals(getPackageName()) && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))) {
                         manager.release();
                         return;
-                    } else if(isTelephonyApp(this, PackageName)) {
+                    } else if (isTelephonyApp(this, PackageName)) {
                         manager.release();
                         return;
                     } else if (isWhitelist(PackageName)) {
