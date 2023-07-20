@@ -531,9 +531,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setContentText("click here to reply or open dialer")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
-                .setGroup(getPackageName() + ".NOTIFICATION")
-                .setGroupSummary(true)
                 .setAutoCancel(true);
+
+        if(Build.VERSION.SDK_INT < 33) {
+            builder
+                    .setGroup(getPackageName() + ".NOTIFICATION")
+                    .setGroupSummary(true);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setSmallIcon(R.drawable.ic_notification);
@@ -547,7 +551,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         } else builder.setSmallIcon(R.mipmap.ic_notification);
 
         assert notificationManager != null;
-        notificationManager.notify((int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        notificationManager.notify(uniqueCode, builder.build());
         playRingtoneAndVibrate();
     }
 
@@ -588,9 +592,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
-                .setGroup(getPackageName() + ".NOTIFICATION")
-                .setGroupSummary(true)
                 .setAutoCancel(true);
+
+        if(Build.VERSION.SDK_INT < 33) {
+            builder
+                    .setGroup(getPackageName() + ".NOTIFICATION")
+                    .setGroupSummary(true);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setSmallIcon(R.drawable.ic_notification);
@@ -604,7 +612,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         } else builder.setSmallIcon(R.mipmap.ic_notification);
 
         assert notificationManager != null;
-        notificationManager.notify((int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE), builder.build());
+        notificationManager.notify(uniqueCode, builder.build());
         playRingtoneAndVibrate();
     }
 
