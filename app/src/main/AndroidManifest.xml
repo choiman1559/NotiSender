@@ -197,6 +197,8 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".service.BitmapIPCManager$BitmapDismissBroadcastListener" android:exported="false"/>
+
         <receiver android:name=".receiver.FindDeviceCancelReceiver" />
 
         <service android:name="me.pushy.sdk.services.PushySocketService" android:stopWithTask="false" />

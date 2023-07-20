@@ -26,6 +26,7 @@ public class SmsViewActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smsdetail);
+        setFinishOnTouchOutside(false);
         Intent i = getIntent();
 
         String Topic = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID","");

@@ -522,7 +522,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             e.printStackTrace();
         }
 
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -579,7 +579,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             e.printStackTrace();
         }
 
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -674,22 +674,29 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             e.printStackTrace();
         }
 
+        BitmapIPCManager.getInstance().addBitmap(uniqueCode, Icon);
+        notificationIntent.putExtra("bitmapId", uniqueCode);
+
         notificationIntent.putExtra("package", Package);
         notificationIntent.putExtra("device_id", Device_id);
         notificationIntent.putExtra("appname", AppName);
         notificationIntent.putExtra("title", title);
         notificationIntent.putExtra("device_name", Device_name);
         notificationIntent.putExtra("date", Date);
-        notificationIntent.putExtra("icon", Icon);
 
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent onDismissIntent = new Intent(this, BitmapIPCManager.BitmapDismissBroadcastListener.class);
+        onDismissIntent.putExtra("bitmapId", uniqueCode);
+        PendingIntent onDismissPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onDismissIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))
                 .setContentTitle(title + " (" + AppName + ")")
                 .setContentText(content)
                 .setPriority(Build.VERSION.SDK_INT > 23 ? getPriority() : NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
+                .setDeleteIntent(onDismissPendingIntent)
                 .setAutoCancel(true);
 
         if(Build.VERSION.SDK_INT < 33) {

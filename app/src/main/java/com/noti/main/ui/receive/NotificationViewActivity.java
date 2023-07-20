@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.button.MaterialButton;
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
+import com.noti.main.service.BitmapIPCManager;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
 
@@ -23,15 +24,18 @@ import org.json.JSONObject;
 
 public class NotificationViewActivity extends Activity {
 
+    Bitmap icon;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notidetail);
+        setFinishOnTouchOutside(false);
 
         Intent intent = getIntent();
         String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID","");
         String Package = intent.getStringExtra("package");
-        Bitmap icon = intent.getParcelableExtra("icon");
+        icon = BitmapIPCManager.getInstance().getBitmap(intent.getIntExtra("bitmapId", -1));
 
         MaterialButton OK = findViewById(R.id.ok);
         MaterialButton NO = findViewById(R.id.cancel);
@@ -73,5 +77,11 @@ public class NotificationViewActivity extends Activity {
         });
 
         NO.setOnClickListener(v -> ExitActivity.exitApplication(this));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (icon != null) icon.recycle();
     }
 }
