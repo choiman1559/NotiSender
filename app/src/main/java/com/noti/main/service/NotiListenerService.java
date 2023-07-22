@@ -220,9 +220,13 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private boolean isTelephonyApp(Context context, String packageName) {
-        String defaultSms = Telephony.Sms.getDefaultSmsPackage(context);
-        String defaultTelephony = getSystemDialerApp(context);
-        return (defaultSms != null && defaultSms.equals(packageName)) || (defaultTelephony != null && defaultTelephony.equals(packageName));
+        try {
+            String defaultSms = Telephony.Sms.getDefaultSmsPackage(context);
+            String defaultTelephony = getSystemDialerApp(context);
+            return (defaultSms != null && defaultSms.equals(packageName)) || (defaultTelephony != null && defaultTelephony.equals(packageName));
+        } catch (NullPointerException e) {
+            return false;
+        }
     }
 
     @Override
