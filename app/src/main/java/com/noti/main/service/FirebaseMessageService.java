@@ -97,6 +97,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         }
     });
 
+    public interface OnNotificationRemoveRequest {
+        void onRequested(String key);
+    }
+
+    public static OnNotificationRemoveRequest removeListener;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -427,15 +433,21 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     protected void startNewRemoteActivity(Map<String, String> map) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
-        String Package = map.get("package");
-        try {
-            getPackageManager().getPackageInfo(Package, PackageManager.GET_ACTIVITIES);
-            Intent intent = getPackageManager().getLaunchIntentForPackage(Package);
-            startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        } catch (Exception e) {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
-            startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        if(map.containsKey("notification_key") && removeListener != null) {
+            removeListener.onRequested(map.get("notification_key"));
+        }
+
+        if(!map.containsKey("start_remote_activity") || "true".equals(map.get("start_remote_activity"))) {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+            String Package = map.get("package");
+            try {
+                getPackageManager().getPackageInfo(Package, PackageManager.GET_ACTIVITIES);
+                Intent intent = getPackageManager().getLaunchIntentForPackage(Package);
+                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            } catch (Exception e) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
+                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            }
         }
     }
 
@@ -624,6 +636,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Device_name = map.get("device_name");
         String Device_id = map.get("device_id");
         String Date = map.get("date");
+        String Key = map.get("notification_key");
 
         Bitmap Icon_original;
         Bitmap Icon = null;
@@ -691,12 +704,17 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         notificationIntent.putExtra("title", title);
         notificationIntent.putExtra("device_name", Device_name);
         notificationIntent.putExtra("date", Date);
+        notificationIntent.putExtra("notification_key", Key);
 
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent onDismissIntent = new Intent(this, BitmapIPCManager.BitmapDismissBroadcastListener.class);
         onDismissIntent.putExtra("bitmapId", uniqueCode);
+        onDismissIntent.putExtra("device_id", Device_id);
+        onDismissIntent.putExtra("device_name", Device_name);
+        onDismissIntent.putExtra("notification_key", Key);
+
         PendingIntent onDismissPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onDismissIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notify_channel_id))

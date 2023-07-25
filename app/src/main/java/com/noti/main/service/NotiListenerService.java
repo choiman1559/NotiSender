@@ -59,6 +59,7 @@ public class NotiListenerService extends NotificationListenerService {
 
     private static final Object pastNotificationLock = new Object();
     private volatile StatusBarNotification pastNotification = null;
+    private final FirebaseMessageService.OnNotificationRemoveRequest onRemoveRequestListener = this::cancelNotification;
 
     private static int queryAccessCount = 0;
     private static volatile long intervalTimestamp = 0;
@@ -90,6 +91,7 @@ public class NotiListenerService extends NotificationListenerService {
     public void onCreate() {
         super.onCreate();
         if (instance == null) initService(this);
+        FirebaseMessageService.removeListener = onRemoveRequestListener;
     }
 
     void initService(Context context) {
@@ -247,6 +249,7 @@ public class NotiListenerService extends NotificationListenerService {
             Bundle extra = notification.extras;
             Date time = Calendar.getInstance().getTime();
             String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
+            String KEY = sbn.getKey();
 
             boolean isLogging = BuildConfig.DEBUG;
 
@@ -308,7 +311,7 @@ public class NotiListenerService extends NotificationListenerService {
                                 e.printStackTrace();
                             }
                         }).start();
-                        sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT);
+                        sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT, KEY);
                     }
 
                     if (queryAccessCount > prefs.getInt("IntervalQueryGCTrigger", 50)) {
@@ -387,7 +390,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT) {
+    private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT, String KEY) {
         PackageManager pm = this.getPackageManager();
         Bitmap ICON = null;
         try {
@@ -467,6 +470,7 @@ public class NotiListenerService extends NotificationListenerService {
             notificationBody.put("device_id", DEVICE_ID);
             notificationBody.put("date", DATE);
             notificationBody.put("icon", ICONS);
+            notificationBody.put("notification_key", KEY);
 
             int dataLimit = prefs.getInt("DataLimit", 4096);
             boolean isLimit = notificationBody.toString().length() < dataLimit - 20 || prefs.getBoolean("UseSplitData", false);

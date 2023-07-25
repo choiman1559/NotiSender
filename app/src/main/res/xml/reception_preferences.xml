@@ -71,4 +71,14 @@
             android:title="Use alternative icon on any condition"
             android:summary="The above option is used even if app icon information is received." />
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Remote Dismiss">
+    <com.noti.main.utils.ui.SwitchedPreference
+        android:defaultValue="false"
+        android:key="RemoteDismiss"
+        android:title="Dismiss Notification Remotely"
+        android:summary="Remove notification from sent device after check on this device"
+        android:icon="@drawable/ic_fluent_comment_dismiss_24_regular"/>
+    </PreferenceCategory>
 </PreferenceScreen>

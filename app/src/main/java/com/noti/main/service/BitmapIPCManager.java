@@ -8,6 +8,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.noti.main.ui.receive.NotificationViewActivity;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +57,12 @@ public class BitmapIPCManager {
                 Log.d("BitmapIPCManager", "Recycling unused bitmap Id: " + id);
                 BitmapIPCManager.getInstance().dismissBitmap(id);
             }
+
+            String DEVICE_NAME = intent.getStringExtra("device_name");
+            String DEVICE_ID = intent.getStringExtra("device_id");
+            String KEY = intent.getStringExtra("notification_key");
+
+            NotificationViewActivity.receptionNotification(context, DEVICE_NAME, DEVICE_ID, KEY, false);
         }
     }
 }
