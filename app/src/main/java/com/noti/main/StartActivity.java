@@ -242,7 +242,7 @@ public class StartActivity extends AppCompatActivity {
         });
         Skip_Alarm.setOnCheckedChangeListener((compoundButton, b) -> {
             checkPermissionsAndEnableComplete();
-            prefs.edit().putBoolean("SkipAlarmAccessPermission", (boolean)b).apply();
+            prefs.edit().putBoolean("SkipAlarmAccessPermission", b).apply();
         });
         Start_App.setOnClickListener((v) -> {
             if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || (Permit_Alarm.isEnabled() && !Skip_Alarm.isChecked()) || Permit_Privacy.isEnabled()) {

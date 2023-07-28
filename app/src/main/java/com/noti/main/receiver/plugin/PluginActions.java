@@ -94,9 +94,14 @@ public class PluginActions {
 
     public static void responseServiceStatus(Context context, String packageName) {
         boolean isRunning = false;
-        Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(context);
-        if (sets.contains(context.getPackageName())) {
+
+        if(context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getBoolean("SkipAlarmAccessPermission", false)) {
             isRunning = true;
+        } else {
+            Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(context);
+            if (sets.contains(context.getPackageName())) {
+                isRunning = true;
+            }
         }
 
         Bundle extras = new Bundle();

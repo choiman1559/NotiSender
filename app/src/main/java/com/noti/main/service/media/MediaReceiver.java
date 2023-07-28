@@ -157,7 +157,7 @@ public class MediaReceiver {
     }
 
     void sendMetadata(MediaReceiverPlayer player) {
-        if(!prefs.getBoolean("serviceToggle", false)) {
+        if(!prefs.getBoolean("serviceToggle", false) || !prefs.getBoolean("UseMediaSync", false)) {
             return;
         }
 
