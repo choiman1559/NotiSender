@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +24,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -39,13 +45,27 @@ import com.noti.main.receiver.plugin.PluginConst;
 import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.receiver.plugin.PluginReceiver;
 import com.noti.main.updater.tasks.Version;
+import com.noti.main.utils.JsonRequest;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class PluginFragment extends Fragment {
     AppCompatActivity mContext;
     ArrayList<PluginAppHolder> pluginAppHolderArrayList = new ArrayList<>();
+    ArrayList<PluginMarketHolder> pluginMarketArrayList = new ArrayList<>();
+
+    LinearLayoutCompat pluginSuggestLayout;
+    SwitchMaterial taskerPluginEnabled;
+    RelativeLayout taskerActionMenuLayout;
+    TextView taskerDescriptionText;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -69,16 +89,15 @@ public class PluginFragment extends Fragment {
 
         LinearLayoutCompat itemNotAvailableLayout = view.findViewById(R.id.itemNotAvailableLayout);
         LinearLayoutCompat pluginListLayout = view.findViewById(R.id.pluginListLayout);
-        LinearLayoutCompat pluginSuggestLayout = view.findViewById(R.id.pluginSuggestLayout);
-        MaterialCardView TelephonyPluginSuggest = view.findViewById(R.id.TelephonyPluginSuggest);
-        MaterialCardView LibraryTestPluginSuggest = view.findViewById(R.id.LibraryTestPluginSuggest);
 
         SharedPreferences prefs = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
         MaterialCardView taskerPluginParent = view.findViewById(R.id.taskerPluginParent);
-        SwitchMaterial taskerPluginEnabled = view.findViewById(R.id.taskerPluginEnabled);
-        RelativeLayout taskerActionMenuLayout = view.findViewById(R.id.taskerActionMenuLayout);
-        TextView taskerDescriptionText = view.findViewById(R.id.taskerDescriptionText);
         Button taskerPluginInfo = view.findViewById(R.id.taskerPluginInfo);
+
+        pluginSuggestLayout = view.findViewById(R.id.pluginSuggestLayout);
+        taskerPluginEnabled = view.findViewById(R.id.taskerPluginEnabled);
+        taskerActionMenuLayout = view.findViewById(R.id.taskerActionMenuLayout);
+        taskerDescriptionText = view.findViewById(R.id.taskerDescriptionText);
 
         ArrayList<String> taskerPluginList = new ArrayList<>();
         taskerPluginList.add("net.dinglisch.android.taskerm");
@@ -130,20 +149,6 @@ public class PluginFragment extends Fragment {
             dialog.show();
         });
 
-        boolean isTelephonyPluginInstalled = isAppInstalled("com.noti.plugin.telephony");
-        boolean isLibraryTestPluginInstalled = isAppInstalled("com.noti.plugin.showcase");
-
-        if(isTelephonyPluginInstalled && isLibraryTestPluginInstalled) {
-            pluginSuggestLayout.setVisibility(View.GONE);
-        } else if(isTelephonyPluginInstalled) {
-            TelephonyPluginSuggest.setVisibility(View.GONE);
-        } else if(isLibraryTestPluginInstalled) {
-            LibraryTestPluginSuggest.setVisibility(View.GONE);
-        }
-
-        TelephonyPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-TelephonyPlugin/releases/latest"))));
-        LibraryTestPluginSuggest.setOnClickListener((v) -> mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/choiman1559/NotiSender-PluginShowcase/releases/latest"))));
-
         loadPluginList(packageManager);
         PluginReceiver.receivePluginInformation = data -> {
             itemNotAvailableLayout.setVisibility(View.GONE);
@@ -188,6 +193,10 @@ public class PluginFragment extends Fragment {
                         for(PluginAppHolder holder1 : pluginAppHolderArrayList) {
                             setDetailVisibility(holder1, false);
                         }
+
+                        for(PluginMarketHolder holder1 : pluginMarketArrayList) {
+                            setDetailVisibility(holder1, false);
+                        }
                     }
 
                     setDetailVisibility(holder, !isVisible);
@@ -201,9 +210,106 @@ public class PluginFragment extends Fragment {
             pluginAppHolderArrayList.add(holder);
             pluginListLayout.addView(layout);
         };
+
+        boolean isTelephonyPluginInstalled = isAppInstalled("com.noti.plugin.telephony");
+        boolean isLibraryTestPluginInstalled = isAppInstalled("com.noti.plugin.showcase");
+
+        if(isTelephonyPluginInstalled && isLibraryTestPluginInstalled) {
+            pluginSuggestLayout.setVisibility(View.GONE);
+        }
+
+        String API_URL = "https://api.github.com/repos/choiman1559/NotiSender-PluginMarket/git/trees/master";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(API_URL, response -> {
+            try {
+                JSONArray jsonArray = response.getJSONArray("tree");
+                for(int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    if("tree".equals(jsonObject.getString("type"))) {
+                        String manifestUrl = String.format("https://raw.githubusercontent.com/choiman1559/NotiSender-PluginMarket/master/%s/MANIFEST", jsonObject.getString("path"));
+                        StringRequest stringRequest = new StringRequest(Request.Method.GET, manifestUrl, response1 -> {
+                            try {
+                                TrimProperties properties = new TrimProperties();
+                                properties.load(new StringReader(response1));
+                                initPluginMarketItem(properties);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }, Throwable::printStackTrace);
+                        JsonRequest.getInstance(mContext).addToRequestQueue(stringRequest, 1);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, Throwable::printStackTrace);
+        JsonRequest.getInstance(mContext).addToRequestQueue(jsonObjectRequest, 1);
+    }
+
+    @SuppressLint("DiscouragedApi")
+    void initPluginMarketItem(TrimProperties properties) {
+        if(isAppInstalled(properties.getProperty("packageName"))) return;
+        CoordinatorLayout layout = (CoordinatorLayout) View.inflate(mContext, R.layout.cardview_plugin_market, null);
+        PluginMarketHolder holder = new PluginMarketHolder(layout);
+
+        holder.pluginTitle.setText(properties.getProperty("pluginName"));
+        holder.pluginDescription.setText(properties.getProperty("description"));
+
+        String useFluentIcon = properties.getProperty("useFluentIcon");
+        if("true".equals(useFluentIcon)) {
+            holder.pluginIcon.setImageDrawable(AppCompatResources.getDrawable(mContext, mContext.getResources().getIdentifier(String.format("ic_fluent_%s_24_regular", properties.getProperty("iconName")),"drawable", mContext.getPackageName())));
+        } else if("false".equals(useFluentIcon)) {
+            Glide.with(mContext).load(properties.getProperty("iconUrl")).into(holder.pluginIcon);
+        }
+
+        holder.downloadButton.setOnClickListener(v -> {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(properties.getProperty("downloadLink"))));
+        });
+
+        holder.infoButton.setOnClickListener(v -> {
+            String message = "";
+            message += String.format("<b>Author</b>: %s<br>", properties.getProperty("author"));
+            message += String.format("<b>Contact</b>: %s<br>", properties.getProperty("contact"));
+            message += String.format("<b>License</b>: %s<br>", properties.getProperty("license"));
+            message += String.format("<b>Version</b>: %s<br>", properties.getProperty("latestVersion"));
+            message += String.format("<b>Tag</b>: %s<br>", properties.getProperty("tag"));
+
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+            builder.setTitle("Plugin Details");
+            builder.setMessage(Html.fromHtml(message));
+            builder.setPositiveButton("Close", (dialog, which) -> { });
+            builder.show();
+        });
+
+        holder.pluginActionMenuLayout.setVisibility(View.GONE);
+        holder.Parent.setOnClickListener((v) -> {
+            boolean isVisible = holder.pluginActionMenuLayout.getVisibility() == View.VISIBLE;
+            if(!isVisible) {
+                taskerActionMenuLayout.setVisibility(View.GONE);
+                taskerDescriptionText.setSingleLine(true);
+
+                for(PluginAppHolder holder1 : pluginAppHolderArrayList) {
+                    setDetailVisibility(holder1, false);
+                }
+
+                for(PluginMarketHolder holder1 : pluginMarketArrayList) {
+                    setDetailVisibility(holder1, false);
+                }
+            }
+
+            setDetailVisibility(holder, !isVisible);
+        });
+
+        pluginSuggestLayout.addView(layout);
+        pluginMarketArrayList.add(holder);
     }
 
     void setDetailVisibility(PluginAppHolder holder, boolean isVisible) {
+        holder.pluginActionMenuLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        holder.pluginTitle.setSingleLine(!isVisible);
+        holder.pluginDescription.setSingleLine(!isVisible);
+    }
+
+    void setDetailVisibility(PluginMarketHolder holder, boolean isVisible) {
         holder.pluginActionMenuLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
         holder.pluginTitle.setSingleLine(!isVisible);
         holder.pluginDescription.setSingleLine(!isVisible);
@@ -242,6 +348,36 @@ public class PluginFragment extends Fragment {
             infoButton = view.findViewById(R.id.infoButton);
             pluginActionMenuLayout = view.findViewById(R.id.pluginActionMenuLayout);
             pluginActionMenuLayout.setVisibility(View.GONE);
+        }
+    }
+
+    static class PluginMarketHolder {
+        MaterialCardView Parent;
+        RelativeLayout pluginActionMenuLayout;
+        ImageView pluginIcon;
+        TextView pluginTitle;
+        TextView pluginDescription;
+        SwitchMaterial pluginEnabled;
+        Button downloadButton;
+        Button infoButton;
+
+        PluginMarketHolder(View view) {
+            Parent = view.findViewById(R.id.Parent);
+            pluginIcon = view.findViewById(R.id.pluginIcon);
+            pluginTitle = view.findViewById(R.id.pluginTitle);
+            pluginDescription = view.findViewById(R.id.pluginDescription);
+            pluginEnabled = view.findViewById(R.id.pluginEnabled);
+            downloadButton = view.findViewById(R.id.downloadButton);
+            infoButton = view.findViewById(R.id.infoButton);
+            pluginActionMenuLayout = view.findViewById(R.id.pluginActionMenuLayout);
+            pluginActionMenuLayout.setVisibility(View.GONE);
+        }
+    }
+
+    public static class TrimProperties extends Properties {
+        @Override
+        public String getProperty(String key) {
+            return super.getProperty(key).trim();
         }
     }
 

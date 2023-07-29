@@ -7,15 +7,18 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import java.util.ArrayList;
+
 public class JsonRequest {
     @SuppressLint("StaticFieldLeak")
     private static JsonRequest instance;
-    private RequestQueue requestQueue;
+    private final ArrayList<RequestQueue> requestQueue;
     private final Context ctx;
 
     private JsonRequest(Context context) {
         ctx = context;
-        requestQueue = getRequestQueue();
+        requestQueue = new ArrayList<>();
+        requestQueue.add(getRequestQueue());
     }
 
     public static synchronized JsonRequest getInstance(Context context) {
@@ -26,13 +29,35 @@ public class JsonRequest {
     }
 
     public RequestQueue getRequestQueue() {
-        if (requestQueue == null) {
-            requestQueue = Volley.newRequestQueue(ctx.getApplicationContext());
+        return getRequestQueue(0);
+    }
+
+    public RequestQueue getRequestQueue(int index) {
+        RequestQueue requestObj = null;
+        if(requestQueue.size() > index) {
+            requestObj = requestQueue.get(index);
         }
-        return requestQueue;
+
+        if(requestObj == null) {
+            requestObj = getActualRequestQueue();
+        }
+
+        if(requestQueue.size() > index) {
+            requestQueue.set(index, requestObj);
+        } else requestQueue.add(requestObj);
+
+        return requestObj;
+    }
+
+    public RequestQueue getActualRequestQueue() {
+        return Volley.newRequestQueue(ctx.getApplicationContext());
     }
 
     public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
+    }
+
+    public <T> void addToRequestQueue(Request<T> req, int index) {
+        getRequestQueue(index).add(req);
     }
 }

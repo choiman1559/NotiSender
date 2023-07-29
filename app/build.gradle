@@ -79,6 +79,7 @@ dependencies {
 
     implementation 'me.pushy:sdk:1.0.93'
     implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'com.anjlab.android.iab.v3:library:2.0.3'
     implementation 'com.github.isradeleon:Notify-Android:1.0.4'
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
