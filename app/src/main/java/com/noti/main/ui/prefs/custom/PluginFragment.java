@@ -248,6 +248,8 @@ public class PluginFragment extends Fragment {
     @SuppressLint("DiscouragedApi")
     void initPluginMarketItem(TrimProperties properties) {
         if(isAppInstalled(properties.getProperty("packageName"))) return;
+        if("false".equals(properties.getProperty("visible"))) return;
+
         CoordinatorLayout layout = (CoordinatorLayout) View.inflate(mContext, R.layout.cardview_plugin_market, null);
         PluginMarketHolder holder = new PluginMarketHolder(layout);
 
@@ -377,7 +379,8 @@ public class PluginFragment extends Fragment {
     public static class TrimProperties extends Properties {
         @Override
         public String getProperty(String key) {
-            return super.getProperty(key).trim();
+            String value = super.getProperty(key);
+            return value == null ? "" : value.trim();
         }
     }
 

@@ -15,15 +15,13 @@ android {
         }
     }
 
-    compileSdkVersion 34
-    buildToolsVersion '34.0.0'
-
     defaultConfig {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 34
         versionCode 1011907
         versionName "1.19.7"
+
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -40,10 +38,13 @@ android {
             minifyEnabled false
         }
     }
+
     dependenciesInfo {
         includeInApk false
         includeInBundle false
     }
+
+    compileSdk 34
     ndkVersion '25.2.9519653'
     namespace 'com.noti.main'
     flavorDimensions
