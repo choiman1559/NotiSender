@@ -182,7 +182,19 @@ public class PluginFragment extends Fragment {
                     holder.pluginDescription.setTextColor(Color.RED);
                 }
 
-                holder.pluginEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> pluginPrefs.setPluginEnabled(isChecked).apply());
+                holder.pluginEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if(isChecked && data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API)) {
+                        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                        builder.setTitle("Sensitive API Warning");
+                        builder.setMessage(getString(R.string.Sensitive_API_Plugin_waring));
+                        builder.setPositiveButton("Enable", (dialog, which) -> pluginPrefs.setPluginEnabled(true).apply());
+                        builder.setNegativeButton("Cancel", (dialog, which) -> { });
+                        builder.show();
+                    } else {
+                        pluginPrefs.setPluginEnabled(isChecked).apply();
+                    }
+                });
+
                 holder.pluginActionMenuLayout.setVisibility(View.GONE);
                 holder.Parent.setOnClickListener((v) -> {
                     boolean isVisible = holder.pluginActionMenuLayout.getVisibility() == View.VISIBLE;

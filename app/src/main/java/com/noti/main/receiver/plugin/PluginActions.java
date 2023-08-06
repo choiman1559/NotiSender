@@ -49,6 +49,13 @@ public class PluginActions {
         sendBroadcast(context, packageName, extras);
     }
 
+    public static void responseSelfDeviceInfo(Context context, String packageName, String deviceInfo) {
+        Bundle extras = new Bundle();
+        extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_SELF_DEVICE_INFO);
+        extras.putString(PluginConst.DATA_KEY_DEVICE_LIST, deviceInfo);
+        sendBroadcast(context, packageName, extras);
+    }
+
     public static void responseDeviceList(Context context, String packageName) {
         Set<String> deviceList = context.getSharedPreferences("com.noti.main_pair", MODE_PRIVATE).getStringSet("paired_list", new HashSet<>());
         Bundle extras = new Bundle();
@@ -107,6 +114,13 @@ public class PluginActions {
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_SERVICE_STATUS);
         extras.putString(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, isRunning + "");
+        sendBroadcast(context, packageName, extras);
+    }
+
+    public static void responsePluginToggle(Context context, String packageName, boolean isEnabled) {
+        Bundle extras = new Bundle();
+        extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_PLUGIN_TOGGLE);
+        extras.putString(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, isEnabled + "");
         sendBroadcast(context, packageName, extras);
     }
 

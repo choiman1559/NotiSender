@@ -27,14 +27,20 @@ public class PluginConst {
     public static final String ACTION_REQUEST_REMOTE_ACTION = "request_remote_action";
     public static final String ACTION_REQUEST_PREFS = "request_preferences";
     public static final String ACTION_REQUEST_SERVICE_STATUS = "request_is_running";
+    public static final String ACTION_REQUEST_PLUGIN_TOGGLE = "request_plugin_toggle";
+    public static final String ACTION_REQUEST_SELF_DEVICE_INFO = "request_self_info";
 
     public static final String ACTION_RESPONSE_INFO = "response_plugin_info";
     public static final String ACTION_RESPONSE_DEVICE_LIST = "response_device_list";
     public static final String ACTION_RESPONSE_REMOTE_DATA = "response_remote_data";
     public static final String ACTION_RESPONSE_PREFS = "response_preferences";
     public static final String ACTION_RESPONSE_SERVICE_STATUS = "response_is_running";
+    public static final String ACTION_RESPONSE_PLUGIN_TOGGLE = "response_plugin_toggle";
+    public static final String ACTION_RESPONSE_SELF_DEVICE_INFO = "response_self_info";
 
     public static final String ACTION_PUSH_MESSAGE_DATA = "push_message_data";
     public static final String ACTION_PUSH_CALL_DATA = "push_call_data";
     public static final String ACTION_PUSH_EXCEPTION = "push_exception";
+    public static final String ACTION_PUSH_NOTIFICATION = "push_notification";
+    public static final String ACTION_PULL_NOTIFICATION = "pull_notification";
 }

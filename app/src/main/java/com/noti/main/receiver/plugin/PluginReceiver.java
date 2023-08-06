@@ -3,6 +3,7 @@ package com.noti.main.receiver.plugin;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.VisibleForTesting;
@@ -10,6 +11,7 @@ import androidx.annotation.VisibleForTesting;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.pair.DataProcess;
+import com.noti.main.service.pair.PairDeviceType;
 
 import java.util.Calendar;
 
@@ -40,6 +42,14 @@ public class PluginReceiver extends BroadcastReceiver {
                         PluginActions.responseDeviceList(context, packageName);
                         break;
 
+                    case PluginConst.ACTION_REQUEST_SELF_DEVICE_INFO:
+                        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+                        String DEVICE_ID = NotiListenerService.getUniqueID();
+                        String DEVICE_TYPE = PairDeviceType.getThisDeviceType(context).getDeviceType();
+                        String DEVICE_STRING = String.format("%s|%s|%s", DEVICE_NAME, DEVICE_ID, DEVICE_TYPE);
+                        PluginActions.responseSelfDeviceInfo(context, packageName, DEVICE_STRING);
+                        break;
+
                     case PluginConst.ACTION_REQUEST_REMOTE_ACTION:
                         if(BuildConfig.DEBUG && rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME).equals("request_purchase")) {
                             @VisibleForTesting
@@ -60,6 +70,10 @@ public class PluginReceiver extends BroadcastReceiver {
                         if(pluginPrefs.isRequireSensitiveAPI()) {
                             PluginActions.responsePreferences(context, packageName, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME));
                         } else PluginActions.pushException(context, packageName, new IllegalAccessException("ACTION_REQUEST_PREFS requires sensitiveAPI=true" + packageName));
+                        break;
+
+                    case PluginConst.ACTION_REQUEST_PLUGIN_TOGGLE:
+                        PluginActions.responsePluginToggle(context, packageName, pluginPrefs.isPluginEnabled());
                         break;
 
                     case PluginConst.ACTION_REQUEST_SERVICE_STATUS:
