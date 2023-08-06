@@ -40,8 +40,10 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
+import com.noti.main.receiver.plugin.NotificationData;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
+import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceStatus;
@@ -814,6 +816,23 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 });
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+        }
+
+        SharedPreferences pluginPrefs = getSharedPreferences("com.noti.main_plugin", Context.MODE_PRIVATE);
+        Map<String, ?> pluginMap = pluginPrefs.getAll();
+        NotificationData data = new NotificationData();
+        data.TITLE = title;
+        data.CONTENT = content;
+        data.DEVICE_NAME = Device_name;
+        data.PACKAGE_NAME = Package;
+        data.APP_NAME = AppName;
+        data.DATE = Date;
+
+        for (Map.Entry<String, ?> entry : pluginMap.entrySet()) {
+            PluginPrefs pluginPref = new PluginPrefs(this, entry.getKey());
+            if(pluginPref.isPluginEnabled() && pluginPref.isRequireSensitiveAPI()) {
+                PluginActions.pushNotification(this, entry.getKey(), data);
             }
         }
     }
