@@ -129,8 +129,8 @@ public class PluginFragment extends Fragment {
         taskerPluginParent.setOnClickListener(v -> {
             boolean isDetailGone = taskerActionMenuLayout.getVisibility() == View.GONE;
 
-            if(isDetailGone) {
-                for(PluginAppHolder holder1 : pluginAppHolderArrayList) {
+            if (isDetailGone) {
+                for (PluginAppHolder holder1 : pluginAppHolderArrayList) {
                     setDetailVisibility(holder1, false);
                 }
             }
@@ -167,8 +167,8 @@ public class PluginFragment extends Fragment {
                 holder.pluginTitle.setText(title.isEmpty() ? packageInfo.applicationInfo.loadLabel(packageManager) : title);
                 holder.pluginIcon.setImageDrawable(packageInfo.applicationInfo.loadIcon(mContext.getPackageManager()));
 
-                if(currentVersion.compareTo(requireVersion) >= 0) {
-                    if(data.getBoolean(PluginConst.PLUGIN_READY)) {
+                if (currentVersion.compareTo(requireVersion) >= 0) {
+                    if (data.getBoolean(PluginConst.PLUGIN_READY)) {
                         String description = data.getString(PluginConst.PLUGIN_DESCRIPTION);
                         holder.pluginDescription.setText(description.isEmpty() ? "Description is not available." : description);
                         holder.pluginEnabled.setEnabled(true);
@@ -183,13 +183,26 @@ public class PluginFragment extends Fragment {
                 }
 
                 holder.pluginEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if(isChecked && data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API)) {
-                        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                        builder.setTitle("Sensitive API Warning");
-                        builder.setMessage(getString(R.string.Sensitive_API_Plugin_waring));
-                        builder.setPositiveButton("Enable", (dialog, which) -> pluginPrefs.setPluginEnabled(true).apply());
-                        builder.setNegativeButton("Cancel", (dialog, which) -> { });
-                        builder.show();
+                    if (isChecked && !pluginPrefs.isPluginEnabled()) {
+                        if(data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API)) {
+                            pluginPrefs.setPluginEnabled(false).apply();
+                            holder.pluginEnabled.setChecked(false);
+
+                            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                            builder.setTitle("Sensitive API Warning");
+                            builder.setMessage(getString(R.string.Sensitive_API_Plugin_waring));
+                            builder.setPositiveButton("Enable", (dialog, which) -> {
+                                pluginPrefs
+                                        .setPluginEnabled(true)
+                                        .setRequireSensitiveAPI(true)
+                                        .apply();
+                                holder.pluginEnabled.setChecked(true);
+                            });
+                            builder.setNegativeButton("Cancel", (dialog, which) -> {});
+                            builder.show();
+                        } else {
+                            pluginPrefs.setRequireSensitiveAPI(false).apply();
+                        }
                     } else {
                         pluginPrefs.setPluginEnabled(isChecked).apply();
                     }
@@ -198,15 +211,15 @@ public class PluginFragment extends Fragment {
                 holder.pluginActionMenuLayout.setVisibility(View.GONE);
                 holder.Parent.setOnClickListener((v) -> {
                     boolean isVisible = holder.pluginActionMenuLayout.getVisibility() == View.VISIBLE;
-                    if(!isVisible) {
+                    if (!isVisible) {
                         taskerActionMenuLayout.setVisibility(View.GONE);
                         taskerDescriptionText.setSingleLine(true);
 
-                        for(PluginAppHolder holder1 : pluginAppHolderArrayList) {
+                        for (PluginAppHolder holder1 : pluginAppHolderArrayList) {
                             setDetailVisibility(holder1, false);
                         }
 
-                        for(PluginMarketHolder holder1 : pluginMarketArrayList) {
+                        for (PluginMarketHolder holder1 : pluginMarketArrayList) {
                             setDetailVisibility(holder1, false);
                         }
                     }
@@ -226,7 +239,7 @@ public class PluginFragment extends Fragment {
         boolean isTelephonyPluginInstalled = isAppInstalled("com.noti.plugin.telephony");
         boolean isLibraryTestPluginInstalled = isAppInstalled("com.noti.plugin.showcase");
 
-        if(isTelephonyPluginInstalled && isLibraryTestPluginInstalled) {
+        if (isTelephonyPluginInstalled && isLibraryTestPluginInstalled) {
             pluginSuggestLayout.setVisibility(View.GONE);
         }
 
@@ -234,9 +247,9 @@ public class PluginFragment extends Fragment {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(API_URL, response -> {
             try {
                 JSONArray jsonArray = response.getJSONArray("tree");
-                for(int i = 0; i < jsonArray.length(); i++) {
+                for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    if("tree".equals(jsonObject.getString("type"))) {
+                    if ("tree".equals(jsonObject.getString("type"))) {
                         String manifestUrl = String.format("https://raw.githubusercontent.com/choiman1559/NotiSender-PluginMarket/master/%s/MANIFEST", jsonObject.getString("path"));
                         StringRequest stringRequest = new StringRequest(Request.Method.GET, manifestUrl, response1 -> {
                             try {
@@ -259,8 +272,8 @@ public class PluginFragment extends Fragment {
 
     @SuppressLint("DiscouragedApi")
     void initPluginMarketItem(TrimProperties properties) {
-        if(isAppInstalled(properties.getProperty("packageName"))) return;
-        if("false".equals(properties.getProperty("visible"))) return;
+        if (isAppInstalled(properties.getProperty("packageName"))) return;
+        if ("false".equals(properties.getProperty("visible"))) return;
 
         CoordinatorLayout layout = (CoordinatorLayout) View.inflate(mContext, R.layout.cardview_plugin_market, null);
         PluginMarketHolder holder = new PluginMarketHolder(layout);
@@ -269,9 +282,9 @@ public class PluginFragment extends Fragment {
         holder.pluginDescription.setText(properties.getProperty("description"));
 
         String useFluentIcon = properties.getProperty("useFluentIcon");
-        if("true".equals(useFluentIcon)) {
-            holder.pluginIcon.setImageDrawable(AppCompatResources.getDrawable(mContext, mContext.getResources().getIdentifier(String.format("ic_fluent_%s_24_regular", properties.getProperty("iconName")),"drawable", mContext.getPackageName())));
-        } else if("false".equals(useFluentIcon)) {
+        if ("true".equals(useFluentIcon)) {
+            holder.pluginIcon.setImageDrawable(AppCompatResources.getDrawable(mContext, mContext.getResources().getIdentifier(String.format("ic_fluent_%s_24_regular", properties.getProperty("iconName")), "drawable", mContext.getPackageName())));
+        } else if ("false".equals(useFluentIcon)) {
             Glide.with(mContext).load(properties.getProperty("iconUrl")).into(holder.pluginIcon);
         }
 
@@ -290,22 +303,23 @@ public class PluginFragment extends Fragment {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
             builder.setTitle("Plugin Details");
             builder.setMessage(Html.fromHtml(message));
-            builder.setPositiveButton("Close", (dialog, which) -> { });
+            builder.setPositiveButton("Close", (dialog, which) -> {
+            });
             builder.show();
         });
 
         holder.pluginActionMenuLayout.setVisibility(View.GONE);
         holder.Parent.setOnClickListener((v) -> {
             boolean isVisible = holder.pluginActionMenuLayout.getVisibility() == View.VISIBLE;
-            if(!isVisible) {
+            if (!isVisible) {
                 taskerActionMenuLayout.setVisibility(View.GONE);
                 taskerDescriptionText.setSingleLine(true);
 
-                for(PluginAppHolder holder1 : pluginAppHolderArrayList) {
+                for (PluginAppHolder holder1 : pluginAppHolderArrayList) {
                     setDetailVisibility(holder1, false);
                 }
 
-                for(PluginMarketHolder holder1 : pluginMarketArrayList) {
+                for (PluginMarketHolder holder1 : pluginMarketArrayList) {
                     setDetailVisibility(holder1, false);
                 }
             }
@@ -337,7 +351,7 @@ public class PluginFragment extends Fragment {
             listApps = packageManager.queryBroadcastReceivers(intent, PackageManager.ResolveInfoFlags.of(0));
         } else listApps = packageManager.queryBroadcastReceivers(intent, 0);
 
-        for(ResolveInfo info : listApps) {
+        for (ResolveInfo info : listApps) {
             PluginActions.requestInformation(mContext, info.activityInfo.packageName);
         }
     }

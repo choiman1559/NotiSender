@@ -38,6 +38,14 @@ public class PluginReceiver extends BroadcastReceiver {
                 }
             } else if(pluginPrefs.isPluginEnabled()) {
                 switch (dataType) {
+                    case PluginConst.ACTION_REQUEST_PLUGIN_TOGGLE:
+                        PluginActions.responsePluginToggle(context, packageName, pluginPrefs.isPluginEnabled());
+                        break;
+
+                    case PluginConst.ACTION_REQUEST_SERVICE_STATUS:
+                        PluginActions.responseServiceStatus(context, packageName);
+                        break;
+
                     case PluginConst.ACTION_REQUEST_DEVICE_LIST:
                         PluginActions.responseDeviceList(context, packageName);
                         break;
@@ -72,14 +80,6 @@ public class PluginReceiver extends BroadcastReceiver {
                         } else PluginActions.pushException(context, packageName, new IllegalAccessException("ACTION_REQUEST_PREFS requires sensitiveAPI=true" + packageName));
                         break;
 
-                    case PluginConst.ACTION_REQUEST_PLUGIN_TOGGLE:
-                        PluginActions.responsePluginToggle(context, packageName, pluginPrefs.isPluginEnabled());
-                        break;
-
-                    case PluginConst.ACTION_REQUEST_SERVICE_STATUS:
-                        PluginActions.responseServiceStatus(context, packageName);
-                        break;
-
                     case PluginConst.ACTION_PUSH_CALL_DATA:
                         NotiListenerService.getInstance().sendTelecomNotification(context, BuildConfig.DEBUG, data[0], data.length > 1 ? data[1] : "");
                         break;
@@ -96,7 +96,21 @@ public class PluginReceiver extends BroadcastReceiver {
                         PluginActions.pushException(context, packageName, new IllegalAccessException("Plugin Action type is not supported: " + dataType));
                         break;
                 }
-            } else PluginActions.pushException(context, packageName, new IllegalAccessException("This plugin is not enabled: " + packageName));
+            } else {
+                switch (dataType) {
+                    case PluginConst.ACTION_REQUEST_PLUGIN_TOGGLE:
+                        PluginActions.responsePluginToggle(context, packageName, pluginPrefs.isPluginEnabled());
+                        break;
+
+                    case PluginConst.ACTION_REQUEST_SERVICE_STATUS:
+                        PluginActions.responseServiceStatus(context, packageName);
+                        break;
+
+                    default:
+                        PluginActions.pushException(context, packageName, new IllegalAccessException("This plugin is not enabled: " + packageName));
+                        break;
+                }
+            }
         }
     }
 }
