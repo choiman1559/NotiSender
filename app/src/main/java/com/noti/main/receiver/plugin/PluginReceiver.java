@@ -24,7 +24,7 @@ public class PluginReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(PluginConst.SENDER_ACTION_NAME)) {
+        if (intent.getAction() != null && intent.getAction().equals(PluginConst.SENDER_ACTION_NAME)) {
             Bundle rawData = intent.getExtras();
             String dataType = rawData.getString(PluginConst.DATA_KEY_TYPE);
             String packageName = rawData.getString(PluginConst.PLUGIN_PACKAGE_NAME);

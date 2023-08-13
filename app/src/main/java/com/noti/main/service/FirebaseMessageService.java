@@ -40,7 +40,7 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
-import com.noti.main.receiver.plugin.NotificationData;
+import com.noti.plugin.data.NotificationData;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
 import com.noti.main.receiver.plugin.PluginPrefs;

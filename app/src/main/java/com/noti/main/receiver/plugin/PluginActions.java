@@ -7,14 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 
 import androidx.core.app.NotificationManagerCompat;
 
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
+import com.noti.plugin.data.NotificationData;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -149,10 +150,10 @@ public class PluginActions {
             Log.d("sent", packageName + " " + extras.getString(PluginConst.DATA_KEY_TYPE));
     }
 
-    private static void sendBroadcast(Context context, String packageName, Bundle extras, Serializable serializable) {
+    private static void sendBroadcast(Context context, String packageName, Bundle extras, Parcelable parcelable) {
         final Intent intent = new Intent();
         intent.setAction(PluginConst.RECEIVER_ACTION_NAME);
-        intent.putExtra(PluginConst.DATA_KEY_EXTRA_DATA, serializable);
+        intent.putExtra(PluginConst.DATA_KEY_EXTRA_DATA, parcelable);
         intent.putExtras(extras);
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         intent.setComponent(new ComponentName(packageName, PluginConst.RECEIVER_CLASS_NAME));
