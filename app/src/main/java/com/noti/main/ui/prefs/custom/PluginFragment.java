@@ -184,7 +184,7 @@ public class PluginFragment extends Fragment {
 
                 holder.pluginEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (isChecked && !pluginPrefs.isPluginEnabled()) {
-                        if(data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API)) {
+                        if(pluginPrefs.isRequireSensitiveAPI()) {
                             pluginPrefs.setPluginEnabled(false).apply();
                             holder.pluginEnabled.setChecked(false);
 
@@ -194,14 +194,14 @@ public class PluginFragment extends Fragment {
                             builder.setPositiveButton("Enable", (dialog, which) -> {
                                 pluginPrefs
                                         .setPluginEnabled(true)
-                                        .setRequireSensitiveAPI(true)
+                                        .setAllowSensitiveAPI(true)
                                         .apply();
                                 holder.pluginEnabled.setChecked(true);
                             });
                             builder.setNegativeButton("Cancel", (dialog, which) -> {});
                             builder.show();
                         } else {
-                            pluginPrefs.setRequireSensitiveAPI(false).apply();
+                            pluginPrefs.setAllowSensitiveAPI(false).apply();
                         }
                     } else {
                         pluginPrefs.setPluginEnabled(isChecked).apply();

@@ -6,22 +6,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.WebView;
 
+import com.noti.plugin.data.NotificationData;
+
 public class RegexInterpreter {
     public interface RegexCallback {
         void onPostExecute(Object result);
     }
 
-    public static class DataType {
-        public String TITLE;
-        public String CONTENT;
-        public String PACKAGE_NAME;
-        public String APP_NAME;
-        public String DEVICE_NAME;
-        public String DATE;
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
-    public static void evalRegex(Context mContext, String express, DataType data, RegexCallback callback) {
+    public static void evalRegex(Context mContext, String express, NotificationData data, RegexCallback callback) {
         WebView webView = new WebView(mContext);
         webView.getSettings().setJavaScriptEnabled(true);
 
@@ -37,7 +30,7 @@ public class RegexInterpreter {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    public static void evalRegexWithArray(Context mContext, String[] expressArray, DataType[] dataArray, RegexCallback callback) {
+    public static void evalRegexWithArray(Context mContext, String[] expressArray, NotificationData[] dataArray, RegexCallback callback) {
         new Handler(Looper.getMainLooper()).post(() -> {
             WebView webView = new WebView(mContext);
             webView.getSettings().setJavaScriptEnabled(true);
@@ -45,7 +38,7 @@ public class RegexInterpreter {
 
             for(int i = 0;i < expressArray.length;i++) {
                 String express = expressArray[i];
-                DataType data = dataArray[i];
+                NotificationData data = dataArray[i];
 
                 String newString = express
                         .replace("$TITLE", data.TITLE)

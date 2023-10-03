@@ -9,6 +9,7 @@ public class PluginPrefs {
 
     private boolean isPluginEnabled = false;
     private boolean isRequireSensitiveAPI = false;
+    private boolean isAllowSensitiveAPI = false;
 
     public PluginPrefs(Context context, String pluginPackage) {
         String PREF_NAME = "com.noti.main_plugin";
@@ -21,13 +22,20 @@ public class PluginPrefs {
         String rawData = pluginPref.getString(PLUGIN_PACKAGE, "");
         if(!rawData.isEmpty()) {
             String[] data = rawData.split("\\|");
-            isPluginEnabled = Boolean.parseBoolean(data[0]);
-            isRequireSensitiveAPI = Boolean.parseBoolean(data[1]);
+            isPluginEnabled = parseFrom(data[0]);
+            isRequireSensitiveAPI = parseFrom(data[1]);
+            isAllowSensitiveAPI = parseFrom(data[2]);
         }
     }
 
+    private boolean parseFrom(String str) {
+        if(str == null || str.isEmpty()) {
+            return false;
+        } else return Boolean.parseBoolean(str);
+    }
+
     public void apply() {
-        String dataToSave = isPluginEnabled + "|" + isRequireSensitiveAPI;
+        String dataToSave = isPluginEnabled + "|" + isRequireSensitiveAPI + "|" + isAllowSensitiveAPI;
         pluginPref.edit().putString(PLUGIN_PACKAGE, dataToSave).apply();
     }
 
@@ -41,8 +49,18 @@ public class PluginPrefs {
         return isRequireSensitiveAPI;
     }
 
+    public boolean isAllowSensitiveAPI() {
+        syncFromPrefs();
+        return isAllowSensitiveAPI;
+    }
+
     public PluginPrefs setRequireSensitiveAPI(boolean requireSensitiveAPI) {
         isRequireSensitiveAPI = requireSensitiveAPI;
+        return this;
+    }
+
+    public PluginPrefs setAllowSensitiveAPI(boolean allowSensitiveAPI) {
+        isAllowSensitiveAPI = allowSensitiveAPI;
         return this;
     }
 

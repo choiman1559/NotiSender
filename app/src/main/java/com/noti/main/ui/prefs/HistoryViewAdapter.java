@@ -296,10 +296,14 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             notificationBody.put("icon", ICONS);
 
             int dataLimit = prefs.getInt("DataLimit", 4096);
+            if(notificationBody.toString().length() >= dataLimit - 20) {
+                notificationBody.put("icon", "none");
+            }
+
             notificationHead.put("to", TOPIC);
             notificationHead.put("android", new JSONObject().put("priority", "high"));
             notificationHead.put("priority", 10);
-            notificationHead.put("data", notificationBody.toString().length() < dataLimit - 20 ? notificationBody : notificationBody.put("icon", "none"));
+            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }

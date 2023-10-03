@@ -733,6 +733,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     .setGroupSummary(true);
         }
 
+        NotificationData data = new NotificationData();
+        data.TITLE = title;
+        data.CONTENT = content;
+        data.DEVICE_NAME = Device_name;
+        data.PACKAGE_NAME = Package;
+        data.APP_NAME = AppName;
+        data.DATE = Date;
+
         String regexData = regexPrefs.getString("RegexData", "");
         if (regexData.isEmpty()) {
             if (Icon != null) builder.setLargeIcon(Icon);
@@ -753,21 +761,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             try {
                 JSONArray array = new JSONArray(regexData);
                 String[] regexArray = new String[array.length()];
-                RegexInterpreter.DataType[] dataArray = new RegexInterpreter.DataType[array.length()];
+                NotificationData[] dataArray = new NotificationData[array.length()];
 
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject object = array.getJSONObject(i);
                     boolean isEnabled = object.optBoolean("enabled");
 
                     String regex = isEnabled ? object.getString("regex") : "false";
-                    RegexInterpreter.DataType data = new RegexInterpreter.DataType();
-                    data.TITLE = title;
-                    data.CONTENT = content;
-                    data.DEVICE_NAME = Device_name;
-                    data.PACKAGE_NAME = Package;
-                    data.APP_NAME = AppName;
-                    data.DATE = Date;
-
                     regexArray[i] = regex;
                     dataArray[i] = data;
                 }
@@ -821,17 +821,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
         SharedPreferences pluginPrefs = getSharedPreferences("com.noti.main_plugin", Context.MODE_PRIVATE);
         Map<String, ?> pluginMap = pluginPrefs.getAll();
-        NotificationData data = new NotificationData();
-        data.TITLE = title;
-        data.CONTENT = content;
-        data.DEVICE_NAME = Device_name;
-        data.PACKAGE_NAME = Package;
-        data.APP_NAME = AppName;
-        data.DATE = Date;
 
         for (Map.Entry<String, ?> entry : pluginMap.entrySet()) {
             PluginPrefs pluginPref = new PluginPrefs(this, entry.getKey());
-            if(pluginPref.isPluginEnabled() && pluginPref.isRequireSensitiveAPI()) {
+            if(pluginPref.isPluginEnabled() && pluginPref.isRequireSensitiveAPI() && pluginPref.isAllowSensitiveAPI()) {
                 PluginActions.pushNotification(this, entry.getKey(), data);
             }
         }

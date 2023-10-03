@@ -473,12 +473,14 @@ public class NotiListenerService extends NotificationListenerService {
             notificationBody.put("notification_key", KEY);
 
             int dataLimit = prefs.getInt("DataLimit", 4096);
-            boolean isLimit = notificationBody.toString().length() < dataLimit - 20 || prefs.getBoolean("UseSplitData", false);
+            if(notificationBody.toString().length() >= dataLimit - 20 && !prefs.getBoolean("UseSplitData", false)) {
+                notificationBody.put("icon", "none");
+            }
 
             notificationHead.put("to", TOPIC);
             notificationHead.put("android", new JSONObject().put("priority", "high"));
             notificationHead.put("priority", 10);
-            notificationHead.put("data", isLimit ? notificationBody : notificationBody.put("icon", "none"));
+            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }

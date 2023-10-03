@@ -21,6 +21,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.utils.ui.ToastHelper;
+import com.noti.plugin.data.NotificationData;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -82,7 +83,7 @@ public class PlaygroundFragment extends Fragment {
         });
 
         GoButton.setOnClickListener((v) -> {
-            RegexInterpreter.DataType data = new RegexInterpreter.DataType();
+            NotificationData data = new NotificationData();
             data.TITLE = getText(titleValue);
             data.CONTENT = getText(contentValue);
             data.PACKAGE_NAME = getText(packageNameValue);
