@@ -26,7 +26,7 @@ import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.utils.ui.ToastHelper;
-import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.utils.ThreadProxy;
 
 import org.json.JSONArray;

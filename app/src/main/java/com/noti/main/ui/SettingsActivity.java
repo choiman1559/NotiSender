@@ -123,22 +123,14 @@ public class SettingsActivity extends MonetCompatActivity {
             mBillingHelper = BillingHelper.initialize(this);
         } else mBillingHelper = BillingHelper.getInstance();
 
-        mBillingHelper.setBillingCallback(new BillingHelper.BillingCallback() {
-            @Override
-            public void onPurchased(String productId) {
-                if (productId.equals(BillingHelper.SubscribeID)) {
-                    ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
-                    new RegisterForPushNotificationsAsync(SettingsActivity.this).execute();
-                }
-
-                if (SettingsActivity.onPurchasedListener != null) {
-                    SettingsActivity.onPurchasedListener.onPurchased(productId);
-                }
+        mBillingHelper.setBillingCallback(productId -> {
+            if (productId.equals(BillingHelper.SubscribeID)) {
+                ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+                new RegisterForPushNotificationsAsync(SettingsActivity.this).execute();
             }
 
-            @Override
-            public void onUpdatePrice(Double priceValue) {
-
+            if (SettingsActivity.onPurchasedListener != null) {
+                SettingsActivity.onPurchasedListener.onPurchased(productId);
             }
         });
 
@@ -487,7 +479,6 @@ public class SettingsActivity extends MonetCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         monet = null;
-        mBillingHelper.Destroy();
     }
 
     private void updateProfileImage() {

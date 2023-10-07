@@ -1,4 +1,4 @@
-package com.noti.main.utils;
+package com.noti.main.utils.network;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

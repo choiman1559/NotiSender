@@ -34,7 +34,7 @@ import com.noti.main.R;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
-import com.noti.main.utils.AESCrypto;
+import com.noti.main.utils.network.AESCrypto;
 
 import java.util.Set;
 

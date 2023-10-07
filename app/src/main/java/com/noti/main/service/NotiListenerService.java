@@ -28,9 +28,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.media.MediaReceiver;
-import com.noti.main.utils.AESCrypto;
-import com.noti.main.utils.JsonRequest;
-import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.network.AESCrypto;
+import com.noti.main.utils.network.JsonRequest;
+import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.service.IntervalQueries.*;
 import com.noti.main.utils.PowerUtils;
 

@@ -54,8 +54,8 @@ import com.noti.main.ui.prefs.custom.RegexInterpreter;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.ui.receive.SmsViewActivity;
 import com.noti.main.ui.receive.TelecomViewActivity;
-import com.noti.main.utils.AESCrypto;
-import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.network.AESCrypto;
+import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONArray;

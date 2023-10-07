@@ -26,7 +26,7 @@ import com.google.firebase.storage.StreamDownloadTask;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.StartActivity;
-import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONException;

@@ -5,13 +5,13 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of("11"))
+            languageVersion.set(JavaLanguageVersion.of("17"))
         }
     }
 
@@ -69,7 +69,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0-alpha03'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
 
-    implementation platform('com.google.firebase:firebase-bom:32.2.2')
+    implementation platform('com.google.firebase:firebase-bom:32.3.1')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
@@ -78,14 +78,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-config'
     implementation 'com.google.firebase:firebase-storage'
 
-    implementation 'me.pushy:sdk:1.0.93'
+    implementation 'me.pushy:sdk:1.0.97'
+    implementation "com.github.mvojtkovszky:BillingHelper:2.2.1"
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.github.bumptech.glide:glide:4.15.1'
-    implementation 'com.anjlab.android.iab.v3:library:2.0.3'
     implementation 'com.github.isradeleon:Notify-Android:1.0.4'
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.7'
-    implementation 'com.microsoft.design:fluent-system-icons:1.1.204@aar'
+    implementation 'com.microsoft.design:fluent-system-icons:1.1.218@aar'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0'
 }
 

@@ -21,7 +21,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
-import com.noti.main.utils.CompressStringUtil;
+import com.noti.main.utils.network.CompressStringUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;

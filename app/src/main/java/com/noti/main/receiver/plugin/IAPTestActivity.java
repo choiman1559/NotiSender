@@ -19,18 +19,7 @@ public class IAPTestActivity extends AppCompatActivity {
             mBillingHelper = BillingHelper.initialize(this);
         } else mBillingHelper = BillingHelper.getInstance();
 
-        mBillingHelper.setBillingCallback(new BillingHelper.BillingCallback() {
-            @Override
-            public void onPurchased(String productId) {
-                finish();
-            }
-
-            @Override
-            public void onUpdatePrice(Double priceValue) {
-
-            }
-        });
-
+        mBillingHelper.setBillingCallback(productId -> finish());
         mBillingHelper.Donate(this);
     }
 }

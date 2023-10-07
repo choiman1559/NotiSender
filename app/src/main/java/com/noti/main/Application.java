@@ -37,4 +37,10 @@ public class Application extends android.app.Application {
         applicationInstance = this;
         thisDeviceType = PairDeviceType.getThisDeviceType(applicationInstance.getApplicationContext());
     }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        BillingHelper.getInstance().Destroy();
+    }
 }

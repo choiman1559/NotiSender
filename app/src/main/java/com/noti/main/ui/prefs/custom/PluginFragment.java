@@ -45,7 +45,7 @@ import com.noti.main.receiver.plugin.PluginConst;
 import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.receiver.plugin.PluginReceiver;
 import com.noti.main.updater.tasks.Version;
-import com.noti.main.utils.JsonRequest;
+import com.noti.main.utils.network.JsonRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -235,13 +235,6 @@ public class PluginFragment extends Fragment {
             pluginAppHolderArrayList.add(holder);
             pluginListLayout.addView(layout);
         };
-
-        boolean isTelephonyPluginInstalled = isAppInstalled("com.noti.plugin.telephony");
-        boolean isLibraryTestPluginInstalled = isAppInstalled("com.noti.plugin.showcase");
-
-        if (isTelephonyPluginInstalled && isLibraryTestPluginInstalled) {
-            pluginSuggestLayout.setVisibility(View.GONE);
-        }
 
         String API_URL = "https://api.github.com/repos/choiman1559/NotiSender-PluginMarket/git/trees/master";
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(API_URL, response -> {

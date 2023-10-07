@@ -1,5 +1,6 @@
 package com.noti.main.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 
@@ -7,29 +8,51 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
 
-import com.anjlab.android.iab.v3.BillingProcessor;
-import com.anjlab.android.iab.v3.PurchaseInfo;
-import com.anjlab.android.iab.v3.SkuDetails;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.common.collect.ImmutableList;
+
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 
-import java.util.List;
+import com.vojtkovszky.billinghelper.BillingEvent;
+import com.vojtkovszky.billinghelper.BillingListener;
 
-public class BillingHelper implements BillingProcessor.IBillingHandler {
+import java.util.Objects;
+
+@SuppressLint("StaticFieldLeak")
+public class BillingHelper implements BillingListener {
 
     public static BillingHelper instance;
     public static final String SubscribeID = "sub_pro";
     public static final String DonateID = "donate_3";
+    private static boolean isNeedToConsume = false;
 
+    private Context mContext;
     private BillingCallback mBillingCallback;
-    private BillingProcessor mBillingProcessor;
+    private com.vojtkovszky.billinghelper.BillingHelper mBillingHelper;
+    private String lastPurchasedItem = "";
+
+    @Override
+    public void onBillingEvent(@NonNull BillingEvent billingEvent, @Nullable String s, @Nullable Integer integer) {
+        if (billingEvent == BillingEvent.PURCHASE_COMPLETE) {
+            if(!lastPurchasedItem.isEmpty()) {
+                instance.mBillingCallback.onPurchased(instance.lastPurchasedItem);
+                if(instance.lastPurchasedItem.equals(DonateID)) {
+                    isNeedToConsume = true;
+                    instance.mBillingHelper.endClientConnection();
+                    instance = initialize(mContext);
+                }
+                lastPurchasedItem = "";
+            }
+        } else if(billingEvent == BillingEvent.QUERY_OWNED_PURCHASES_COMPLETE && isNeedToConsume) {
+            instance.mBillingHelper.consumePurchase(Objects.requireNonNull(instance.mBillingHelper.getPurchaseWithProductName(DonateID)));
+            isNeedToConsume = false;
+        }
+    }
 
     public interface BillingCallback {
         void onPurchased(String productId);
-
-        void onUpdatePrice(Double priceValue);
     }
 
     public static BillingHelper getInstance() throws IllegalStateException {
@@ -38,41 +61,48 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
 
     @Nullable
     public static BillingHelper getInstance(boolean needThrow) throws IllegalStateException {
-        if (instance != null && instance.mBillingProcessor.isConnected()) return instance;
-        else if(needThrow) throw new IllegalStateException("BillingHelper is not initialized");
+        if (instance != null && !instance.mBillingHelper.isConnectionFailure()) return instance;
+        else if (needThrow) throw new IllegalStateException("BillingHelper is not initialized");
         else return null;
     }
 
     public static BillingHelper initialize(Context mContext) {
-        String APIKey = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("ApiKey_Billing", "");
         BillingHelper billingHelper = new BillingHelper();
-        billingHelper.mBillingProcessor = new BillingProcessor(mContext, APIKey, billingHelper);
-        billingHelper.mBillingProcessor.initialize();
+        String APIKey = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("ApiKey_Billing", "");
+        if (APIKey.isEmpty()) throw new IllegalStateException("IAP API key is required");
 
+        billingHelper.mBillingHelper = new com.vojtkovszky.billinghelper.BillingHelper(
+                mContext,
+                ImmutableList.of(DonateID),
+                ImmutableList.of(SubscribeID),
+                true, APIKey, true, true, true,
+                BuildConfig.DEBUG, billingHelper
+        );
+
+        billingHelper.mContext = mContext;
         instance = billingHelper;
         return billingHelper;
     }
 
     public void setBillingCallback(BillingCallback callback) {
-        this.mBillingCallback = callback;
+        instance.mBillingCallback = callback;
     }
 
     public void Subscribe(Activity mContext) {
-        if (mBillingProcessor != null && mBillingProcessor.isInitialized()) {
-            mBillingProcessor.subscribe(mContext, SubscribeID);
-        }
+        instance.lastPurchasedItem = SubscribeID;
+        instance.mBillingHelper.launchPurchaseFlow(mContext, SubscribeID, null, null, null, 0);
     }
 
     public boolean isSubscribed() {
-        return mBillingProcessor.isSubscribed(SubscribeID);
+        return instance.mBillingHelper.isPurchased(SubscribeID);
     }
 
     public boolean isSubscribedOrDebugBuild() {
-        return  isSubscribed() || BuildConfig.DEBUG;
+        return isSubscribed() || BuildConfig.DEBUG;
     }
 
     public static void showSubscribeInfoDialog(Activity mContext, String cause) {
-        showSubscribeInfoDialog(mContext, cause, true,(d, w) -> {
+        showSubscribeInfoDialog(mContext, cause, true, (d, w) -> {
         });
     }
 
@@ -88,88 +118,12 @@ public class BillingHelper implements BillingProcessor.IBillingHandler {
     }
 
     public void Donate(Activity mContext) {
-        if (mBillingProcessor != null && mBillingProcessor.isInitialized()) {
-            if (mBillingProcessor.isPurchased(DonateID)) {
-                mBillingProcessor.consumePurchaseAsync(DonateID, new BillingProcessor.IPurchasesResponseListener() {
-                    @Override
-                    public void onPurchasesSuccess() {
-                    }
-
-                    @Override
-                    public void onPurchasesError() {
-                    }
-                });
-            } else {
-                mBillingProcessor.purchase(mContext, DonateID);
-            }
-        }
+        instance.lastPurchasedItem = DonateID;
+        instance.mBillingHelper.launchPurchaseFlow(mContext, DonateID, null, null, null, 0);
     }
 
     public void Destroy() {
-        if (mBillingProcessor != null) {
-            mBillingProcessor.release();
-        }
-    }
-
-    @Override
-    public void onBillingInitialized() {
-        mBillingProcessor.getSubscriptionListingDetailsAsync(SubscribeID, new BillingProcessor.ISkuDetailsResponseListener() {
-            @Override
-            public void onSkuDetailsResponse(@Nullable List<SkuDetails> products) {
-                if (products != null && products.size() > 0) {
-                    SkuDetails Details = products.get(0);
-                    if (mBillingCallback != null && Details != null) {
-                        mBillingCallback.onUpdatePrice(Details.priceValue);
-                    }
-                    mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
-                        @Override
-                        public void onPurchasesSuccess() {
-                        }
-
-                        @Override
-                        public void onPurchasesError() {
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onSkuDetailsError(String error) {
-            }
-        });
-    }
-
-    @Override
-    public void onProductPurchased(@NonNull String productId, @Nullable PurchaseInfo details) {
-        if (mBillingCallback != null) {
-            mBillingCallback.onPurchased(productId);
-        }
-        mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
-            @Override
-            public void onPurchasesSuccess() {
-            }
-
-            @Override
-            public void onPurchasesError() {
-            }
-        });
-    }
-
-    @Override
-    public void onPurchaseHistoryRestored() {
-        mBillingProcessor.loadOwnedPurchasesFromGoogleAsync(new BillingProcessor.IPurchasesResponseListener() {
-            @Override
-            public void onPurchasesSuccess() {
-            }
-
-            @Override
-            public void onPurchasesError() {
-            }
-        });
-    }
-
-    @Override
-    public void onBillingError(int errorCode, Throwable error) {
-
+        instance.mBillingHelper.endClientConnection();
+        instance.mBillingCallback = null;
     }
 }

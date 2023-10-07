@@ -1,4 +1,4 @@
-package com.noti.main.utils;
+package com.noti.main.utils.network;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
