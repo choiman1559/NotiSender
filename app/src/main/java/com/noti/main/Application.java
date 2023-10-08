@@ -1,5 +1,6 @@
 package com.noti.main;
 
+import android.content.Context;
 import android.content.res.Configuration;
 
 import com.kieronquinn.monetcompat.core.MonetCompat;
@@ -32,7 +33,11 @@ public class Application extends android.app.Application {
     public void onCreate() {
         super.onCreate();
         MonetCompat.enablePaletteCompat();
-        if(BillingHelper.getInstance(false) == null) BillingHelper.initialize(this);
+        if(BillingHelper.getInstance(false) == null
+                && !getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("ApiKey_Billing", "").isEmpty()) {
+            BillingHelper.initialize(this);
+        }
+
         pairingProcessList = new ArrayList<>();
         applicationInstance = this;
         thisDeviceType = PairDeviceType.getThisDeviceType(applicationInstance.getApplicationContext());

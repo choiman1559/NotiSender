@@ -113,6 +113,7 @@ public class SettingsActivity extends MonetCompatActivity {
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
         prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
+        getAPIKeyFromCloud(this);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -339,7 +340,6 @@ public class SettingsActivity extends MonetCompatActivity {
             }
         }
 
-        getAPIKeyFromCloud(this);
         if(!prefs.getBoolean("IsFcmTopicSubscribed", false) && !(mAuth.getUid() == null ? "" : mAuth.getUid()).isEmpty()) {
             FirebaseMessaging.getInstance().subscribeToTopic(Objects.requireNonNull(mAuth.getUid()));
         }
@@ -380,6 +380,9 @@ public class SettingsActivity extends MonetCompatActivity {
                                     .putString("ApiKey_Billing", document.getString("Billing"))
                                     .apply();
                         }
+
+                        if(mBillingHelper != null) mBillingHelper.Destroy();
+                        mBillingHelper = BillingHelper.initialize(mContext);
                     } else {
                         new MaterialAlertDialogBuilder(mContext)
                                 .setTitle("Error occurred!")

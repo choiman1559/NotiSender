@@ -69,13 +69,13 @@ public class BillingHelper implements BillingListener {
     public static BillingHelper initialize(Context mContext) {
         BillingHelper billingHelper = new BillingHelper();
         String APIKey = mContext.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("ApiKey_Billing", "");
-        if (APIKey.isEmpty()) throw new IllegalStateException("IAP API key is required");
 
         billingHelper.mBillingHelper = new com.vojtkovszky.billinghelper.BillingHelper(
                 mContext,
                 ImmutableList.of(DonateID),
                 ImmutableList.of(SubscribeID),
-                true, APIKey, true, true, true,
+                true, APIKey.isEmpty() ? null : APIKey,
+                true, true, true,
                 BuildConfig.DEBUG, billingHelper
         );
 
