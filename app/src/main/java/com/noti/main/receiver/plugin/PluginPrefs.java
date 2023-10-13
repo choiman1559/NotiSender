@@ -24,7 +24,10 @@ public class PluginPrefs {
             String[] data = rawData.split("\\|");
             isPluginEnabled = parseFrom(data[0]);
             isRequireSensitiveAPI = parseFrom(data[1]);
-            isAllowSensitiveAPI = parseFrom(data[2]);
+
+            if(data.length > 2) {
+                isAllowSensitiveAPI = parseFrom(data[2]);
+            }
         }
     }
 

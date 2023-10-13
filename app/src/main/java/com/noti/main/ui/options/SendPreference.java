@@ -27,21 +27,19 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
+
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
-import com.noti.main.utils.network.AESCrypto;
 
 import java.util.Set;
 
 public class SendPreference extends PreferenceFragmentCompat {
 
     SharedPreferences prefs;
-    FirebaseAuth mAuth;
 
     MonetCompat monet;
     Activity mContext;
@@ -66,14 +64,13 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference DefaultTitle;
     Preference DefaultMessage;
 
-    Preference UseDataEncryption;
-    Preference UseDataEncryptionPassword;
-    Preference EncryptionInfo;
-
     Preference UseMediaSync;
     Preference UseAlbumArt;
     Preference UseFcmWhenSendImage;
     Preference FcmWhenSendImageInfo;
+
+    Preference UseSplitData;
+    Preference SplitInterval;
 
     @NonNull
     @Override
@@ -102,7 +99,6 @@ public class SendPreference extends PreferenceFragmentCompat {
         setPreferencesFromResource(R.xml.send_preferences, rootKey);
 
         prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
-        mAuth = FirebaseAuth.getInstance();
 
         Blacklist = findPreference("blacklist");
         UseWhiteList = findPreference("UseWhite");
@@ -124,14 +120,13 @@ public class SendPreference extends PreferenceFragmentCompat {
         DefaultTitle = findPreference("DefaultTitle");
         DefaultMessage = findPreference("DefaultMessage");
 
-        UseDataEncryption = findPreference("UseDataEncryption");
-        UseDataEncryptionPassword = findPreference("UseDataEncryptionPassword");
-        EncryptionInfo = findPreference("EncryptionInfo");
-
         UseMediaSync = findPreference("UseMediaSync");
         UseAlbumArt = findPreference("UseAlbumArt");
         UseFcmWhenSendImage = findPreference("UseFcmWhenSendImage");
         FcmWhenSendImageInfo = findPreference("FcmWhenSendImageInfo");
+
+        UseSplitData = findPreference("UseSplitData");
+        SplitInterval = findPreference("SplitInterval");
 
         boolean isntUpOsM = Build.VERSION.SDK_INT < 22;
         if (isntUpOsM) {
@@ -198,30 +193,11 @@ public class SendPreference extends PreferenceFragmentCompat {
         DefaultTitle.setVisible(!isUseNullStrict);
         DefaultMessage.setVisible(!isUseNullStrict);
         UseNullStrict.setOnPreferenceChangeListener((p, n) -> {
-            boolean isUseNullStricts = (boolean) n;
-            DefaultTitle.setVisible(!isUseNullStricts);
-            DefaultMessage.setVisible(!isUseNullStricts);
+            boolean isUseNullStructs = (boolean) n;
+            DefaultTitle.setVisible(!isUseNullStructs);
+            DefaultMessage.setVisible(!isUseNullStructs);
             return true;
         });
-
-        boolean ifUIDBlank = prefs.getString("UID", "").equals("");
-        if(ifUIDBlank) {
-            ((SwitchPreference)UseDataEncryption).setChecked(false);
-            UseDataEncryption.setEnabled(false);
-            UseDataEncryption.setSummary("You should login first to use this feature");
-            UseDataEncryptionPassword.setVisible(false);
-            EncryptionInfo.setVisible(false);
-        } else {
-            boolean usesDataEncryption = prefs.getBoolean("UseDataEncryption", false);
-            UseDataEncryptionPassword.setVisible(usesDataEncryption);
-            EncryptionInfo.setVisible(usesDataEncryption);
-            UseDataEncryption.setOnPreferenceChangeListener((preference, newValue) -> {
-                boolean foo = (boolean) newValue;
-                UseDataEncryptionPassword.setVisible(foo);
-                EncryptionInfo.setVisible(foo);
-                return true;
-            });
-        }
 
         boolean isUseMediaSync = prefs.getBoolean("UseMediaSync", false);
         UseFcmWhenSendImage.setVisible(isUseMediaSync);
@@ -255,6 +231,14 @@ public class SendPreference extends PreferenceFragmentCompat {
 
         UseFcmWhenSendImage.setOnPreferenceChangeListener(((preference, newValue) -> {
             FcmWhenSendImageInfo.setVisible((boolean) newValue);
+            return true;
+        }));
+
+        int splitIntervalValue = prefs.getInt("SplitInterval", 500);
+        SplitInterval.setVisible(prefs.getBoolean("UseSplitData", false));
+        SplitInterval.setSummary("Now : " + (splitIntervalValue == 500 ? "500 ms (Default)" : (splitIntervalValue < 1 ? "0 ms (Disabled)" : splitIntervalValue + " ms")));
+        UseSplitData.setOnPreferenceChangeListener(((preference, newValue) -> {
+            SplitInterval.setVisible((boolean) newValue);
             return true;
         }));
 
@@ -484,30 +468,18 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.show();
                 break;
 
-            case "UseDataEncryptionPassword":
+            case "SplitInterval":
                 dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                 dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
                 dialog.setCancelable(false);
-                dialog.setTitle("Input password");
-                dialog.setMessage("Enter the password to be used for encryption.\nPassword is limited to a maximum of 20 characters.");
+                dialog.setTitle("Input Value");
+                dialog.setMessage("The interval maximum limit is 2147483647 ms and Input 0 or lower to disable this option.");
 
                 editText = new EditText(mContext);
-                editText.setInputType(InputType.TYPE_CLASS_TEXT);
-                editText.setHint("Input password");
-                editText.setGravity(Gravity.START);
-
-                String rawPassword = prefs.getString("EncryptionPassword", "");
-                if(rawPassword.equals("")) editText.setText("");
-                else {
-                    String uid = mAuth.getUid();
-                    if(uid != null) {
-                        try {
-                            editText.setText(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
-                        } catch (Exception e) {
-                            ToastHelper.show(mContext, "Error while processing crypto","DISMISS", ToastHelper.LENGTH_SHORT);
-                        }
-                    }
-                }
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                editText.setHint("Input interval value");
+                editText.setGravity(Gravity.CENTER);
+                editText.setText(String.valueOf(prefs.getInt("SplitInterval", 0)));
 
                 parentLayout = new LinearLayout(mContext);
                 layoutParams = new LinearLayout.LayoutParams(
@@ -521,30 +493,22 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
                     if (value.equals("")) {
-                        ToastHelper.show(mContext, "Please Input password","DISMISS", ToastHelper.LENGTH_SHORT);
-                    } else if(value.length() > 20) {
-                        ToastHelper.show(mContext, "Password too long! maximum 20 chars.", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
-                        try {
-                            String uid = mAuth.getUid();
-                            if(uid != null) prefs.edit().putString("EncryptionPassword", AESCrypto.encrypt(value, AESCrypto.parseAESToken(uid))).apply();
-                        } catch (Exception e) {
-                            ToastHelper.show(mContext, "Error while processing crypto", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        int IntValue = Integer.parseInt(value);
+                        if (IntValue > 0x7FFFFFFF - 1) {
+                            ToastHelper.show(mContext, "Value must be lower than 2147483647", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        } else {
+                            prefs.edit().putInt("SplitInterval", IntValue).apply();
+                            SplitInterval.setSummary("Now : " + (IntValue == 500 ? "500 ms (Default)" : (IntValue < 1 ? "0 ms (Disabled)" : IntValue + " ms")));
                         }
                     }
                 });
-                dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().remove("EncryptionPassword").apply());
-                dialog.setNegativeButton("Cancel", (d, w) -> {
+                dialog.setNeutralButton("Reset Default", (d, w) -> {
+                    prefs.edit().putInt("SplitInterval", 500).apply();
+                    SplitInterval.setSummary("Now : 500 ms (Default)");
                 });
-                dialog.show();
-                break;
-
-            case "EncryptionInfo":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                dialog.setTitle("Encryption Info");
-                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-                dialog.setMessage(getString(R.string.Encryption_information));
-                dialog.setPositiveButton("Close", (d, w) -> { });
+                dialog.setNegativeButton("Cancel", (d, w) -> {});
                 dialog.show();
                 break;
         }

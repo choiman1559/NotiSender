@@ -21,10 +21,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -40,6 +42,7 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
+import com.noti.main.utils.network.HMACCrypto;
 import com.noti.plugin.data.NotificationData;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
@@ -63,6 +66,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -131,14 +135,22 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @SuppressWarnings("unchecked")
     public void preProcessReception(Map <String, String> map, Context context) {
         String rawPassword = prefs.getString("EncryptionPassword", "");
+        boolean useHmacAuth = prefs.getBoolean("UseHMacAuth", false);
+
         if ("true".equals(map.get("encrypted"))) {
-            if (prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
+            boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
+            if ((prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) || isAlwaysEncryptData) {
                 try {
                     String uid = FirebaseAuth.getInstance().getUid();
                     if (uid != null) {
-                        JSONObject object = new JSONObject(AESCrypto.decrypt(CompressStringUtil.decompressString(map.get("encryptedData")), AESCrypto.parseAESToken(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)))));
-                        Map<String, String> newMap = new ObjectMapper().readValue(object.toString(), Map.class);
-                        processReception(newMap, context);
+                        String finalPassword = AESCrypto.parseAESToken(isAlwaysEncryptData ? Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP) : AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
+                        if(useHmacAuth) {
+                            preProcessReceptionWithHmac(map, finalPassword, context);
+                        } else {
+                            JSONObject object = new JSONObject(AESCrypto.decrypt(CompressStringUtil.decompressString(map.get("encryptedData")), finalPassword));
+                            Map<String, String> newMap = new ObjectMapper().readValue(object.toString(), Map.class);
+                            processReception(newMap, context);
+                        }
                     }
                 } catch (GeneralSecurityException e) {
                     Handler mHandler = new Handler(Looper.getMainLooper());
@@ -147,7 +159,40 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     e.printStackTrace();
                 }
             }
-        } else processReception(map, context);
+        } else {
+            if(useHmacAuth) {
+                preProcessReceptionWithHmac(map, null, context);
+            } else {
+                processReception(map, context);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void preProcessReceptionWithHmac(Map <String, String> map, @Nullable String token, Context context) {
+        String HmacID = map.get("HmacID");
+        if(HmacID != null && !HmacID.isEmpty()) {
+            try {
+                String HmacToken = "";
+                for (String str : pairPrefs.getStringSet("paired_list", new HashSet<>())) {
+                    String[] savedData = str.split("\\|");
+                    if (HMACCrypto.generateTokenIdentifier(savedData[0], savedData[1]).equals(HmacID)) {
+                        HmacToken = savedData[1];
+                        break;
+                    }
+                }
+
+                if(HmacToken.isEmpty()) {
+                    throw new GeneralSecurityException("Invalid token: Paired Device not found!");
+                }
+
+                JSONObject object = new JSONObject(HMACCrypto.decrypt(CompressStringUtil.decompressString(map.get("encryptedData")), HmacToken, token));
+                Map<String, String> newMap = new ObjectMapper().readValue(object.toString(), Map.class);
+                processReception(newMap, context);
+            } catch (IOException | GeneralSecurityException | JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void processReception(Map<String, String> map, Context context) {
@@ -158,6 +203,10 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             if (prefs.getBoolean("serviceToggle", false)) {
                 if ("split_data".equals(type) && !isDeviceItself(map)) {
                     processSplitData(map, context);
+                    return;
+                }
+
+                if(prefs.getBoolean("AllowOnlyPaired", false) && !isPairedDevice(map)) {
                     return;
                 }
 
@@ -186,15 +235,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
                     if (mode.equals("hybrid") && isDeviceItself(map)) return;
                     switch (type) {
-                        case "send|normal":
-                            sendNotification(map);
-                            break;
-                        case "send|sms":
-                            sendSmsNotification(map);
-                            break;
-                        case "send|telecom":
-                            sendTelecomNotification(map);
-                            break;
+                        case "send|normal" -> sendNotification(map);
+                        case "send|sms" -> sendSmsNotification(map);
+                        case "send|telecom" -> sendTelecomNotification(map);
                     }
                 } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
                     if ((Build.MANUFACTURER + " " + Build.MODEL).equals(map.get("send_device_name")) && getUniqueID().equals(map.get("send_device_id"))) {
@@ -218,7 +261,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             JSONObject object = new JSONObject(raw);
 
                             switch (type) {
-                                case "media|meta_data":
+                                case "media|meta_data" -> {
                                     if (!isDeviceItself(map)) {
                                         MediaSession current;
                                         if (!playingSessionMap.containsKey(map.get("device_id"))) {
@@ -231,13 +274,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                         assert current != null;
                                         current.update(object);
                                     }
-                                    break;
-
-                                case "media|action":
+                                }
+                                case "media|action" -> {
                                     if (isTargetDevice(map)) {
                                         NotiListenerService.getInstance().mediaReceiver.onDataReceived(object);
                                     }
-                                    break;
+                                }
                             }
                         }
                     } catch (JSONException e) {
@@ -249,7 +291,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             if(prefs.getBoolean("pairToggle", false)) {
                 if (type.startsWith("pair") && !isDeviceItself(map)) {
                     switch (type) {
-                        case "pair|request_device_list":
+                        case "pair|request_device_list" -> {
                             //Target Device action
                             //Have to Send this device info Data Now
                             if (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false)) {
@@ -259,9 +301,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                 Application.isListeningToPair = true;
                                 PairingUtils.responseDeviceInfoToFinder(map, context);
                             }
-                            break;
-
-                        case "pair|response_device_list":
+                        }
+                        case "pair|response_device_list" -> {
                             //Request Device Action
                             //Show device list here; give choice to user which device to pair
                             if (Application.isFindingDeviceToPair && (!isPairedDevice(map) || prefs.getBoolean("showAlreadyConnected", false))) {
@@ -270,9 +311,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                 pairingProcessList.add(info);
                                 PairingUtils.onReceiveDeviceInfo(map);
                             }
-                            break;
-
-                        case "pair|request_pair":
+                        }
+                        case "pair|request_pair" -> {
                             //Target Device action
                             //Show choice notification (or activity) to user whether user wants to pair this device with another one or not
                             if (Application.isListeningToPair && isTargetDevice(map)) {
@@ -283,9 +323,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                     }
                                 }
                             }
-                            break;
-
-                        case "pair|accept_pair":
+                        }
+                        case "pair|accept_pair" -> {
                             //Request Device Action
                             //Check if target accepted to pair and process result here
                             if (Application.isFindingDeviceToPair && isTargetDevice(map)) {
@@ -296,54 +335,48 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                     }
                                 }
                             }
-                            break;
-
-                        case "pair|request_remove":
+                        }
+                        case "pair|request_remove" -> {
                             if (isTargetDevice(map) && isPairedDevice(map) && prefs.getBoolean("allowRemovePairRemotely", true)) {
                                 String dataToFind = map.get("device_name") + "|" + map.get("device_id") + (map.containsKey("device_type") ? "|" + map.get("device_type") : "");
                                 String dataToRemove = null;
 
                                 Set<String> list = new HashSet<>(pairPrefs.getStringSet("paired_list", new HashSet<>()));
-                                for(String str : list) {
-                                    if(str.contains(dataToFind)) {
+                                for (String str : list) {
+                                    if (str.contains(dataToFind)) {
                                         dataToRemove = str;
                                         break;
                                     }
                                 }
 
-                                if(dataToRemove != null) list.remove(dataToRemove);
+                                if (dataToRemove != null) list.remove(dataToRemove);
                                 pairPrefs.edit().putStringSet("paired_list", list).apply();
                             }
-                            break;
-
-                        case "pair|request_data":
+                        }
+                        case "pair|request_data" -> {
                             //process request normal data here sent by paired device(s).
                             if (isTargetDevice(map) && isPairedDevice(map)) {
                                 DataProcess.onDataRequested(map, context);
                             }
-                            break;
-
-                        case "pair|receive_data":
+                        }
+                        case "pair|receive_data" -> {
                             //process received normal data here sent by paired device(s).
                             if (isTargetDevice(map) && isPairedDevice(map)) {
                                 PairListener.callOnDataReceived(map);
                             }
-                            break;
-
-                        case "pair|request_action":
+                        }
+                        case "pair|request_action" -> {
                             //process received action data here sent by paired device(s).
                             if (isTargetDevice(map) && isPairedDevice(map)) {
                                 DataProcess.onActionRequested(map, context);
                             }
-                            break;
-
-                        case "pair|find":
+                        }
+                        case "pair|find" -> {
                             if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                                 sendFindTaskNotification();
                             }
-                            break;
-
-                        case "pair|plugin":
+                        }
+                        case "pair|plugin" -> {
                             if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceivePlugin", false)) {
                                 String actionType = map.get("plugin_action_type");
                                 String actionName = map.get("plugin_action_name");
@@ -351,21 +384,16 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                 String extraData = map.get("plugin_extra_data");
                                 String targetDevice = map.get("device_name") + "|" + map.get("device_id");
 
-                               if(actionType != null) switch (actionType) {
-                                   case PluginConst.ACTION_REQUEST_REMOTE_ACTION:
-                                       PluginActions.requestAction(context, targetDevice, pluginPackage, actionName, extraData);
-                                       break;
-
-                                   case PluginConst.ACTION_REQUEST_REMOTE_DATA:
-                                       PluginActions.requestData(context, targetDevice, pluginPackage, actionName);
-                                       break;
-
-                                   case PluginConst.ACTION_RESPONSE_REMOTE_DATA:
-                                       PluginActions.responseData(context, pluginPackage, actionName, extraData);
-                                       break;
-                               }
+                                if (actionType != null) switch (actionType) {
+                                    case PluginConst.ACTION_REQUEST_REMOTE_ACTION ->
+                                            PluginActions.requestAction(context, targetDevice, pluginPackage, actionName, extraData);
+                                    case PluginConst.ACTION_REQUEST_REMOTE_DATA ->
+                                            PluginActions.requestData(context, targetDevice, pluginPackage, actionName);
+                                    case PluginConst.ACTION_RESPONSE_REMOTE_DATA ->
+                                            PluginActions.responseData(context, pluginPackage, actionName, extraData);
+                                }
                             }
-                            break;
+                        }
                     }
                 }
             }
@@ -833,69 +861,37 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getImportance() {
         String value = prefs.getString("importance", "Default");
-        switch (value) {
-            case "Default":
-                return NotificationManager.IMPORTANCE_DEFAULT;
-            case "Low":
-                return NotificationManager.IMPORTANCE_LOW;
-            case "High":
-                return NotificationManager.IMPORTANCE_MAX;
-            case "Custom…":
-                return NotificationManager.IMPORTANCE_NONE;
-            default:
-                return NotificationManager.IMPORTANCE_UNSPECIFIED;
-        }
+        return switch (value) {
+            case "Default" -> NotificationManager.IMPORTANCE_DEFAULT;
+            case "Low" -> NotificationManager.IMPORTANCE_LOW;
+            case "High" -> NotificationManager.IMPORTANCE_MAX;
+            case "Custom…" -> NotificationManager.IMPORTANCE_NONE;
+            default -> NotificationManager.IMPORTANCE_UNSPECIFIED;
+        };
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getPriority() {
         String value = prefs.getString("importance", "Default");
-        switch (value) {
-            case "Low":
-                return NotificationCompat.PRIORITY_LOW;
-            case "High":
-                return NotificationCompat.PRIORITY_MAX;
-            default:
-                return NotificationCompat.PRIORITY_DEFAULT;
-        }
+        return switch (value) {
+            case "Low" -> NotificationCompat.PRIORITY_LOW;
+            case "High" -> NotificationCompat.PRIORITY_MAX;
+            default -> NotificationCompat.PRIORITY_DEFAULT;
+        };
     }
 
     private long parseTimeAndUnitToLong(String data) {
         String[] foo = data.split(" ");
-        long numberToMultiply;
-        switch (foo[1]) {
-            case "sec":
-                numberToMultiply = 1000L;
-                break;
-
-            case "min":
-                numberToMultiply = 60000L;
-                break;
-
-            case "hour":
-                numberToMultiply = 3600000L;
-                break;
-
-            case "day":
-                numberToMultiply = 86400000L;
-                break;
-
-            case "week":
-                numberToMultiply = 604800000L;
-                break;
-
-            case "month":
-                numberToMultiply = 2419200000L;
-                break;
-
-            case "year":
-                numberToMultiply = 29030400000L;
-                break;
-
-            default:
-                numberToMultiply = 0L;
-                break;
-        }
+        long numberToMultiply = switch (foo[1]) {
+            case "sec" -> 1000L;
+            case "min" -> 60000L;
+            case "hour" -> 3600000L;
+            case "day" -> 86400000L;
+            case "week" -> 604800000L;
+            case "month" -> 2419200000L;
+            case "year" -> 29030400000L;
+            default -> 0L;
+        };
         return Long.parseLong(foo[0]) * numberToMultiply;
     }
 

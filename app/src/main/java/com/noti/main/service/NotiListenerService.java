@@ -18,6 +18,7 @@ import android.provider.Telephony;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.media.MediaReceiver;
 import com.noti.main.utils.network.AESCrypto;
+import com.noti.main.utils.network.HMACCrypto;
 import com.noti.main.utils.network.JsonRequest;
 import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.service.IntervalQueries.*;
@@ -143,21 +145,10 @@ public class NotiListenerService extends NotificationListenerService {
 
         if (prefs != null) {
             switch (prefs.getString("uniqueIdMethod", "Globally-Unique ID")) {
-                case "Globally-Unique ID":
-                    str = prefs.getString("GUIDPrefix", "");
-                    break;
-
-                case "Android ID":
-                    str = prefs.getString("AndroidIDPrefix", "");
-                    break;
-
-                case "Firebase IID":
-                    str = prefs.getString("FirebaseIIDPrefix", "");
-                    break;
-
-                case "Device MAC ID":
-                    str = prefs.getString("MacIDPrefix", "");
-                    break;
+                case "Globally-Unique ID" -> str = prefs.getString("GUIDPrefix", "");
+                case "Android ID" -> str = prefs.getString("AndroidIDPrefix", "");
+                case "Firebase IID" -> str = prefs.getString("FirebaseIIDPrefix", "");
+                case "Device MAC ID" -> str = prefs.getString("MacIDPrefix", "");
             }
             return str;
         }
@@ -425,24 +416,12 @@ public class NotiListenerService extends NotificationListenerService {
         String ICONS;
         if (ICON != null && prefs.getBoolean("SendIcon", false)) {
             ICON.setHasAlpha(true);
-            int res;
-            switch (prefs.getString("IconRes", "")) {
-                case "68 x 68 (Not Recommend)":
-                    res = 68;
-                    break;
-
-                case "52 x 52 (Default)":
-                    res = 52;
-                    break;
-
-                case "36 x 36":
-                    res = 36;
-                    break;
-
-                default:
-                    res = 0;
-                    break;
-            }
+            int res = switch (prefs.getString("IconRes", "")) {
+                case "68 x 68 (Not Recommend)" -> 68;
+                case "52 x 52 (Default)" -> 52;
+                case "36 x 36" -> 36;
+                default -> 0;
+            };
             ICONS = (res == 0 || prefs.getBoolean("UseDataEncryption", false) ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))));
         } else ICONS = "none";
 
@@ -639,30 +618,54 @@ public class NotiListenerService extends NotificationListenerService {
                         obj.put("device_id", getUniqueID());
                         Log.d("unique_id", "id: " + rawData.hashCode());
                         sendNotification(notification.put("data", obj), PackageName, context);
+
+                        int splitInterval = prefs.getInt("SplitInterval" ,500);
+                        if(splitInterval > 0) {
+                            Thread.sleep(splitInterval);
+                        }
                     }
                     return;
                 }
-            } catch (JSONException e) {
+            } catch (JSONException | InterruptedException  e) {
                 e.printStackTrace();
             }
         }
 
         try {
             String rawPassword = prefs.getString("EncryptionPassword", "");
+            boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
             JSONObject data = notification.getJSONObject("data");
-            if (prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) {
+
+            boolean useHmacAuth = prefs.getBoolean("UseHMacAuth", false);
+            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_ID = getUniqueID();
+            String HmacToken = HMACCrypto.generateTokenIdentifier(DEVICE_NAME, DEVICE_ID);
+
+            if ((prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) || isAlwaysEncryptData) {
                 String uid = FirebaseAuth.getInstance().getUid();
                 if (uid != null) {
-                    String encryptedData = AESCrypto.encrypt(notification.getJSONObject("data").toString(), AESCrypto.parseAESToken(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid))));
+                    String finalPassword = AESCrypto.parseAESToken(isAlwaysEncryptData ? Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP) : AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
+                    String encryptedData = useHmacAuth ? HMACCrypto.encrypt(notification.getJSONObject("data").toString(), DEVICE_ID, finalPassword) : AESCrypto.encrypt(notification.getJSONObject("data").toString(), finalPassword);
 
                     JSONObject newData = new JSONObject();
                     newData.put("encrypted", "true");
                     newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
+                    newData.put("HmacID", useHmacAuth ? HmacToken : "none");
                     notification.put("data", newData);
                 }
             } else {
-                data.put("encrypted", "false");
-                notification.put("data", data);
+                if(useHmacAuth) {
+                    String encryptedData = HMACCrypto.encrypt(notification.getJSONObject("data").toString(), DEVICE_ID, null);
+                    JSONObject newData = new JSONObject();
+                    newData.put("encrypted", "false");
+                    newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
+                    newData.put("HmacID", HmacToken);
+                    notification.put("data", newData);
+                } else {
+                    data.put("encrypted", "false");
+                    data.put("HmacID", "none");
+                    notification.put("data", data);
+                }
             }
         } catch (Exception e) {
             if (BuildConfig.DEBUG) e.printStackTrace();

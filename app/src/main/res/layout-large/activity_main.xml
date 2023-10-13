@@ -343,7 +343,7 @@
                                     android:layout_height="wrap_content"
                                     android:maxEms="20"
                                     android:singleLine="true"
-                                    android:text="Not so important options"
+                                    android:text="Encryption, In-App UI, Others"
                                     android:textAppearance="?attr/textAppearanceSubtitle1"
                                     android:textSize="15sp" />
                             </LinearLayout>

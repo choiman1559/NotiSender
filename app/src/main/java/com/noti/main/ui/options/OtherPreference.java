@@ -20,13 +20,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreference;
 
 import com.application.isradeleon.notify.Notify;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.ui.prefs.custom.CustomFragment;
+import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.Date;
@@ -36,6 +39,7 @@ import me.pushy.sdk.Pushy;
 public class OtherPreference extends PreferenceFragmentCompat {
 
     SharedPreferences prefs;
+    FirebaseAuth mAuth;
     MonetCompat monet;
     Activity mContext;
 
@@ -47,6 +51,13 @@ public class OtherPreference extends PreferenceFragmentCompat {
     Preference UpdateChannel;
     Preference SaveLastSelectedItem;
     Preference NewCardRadius;
+
+    Preference UseDataEncryption;
+    Preference UseDataEncryptionPassword;
+    Preference EncryptionInfo;
+    Preference AlwaysEncryptData;
+    Preference AllowOnlyPaired;
+    Preference UseHMacAuth;
 
     @NonNull
     @Override
@@ -74,6 +85,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.other_preferences, rootKey);
         prefs = mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
+        mAuth = FirebaseAuth.getInstance();
 
         UseWiFiSleepPolicy = findPreference("UseWiFiSleepPolicy");
         HistoryLimit = findPreference("HistoryLimit");
@@ -83,6 +95,13 @@ public class OtherPreference extends PreferenceFragmentCompat {
         UpdateChannel = findPreference("UpdateChannel");
         SaveLastSelectedItem = findPreference("SaveLastSelectedItem");
         NewCardRadius = findPreference("NewCardRadius");
+
+        UseDataEncryption = findPreference("UseDataEncryption");
+        UseDataEncryptionPassword = findPreference("UseDataEncryptionPassword");
+        EncryptionInfo = findPreference("EncryptionInfo");
+        AlwaysEncryptData = findPreference("AlwaysEncryptData");
+        AllowOnlyPaired = findPreference("AllowOnlyPaired");
+        UseHMacAuth = findPreference("UseHMacAuth");
 
         UseWiFiSleepPolicy.setOnPreferenceChangeListener((p, n) -> {
             Pushy.toggleWifiPolicyCompliance((boolean) n, mContext);
@@ -98,6 +117,34 @@ public class OtherPreference extends PreferenceFragmentCompat {
         UpdateChannel.setSummary("Now : " + prefs.getString("UpdateChannel", "Automatically specified"));
         UpdateChannel.setOnPreferenceChangeListener((p, n) -> {
             UpdateChannel.setSummary("Now : " + n);
+            return true;
+        });
+
+        boolean ifUIDBlank = prefs.getString("UID", "").equals("");
+        if(ifUIDBlank) {
+            ((SwitchPreference)UseDataEncryption).setChecked(false);
+            UseDataEncryption.setEnabled(false);
+            UseDataEncryption.setSummary("You should login first to use this feature");
+            UseDataEncryptionPassword.setVisible(false);
+            EncryptionInfo.setVisible(false);
+        } else {
+            boolean usesDataEncryption = prefs.getBoolean("UseDataEncryption", false);
+            UseDataEncryptionPassword.setVisible(usesDataEncryption);
+            EncryptionInfo.setVisible(usesDataEncryption);
+            AlwaysEncryptData.setEnabled(!usesDataEncryption);
+            UseDataEncryption.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean foo = (boolean) newValue;
+                UseDataEncryptionPassword.setVisible(foo);
+                EncryptionInfo.setVisible(foo);
+                AlwaysEncryptData.setVisible(!foo);
+                return true;
+            });
+        }
+
+        boolean isAllowOnlyPaired = prefs.getBoolean("AllowOnlyPaired", false);
+        UseHMacAuth.setVisible(isAllowOnlyPaired);
+        AllowOnlyPaired.setOnPreferenceChangeListener((preference, newValue) -> {
+            UseHMacAuth.setVisible((Boolean) newValue);
             return true;
         });
 
@@ -277,6 +324,70 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
             case "StartRegexAction":
                 mContext.startActivity(new Intent(mContext, CustomFragment.class));
+                break;
+
+            case "UseDataEncryptionPassword":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
+                dialog.setCancelable(false);
+                dialog.setTitle("Input password");
+                dialog.setMessage("Enter the password to be used for encryption.\nPassword is limited to a maximum of 20 characters.");
+
+                editText = new EditText(mContext);
+                editText.setInputType(InputType.TYPE_CLASS_TEXT);
+                editText.setHint("Input password");
+                editText.setGravity(Gravity.START);
+
+                String rawPassword = prefs.getString("EncryptionPassword", "");
+                if(rawPassword.equals("")) editText.setText("");
+                else {
+                    String uid = mAuth.getUid();
+                    if(uid != null) {
+                        try {
+                            editText.setText(AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
+                        } catch (Exception e) {
+                            ToastHelper.show(mContext, "Error while processing crypto","DISMISS", ToastHelper.LENGTH_SHORT);
+                        }
+                    }
+                }
+
+                parentLayout = new LinearLayout(mContext);
+                layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(30, 16, 30, 16);
+                editText.setLayoutParams(layoutParams);
+                parentLayout.addView(editText);
+                dialog.setView(parentLayout);
+
+                dialog.setPositiveButton("Apply", (d, w) -> {
+                    String values = editText.getText().toString();
+                    if (values.equals("")) {
+                        ToastHelper.show(mContext, "Please Input password","DISMISS", ToastHelper.LENGTH_SHORT);
+                    } else if(values.length() > 20) {
+                        ToastHelper.show(mContext, "Password too long! maximum 20 chars.", "DISMISS",ToastHelper.LENGTH_SHORT);
+                    } else {
+                        try {
+                            String uid = mAuth.getUid();
+                            if(uid != null) prefs.edit().putString("EncryptionPassword", AESCrypto.encrypt(values, AESCrypto.parseAESToken(uid))).apply();
+                        } catch (Exception e) {
+                            ToastHelper.show(mContext, "Error while processing crypto", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        }
+                    }
+                });
+                dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().remove("EncryptionPassword").apply());
+                dialog.setNegativeButton("Cancel", (d, w) -> {
+                });
+                dialog.show();
+                break;
+
+            case "EncryptionInfo":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                dialog.setTitle("Encryption Info");
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                dialog.setMessage(getString(R.string.Encryption_information));
+                dialog.setPositiveButton("Close", (d, w) -> { });
+                dialog.show();
                 break;
         }
         return super.onPreferenceTreeClick(preference);

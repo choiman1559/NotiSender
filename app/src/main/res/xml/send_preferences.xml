@@ -134,23 +134,6 @@
             android:title="Customizing default message string" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Data Encryption">
-        <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_fluent_lock_shield_24_regular"
-            android:key="UseDataEncryption"
-            android:summary="Encrypt your notification data using AES algorithm"
-            android:title="Encrypt sending data" />
-        <Preference
-            android:key="UseDataEncryptionPassword"
-            android:summary="Password to use for AES encryption"
-            android:title="Password for encryption" />
-        <Preference
-            android:icon="@drawable/ic_info_outline_black_24dp"
-            android:key="EncryptionInfo"
-            android:summary="Some Information about encryption" />
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="Data split">
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
@@ -158,5 +141,9 @@
             android:key="UseSplitData"
             android:summary="If the data is too large to be transmitted, it will be transmitted in fragments."
             android:title="Use data split transmission (Unstable)" />
+        <Preference
+            android:key="SplitInterval"
+            android:summary="Now : 500 ms (Default)"
+            android:title="Transmission interval between segmented packets" />
     </PreferenceCategory>
 </PreferenceScreen>
