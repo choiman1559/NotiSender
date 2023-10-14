@@ -31,7 +31,6 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.documentfile.provider.DocumentFile;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -135,15 +134,16 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @SuppressWarnings("unchecked")
     public void preProcessReception(Map <String, String> map, Context context) {
         String rawPassword = prefs.getString("EncryptionPassword", "");
+        boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
         boolean useHmacAuth = prefs.getBoolean("UseHMacAuth", false);
 
         if ("true".equals(map.get("encrypted"))) {
             boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
-            if ((prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) || isAlwaysEncryptData) {
+            if ((useEncryption && !rawPassword.equals("")) || isAlwaysEncryptData) {
                 try {
-                    String uid = FirebaseAuth.getInstance().getUid();
-                    if (uid != null) {
-                        String finalPassword = AESCrypto.parseAESToken(isAlwaysEncryptData ? Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP) : AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
+                    String uid = prefs.getString("UID", "");
+                    if (!uid.isEmpty()) {
+                        String finalPassword = AESCrypto.parseAESToken(useEncryption ? AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)) : Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
                         if(useHmacAuth) {
                             preProcessReceptionWithHmac(map, finalPassword, context);
                         } else {

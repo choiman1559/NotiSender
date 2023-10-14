@@ -131,7 +131,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
             boolean usesDataEncryption = prefs.getBoolean("UseDataEncryption", false);
             UseDataEncryptionPassword.setVisible(usesDataEncryption);
             EncryptionInfo.setVisible(usesDataEncryption);
-            AlwaysEncryptData.setEnabled(!usesDataEncryption);
+            AlwaysEncryptData.setVisible(!usesDataEncryption);
             UseDataEncryption.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean foo = (boolean) newValue;
                 UseDataEncryptionPassword.setVisible(foo);

@@ -632,20 +632,21 @@ public class NotiListenerService extends NotificationListenerService {
         }
 
         try {
-            String rawPassword = prefs.getString("EncryptionPassword", "");
-            boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
             JSONObject data = notification.getJSONObject("data");
+            String rawPassword = prefs.getString("EncryptionPassword", "");
+            boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
+            boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
 
             boolean useHmacAuth = prefs.getBoolean("UseHMacAuth", false);
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
             String HmacToken = HMACCrypto.generateTokenIdentifier(DEVICE_NAME, DEVICE_ID);
 
-            if ((prefs.getBoolean("UseDataEncryption", false) && !rawPassword.equals("")) || isAlwaysEncryptData) {
+            if ((useEncryption && !rawPassword.equals("")) || isAlwaysEncryptData) {
                 String uid = FirebaseAuth.getInstance().getUid();
                 if (uid != null) {
-                    String finalPassword = AESCrypto.parseAESToken(isAlwaysEncryptData ? Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP) : AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)));
-                    String encryptedData = useHmacAuth ? HMACCrypto.encrypt(notification.getJSONObject("data").toString(), DEVICE_ID, finalPassword) : AESCrypto.encrypt(notification.getJSONObject("data").toString(), finalPassword);
+                    String finalPassword = AESCrypto.parseAESToken(useEncryption ? AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)) : Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
+                    String encryptedData = useHmacAuth ? HMACCrypto.encrypt(data.toString(), DEVICE_ID, finalPassword) : AESCrypto.encrypt(data.toString(), finalPassword);
 
                     JSONObject newData = new JSONObject();
                     newData.put("encrypted", "true");
@@ -655,7 +656,7 @@ public class NotiListenerService extends NotificationListenerService {
                 }
             } else {
                 if(useHmacAuth) {
-                    String encryptedData = HMACCrypto.encrypt(notification.getJSONObject("data").toString(), DEVICE_ID, null);
+                    String encryptedData = HMACCrypto.encrypt(data.toString(), DEVICE_ID, null);
                     JSONObject newData = new JSONObject();
                     newData.put("encrypted", "false");
                     newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
@@ -674,6 +675,7 @@ public class NotiListenerService extends NotificationListenerService {
         try {
             JSONObject data = notification.getJSONObject("data");
             data.put("topic", prefs.getString("UID", ""));
+            notification.put("data", data);
         } catch (JSONException e) {
             e.printStackTrace();
         }
