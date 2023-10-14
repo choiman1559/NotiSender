@@ -56,8 +56,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.3'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.7.3'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.4'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.4'
     implementation "androidx.documentfile:documentfile:1.0.1"
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.palette:palette-ktx:1.0.0'
@@ -84,8 +84,8 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'com.github.isradeleon:Notify-Android:1.0.4'
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
-    implementation 'com.joaomgcd:taskerpluginlibrary:0.4.7'
-    implementation 'com.microsoft.design:fluent-system-icons:1.1.218@aar'
+    implementation 'com.joaomgcd:taskerpluginlibrary:0.4.9'
+    implementation 'com.microsoft.design:fluent-system-icons:1.1.219@aar'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0'
 }
 
