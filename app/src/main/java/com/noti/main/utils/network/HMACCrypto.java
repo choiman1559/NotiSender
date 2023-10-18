@@ -1,6 +1,7 @@
 package com.noti.main.utils.network;
 
 import android.util.Base64;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -41,6 +42,9 @@ public class HMACCrypto {
 
         data = getCombinedArray(data, hasher.doFinal());
         data = getCombinedArray(data, cipherText);
+
+        Log.d("dddd",Base64.encodeToString(data, Base64.NO_WRAP) + " " + Arrays.toString(data));
+
         return Base64.encodeToString(data, Base64.NO_WRAP);
     }
 
@@ -91,13 +95,13 @@ public class HMACCrypto {
         String finalString = "";
 
         if(string1.length() >= string2.length()) {
-            finalString += (string1 + saltArray[0]).substring(0, 16);
-            finalString += (string2 + saltArray[1]).substring(0, 16);
+            finalString += (string1.substring(0, 8) + saltArray[0]).substring(0, 16);
+            finalString += (string2.substring(0, 8) + saltArray[1]).substring(0, 16);
         } else {
-            finalString += (string1 + saltArray[1]).substring(0, 16);
-            finalString += (string2 + saltArray[0]).substring(0, 16);
+            finalString += (string1.substring(0, 8) + saltArray[1]).substring(0, 16);
+            finalString += (string2.substring(0, 8) + saltArray[0]).substring(0, 16);
         }
 
-        return finalString.substring(0, 32);
+        return Base64.encodeToString(finalString.substring(0, 32).getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
     }
 }

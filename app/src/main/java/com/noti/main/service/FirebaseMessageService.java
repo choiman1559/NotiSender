@@ -135,7 +135,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public void preProcessReception(Map <String, String> map, Context context) {
         String rawPassword = prefs.getString("EncryptionPassword", "");
         boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
-        boolean useHmacAuth = prefs.getBoolean("UseHMacAuth", false);
+        boolean useHmacAuth = prefs.getBoolean("AllowOnlyPaired", false) && prefs.getBoolean("UseHMacAuth", false);
 
         if ("true".equals(map.get("encrypted"))) {
             boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);

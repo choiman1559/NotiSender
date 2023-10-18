@@ -637,7 +637,11 @@ public class NotiListenerService extends NotificationListenerService {
             boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
             boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
 
-            boolean useHmacAuth = prefs.getBoolean("UseHMacAuth", false);
+            boolean useHmacAuth = prefs.getBoolean("AllowOnlyPaired", false) && prefs.getBoolean("UseHMacAuth", false) && switch (data.getString("type")) {
+                case "pair|request_device_list", "pair|request_pair", "pair|response_device_list", "pair|accept_pair" -> false;
+                default -> true;
+            };
+
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
             String HmacToken = HMACCrypto.generateTokenIdentifier(DEVICE_NAME, DEVICE_ID);
