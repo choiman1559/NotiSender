@@ -43,8 +43,6 @@ public class HMACCrypto {
         data = getCombinedArray(data, hasher.doFinal());
         data = getCombinedArray(data, cipherText);
 
-        Log.d("dddd",Base64.encodeToString(data, Base64.NO_WRAP) + " " + Arrays.toString(data));
-
         return Base64.encodeToString(data, Base64.NO_WRAP);
     }
 
