@@ -705,12 +705,15 @@ public class NotiListenerService extends NotificationListenerService {
         data.put("topic", prefs.getString("UID", ""));
         notification.put("data", data);
 
+        if(data.has("encryptedData")) {
+            int uniqueId = data.getString("encryptedData").hashCode();
+            FirebaseMessageService.selfReceiveDetectorList.add(uniqueId);
+        }
+
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
             if (!prefs.getString("ApiKey_Pushy", "").equals(""))
                 sendPushyNotification(notification, PackageName, context);
         } else sendFCMNotification(notification, PackageName, context);
-
-        Log.d("dddd", notification.toString());
 
         System.gc();
     }

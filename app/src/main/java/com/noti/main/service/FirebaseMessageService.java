@@ -74,6 +74,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -94,6 +95,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static volatile Ringtone lastPlayedRingtone;
     public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
+    public static final ArrayList<Integer> selfReceiveDetectorList = new ArrayList<>();
     private final PushyReceiver.onPushyMessageListener onPushyMessageListener = message -> preProcessReception(message.getData(), FirebaseMessageService.this);
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
@@ -138,6 +140,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         boolean useHmacAuth = prefs.getBoolean("AllowOnlyPaired", false) && prefs.getBoolean("UseHMacAuth", false);
 
         if ("true".equals(map.get("encrypted"))) {
+            int dataHash = Objects.requireNonNull(map.get("encryptedData")).hashCode();
+            if(selfReceiveDetectorList.contains(dataHash)) {
+                selfReceiveDetectorList.remove((Integer) dataHash);
+                return;
+            }
+
             boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
             if ((useEncryption && !rawPassword.equals("")) || isAlwaysEncryptData) {
                 try {
@@ -396,7 +404,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @SuppressWarnings("unchecked")
     protected void processSplitData(Map<String, String> map, Context context) {
         synchronized (splitDataList) {
-            Log.d("split_data", "current size : " + splitDataList.size());
+            if(BuildConfig.DEBUG) Log.d("split_data", "current size : " + splitDataList.size());
 
             for (int i = 0; i < splitDataList.size(); i++) {
                 SplitDataObject object = splitDataList.get(i);
