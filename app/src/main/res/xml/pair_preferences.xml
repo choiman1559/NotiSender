@@ -43,4 +43,10 @@
         android:summary="Output debug information about pairing to Logcat"
         android:title="Print debug log"
         android:icon="@drawable/ic_fluent_bug_24_regular" />
+
+    <Preference
+        android:key="pairKillSwitch"
+        android:title="Unpair all paired devices"
+        android:summary="Reset and delete all previous connected devices"
+        android:icon="@drawable/ic_fluent_arrow_reset_24_regular" />
 </PreferenceScreen>

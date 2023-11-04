@@ -338,19 +338,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         }
                         case "pair|request_remove" -> {
                             if (isTargetDevice(map) && isPairedDevice(map) && prefs.getBoolean("allowRemovePairRemotely", true)) {
-                                String dataToFind = map.get("device_name") + "|" + map.get("device_id") + (map.containsKey("device_type") ? "|" + map.get("device_type") : "");
-                                String dataToRemove = null;
-
-                                Set<String> list = new HashSet<>(pairPrefs.getStringSet("paired_list", new HashSet<>()));
-                                for (String str : list) {
-                                    if (str.contains(dataToFind)) {
-                                        dataToRemove = str;
-                                        break;
-                                    }
-                                }
-
-                                if (dataToRemove != null) list.remove(dataToRemove);
-                                pairPrefs.edit().putStringSet("paired_list", list).apply();
+                                removePairedDevice(map);
+                            }
+                        }
+                        case "pair|request_remove_all" -> {
+                            if (isPairedDevice(map) && prefs.getBoolean("allowRemovePairRemotely", true)) {
+                               removePairedDevice(map);
                             }
                         }
                         case "pair|request_data" -> {
@@ -460,6 +453,22 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             if ((savedData[0] + "|" + savedData[1]).equals(dataToFind)) return true;
         }
         return false;
+    }
+
+    protected void removePairedDevice(Map<String, String> map) {
+        String dataToFind = map.get("device_name") + "|" + map.get("device_id") + (map.containsKey("device_type") ? "|" + map.get("device_type") : "");
+        String dataToRemove = null;
+
+        Set<String> list = new HashSet<>(pairPrefs.getStringSet("paired_list", new HashSet<>()));
+        for (String str : list) {
+            if (str.contains(dataToFind)) {
+                dataToRemove = str;
+                break;
+            }
+        }
+
+        if (dataToRemove != null) list.remove(dataToRemove);
+        pairPrefs.edit().putStringSet("paired_list", list).apply();
     }
 
     protected void startNewRemoteActivity(Map<String, String> map) {
