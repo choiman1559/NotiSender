@@ -47,12 +47,12 @@ public class PairDetailActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pair_detail);
-        
+
         Intent intent = getIntent();
         String Device_name = intent.getStringExtra("device_name");
         String Device_id = intent.getStringExtra("device_id");
         String Device_type = intent.getStringExtra("device_type");
-        SharedPreferences prefs = getSharedPreferences("com.noti.main_pair",MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         SharedPreferences deviceBlacksPrefs = getSharedPreferences("com.noti.main_device.blacklist", MODE_PRIVATE);
 
         ImageView icon = findViewById(R.id.icon);
@@ -63,11 +63,13 @@ public class PairDetailActivity extends AppCompatActivity {
         Button forgetButton = findViewById(R.id.forgetButton);
         Button findButton = findViewById(R.id.findButton);
         SwitchMaterial blockToggle = findViewById(R.id.switchCompat);
+        SwitchMaterial remoteToggle = findViewById(R.id.remoteToggleSwitch);
 
         LinearLayout batterySaveEnabled = findViewById(R.id.batterySaveEnabled);
         LinearLayout batteryLayout = findViewById(R.id.batteryLayout);
         LinearLayout deviceBlackListLayout = findViewById(R.id.deviceBlackListLayout);
         LinearLayout remotePresentation = findViewById(R.id.remotePresentation);
+        LinearLayout remoteToggleLayout = findViewById(R.id.remoteToggleLayout);
 
         boolean isComputer = Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_DESKTOP) || Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_LAPTOP);
         boolean isBlocked = deviceBlacksPrefs.getBoolean(Device_id, false);
@@ -76,11 +78,18 @@ public class PairDetailActivity extends AppCompatActivity {
         deviceBlackListLayout.setOnClickListener((v) -> blockToggle.setChecked(!blockToggle.isChecked()));
         deviceBlackListLayout.setVisibility(isComputer ? View.GONE : View.VISIBLE);
 
+        remoteToggleLayout.setOnClickListener((v) -> {
+            boolean targetToggle = !remoteToggle.isChecked();
+            remoteToggle.setChecked(targetToggle);
+            DataProcess.requestAction(this, Device_name, Device_id, "toggle_service", Boolean.toString(targetToggle));
+        });
+
         String[] colorLow = getResources().getStringArray(R.array.material_color_low);
         String[] colorHigh = getResources().getStringArray(R.array.material_color_high);
         int randomIndex = new Random(Device_name.hashCode()).nextInt(colorHigh.length);
 
-        if(Device_type != null) icon.setImageResource(new PairDeviceType(Device_type).getDeviceTypeBitmap());
+        if (Device_type != null)
+            icon.setImageResource(new PairDeviceType(Device_type).getDeviceTypeBitmap());
         icon.setImageTintList(ColorStateList.valueOf(Color.parseColor(colorHigh[randomIndex])));
         icon.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorLow[randomIndex])));
         deviceName.setText(Device_name);
@@ -98,7 +107,7 @@ public class PairDetailActivity extends AppCompatActivity {
         forgetButton.setOnClickListener(v -> {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID", "");
+            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
 
             JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();
@@ -117,7 +126,7 @@ public class PairDetailActivity extends AppCompatActivity {
 
             sendNotification(notificationHead, getPackageName(), this);
             Set<String> list = new HashSet<>(prefs.getStringSet("paired_list", new HashSet<>()));
-            if(Device_type == null) list.remove(Device_name + "|" + Device_id);
+            if (Device_type == null) list.remove(Device_name + "|" + Device_id);
             else list.remove(Device_name + "|" + Device_id + "|" + Device_type);
             prefs.edit().putStringSet("paired_list", list).apply();
 
@@ -128,7 +137,7 @@ public class PairDetailActivity extends AppCompatActivity {
             Date date = Calendar.getInstance().getTime();
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID", "");
+            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
 
             JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();
@@ -147,37 +156,55 @@ public class PairDetailActivity extends AppCompatActivity {
             }
 
             sendNotification(notificationHead, getPackageName(), this);
-            ToastHelper.show(this, "Your request is posted!","OK", ToastHelper.LENGTH_SHORT);
+            ToastHelper.show(this, "Your request is posted!", "OK", ToastHelper.LENGTH_SHORT);
         });
 
         DataProcess.requestData(this, Device_name, Device_id, "battery_info");
         PairListener.addOnDataReceivedListener(map -> {
-            if(Objects.equals(map.get("request_data"), "battery_info") &&
+            if (Objects.equals(map.get("request_data"), "battery_info") &&
                     Objects.equals(map.get("device_name"), Device_name) &&
                     Objects.equals(map.get("device_id"), Device_id)) {
                 String[] data = Objects.requireNonNull(map.get("receive_data")).split("\\|");
                 int batteryInt = Integer.parseInt(data[0].split("\\.")[0]);
                 int resId = R.drawable.ic_fluent_battery_warning_24_regular;
 
-                if(batteryInt < 10) resId = R.drawable.ic_fluent_battery_0_24_regular;
-                else if(batteryInt < 20) resId = R.drawable.ic_fluent_battery_1_24_regular;
-                else if(batteryInt < 30) resId = R.drawable.ic_fluent_battery_2_24_regular;
-                else if(batteryInt < 40) resId = R.drawable.ic_fluent_battery_3_24_regular;
-                else if(batteryInt < 50) resId = R.drawable.ic_fluent_battery_4_24_regular;
-                else if(batteryInt < 60) resId = R.drawable.ic_fluent_battery_5_24_regular;
-                else if(batteryInt < 70) resId = R.drawable.ic_fluent_battery_6_24_regular;
-                else if(batteryInt < 80) resId = R.drawable.ic_fluent_battery_7_24_regular;
-                else if(batteryInt < 90) resId = R.drawable.ic_fluent_battery_8_24_regular;
-                else if(batteryInt < 100) resId = R.drawable.ic_fluent_battery_9_24_regular;
-                else if(batteryInt == 100) resId = R.drawable.ic_fluent_battery_10_24_regular;
+                if (batteryInt < 10) resId = R.drawable.ic_fluent_battery_0_24_regular;
+                else if (batteryInt < 20) resId = R.drawable.ic_fluent_battery_1_24_regular;
+                else if (batteryInt < 30) resId = R.drawable.ic_fluent_battery_2_24_regular;
+                else if (batteryInt < 40) resId = R.drawable.ic_fluent_battery_3_24_regular;
+                else if (batteryInt < 50) resId = R.drawable.ic_fluent_battery_4_24_regular;
+                else if (batteryInt < 60) resId = R.drawable.ic_fluent_battery_5_24_regular;
+                else if (batteryInt < 70) resId = R.drawable.ic_fluent_battery_6_24_regular;
+                else if (batteryInt < 80) resId = R.drawable.ic_fluent_battery_7_24_regular;
+                else if (batteryInt < 90) resId = R.drawable.ic_fluent_battery_8_24_regular;
+                else if (batteryInt < 100) resId = R.drawable.ic_fluent_battery_9_24_regular;
+                else if (batteryInt == 100) resId = R.drawable.ic_fluent_battery_10_24_regular;
 
                 int finalResId = resId;
                 PairDetailActivity.this.runOnUiThread(() -> {
-                    if(data[2].equals("true")) batterySaveEnabled.setVisibility(View.VISIBLE);
+                    if (data[2].equals("true")) batterySaveEnabled.setVisibility(View.VISIBLE);
                     batteryLayout.setVisibility(View.VISIBLE);
                     batteryDetail.setText(batteryInt + "% remaining" + (data[1].equals("true") ? ", Charging" : ""));
                     batteryIcon.setImageDrawable(AppCompatResources.getDrawable(PairDetailActivity.this, finalResId));
                 });
+
+                if (data.length > 3) {
+                    String toggleInfo = data[3];
+                    this.runOnUiThread(() -> {
+                        switch (Objects.requireNonNull(toggleInfo)) {
+                            case "none" -> remoteToggleLayout.setVisibility(View.GONE);
+                            case "true" -> {
+                                remoteToggleLayout.setVisibility(View.VISIBLE);
+
+                                remoteToggle.setChecked(true);
+                            }
+                            case "false" -> {
+                                remoteToggleLayout.setVisibility(View.VISIBLE);
+                                remoteToggle.setChecked(false);
+                            }
+                        }
+                    });
+                }
             }
         });
 

@@ -13,6 +13,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -159,6 +160,7 @@ public class DataProcess {
                     boolean isBatterySaver = powerManager.isPowerSaveMode();
 
                     dataToSend = batteryPct + "|" + isCharging + "|" + isBatterySaver;
+                    dataToSend += ("|" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getBoolean("serviceToggle", false));
                     break;
 
                 case "":
@@ -386,6 +388,11 @@ public class DataProcess {
                             mNotifyManager.cancel(notificationId);
                         }
                     }).start();
+                    break;
+
+                case "toggle_service":
+                    SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
+                    prefs.edit().putBoolean("serviceToggle", Boolean.parseBoolean(actionArg)).apply();
                     break;
             }
         }
