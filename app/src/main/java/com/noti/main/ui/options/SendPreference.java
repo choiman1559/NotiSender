@@ -71,6 +71,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
     Preference UseSplitData;
     Preference SplitInterval;
+    Preference SplitAfterEncryption;
 
     @NonNull
     @Override
@@ -127,6 +128,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
         UseSplitData = findPreference("UseSplitData");
         SplitInterval = findPreference("SplitInterval");
+        SplitAfterEncryption = findPreference("SplitAfterEncryption");
 
         boolean isntUpOsM = Build.VERSION.SDK_INT < 22;
         if (isntUpOsM) {
@@ -235,10 +237,13 @@ public class SendPreference extends PreferenceFragmentCompat {
         }));
 
         int splitIntervalValue = prefs.getInt("SplitInterval", 500);
-        SplitInterval.setVisible(prefs.getBoolean("UseSplitData", false));
+        boolean useSplit = prefs.getBoolean("UseSplitData", false);
+        SplitInterval.setVisible(useSplit);
+        SplitAfterEncryption.setVisible(useSplit);
         SplitInterval.setSummary("Now : " + (splitIntervalValue == 500 ? "500 ms (Default)" : (splitIntervalValue < 1 ? "0 ms (Disabled)" : splitIntervalValue + " ms")));
         UseSplitData.setOnPreferenceChangeListener(((preference, newValue) -> {
             SplitInterval.setVisible((boolean) newValue);
+            SplitAfterEncryption.setVisible((boolean) newValue);
             return true;
         }));
 

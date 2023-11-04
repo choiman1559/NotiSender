@@ -407,7 +407,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     if (object.length == object.getSize()) {
                         try {
                             Map<String, String> newMap = new ObjectMapper().readValue(object.getFullData(), Map.class);
-                            processReception(newMap, context);
+                            preProcessReception(newMap, context);
                         } catch (IOException e) {
                             e.printStackTrace();
                         } finally {

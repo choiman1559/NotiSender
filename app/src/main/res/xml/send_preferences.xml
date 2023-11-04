@@ -140,10 +140,15 @@
             android:icon="@drawable/ic_fluent_split_vertical_24_regular"
             android:key="UseSplitData"
             android:summary="If the data is too large to be transmitted, it will be transmitted in fragments."
-            android:title="Use data split transmission (Unstable)" />
+            android:title="Use data split transmission" />
         <Preference
             android:key="SplitInterval"
             android:summary="Now : 500 ms (Default)"
             android:title="Transmission interval between segmented packets" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="SplitAfterEncryption"
+            android:summary="Proceed data split after encrypting is done"
+            android:title="Split after encryption" />
     </PreferenceCategory>
 </PreferenceScreen>

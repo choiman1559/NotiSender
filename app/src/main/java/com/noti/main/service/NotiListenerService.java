@@ -422,7 +422,7 @@ public class NotiListenerService extends NotificationListenerService {
                 case "36 x 36" -> 36;
                 default -> 0;
             };
-            ICONS = (res == 0 || prefs.getBoolean("UseDataEncryption", false) ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))));
+            ICONS = (res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))));
         } else ICONS = "none";
 
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
@@ -452,7 +452,7 @@ public class NotiListenerService extends NotificationListenerService {
             notificationBody.put("notification_key", KEY);
 
             int dataLimit = prefs.getInt("DataLimit", 4096);
-            if(notificationBody.toString().length() >= dataLimit - 20 && !prefs.getBoolean("UseSplitData", false)) {
+            if (notificationBody.toString().length() >= dataLimit - 20 && !prefs.getBoolean("UseSplitData", false)) {
                 notificationBody.put("icon", "none");
             }
 
@@ -602,92 +602,116 @@ public class NotiListenerService extends NotificationListenerService {
         if (manager == null) manager = PowerUtils.getInstance(context);
         manager.acquire();
 
-        if (prefs.getBoolean("UseSplitData", false)) {
-            try {
-                String rawData = notification.getString("data");
-                if (rawData.length() > 3072) {
-                    String[] arr = rawData.split("(?<=\\G.{1024})");
-                    for (int i = 0; i < arr.length; i++) {
-                        String str = arr[i];
-                        JSONObject obj = new JSONObject();
-                        obj.put("type", "split_data");
-                        obj.put("split_index", i + "/" + arr.length);
-                        obj.put("split_unique", Integer.toString(rawData.hashCode()));
-                        obj.put("split_data", str);
-                        obj.put("device_name", Build.MANUFACTURER + " " + Build.MODEL);
-                        obj.put("device_id", getUniqueID());
-                        Log.d("unique_id", "id: " + rawData.hashCode());
-                        sendNotification(notification.put("data", obj), PackageName, context);
-
-                        int splitInterval = prefs.getInt("SplitInterval" ,500);
-                        if(splitInterval > 0) {
-                            Thread.sleep(splitInterval);
-                        }
-                    }
-                    return;
-                }
-            } catch (JSONException | InterruptedException  e) {
-                e.printStackTrace();
-            }
-        }
-
         try {
-            JSONObject data = notification.getJSONObject("data");
-            String rawPassword = prefs.getString("EncryptionPassword", "");
+            boolean useSplit = prefs.getBoolean("UseSplitData", false) && notification.getString("data").length() > 3072;
             boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
-            boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
+            boolean splitAfterEncryption = prefs.getBoolean("SplitAfterEncryption", false);
+            int splitInterval = prefs.getInt("SplitInterval", 500);
 
-            boolean useHmacAuth = prefs.getBoolean("AllowOnlyPaired", false) && prefs.getBoolean("UseHMacAuth", false) && switch (data.getString("type")) {
-                case "pair|request_device_list", "pair|request_pair", "pair|response_device_list", "pair|accept_pair" -> false;
-                default -> true;
-            };
-
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-            String DEVICE_ID = getUniqueID();
-            String HmacToken = HMACCrypto.generateTokenIdentifier(DEVICE_NAME, DEVICE_ID);
-
-            if ((useEncryption && !rawPassword.equals("")) || isAlwaysEncryptData) {
-                String uid = FirebaseAuth.getInstance().getUid();
-                if (uid != null) {
-                    String finalPassword = AESCrypto.parseAESToken(useEncryption ? AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)) : Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
-                    String encryptedData = useHmacAuth ? HMACCrypto.encrypt(data.toString(), DEVICE_ID, finalPassword) : AESCrypto.encrypt(data.toString(), finalPassword);
-
-                    JSONObject newData = new JSONObject();
-                    newData.put("encrypted", "true");
-                    newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
-                    newData.put("HmacID", useHmacAuth ? HmacToken : "none");
-                    notification.put("data", newData);
+            if (useSplit) {
+                if(useEncryption && splitAfterEncryption) encryptData(notification);
+                for (JSONObject object : splitData(notification)) {
+                    if(useEncryption && !splitAfterEncryption) encryptData(object);
+                    finalProcessData(object, PackageName, context);
+                    if (splitInterval > 0) {
+                        Thread.sleep(splitInterval);
+                    }
                 }
-            } else {
-                if(useHmacAuth) {
-                    String encryptedData = HMACCrypto.encrypt(data.toString(), DEVICE_ID, null);
-                    JSONObject newData = new JSONObject();
-                    newData.put("encrypted", "false");
-                    newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
-                    newData.put("HmacID", HmacToken);
-                    notification.put("data", newData);
-                } else {
-                    data.put("encrypted", "false");
-                    data.put("HmacID", "none");
-                    notification.put("data", data);
-                }
+                return;
+            } else if (useEncryption) {
+                encryptData(notification);
             }
-        } catch (Exception e) {
-            if (BuildConfig.DEBUG) e.printStackTrace();
-        }
 
-        try {
-            JSONObject data = notification.getJSONObject("data");
-            data.put("topic", prefs.getString("UID", ""));
-            notification.put("data", data);
-        } catch (JSONException e) {
+            finalProcessData(notification, PackageName, context);
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    protected static JSONObject[] splitData(JSONObject notification) throws JSONException {
+        String rawData = notification.getString("data");
+
+        int size = 1024;
+        List<String> arr = new ArrayList<>((rawData.length() + size - 1) / size);
+        for (int start = 0; start < rawData.length(); start += size) {
+            arr.add(rawData.substring(start, Math.min(rawData.length(), start + size)));
+        }
+
+        JSONObject[] data = new JSONObject[arr.size()];
+        for (int i = 0; i < arr.size(); i++) {
+            String str = arr.get(i);
+            JSONObject obj = new JSONObject();
+            obj.put("type", "split_data");
+            obj.put("split_index", i + "/" + arr.size());
+            obj.put("split_unique", Integer.toString(rawData.hashCode()));
+            obj.put("split_data", str);
+            obj.put("device_name", Build.MANUFACTURER + " " + Build.MODEL);
+            obj.put("device_id", getUniqueID());
+            Log.d("unique_id", "id: " + rawData.hashCode());
+            data[i] = new JSONObject(notification.put("data", obj).toString());
+        }
+        return data;
+    }
+
+    protected static void encryptData(JSONObject notification) throws Exception {
+        SharedPreferences prefs = getPrefs();
+        JSONObject data = notification.getJSONObject("data");
+
+        String rawPassword = prefs.getString("EncryptionPassword", "");
+        boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
+        boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
+
+        boolean useHmacAuth = prefs.getBoolean("AllowOnlyPaired", false) && prefs.getBoolean("UseHMacAuth", false) && switch (data.getString("type")) {
+            case "pair|request_device_list", "pair|request_pair", "pair|response_device_list", "pair|accept_pair" ->
+                    false;
+            default -> true;
+        };
+
+        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_ID = getUniqueID();
+        String HmacToken = HMACCrypto.generateTokenIdentifier(DEVICE_NAME, DEVICE_ID);
+
+        if ((useEncryption && !rawPassword.equals("")) || isAlwaysEncryptData) {
+            String uid = FirebaseAuth.getInstance().getUid();
+            if (uid != null) {
+                String finalPassword = AESCrypto.parseAESToken(useEncryption ? AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)) : Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
+                String encryptedData = useHmacAuth ? HMACCrypto.encrypt(data.toString(), DEVICE_ID, finalPassword) : AESCrypto.encrypt(data.toString(), finalPassword);
+
+                JSONObject newData = new JSONObject();
+                newData.put("encrypted", "true");
+                newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
+                newData.put("HmacID", useHmacAuth ? HmacToken : "none");
+                notification.put("data", newData);
+            }
+        } else {
+            if (useHmacAuth) {
+                String encryptedData = HMACCrypto.encrypt(data.toString(), DEVICE_ID, null);
+                JSONObject newData = new JSONObject();
+                newData.put("encrypted", "false");
+                newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
+                newData.put("HmacID", HmacToken);
+                notification.put("data", newData);
+            } else {
+                data.put("encrypted", "false");
+                data.put("HmacID", "none");
+                notification.put("data", data);
+            }
+        }
+    }
+
+    protected static void finalProcessData(JSONObject notification, String PackageName, Context context) throws JSONException {
+        SharedPreferences prefs = getPrefs();
+        JSONObject data = notification.getJSONObject("data");
+        data.put("topic", prefs.getString("UID", ""));
+        notification.put("data", data);
 
         if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
             if (!prefs.getString("ApiKey_Pushy", "").equals(""))
                 sendPushyNotification(notification, PackageName, context);
         } else sendFCMNotification(notification, PackageName, context);
+
+        Log.d("dddd", notification.toString());
+
         System.gc();
     }
 
