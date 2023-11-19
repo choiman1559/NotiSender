@@ -24,16 +24,14 @@
             android:title="Alarm access permission not granted"
             android:summary="Click here to permit alarm access permission"
             android:icon="@drawable/ic_fluent_warning_24_regular" />
-        <ListPreference
-            android:key="server"
+        <Preference
+            android:key="serverSelect"
             android:defaultValue="Firebase Cloud Message"
-            android:entries="@array/server_shown"
-            android:entryValues="@array/server"
-            android:title="Select server"
+            android:title="Select Network provider"
             android:summary="Now : Firebase Cloud Message"/>
         <Preference
             android:key="ServerInfo"
-            android:summary="Information about server differences"
+            android:summary="Information about provider's differences"
             android:icon="@drawable/ic_info_outline_black_24dp" />
     </PreferenceCategory>
 

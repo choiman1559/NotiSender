@@ -11,6 +11,7 @@ import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -41,6 +42,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.receiver.plugin.PluginPrefs;
+import com.noti.main.ui.NetSelectActivity;
 import com.noti.main.ui.OptionActivity;
 import com.noti.main.ui.SettingsActivity;
 import com.noti.main.utils.BillingHelper;
@@ -62,7 +65,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
     Preference Service;
     Preference AlarmAccessWarning;
     Preference AlarmAccessInfo;
-    Preference Server;
+    Preference ServerSelect;
     Preference Subscribe;
     Preference AlreadySubscribed;
     Preference ServerInfo;
@@ -87,6 +90,22 @@ public class AccountPreference extends PreferenceFragmentCompat {
             AlarmAccessInfo.setVisible(false);
         }
     });
+
+    SharedPreferences.OnSharedPreferenceChangeListener onServerChanged = (sharedPreferences, key) -> {
+        if(key != null && key.equals("server")) {
+            String server = prefs.getString("server", "Firebase Cloud Message");
+            ServerSelect.setSummary("Now : " + getProviderShownString(server));
+            if (server.equals("Pushy")) {
+                if (mBillingHelper.isSubscribed()) ServiceToggle.setEnabled(true);
+                else {
+                    ServiceToggle.setEnabled(false);
+                    ServiceToggle.setChecked(false);
+                }
+            } else {
+                ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+            }
+        }
+    };
 
     public AccountPreference() {
     }
@@ -150,7 +169,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
         Service = findPreference("service");
         AlarmAccessWarning = findPreference("AlarmAccessWarning");
         AlarmAccessInfo = findPreference("AlarmAccessInfo");
-        Server = findPreference("server");
+        ServerSelect = findPreference("serverSelect");
         Subscribe = findPreference("Subscribe");
         AlreadySubscribed = findPreference("AlreadySubscribed");
         ServerInfo = findPreference("ServerInfo");
@@ -199,20 +218,41 @@ public class AccountPreference extends PreferenceFragmentCompat {
             AlarmAccessInfo.setVisible(true);
         }
 
-        Server.setSummary("Now : " + prefs.getString("server", "Firebase Cloud Message"));
-        Server.setOnPreferenceChangeListener((p, n) -> {
-            p.setSummary("Now : " + n.toString());
-            if (n.toString().equals("Pushy")) {
-                if (mBillingHelper.isSubscribed()) ServiceToggle.setEnabled(true);
-                else {
-                    ServiceToggle.setEnabled(false);
-                    ServiceToggle.setChecked(false);
-                }
-            } else {
-                ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+        ServerSelect.setSummary("Now : " + getProviderShownString(prefs.getString("server", "Firebase Cloud Message")));
+        prefs.registerOnSharedPreferenceChangeListener(onServerChanged);
+    }
+
+    String getProviderShownString(String provider) {
+        switch (provider) {
+            case "Firebase Cloud Message", "Pushy" -> {
+                return provider;
             }
-            return true;
-        });
+            default -> {
+                boolean isAppInstalled;
+                PackageManager packageManager = mContext.getPackageManager();
+                try {
+                    packageManager.getApplicationInfo(provider, PackageManager.GET_META_DATA);
+                    isAppInstalled = true;
+                } catch (PackageManager.NameNotFoundException e) {
+                    isAppInstalled = false;
+                }
+
+                if (isAppInstalled) {
+                    PluginPrefs pluginPrefs = new PluginPrefs(mContext, provider);
+                    if (pluginPrefs.getNetworkProviderName().isBlank()) {
+                        try {
+                            return (String) packageManager.getApplicationLabel(packageManager.getApplicationInfo(provider, PackageManager.GET_META_DATA));
+                        } catch (PackageManager.NameNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        return pluginPrefs.getNetworkProviderName();
+                    }
+                }
+            }
+        }
+
+        return "Firebase Cloud Message";
     }
 
     boolean isAlarmPermissionGranted() {
@@ -270,6 +310,10 @@ public class AccountPreference extends PreferenceFragmentCompat {
 
             case "Donation":
                 mBillingHelper.Donate(mContext);
+                break;
+
+            case "serverSelect":
+                mContext.startActivity(new Intent(mContext, NetSelectActivity.class));
                 break;
         }
         return super.onPreferenceTreeClick(preference);

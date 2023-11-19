@@ -139,7 +139,7 @@ public class PluginActions {
         sendBroadcast(context, packageName, extras);
     }
 
-    private static void sendBroadcast(Context context, String packageName, Bundle extras) {
+    public static void sendBroadcast(Context context, String packageName, Bundle extras) {
         final Intent intent = new Intent();
         intent.setAction(PluginConst.RECEIVER_ACTION_NAME);
         intent.putExtras(extras);

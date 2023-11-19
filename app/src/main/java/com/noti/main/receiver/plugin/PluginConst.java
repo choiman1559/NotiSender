@@ -42,5 +42,9 @@ public class PluginConst {
     public static final String ACTION_PUSH_CALL_DATA = "push_call_data";
     public static final String ACTION_PUSH_EXCEPTION = "push_exception";
     public static final String ACTION_PUSH_NOTIFICATION = "push_notification";
-    public static final String ACTION_PULL_NOTIFICATION = "pull_notification";
+
+    public static final String NET_PROVIDER_DATA = "provider_data";
+    public static final String NET_PROVIDER_METADATA = "provider_metadata";
+    public static final String NET_PROVIDER_POST = "provider_post";
+    public static final String NET_PROVIDER_RECEIVED = "provider_received";
 }

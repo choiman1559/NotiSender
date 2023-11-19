@@ -42,6 +42,7 @@ import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.utils.network.HMACCrypto;
+import com.noti.plugin.data.NetworkProvider;
 import com.noti.plugin.data.NotificationData;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
@@ -121,7 +122,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         playingSessionMap = new HashMap<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
+
         PushyReceiver.setOnPushyMessageListener(this.onPushyMessageListener);
+        NetworkProvider.setOnNetworkProviderListener(this.onPushyMessageListener);
     }
 
     @Override

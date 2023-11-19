@@ -60,16 +60,6 @@
         <item>Per app</item>
     </string-array>
 
-    <string-array name="server_shown">
-        <item>Firebase Cloud Message</item>
-        <item>Pushy (Premium only)</item>
-    </string-array>
-
-    <string-array name="server">
-        <item>Firebase Cloud Message</item>
-        <item>Pushy</item>
-    </string-array>
-
     <string-array name="updateChannel">
         <item>Automatically specified</item>
         <item>Github</item>

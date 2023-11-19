@@ -28,6 +28,8 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
+import com.noti.main.receiver.plugin.PluginActions;
+import com.noti.main.receiver.plugin.PluginConst;
 import com.noti.main.service.media.MediaReceiver;
 import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.network.HMACCrypto;
@@ -35,6 +37,7 @@ import com.noti.main.utils.network.JsonRequest;
 import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.service.IntervalQueries.*;
 import com.noti.main.utils.PowerUtils;
+import com.noti.plugin.data.NetPacket;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -710,10 +713,35 @@ public class NotiListenerService extends NotificationListenerService {
             FirebaseMessageService.selfReceiveDetectorList.add(uniqueId);
         }
 
-        if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
-            if (!prefs.getString("ApiKey_Pushy", "").equals(""))
-                sendPushyNotification(notification, PackageName, context);
-        } else sendFCMNotification(notification, PackageName, context);
+        String networkProvider = prefs.getString("server", "Firebase Cloud Message");
+        switch (networkProvider) {
+            case "Firebase Cloud Message" ->
+                    sendFCMNotification(notification, PackageName, context);
+            case "Pushy" -> {
+                if (!prefs.getString("ApiKey_Pushy", "").equals(""))
+                    sendPushyNotification(notification, PackageName, context);
+            }
+            default -> {
+                boolean isAppInstalled;
+                PackageManager packageManager = context.getPackageManager();
+
+                try {
+                    packageManager.getApplicationInfo(networkProvider, PackageManager.GET_META_DATA);
+                    isAppInstalled = true;
+                } catch (PackageManager.NameNotFoundException e) {
+                    isAppInstalled = false;
+                }
+
+                if(isAppInstalled) {
+                    Bundle extras = new Bundle();
+                    extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.NET_PROVIDER_POST);
+                    extras.putSerializable(PluginConst.NET_PROVIDER_DATA, notification.toString());
+                    PluginActions.sendBroadcast(context, networkProvider, extras);
+                } else {
+                    sendFCMNotification(notification, PackageName, context);
+                }
+            }
+        }
 
         System.gc();
     }

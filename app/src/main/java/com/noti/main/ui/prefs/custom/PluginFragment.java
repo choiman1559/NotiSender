@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 public class PluginFragment extends Fragment {
@@ -157,6 +158,15 @@ public class PluginFragment extends Fragment {
             String packageName = data.getString(PluginConst.PLUGIN_PACKAGE_NAME);
             PluginPrefs pluginPrefs = new PluginPrefs(mContext, packageName);
             pluginPrefs.setRequireSensitiveAPI(data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API, false)).apply();
+
+            if(data.containsKey(PluginConst.NET_PROVIDER_METADATA)) {
+                String[] providerMetadata = Objects.requireNonNull(data.getString(PluginConst.NET_PROVIDER_METADATA)).split("\\|");
+                pluginPrefs.setHasNetworkProvider(Boolean.parseBoolean(providerMetadata[0]));
+                if (providerMetadata.length > 1) {
+                    pluginPrefs.setNetworkProviderName(providerMetadata[1]);
+                }
+                pluginPrefs.apply();
+            }
 
             try {
                 String title = data.getString(PluginConst.PLUGIN_TITLE);
@@ -281,10 +291,7 @@ public class PluginFragment extends Fragment {
             Glide.with(mContext).load(properties.getProperty("iconUrl")).into(holder.pluginIcon);
         }
 
-        holder.downloadButton.setOnClickListener(v -> {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(properties.getProperty("downloadLink"))));
-        });
-
+        holder.downloadButton.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(properties.getProperty("downloadLink")))));
         holder.infoButton.setOnClickListener(v -> {
             String message = "";
             message += String.format("<b>Author</b>: %s<br>", properties.getProperty("author"));

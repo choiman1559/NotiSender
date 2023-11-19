@@ -45,6 +45,7 @@
         tools:targetApi="s">
 
         <activity android:name=".StartActivity" />
+        <activity android:name=".ui.NetSelectActivity"/>
         <activity android:name=".ui.prefs.BlacklistActivity" />
         <activity android:name=".ui.prefs.custom.AddActionActivity"
             android:windowSoftInputMode="adjustNothing|stateHidden"/>

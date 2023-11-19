@@ -19,8 +19,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 1012002
-        versionName "1.20.2"
+        versionCode 1012003
+        versionName "1.20.3"
 
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -66,7 +66,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.google.android.material:material:1.11.0-beta01'
+    implementation 'com.google.android.material:material:1.12.0-alpha01'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
 
     implementation platform('com.google.firebase:firebase-bom:32.5.0')
