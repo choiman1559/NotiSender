@@ -4,24 +4,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
+import com.noti.plugin.data.NetworkProvider;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class PushyReceiver extends BroadcastReceiver {
-
-    public static onPushyMessageListener onPushyMessageListener;
-    public interface onPushyMessageListener {
-        void onMessageReceived(RemoteMessage message);
-    }
-
-    public static void setOnPushyMessageListener(onPushyMessageListener listener) {
-        onPushyMessageListener = listener;
-    }
 
     @Override
     public void onReceive(Context context, Intent map) {
@@ -33,9 +24,6 @@ public class PushyReceiver extends BroadcastReceiver {
         }
 
         RemoteMessage remoteMessage = new RemoteMessage.Builder("Implement").setData(hashMap).build();
-        if(onPushyMessageListener != null) {
-            onPushyMessageListener.onMessageReceived(remoteMessage);
-            Log.d("Push", "onPushyMessageListener1");
-        }
+        NetworkProvider.processReception(context, remoteMessage);
     }
 }

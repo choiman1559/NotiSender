@@ -595,7 +595,7 @@ public class NotiListenerService extends NotificationListenerService {
         return -1;
     }
 
-    public static void sendNotification(JSONObject notification, String PackageName, Context context) {
+    public static void sendNotification(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) {
         SharedPreferences prefs = getPrefs();
         PowerUtils manager = getInstance().manager;
 
@@ -610,11 +610,11 @@ public class NotiListenerService extends NotificationListenerService {
             boolean splitAfterEncryption = prefs.getBoolean("SplitAfterEncryption", false);
             int splitInterval = prefs.getInt("SplitInterval", 500);
 
-            if (useSplit) {
+            if (useSplit && !useFCMOnly) {
                 if(useEncryption && splitAfterEncryption) encryptData(notification);
                 for (JSONObject object : splitData(notification)) {
                     if(useEncryption && !splitAfterEncryption) encryptData(object);
-                    finalProcessData(object, PackageName, context);
+                    finalProcessData(object, PackageName, context, false);
                     if (splitInterval > 0) {
                         Thread.sleep(splitInterval);
                     }
@@ -624,10 +624,14 @@ public class NotiListenerService extends NotificationListenerService {
                 encryptData(notification);
             }
 
-            finalProcessData(notification, PackageName, context);
+            finalProcessData(notification, PackageName, context, useFCMOnly);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void sendNotification(JSONObject notification, String PackageName, Context context) {
+       sendNotification(notification, PackageName, context, false);
     }
 
     protected static JSONObject[] splitData(JSONObject notification) throws JSONException {
@@ -701,7 +705,7 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    protected static void finalProcessData(JSONObject notification, String PackageName, Context context) throws JSONException {
+    protected static void finalProcessData(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) throws JSONException {
         SharedPreferences prefs = getPrefs();
         JSONObject data = notification.getJSONObject("data");
         data.put("topic", prefs.getString("UID", ""));
@@ -712,7 +716,7 @@ public class NotiListenerService extends NotificationListenerService {
             FirebaseMessageService.selfReceiveDetectorList.add(uniqueId);
         }
 
-        String networkProvider = prefs.getString("server", "Firebase Cloud Message");
+        String networkProvider = useFCMOnly ? "Firebase Cloud Message" : prefs.getString("server", "Firebase Cloud Message");
         switch (networkProvider) {
             case "Firebase Cloud Message" ->
                     sendFCMNotification(notification, PackageName, context);

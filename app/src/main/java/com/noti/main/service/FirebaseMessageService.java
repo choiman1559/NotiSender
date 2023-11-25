@@ -39,7 +39,6 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
-import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.service.refiler.RemoteFileProcess;
 import com.noti.main.utils.network.HMACCrypto;
@@ -98,7 +97,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
     public static final ArrayList<Integer> selfReceiveDetectorList = new ArrayList<>();
-    private final PushyReceiver.onPushyMessageListener onPushyMessageListener = this::onMessageReceived;
+    private final NetworkProvider.onProviderMessageListener onProviderMessageListener = this::onMessageReceived;
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
             if (lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying())
@@ -123,17 +122,13 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         playingSessionMap = new HashMap<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
-
-        PushyReceiver.setOnPushyMessageListener(this.onPushyMessageListener);
-        NetworkProvider.setOnNetworkProviderListener(this.onPushyMessageListener);
+        NetworkProvider.setOnNetworkProviderListener(this.onProviderMessageListener);
     }
 
     @Override
     public void onRebind(Intent intent) {
         super.onRebind(intent);
-
-        PushyReceiver.setOnPushyMessageListener(this.onPushyMessageListener);
-        NetworkProvider.setOnNetworkProviderListener(this.onPushyMessageListener);
+        NetworkProvider.setOnNetworkProviderListener(this.onProviderMessageListener);
     }
 
     @Override
@@ -220,6 +215,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String mode = prefs.getString("service", "reception");
 
         if (type != null && !prefs.getString("UID", "").equals("")) {
+            if("send|startup".equals(type) && isDeviceItself(map)) {
+                NetworkProvider.fcmIgnitionComplete();
+                return;
+            }
+
             if (prefs.getBoolean("serviceToggle", false)) {
                 if ("split_data".equals(type) && !isDeviceItself(map)) {
                     processSplitData(map, context);

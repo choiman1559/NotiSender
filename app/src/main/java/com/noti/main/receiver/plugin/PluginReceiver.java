@@ -79,7 +79,7 @@ public class PluginReceiver extends BroadcastReceiver {
                     case PluginConst.ACTION_RESPONSE_REMOTE_DATA ->
                             DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_RESPONSE_REMOTE_DATA, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[2]);
                     case PluginConst.NET_PROVIDER_RECEIVED ->
-                            NetworkProvider.processReception((NetPacket) Objects.requireNonNull(rawData.getSerializable(PluginConst.NET_PROVIDER_DATA)));
+                            NetworkProvider.processReception(context, (NetPacket) Objects.requireNonNull(rawData.getSerializable(PluginConst.NET_PROVIDER_DATA)));
                     default ->
                             PluginActions.pushException(context, packageName, new IllegalAccessException("Plugin Action type is not supported: " + dataType));
                 }
