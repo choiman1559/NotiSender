@@ -1,6 +1,6 @@
 # NotiSender
 
-[![license](https://img.shields.io/badge/License-LGPL--3.0-green.svg?logo=gnu)](https://www.gnu.org/licenses/lgpl-3.0.html)
+[![license](https://img.shields.io/badge/License-LGPL--3.0-green.svg?logo=gnu)](https://www.gnu.org/licenses/gpl-3.0.html)
 ![language](https://img.shields.io/badge/Language-Java-green?logo=java) 
 ![Last](https://img.shields.io/github/last-commit/choiman1559/NotiSender)
 
@@ -24,10 +24,10 @@ Competition Hosted and organized by:
 
 ## Screenshots
 
- ![s1](https://play-lh.googleusercontent.com/Kpnpqw09gCmO-vhmhZRyaJ2F7VWf4R7vtP7BKf0YTEZCLD51o6OAdPqUIfxAm8UFZbM=w720-h310)
- ![s2](https://play-lh.googleusercontent.com/k66WfjR4XgRXT6n_9bv9Ltsf_vR3D31BtHWlf8AZJB_hXsmj48VdZ_LhzoiSexZoAg=w720-h310)
- ![s3](https://play-lh.googleusercontent.com/Ol3H7nOVcxJV7v0sydOXKRqu9C7Ktl45Xt-v2NwMODrMcLb33U7k3yHjNcBRl4U0Ycm7=w720-h310)
- ![s4](https://play-lh.googleusercontent.com/_2rM0StxYotKVXzyVH2Kn1w_Chcd8jFAPWOZjk-mLwankuCe9C1-d1p2HD37al97mMQ=w720-h310)
+ ![s1](https://play-lh.googleusercontent.com/KG-AKeJLY9KJrmFFRGqYJSMxAW30spfdBKbQhy1PlR0dTFg5dLDEiSQadFpn0002Yw=w526-h296)
+ ![s2](https://play-lh.googleusercontent.com/uALYj4NGjLW-oe7Mz7YKWj-XW6Dk4oyS8gXtJ8qGsquW5R78JQIQstSOMtJPj9FC5pU3=w526-h296)
+ ![s3](https://play-lh.googleusercontent.com/c1ukqYvf9ZL-fvASWOO0e6it94iPcPpI3OBkMs0UFSFEnQNr_xtXlVfNov3r8xCGOpM=w526-h296)
+ ![s4](https://play-lh.googleusercontent.com/cCphMB0W3TN8xeLzjv0gIFPWerd4Xm2725yoOc8t9QWN2Hj7N5id8l9eBx16yK192NY=w526-h296)
 
 ## How-To-Use 
 
@@ -50,13 +50,5 @@ and mode "reception" is setting phone by client, get notifications from "send" m
 - Strong data encryption function
 - View previous notification history
 - Multiple customizable parameters
- 
- ## TO-DO List
- 
- - [X] UI reorganization and Material You design application
- - [ ] Soft-coding all Strings (which are hard-coded in the source code) into string.xml
- - [ ] Translate the app into languages other than English
- - [X] Add custom notification ringtone and vibration options
- - [ ] Source code optimization and cleanup
- 
+
 **The Noti Sender development team always welcomes your issues, PRs.**
