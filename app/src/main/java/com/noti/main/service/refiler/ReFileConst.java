@@ -10,4 +10,10 @@ public class ReFileConst {
     public static final String DATA_RESULTS = "data_results";
     public static final String DATA_ERROR_CAUSE = "data_error_cause";
     public static final String DATA_PATH = "data_path";
+
+    public static final String DATA_TYPE_IS_FILE = "$isFile";
+    public static final String DATA_TYPE_LAST_MODIFIED = "$lastModified";
+    public static final String DATA_TYPE_IS_SKIPPED = "$isSkipped";
+    public static final String DATA_TYPE_SIZE = "$size";
+    public static final String DATA_TYPE_INTERNAL_STORAGE = "Internal Storage";
 }

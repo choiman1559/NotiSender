@@ -61,7 +61,7 @@ public class RemoteFileProcess {
                             RemoteFolderDoc remoteFolderDoc =  new RemoteFolderDoc(prefs, new File(filesDirName));
 
                             if(filesDirName.equals(internalPath)) {
-                                drives.put("Internal Storage", remoteFolderDoc.getLists());
+                                drives.put(ReFileConst.DATA_TYPE_INTERNAL_STORAGE, remoteFolderDoc.getLists());
                             } else {
                                 String[] dividerArr = filesDirName.split("/");
                                 drives.put(dividerArr[dividerArr.length - 1], remoteFolderDoc.getLists());
@@ -70,7 +70,7 @@ public class RemoteFileProcess {
                     }
                 }
 
-                drives.put("$lastUpdate", Calendar.getInstance().getTimeInMillis());
+                drives.put(ReFileConst.DATA_TYPE_LAST_MODIFIED, Calendar.getInstance().getTimeInMillis());
                 fileRef.putBytes(new JSONObject(drives).toString().getBytes(StandardCharsets.UTF_8), metadata)
                         .addOnSuccessListener(task -> {
                             pushResponseQuery(context, map.get("device_name"), map.get("device_id"), true, null);

@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.noti.main.BuildConfig;
+import com.noti.main.service.refiler.ReFileConst;
 
 import java.io.File;
 import java.io.Serializable;
@@ -16,8 +17,8 @@ public class RemoteFolderDoc implements Serializable {
     public RemoteFolderDoc(SharedPreferences prefs, File baseFolder) {
         lists = new HashMap<>();
         if(baseFolder.canRead()) {
-            lists.put("$isFile", false);
-            lists.put("$lastModified", baseFolder.lastModified());
+            lists.put(ReFileConst.DATA_TYPE_IS_FILE, false);
+            lists.put(ReFileConst.DATA_TYPE_LAST_MODIFIED, baseFolder.lastModified());
 
             if(BuildConfig.DEBUG) Log.d("Added File", "Added:" + baseFolder);
             File[] fileList = baseFolder.listFiles();
@@ -25,9 +26,9 @@ public class RemoteFolderDoc implements Serializable {
             if (fileList != null) {
                 boolean isIndexSkipped = fileList.length > prefs.getInt("indexMaximumSize", 150);
                 if(isIndexSkipped) {
-                    lists.put("$isSkipped", true);
+                    lists.put(ReFileConst.DATA_TYPE_IS_SKIPPED, true);
                 } else {
-                    lists.put("$isSkipped", false);
+                    lists.put(ReFileConst.DATA_TYPE_IS_SKIPPED, false);
                     for (File files : fileList) {
                         if (files.canRead() && (prefs.getBoolean("indexHiddenFiles", false) || !files.getName().startsWith("."))) {
                             if (files.isDirectory()) {

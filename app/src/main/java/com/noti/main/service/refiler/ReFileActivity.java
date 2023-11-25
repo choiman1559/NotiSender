@@ -215,8 +215,15 @@ public class ReFileActivity extends AppCompatActivity {
                         dialog.setMessage(Html.fromHtml(String.format(Locale.getDefault(), """
                                 <b>Name:</b> %s<br>
                                 <b>Path:</b> %s<br>
+                                <b>Queried time:</b> %s<br>
                                 <b>Size:</b> %s Bytes
-                                """, file.getName(), file.getPath().replace(file.getName(), ""), file.getSize())));
+                                """,
+                                file.getName(),
+                                file.getPath().replace(file.getName(), ""),
+                                new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(allFileList.getLastModified()),
+                                file.getSize()
+                        )));
+
                         dialog.setPositiveButton("Download", (d, w) -> {
                             new FileTransferService(this, true)
                                     .setDownloadProperties(file.getName(), true)
@@ -224,6 +231,7 @@ public class ReFileActivity extends AppCompatActivity {
                             RemoteFileProcess.pushRequestFile(this, device_name, device_id, file.getPath());
                             ToastHelper.show(this, "Download started at background\nWatch notification to check progress", "Okay", ToastHelper.LENGTH_SHORT);
                         });
+
                         dialog.setNegativeButton("Cancel", (d, w) -> { });
                         dialog.show();
                     } else {

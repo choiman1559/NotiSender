@@ -1,5 +1,7 @@
 package com.noti.main.service.refiler.db;
 
+import com.noti.main.service.refiler.ReFileConst;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ public class RemoteFileDoc implements Serializable {
         return size;
     }
 
+    @SuppressWarnings("unused")
     public long getLastModified() {
         return lastModified;
     }
@@ -30,9 +33,9 @@ public class RemoteFileDoc implements Serializable {
 
     public Map<String, Object> getList() {
         Map<String, Object> map = new HashMap<>();
-        map.put("$lastModified", lastModified);
-        map.put("$isFile", isFile);
-        map.put("$size", size);
+        map.put(ReFileConst.DATA_TYPE_LAST_MODIFIED, lastModified);
+        map.put(ReFileConst.DATA_TYPE_IS_FILE, isFile);
+        map.put(ReFileConst.DATA_TYPE_SIZE, size);
         return map;
     }
 }

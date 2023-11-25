@@ -1,5 +1,7 @@
 package com.noti.main.service.refiler.db;
 
+import com.noti.main.service.refiler.ReFileConst;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,9 +26,9 @@ public class RemoteFile implements Comparable<RemoteFile>{
             String key = it.next();
             Object obj = jsonObject.get(key);
             switch (key) {
-                case "$lastUpdate" -> lastModified = (Long) obj;
-                case "Internal Storage" -> list.add(new RemoteFile(this ,(JSONObject) obj, "/storage/emulated/0"));
-                default -> list.add(new RemoteFile(this, (JSONObject) obj, "/storage/emulated/" + key));
+                case ReFileConst.DATA_TYPE_LAST_MODIFIED -> lastModified = (Long) obj;
+                case ReFileConst.DATA_TYPE_INTERNAL_STORAGE -> list.add(new RemoteFile(this ,(JSONObject) obj, path + "/0"));
+                default -> list.add(new RemoteFile(this, (JSONObject) obj, path + "/" + key));
             }
         }
     }
@@ -36,19 +38,19 @@ public class RemoteFile implements Comparable<RemoteFile>{
         list = new ArrayList<>();
         this.parent = parent;
 
-        if (jsonObject.getBoolean("$isFile")) {
+        if (jsonObject.getBoolean(ReFileConst.DATA_TYPE_IS_FILE)) {
             isFile = true;
-            size = jsonObject.getLong("$size");
-            lastModified = jsonObject.getLong("$lastModified");
+            size = jsonObject.getLong(ReFileConst.DATA_TYPE_SIZE);
+            lastModified = jsonObject.getLong(ReFileConst.DATA_TYPE_LAST_MODIFIED);
         } else {
             isFile = false;
-            lastModified = jsonObject.getLong("$lastModified");
-            isIndexSkipped = jsonObject.getBoolean("$isSkipped");
+            lastModified = jsonObject.getLong(ReFileConst.DATA_TYPE_LAST_MODIFIED);
+            isIndexSkipped = jsonObject.getBoolean(ReFileConst.DATA_TYPE_IS_SKIPPED);
 
             ArrayList<String> metaKeys = new ArrayList<>();
-            metaKeys.add("$isFile");
-            metaKeys.add("$lastModified");
-            metaKeys.add("$isSkipped");
+            metaKeys.add(ReFileConst.DATA_TYPE_IS_FILE);
+            metaKeys.add(ReFileConst.DATA_TYPE_LAST_MODIFIED);
+            metaKeys.add(ReFileConst.DATA_TYPE_IS_SKIPPED);
 
             for (Iterator<String> it = jsonObject.keys(); it.hasNext(); ) {
                 String key = it.next();
