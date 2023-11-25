@@ -136,9 +136,7 @@ public class NetSelectActivity extends AppCompatActivity {
             }
 
             this.providerSelected.setChecked(isChecked);
-            if(isChecked) {
-                lastSelected = providerSelected;
-            }
+            lastSelected = providerSelected;
         }
     }
 

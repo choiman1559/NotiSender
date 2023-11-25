@@ -98,7 +98,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
     public static final ArrayList<Integer> selfReceiveDetectorList = new ArrayList<>();
-    private final PushyReceiver.onPushyMessageListener onPushyMessageListener = message -> preProcessReception(message.getData(), FirebaseMessageService.this);
+    private final PushyReceiver.onPushyMessageListener onPushyMessageListener = this::onMessageReceived;
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
             if (lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying())
@@ -123,6 +123,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         playingSessionMap = new HashMap<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
+
+        PushyReceiver.setOnPushyMessageListener(this.onPushyMessageListener);
+        NetworkProvider.setOnNetworkProviderListener(this.onPushyMessageListener);
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
 
         PushyReceiver.setOnPushyMessageListener(this.onPushyMessageListener);
         NetworkProvider.setOnNetworkProviderListener(this.onPushyMessageListener);
