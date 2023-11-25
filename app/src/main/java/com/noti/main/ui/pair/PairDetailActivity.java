@@ -28,6 +28,7 @@ import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
+import com.noti.main.service.refiler.ReFileActivity;
 import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
@@ -70,6 +71,7 @@ public class PairDetailActivity extends AppCompatActivity {
         LinearLayout deviceBlackListLayout = findViewById(R.id.deviceBlackListLayout);
         LinearLayout remotePresentation = findViewById(R.id.remotePresentation);
         LinearLayout remoteToggleLayout = findViewById(R.id.remoteToggleLayout);
+        LinearLayout remoteFileLayout = findViewById(R.id.remoteFileExplorer);
 
         boolean isComputer = Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_DESKTOP) || Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_LAPTOP);
         boolean isBlocked = deviceBlacksPrefs.getBoolean(Device_id, false);
@@ -98,6 +100,14 @@ public class PairDetailActivity extends AppCompatActivity {
         remotePresentation.setVisibility(isComputer ? View.VISIBLE : View.GONE);
         remotePresentation.setOnClickListener(v -> {
             Intent presentationIntent = new Intent(PairDetailActivity.this, PresentationActivity.class);
+            presentationIntent.putExtra("device_name", Device_name);
+            presentationIntent.putExtra("device_id", Device_id);
+            presentationIntent.putExtra("device_type", Device_type);
+            startActivity(presentationIntent);
+        });
+
+        remoteFileLayout.setOnClickListener(v -> {
+            Intent presentationIntent = new Intent(PairDetailActivity.this, ReFileActivity.class);
             presentationIntent.putExtra("device_name", Device_name);
             presentationIntent.putExtra("device_id", Device_id);
             presentationIntent.putExtra("device_type", Device_type);

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/remoteFileExplorer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal"
+    android:paddingVertical="10dp"
+    tools:ignore="HardcodedText">
+
+    <ImageView
+        android:id="@+id/remoteFileIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="24dp"
+        app:srcCompat="@drawable/ic_fluent_folder_24_regular"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:id="@+id/remoteFileExplorerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/remoteFileTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="folder_or_file_name"
+            android:maxEms="25"
+            android:ellipsize="marquee"
+            android:textSize="18sp"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/remoteFileDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="0000-00-00 00:00:00 (00 KBytes)"
+            android:maxEms="40"
+            android:ellipsize="marquee"
+            android:textColor="@color/ui_fg_secondary" />
+    </LinearLayout>
+</LinearLayout>

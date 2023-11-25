@@ -15,9 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,13 +27,9 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
+import com.noti.main.service.refiler.FileTransferService;
 import com.noti.main.utils.BillingHelper;
 
 import java.util.ArrayList;
@@ -56,7 +50,6 @@ public class ShareDataActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.activity_pair_share);
 
-        ProgressBar progressBar = dialog.findViewById(R.id.progressBar);
         TextView title = dialog.findViewById(R.id.titleDetail);
         TextView fileTooBigWarning = dialog.findViewById(R.id.fileTooBigWarning);
         TextInputEditText textPreview = dialog.findViewById(R.id.textPreview);
@@ -67,7 +60,6 @@ public class ShareDataActivity extends AppCompatActivity {
         MaterialButton ok = dialog.findViewById(R.id.ok);
 
         fileTooBigWarning.setVisibility(View.GONE);
-        progressBar.setVisibility(View.GONE);
         AtomicInteger deviceSelection = new AtomicInteger();
         SharedPreferences pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         ArrayList<String> nameList = new ArrayList<>();
@@ -147,56 +139,21 @@ public class ShareDataActivity extends AppCompatActivity {
                         if (deviceSelectSpinner.getText().toString().isEmpty()) {
                             deviceSelectSpinner.setError("Please select target device");
                         } else {
-                            progressBar.setVisibility(View.VISIBLE);
-                            progressBar.setIndeterminate(true);
                             deviceSelectSpinner.setEnabled(false);
                             ok.setEnabled(false);
-                            cancel.setText("Pause");
-                            title.setText("Uploading file...");
 
-                            FirebaseStorage storage = FirebaseStorage.getInstance();
-                            StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-                            StorageReference fileRef = storageRef.child(getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "") + "/" + name);
-                            StorageMetadata metadata = new StorageMetadata.Builder().setContentType(type).build();
-                            UploadTask uploadTask = fileRef.putFile(dataUri, metadata);
+                            String[] array = rawList.get(deviceSelection.get()).split("\\|");
+                            new FileTransferService(this, false)
+                                    .setUploadProperties(dataUri.toString(), type,true, array[0], array[1])
+                                    .execute();
 
-                            uploadTask.addOnFailureListener(exception -> {
-                                exception.printStackTrace();
-                                Toast.makeText(this, "Error occurred while uploading file!", Toast.LENGTH_SHORT).show();
-                                finish();
-                            });
-
-                            uploadTask.addOnSuccessListener(taskSnapshot -> {
-                                MaterialAlertDialogBuilder completeDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
-                                completeDialog.setTitle("File upload completed!");
-                                completeDialog.setMessage("The file download task will start automatically on the target device.");
-                                completeDialog.setIcon(R.drawable.ic_fluent_arrow_sync_checkmark_24_regular);
-                                completeDialog.setCancelable(false);
-                                completeDialog.setPositiveButton("Close", (dialogInterface, i) -> finish());
-                                completeDialog.show();
-
-                                String[] array = rawList.get(deviceSelection.get()).split("\\|");
-                                DataProcess.requestAction(this, array[0], array[1], "Share file", name);
-                            });
-
-                            uploadTask.addOnProgressListener(snapshot -> {
-                                if (progressBar.isIndeterminate())
-                                    progressBar.setIndeterminate(false);
-                                double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
-                                progressBar.setProgress((int) progress);
-                            });
-
-                            uploadTask.addOnPausedListener(snapshot -> cancel.setText("Resume"));
-                            cancel.setOnClickListener(v1 -> {
-                                if (cancel.getText().equals("Resume")) {
-                                    uploadTask.resume();
-                                    cancel.setText("Pause");
-                                    title.setText("Uploading file...");
-                                } else if (cancel.getText().equals("Pause")) {
-                                    uploadTask.pause();
-                                    title.setText("File uploading paused");
-                                } else dialog.dismiss();
-                            });
+                            MaterialAlertDialogBuilder completeDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
+                            completeDialog.setTitle("File upload started!");
+                            completeDialog.setMessage("Watch notification to check upload progress.\n\nAfter upload completion, The file download task will start automatically on the target device.");
+                            completeDialog.setIcon(R.drawable.ic_fluent_arrow_sync_checkmark_24_regular);
+                            completeDialog.setCancelable(false);
+                            completeDialog.setPositiveButton("Close", (dialogInterface, i) -> finish());
+                            completeDialog.show();
                         }
                     });
                     cancel.setOnClickListener(v -> dialog.dismiss());

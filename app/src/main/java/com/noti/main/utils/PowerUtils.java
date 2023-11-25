@@ -17,6 +17,7 @@ public class PowerUtils {
             PowerManager manager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             wakeLock = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         }
+
         return instance;
     }
 
@@ -25,9 +26,13 @@ public class PowerUtils {
     }
 
     public void acquire() {
+        //30 second timeout for battery save
+        acquire(30 * 1000L);
+    }
+
+    public void acquire(long timeout) {
         if (!isHeld()) {
-            //30 second timeout for battery save
-            wakeLock.acquire(30 * 1000L);
+            wakeLock.acquire(timeout);
         }
     }
 

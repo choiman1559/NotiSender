@@ -4,12 +4,8 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.noti.main.service.NotiListenerService.getUniqueID;
 import static com.noti.main.service.NotiListenerService.sendNotification;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,34 +14,24 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.core.app.NotificationCompat;
-
 import com.application.isradeleon.notify.Notify;
 
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.receiver.TaskerPairEventKt;
-import com.noti.main.utils.AsyncTask;
+import com.noti.main.service.refiler.FileTransferService;
 import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -270,124 +256,9 @@ public class DataProcess {
                     break;
 
                 case "Share file":
-                    int notificationId = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
-                    String notificationChannel = "DownloadFile";
-                    NotificationManager mNotifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        NotificationChannel channel = new NotificationChannel(notificationChannel, "Download File Notification", NotificationManager.IMPORTANCE_DEFAULT);
-                        mNotifyManager.createNotificationChannel(channel);
-                    }
-
-                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, notificationChannel)
-                            .setContentTitle("File Download")
-                            .setContentText("File name: " + actionArg)
-                            .setSmallIcon(R.drawable.ic_fluent_arrow_download_24_regular)
-                            .setPriority(NotificationCompat.PRIORITY_HIGH)
-                            .setOnlyAlertOnce(true)
-                            .setGroupSummary(false)
-                            .setOngoing(true)
-                            .setAutoCancel(false);
-                    mBuilder.setProgress(0, 0, true);
-                    mNotifyManager.notify(notificationId, mBuilder.build());
-
-                    new Thread(() -> {
-                        FirebaseStorage storage = FirebaseStorage.getInstance();
-                        StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-                        StorageReference fileRef = storageRef.child(context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "") + "/" + actionArg);
-
-                        try {
-                            if (Build.VERSION.SDK_INT < 29) {
-                                File targetFile = new File(Environment.getExternalStorageDirectory(), "Download/NotiSender/" + actionArg);
-                                targetFile.mkdirs();
-                                if (targetFile.exists()) targetFile.delete();
-                                targetFile.createNewFile();
-                                FileDownloadTask task = fileRef.getFile(targetFile);
-
-                                task.addOnSuccessListener(taskSnapshot -> {
-                                    mBuilder.setContentText(actionArg + " download completed.\nCheck download folder!")
-                                            .setProgress(0, 0, false)
-                                            .setOngoing(false);
-                                    mNotifyManager.notify(notificationId, mBuilder.build());
-                                });
-
-                                task.addOnFailureListener(exception -> {
-                                    mBuilder.setContentText(actionArg + " download failed")
-                                            .setProgress(0, 0, false)
-                                            .setOngoing(false);
-                                    mNotifyManager.notify(notificationId, mBuilder.build());
-                                });
-
-                                task.addOnProgressListener(snapshot -> {
-                                    double progress = (100.0 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
-                                    mBuilder.setProgress(100, (int) progress, false);
-                                    mNotifyManager.notify(notificationId, mBuilder.build());
-                                });
-                            } else {
-                                fileRef.getMetadata().addOnSuccessListener(storageMetadata -> {
-                                    ContentResolver resolver = context.getContentResolver();
-                                    ContentValues contentValues = new ContentValues();
-                                    contentValues.put(MediaStore.Downloads.DISPLAY_NAME, actionArg);
-                                    contentValues.put(MediaStore.Downloads.RELATIVE_PATH, "Download/" + "NotiSender");
-                                    contentValues.put(MediaStore.Downloads.MIME_TYPE, storageMetadata.getContentType());
-                                    contentValues.put(MediaStore.Downloads.IS_PENDING, true);
-                                    Uri uri = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-                                    Uri itemUri = resolver.insert(uri, contentValues);
-
-                                    fileRef.getStream().addOnSuccessListener(stream -> {
-                                        if (itemUri != null) {
-                                            AsyncTask<Void, Void, Void> downloadTask = new AsyncTask<>() {
-                                                @Override
-                                                protected Void doInBackground(Void... voids) {
-                                                    try {
-                                                        InputStream inputStream = stream.getStream();
-                                                        OutputStream outputStream = resolver.openOutputStream(itemUri);
-                                                        byte[] buffer = new byte[102400];
-                                                        int len;
-                                                        while ((len = inputStream.read(buffer)) > 0) {
-                                                            outputStream.write(buffer, 0, len);
-                                                        }
-                                                        outputStream.close();
-
-                                                        contentValues.put(MediaStore.Images.Media.IS_PENDING, false);
-                                                        resolver.update(itemUri, contentValues, null, null);
-                                                    } catch (Exception e) {
-                                                        e.printStackTrace();
-                                                    }
-                                                    return null;
-                                                }
-
-                                                @Override
-                                                protected void onPostExecute(Void unused) {
-                                                    super.onPostExecute(unused);
-                                                    mBuilder.setContentText(actionArg + " download completed.\nCheck download folder!")
-                                                            .setProgress(0, 0, false)
-                                                            .setOngoing(false);
-                                                    mNotifyManager.notify(notificationId, mBuilder.build());
-                                                }
-                                            };
-                                            downloadTask.execute();
-                                        }
-                                    }).addOnFailureListener(e -> {
-                                        e.printStackTrace();
-                                        mBuilder.setContentText(actionArg + " download failed")
-                                                .setProgress(0, 0, false)
-                                                .setOngoing(false);
-                                        mNotifyManager.notify(notificationId, mBuilder.build());
-                                    });
-                                }).addOnFailureListener(e -> {
-                                    e.printStackTrace();
-                                    mBuilder.setContentText(actionArg + " download failed")
-                                            .setProgress(0, 0, false)
-                                            .setOngoing(false);
-                                    mNotifyManager.notify(notificationId, mBuilder.build());
-                                });
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            mNotifyManager.cancel(notificationId);
-                        }
-                    }).start();
+                    new FileTransferService(context, true)
+                            .setDownloadProperties(actionArg, false)
+                            .execute();
                     break;
 
                 case "toggle_service":

@@ -41,6 +41,7 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.PushyReceiver;
 import com.noti.main.receiver.media.MediaSession;
+import com.noti.main.service.refiler.RemoteFileProcess;
 import com.noti.main.utils.network.HMACCrypto;
 import com.noti.plugin.data.NetworkProvider;
 import com.noti.plugin.data.NotificationData;
@@ -378,6 +379,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         case "pair|find" -> {
                             if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
                                 sendFindTaskNotification();
+                            }
+                        }
+                        case "pair|remote_file" -> {
+                            if (isTargetDevice(map) && isPairedDevice(map)) {
+                               RemoteFileProcess.onReceive(map, context);
                             }
                         }
                         case "pair|plugin" -> {

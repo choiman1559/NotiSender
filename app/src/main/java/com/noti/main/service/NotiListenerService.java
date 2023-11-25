@@ -37,7 +37,6 @@ import com.noti.main.utils.network.JsonRequest;
 import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.service.IntervalQueries.*;
 import com.noti.main.utils.PowerUtils;
-import com.noti.plugin.data.NetPacket;
 
 import org.json.JSONArray;
 import org.json.JSONException;

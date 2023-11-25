@@ -12,6 +12,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.Html;
@@ -58,6 +59,7 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_Overlay;
     MaterialButton Permit_Battery;
     MaterialButton Permit_File;
+    MaterialButton Permit_AllFiles;
     MaterialButton Permit_Alarm;
     MaterialButton Permit_Privacy;
     MaterialButton Permit_Collect_Data;
@@ -86,6 +88,13 @@ public class StartActivity extends AppCompatActivity {
         }
     });
 
+    ActivityResultLauncher<Intent> startAllFilesPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if(Build.VERSION.SDK_INT >= 30 && Environment.isExternalStorageManager()) {
+            setButtonCompleted(this, Permit_AllFiles);
+            checkPermissionsAndEnableComplete();
+        }
+    });
+
     @SuppressLint({"BatteryLife", "HardwareIds"})
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,6 +110,7 @@ public class StartActivity extends AppCompatActivity {
         Permit_Overlay = findViewById(R.id.Permit_Overlay);
         Permit_Battery = findViewById(R.id.Permit_Battery);
         Permit_File = findViewById(R.id.Permit_File);
+        Permit_AllFiles = findViewById(R.id.Permit_AllFiles);
         Permit_Alarm = findViewById(R.id.Permit_Alarm);
         Permit_Privacy = findViewById(R.id.Permit_Privacy);
         Permit_Collect_Data = findViewById(R.id.Permit_Collect_Data);
@@ -128,6 +138,11 @@ public class StartActivity extends AppCompatActivity {
         if(Build.VERSION.SDK_INT > 28 || (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
             setButtonCompleted(this, Permit_File);
+            count++;
+        }
+
+        if (Build.VERSION.SDK_INT < 30 || Environment.isExternalStorageManager()) {
+            setButtonCompleted(this, Permit_AllFiles);
             count++;
         }
 
@@ -189,7 +204,7 @@ public class StartActivity extends AppCompatActivity {
             }
         }
 
-        if(count >= 7) {
+        if(count >= 8) {
             startActivity(new Intent(this, SettingsActivity.class));
             finish();
         }
@@ -203,6 +218,13 @@ public class StartActivity extends AppCompatActivity {
         });
         Permit_Alarm.setOnClickListener((v) -> startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
         Permit_File.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101));
+        Permit_AllFiles.setOnClickListener((v) -> {
+            if(Build.VERSION.SDK_INT >= 30) {
+                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                startAllFilesPermit.launch(intent);
+            }
+        });
         Permit_Privacy.setOnClickListener((v) -> {
             RelativeLayout layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_privacy, null,false);
             WebView webView = layout.findViewById(R.id.webView);
@@ -261,7 +283,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
     void checkPermissionsAndEnableComplete() {
-        Start_App.setEnabled(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && (!Permit_Alarm.isEnabled() || Skip_Alarm.isChecked()) && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled());
+        Start_App.setEnabled(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_AllFiles.isEnabled() && !Permit_Overlay.isEnabled() && (!Permit_Alarm.isEnabled() || Skip_Alarm.isChecked()) && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled());
     }
 
     @Override

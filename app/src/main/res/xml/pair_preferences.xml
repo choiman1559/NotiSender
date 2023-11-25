@@ -1,52 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="General Options">
 
-    <ListPreference
-        android:defaultValue="Auto Detect"
-        android:entries="@array/device_type_list"
-        android:entryValues="@array/device_type_list"
-        android:key="customDeviceType"
-        android:summary="Now : Auto Detect (Default)"
-        android:title="Device type custom specification"
-        android:icon="@drawable/ic_fluent_phone_desktop_24_regular"/>
+        <ListPreference
+            android:defaultValue="Auto Detect"
+            android:entries="@array/device_type_list"
+            android:entryValues="@array/device_type_list"
+            android:key="customDeviceType"
+            android:summary="Now : Auto Detect (Default)"
+            android:title="Device type custom specification"
+            android:icon="@drawable/ic_fluent_phone_desktop_24_regular"/>
 
-    <Preference
-        android:key="deviceTypeChangeReboot"
-        android:visible="false"
-        android:summary="Reboot is required to save device type change"
-        android:icon="@drawable/ic_info_outline_black_24dp" />
+        <Preference
+            android:key="deviceTypeChangeReboot"
+            android:visible="false"
+            android:summary="Reboot is required to save device type change"
+            android:icon="@drawable/ic_info_outline_black_24dp" />
 
-    <com.noti.main.utils.ui.SwitchedPreference
-        android:defaultValue="false"
-        android:key="allowAcceptPairAutomatically"
-        android:summary="WARNING: May be paired automatically without user permission"
-        android:title="Accept pairing without confirm"
-        android:icon="@drawable/ic_fluent_arrow_sync_checkmark_24_regular" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="allowAcceptPairAutomatically"
+            android:summary="WARNING: May be paired automatically without user permission"
+            android:title="Accept pairing without confirm"
+            android:icon="@drawable/ic_fluent_arrow_sync_checkmark_24_regular" />
 
-    <com.noti.main.utils.ui.SwitchedPreference
-        android:defaultValue="true"
-        android:key="allowRemovePairRemotely"
-        android:title="Unpair from another device"
-        android:summary="Allow to remove pair automatically"
-        android:icon="@drawable/ic_fluent_person_delete_24_regular" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="true"
+            android:key="allowRemovePairRemotely"
+            android:title="Unpair from another device"
+            android:summary="Allow to remove pair automatically"
+            android:icon="@drawable/ic_fluent_person_delete_24_regular" />
 
-    <com.noti.main.utils.ui.SwitchedPreference
-        android:defaultValue="false"
-        android:key="showAlreadyConnected"
-        android:summary="Display already connected devices in the search list"
-        android:title="Search already connected devices"
-        android:icon="@drawable/ic_fluent_plug_disconnected_24_regular" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="showAlreadyConnected"
+            android:summary="Display already connected devices in the search list"
+            android:title="Search already connected devices"
+            android:icon="@drawable/ic_fluent_plug_disconnected_24_regular" />
 
-    <com.noti.main.utils.ui.SwitchedPreference
-        android:defaultValue="false"
-        android:key="printDebugLog"
-        android:summary="Output debug information about pairing to Logcat"
-        android:title="Print debug log"
-        android:icon="@drawable/ic_fluent_bug_24_regular" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="printDebugLog"
+            android:summary="Output debug information about pairing to Logcat"
+            android:title="Print debug log"
+            android:icon="@drawable/ic_fluent_bug_24_regular" />
 
-    <Preference
-        android:key="pairKillSwitch"
-        android:title="Unpair all paired devices"
-        android:summary="Reset and delete all previous connected devices"
-        android:icon="@drawable/ic_fluent_arrow_reset_24_regular" />
+        <Preference
+            android:key="pairKillSwitch"
+            android:title="Unpair all paired devices"
+            android:summary="Reset and delete all previous connected devices"
+            android:icon="@drawable/ic_fluent_arrow_reset_24_regular" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Remote File Explorer">
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="true"
+            android:key="listFolderFirst"
+            android:title="List folders first"
+            android:summary="Folders are always listed first, followed by the remaining files"
+            android:icon="@drawable/ic_fluent_document_folder_24_regular" />
+
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="indexHiddenFiles"
+            android:title="Index hidden files"
+            android:summary="Indexes hidden files and folders whose names start with \u0022.\u0022 (dot)"
+            android:icon="@drawable/ic_fluent_eye_off_24_regular" />
+
+        <Preference
+            android:key="indexMaximumSize"
+            android:title="Set the maximum size of folder content"
+            android:summary="If the number of files/folders in a folder exceeds a certain number, indexing of that folder is skipped"
+            android:icon="@drawable/ic_fluent_number_symbol_square_24_regular" />
+    </PreferenceCategory>
 </PreferenceScreen>
