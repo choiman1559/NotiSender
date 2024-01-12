@@ -38,7 +38,7 @@ public class PairingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pair_find);
+        setContentView(R.layout.activity_pair_search);
 
         TextView deviceName = findViewById(R.id.deviceNameInfo);
         TextView deviceId = findViewById(R.id.deviceIdInfo);

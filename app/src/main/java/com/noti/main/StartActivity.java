@@ -59,6 +59,8 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_Overlay;
     MaterialButton Permit_Battery;
     MaterialButton Permit_File;
+    MaterialButton Permit_Location;
+    MaterialButton Permit_Background_Location;
     MaterialButton Permit_AllFiles;
     MaterialButton Permit_Alarm;
     MaterialButton Permit_Privacy;
@@ -95,6 +97,27 @@ public class StartActivity extends AppCompatActivity {
         }
     });
 
+    ActivityResultLauncher<String[]> locationPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            Boolean fineLocationGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
+            Boolean coarseLocationGranted = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION,false);
+
+            if((fineLocationGranted != null && fineLocationGranted) || (coarseLocationGranted != null && coarseLocationGranted)) {
+                setButtonCompleted(this, Permit_Location);
+                checkPermissionsAndEnableComplete();
+            }
+        }
+    });
+
+    ActivityResultLauncher<String> backgroundLocationPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestPermission(), fineLocationGranted -> {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if(fineLocationGranted != null && fineLocationGranted) {
+                setButtonCompleted(this, Permit_Background_Location);
+                checkPermissionsAndEnableComplete();
+            }
+        }
+    });
+
     @SuppressLint({"BatteryLife", "HardwareIds"})
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,6 +133,8 @@ public class StartActivity extends AppCompatActivity {
         Permit_Overlay = findViewById(R.id.Permit_Overlay);
         Permit_Battery = findViewById(R.id.Permit_Battery);
         Permit_File = findViewById(R.id.Permit_File);
+        Permit_Location = findViewById(R.id.Permit_Location);
+        Permit_Background_Location = findViewById(R.id.Permit_Background_Location);
         Permit_AllFiles = findViewById(R.id.Permit_AllFiles);
         Permit_Alarm = findViewById(R.id.Permit_Alarm);
         Permit_Privacy = findViewById(R.id.Permit_Privacy);
@@ -149,6 +174,18 @@ public class StartActivity extends AppCompatActivity {
         Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
         if (isTelevisionsEnabled || sets.contains(getPackageName())) {
             setButtonCompleted(this, Permit_Alarm);
+            count++;
+        }
+
+        boolean isFineLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean isCoarseLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        if(isCoarseLocation || isFineLocation) {
+            setButtonCompleted(this, Permit_Location);
+            count++;
+        }
+
+        if(Build.VERSION.SDK_INT <= 23 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            setButtonCompleted(this, Permit_Background_Location);
             count++;
         }
 
@@ -204,7 +241,7 @@ public class StartActivity extends AppCompatActivity {
             }
         }
 
-        if(count >= 8) {
+        if(count >= 10) {
             startActivity(new Intent(this, SettingsActivity.class));
             finish();
         }
@@ -218,12 +255,29 @@ public class StartActivity extends AppCompatActivity {
         });
         Permit_Alarm.setOnClickListener((v) -> startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
         Permit_File.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101));
+        Permit_Location.setOnClickListener((v) -> locationPermissionRequest.launch(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}));
         Permit_AllFiles.setOnClickListener((v) -> {
             if(Build.VERSION.SDK_INT >= 30) {
                 Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
                 startAllFilesPermit.launch(intent);
             }
+        });
+        Permit_Background_Location.setOnClickListener((v) -> {
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
+            dialog.setTitle("Background Location");
+            dialog.setMessage("""
+                    Please allow background location permission to remotely locate this device from other devices.
+
+                    On the screen that appears, select “Always Allow” to enable background location permissions.""");
+            dialog.setPositiveButton("Permit", (dialog12, which) -> {
+                if(Permit_Location.isEnabled()) {
+                    ToastHelper.show(this, "You should permit location permission first!", "OK", ToastHelper.LENGTH_SHORT);
+                } else if(Build.VERSION.SDK_INT >= 29) {
+                    backgroundLocationPermissionRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+                }
+            });
+            dialog.show();
         });
         Permit_Privacy.setOnClickListener((v) -> {
             RelativeLayout layout = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_privacy, null,false);
@@ -267,7 +321,37 @@ public class StartActivity extends AppCompatActivity {
             prefs.edit().putBoolean("SkipAlarmAccessPermission", b).apply();
         });
         Start_App.setOnClickListener((v) -> {
-            if(Permit_Notification.isEnabled() || Permit_Battery.isEnabled() || Permit_File.isEnabled() || Permit_Overlay.isEnabled() || (Permit_Alarm.isEnabled() && !Skip_Alarm.isChecked()) || Permit_Privacy.isEnabled()) {
+            boolean isBadCondition = Permit_Notification.isEnabled();
+
+            if(Permit_Battery.isEnabled()) {
+                isBadCondition = true;
+            }
+
+            if(Permit_File.isEnabled()) {
+                isBadCondition = true;
+            }
+
+            if(Permit_Overlay.isEnabled()) {
+                isBadCondition = true;
+            }
+
+            if(Permit_Alarm.isEnabled() && !Skip_Alarm.isChecked()) {
+                isBadCondition = true;
+            }
+
+            if(Permit_Privacy.isEnabled()) {
+                isBadCondition = true;
+            }
+
+            if(Permit_Location.isEnabled()) {
+                isBadCondition = true;
+            }
+
+            if(Permit_Background_Location.isEnabled()) {
+                isBadCondition = true;
+            }
+
+            if(isBadCondition) {
                 ToastHelper.show(this, "Please complete all section!", ToastHelper.LENGTH_SHORT);
             } else {
                 startActivity(new Intent(this, SettingsActivity.class));

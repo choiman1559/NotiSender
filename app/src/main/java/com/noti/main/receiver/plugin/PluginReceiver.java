@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.pair.DataProcess;
@@ -78,8 +79,11 @@ public class PluginReceiver extends BroadcastReceiver {
                             NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data[1], data[2], Calendar.getInstance().getTime());
                     case PluginConst.ACTION_RESPONSE_REMOTE_DATA ->
                             DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_RESPONSE_REMOTE_DATA, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[2]);
-                    case PluginConst.NET_PROVIDER_RECEIVED ->
+                    case PluginConst.NET_PROVIDER_RECEIVED -> {
+                        if(context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("server", "Firebase Cloud Message").equals(packageName)) {
                             NetworkProvider.processReception(context, (NetPacket) Objects.requireNonNull(rawData.getSerializable(PluginConst.NET_PROVIDER_DATA)));
+                        }
+                    }
                     default ->
                             PluginActions.pushException(context, packageName, new IllegalAccessException("Plugin Action type is not supported: " + dataType));
                 }

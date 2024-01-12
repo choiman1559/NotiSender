@@ -41,6 +41,7 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.service.refiler.RemoteFileProcess;
+import com.noti.main.ui.pair.DeviceFindActivity;
 import com.noti.main.utils.network.HMACCrypto;
 import com.noti.plugin.data.NetworkProvider;
 import com.noti.plugin.data.NotificationData;
@@ -269,10 +270,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 }
 
-                if (type.equals("send|find") && !isDeviceItself(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
-                    sendFindTaskNotification();
-                }
-
                 if (type.startsWith("media") && prefs.getBoolean("UseMediaSync", false)) {
                     manager.acquire();
                     try {
@@ -385,8 +382,29 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             }
                         }
                         case "pair|find" -> {
-                            if (isTargetDevice(map) && isPairedDevice(map) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
-                                sendFindTaskNotification();
+                            if (isTargetDevice(map) && isPairedDevice(map)) {
+                                if(map.containsKey("findType")) switch (Objects.requireNonNull(map.get("findType"))) {
+                                        case "findRequest" -> {
+                                            if ("true".equals(map.get("playSound")) && !prefs.getBoolean("NotReceiveFindDevice", false)) {
+                                                sendFindTaskNotification();
+                                            }
+                                            if ("true".equals(map.get("locationRequest"))) {
+                                                DeviceFindActivity.responseLocation(context, map.get("device_id"), map.get("device_name"));
+                                            }
+                                        }
+                                        case "locationResponse" -> {
+                                            if (DeviceFindActivity.mOnLocationResponseListener != null) {
+                                                if("true".equals(map.get("isSuccess"))) {
+                                                    DeviceFindActivity.mOnLocationResponseListener.onLocationResponse(true,
+                                                            Double.parseDouble(Objects.requireNonNull(map.get("latitude"))),
+                                                            Double.parseDouble(Objects.requireNonNull(map.get("longitude"))));
+                                                } else DeviceFindActivity.mOnLocationResponseListener.onLocationResponse(false, null, null);
+                                            }
+                                        }
+                                    }
+                                else if(!prefs.getBoolean("NotReceiveFindDevice", false)) {
+                                    sendFindTaskNotification();
+                                }
                             }
                         }
                         case "pair|remote_file" -> {

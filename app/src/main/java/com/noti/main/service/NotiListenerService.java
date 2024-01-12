@@ -432,7 +432,7 @@ public class NotiListenerService extends NotificationListenerService {
         String TOPIC = "/topics/" + prefs.getString("UID", "");
         String APPNAME = null;
         try {
-            APPNAME = "" + pm.getApplicationLabel(pm.getApplicationInfo(PackageName, PackageManager.GET_META_DATA));
+            APPNAME = String.valueOf(pm.getApplicationLabel(pm.getApplicationInfo(PackageName, PackageManager.GET_META_DATA)));
         } catch (PackageManager.NameNotFoundException e) {
             if (isLogging) Log.d("Error", "Package not found : " + PackageName);
         }
@@ -605,6 +605,9 @@ public class NotiListenerService extends NotificationListenerService {
         manager.acquire();
 
         try {
+            notification.put("android", new JSONObject().put("priority", "high"));
+            notification.put("priority", 10);
+
             boolean useSplit = prefs.getBoolean("UseSplitData", false) && notification.getString("data").length() > 3072;
             boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
             boolean splitAfterEncryption = prefs.getBoolean("SplitAfterEncryption", false);

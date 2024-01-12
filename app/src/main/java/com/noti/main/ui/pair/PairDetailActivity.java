@@ -29,13 +29,10 @@ import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
 import com.noti.main.service.refiler.ReFileActivity;
-import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
@@ -144,29 +141,11 @@ public class PairDetailActivity extends AppCompatActivity {
         });
 
         findButton.setOnClickListener(v -> {
-            Date date = Calendar.getInstance().getTime();
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
-            String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-            JSONObject notificationHead = new JSONObject();
-            JSONObject notificationBody = new JSONObject();
-            try {
-                notificationBody.put("type", "pair|find");
-                notificationBody.put("device_name", DEVICE_NAME);
-                notificationBody.put("device_id", DEVICE_ID);
-                notificationBody.put("send_device_name", Device_name);
-                notificationBody.put("send_device_id", Device_id);
-                notificationBody.put("date", date);
-
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notificationBody);
-            } catch (JSONException e) {
-                Log.e("Noti", "onCreate: " + e.getMessage());
-            }
-
-            sendNotification(notificationHead, getPackageName(), this);
-            ToastHelper.show(this, "Your request is posted!", "OK", ToastHelper.LENGTH_SHORT);
+            Intent presentationIntent = new Intent(PairDetailActivity.this, DeviceFindActivity.class);
+            presentationIntent.putExtra("device_name", Device_name);
+            presentationIntent.putExtra("device_id", Device_id);
+            presentationIntent.putExtra("device_type", Device_type);
+            startActivity(presentationIntent);
         });
 
         DataProcess.requestData(this, Device_name, Device_id, "battery_info");
