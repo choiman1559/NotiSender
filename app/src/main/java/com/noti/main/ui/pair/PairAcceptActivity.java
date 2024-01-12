@@ -96,8 +96,8 @@ public class PairAcceptActivity extends AppCompatActivity {
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
             notificationBody.put("pair_accept", isAccepted);
+
             notificationHead.put("to", Topic);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());

@@ -8,7 +8,11 @@ import com.noti.main.service.pair.PairDeviceInfo;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.utils.BillingHelper;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class Application extends android.app.Application {
     private static Application applicationInstance;
@@ -41,6 +45,11 @@ public class Application extends android.app.Application {
         pairingProcessList = new ArrayList<>();
         applicationInstance = this;
         thisDeviceType = PairDeviceType.getThisDeviceType(applicationInstance.getApplicationContext());
+    }
+
+    public static String getDateString() {
+        Date date = Calendar.getInstance().getTime();
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(date);
     }
 
     @Override

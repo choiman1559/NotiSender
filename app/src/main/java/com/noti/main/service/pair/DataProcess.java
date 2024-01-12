@@ -32,13 +32,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 
 public class DataProcess {
     public static void pushPluginRemoteAction(Context context, String Device_name, String Device_id, String pluginPackage, String actionType, String actionName, String args) {
-        Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
@@ -51,7 +48,7 @@ public class DataProcess {
             notificationBody.put("device_id", DEVICE_ID);
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
-            notificationBody.put("date", date);
+            notificationBody.put("date", Application.getDateString());
 
             notificationBody.put("plugin_action_type", actionType);
             notificationBody.put("plugin_action_name", actionName);
@@ -59,7 +56,6 @@ public class DataProcess {
             notificationBody.put("plugin_package", pluginPackage);
 
             notificationHead.put("to", TOPIC);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
@@ -68,7 +64,6 @@ public class DataProcess {
     }
 
     public static void requestData(Context context, String Device_name, String Device_id, String dataType) {
-        Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
@@ -82,10 +77,9 @@ public class DataProcess {
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
             notificationBody.put("request_data", dataType);
-            notificationBody.put("date", date);
+            notificationBody.put("date", Application.getDateString());
 
             notificationHead.put("to", TOPIC);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
@@ -102,7 +96,6 @@ public class DataProcess {
             dataToSend.setCharAt(dataToSend.length() - 1, '\0');
         } else if (args.length == 1) dataToSend.append(args[0]);
 
-        Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
@@ -116,11 +109,10 @@ public class DataProcess {
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
             notificationBody.put("request_action", dataType);
-            notificationBody.put("date", date);
+            notificationBody.put("date", Application.getDateString());
             if (args.length > 0) notificationBody.put("action_args", dataToSend.toString());
 
             notificationHead.put("to", TOPIC);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
@@ -155,7 +147,6 @@ public class DataProcess {
         }
 
         if (dataToSend.isEmpty()) return;
-        Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
@@ -170,10 +161,9 @@ public class DataProcess {
             notificationBody.put("send_device_id", map.get("device_id"));
             notificationBody.put("receive_data", dataToSend);
             notificationBody.put("request_data", dataType);
-            notificationBody.put("date", date);
+            notificationBody.put("date", Application.getDateString());
 
             notificationHead.put("to", TOPIC);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
@@ -195,41 +185,39 @@ public class DataProcess {
 
         if (actionType != null) {
             switch (actionType) {
-                case "Show notification with text":
-                    Notify.build(context)
-                            .setTitle(actionArgs[0])
-                            .setContent(actionArgs[1])
-                            .setLargeIcon(R.mipmap.ic_launcher)
-                            .largeCircularIcon()
-                            .setSmallIcon(R.drawable.ic_broken_image)
-                            .setChannelName("")
-                            .setChannelId("Notification Test")
-                            .enableVibration(true)
-                            .setAutoCancel(true)
-                            .show();
-                    break;
+                case "Show notification with text" -> Notify.build(context)
+                        .setTitle(actionArgs[0])
+                        .setContent(actionArgs[1])
+                        .setLargeIcon(R.mipmap.ic_launcher)
+                        .largeCircularIcon()
+                        .setSmallIcon(R.drawable.ic_broken_image)
+                        .setChannelName("")
+                        .setChannelId("Notification Test")
+                        .enableVibration(true)
+                        .setAutoCancel(true)
+                        .show();
 
-                case "Copy text to clipboard":
+                case "Copy text to clipboard" -> {
                     ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("Shared from " + Device_name, actionArgs[0]);
                     clipboard.setPrimaryClip(clip);
-                    break;
+                }
 
-                case "Open link in Browser":
+                case "Open link in Browser" -> {
                     String url = actionArgs[0];
                     if (!url.startsWith("http://") && !url.startsWith("https://"))
                         url = "http://" + url;
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     context.startActivity(browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                    break;
+                }
 
-                case "Trigger tasker event":
+                case "Trigger tasker event" -> {
                     if (Device_name != null && Device_id != null) {
                         TaskerPairEventKt.callTaskerEvent(Device_name, Device_id, context);
                     }
-                    break;
+                }
 
-                case "Run application":
+                case "Run application" -> {
                     new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(context, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
                     String Package = actionArgs[0];
                     try {
@@ -241,9 +229,9 @@ public class DataProcess {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
                         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     }
-                    break;
+                }
 
-                case "Run command":
+                case "Run command" -> {
                     final String[] finalActionArgs = actionArgs;
                     new Thread(() -> {
                         try {
@@ -253,18 +241,16 @@ public class DataProcess {
                             e.printStackTrace();
                         }
                     }).start();
-                    break;
+                }
 
-                case "Share file":
-                    new FileTransferService(context, true)
-                            .setDownloadProperties(actionArg, false)
-                            .execute();
-                    break;
+                case "Share file" -> new FileTransferService(context, true)
+                        .setDownloadProperties(actionArg, false)
+                        .execute();
 
-                case "toggle_service":
+                case "toggle_service" -> {
                     SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
                     prefs.edit().putBoolean("serviceToggle", Boolean.parseBoolean(actionArg)).apply();
-                    break;
+                }
             }
         }
     }

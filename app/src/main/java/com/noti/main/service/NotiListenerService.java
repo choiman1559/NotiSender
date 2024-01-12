@@ -43,14 +43,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class NotiListenerService extends NotificationListenerService {
@@ -241,7 +239,7 @@ public class NotiListenerService extends NotificationListenerService {
             Notification notification = sbn.getNotification();
             Bundle extra = notification.extras;
             Date time = Calendar.getInstance().getTime();
-            String DATE = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(time);
+            String DATE = Application.getDateString();
             String KEY = sbn.getKey();
 
             boolean isLogging = BuildConfig.DEBUG;
@@ -324,7 +322,7 @@ public class NotiListenerService extends NotificationListenerService {
         }
 
         Date time = Calendar.getInstance().getTime();
-        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
+        String date = Application.getDateString();
         String PackageName = getSystemDialerApp(context);
 
         if (isTelecomIntervalGaped(address, time)) {
@@ -354,8 +352,6 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     public void sendSmsNotification(Context context, Boolean isLogging, String PackageName, String address, String nickname, String message, Date time) {
-        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(time);
-
         if (isSmsIntervalGaped(context, address, message, time)) {
             String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
             String DEVICE_ID = getUniqueID();
@@ -370,7 +366,7 @@ public class NotiListenerService extends NotificationListenerService {
                 notificationBody.put("nickname", nickname);
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
-                notificationBody.put("date", date);
+                notificationBody.put("date", Application.getDateString());
 
                 notificationHead.put("to", TOPIC);
                 notificationHead.put("data", notificationBody);
@@ -459,8 +455,6 @@ public class NotiListenerService extends NotificationListenerService {
             }
 
             notificationHead.put("to", TOPIC);
-            notificationHead.put("android", new JSONObject().put("priority", "high"));
-            notificationHead.put("priority", 10);
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());

@@ -250,24 +250,13 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         String ICONS;
         if (ICON != null && prefs.getBoolean("SendIcon", false)) {
             ICON.setHasAlpha(true);
-            int res;
-            switch (prefs.getString("IconRes", "")) {
-                case "68 x 68 (Not Recommend)":
-                    res = 68;
-                    break;
+            int res = switch (prefs.getString("IconRes", "")) {
+                case "68 x 68 (Not Recommend)" -> 68;
+                case "52 x 52 (Default)" -> 52;
+                case "36 x 36" -> 36;
+                default -> 0;
+            };
 
-                case "52 x 52 (Default)":
-                    res = 52;
-                    break;
-
-                case "36 x 36":
-                    res = 36;
-                    break;
-
-                default:
-                    res = 0;
-                    break;
-            }
             ICONS = res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(NotiListenerService.getResizedBitmap(ICON, res, res)));
         } else ICONS = "none";
 
@@ -276,7 +265,7 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         String TOPIC = "/topics/" + prefs.getString("UID", "");
         String APPNAME = null;
         try {
-            APPNAME = "" + pm.getApplicationLabel(pm.getApplicationInfo(PackageName, PackageManager.GET_META_DATA));
+            APPNAME = String.valueOf(pm.getApplicationLabel(pm.getApplicationInfo(PackageName, PackageManager.GET_META_DATA)));
         } catch (PackageManager.NameNotFoundException e) {
             if (isLogging) Log.d("Error", "Package not found : " + PackageName);
         }
@@ -301,8 +290,6 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             }
 
             notificationHead.put("to", TOPIC);
-            notificationHead.put("android", new JSONObject().put("priority", "high"));
-            notificationHead.put("priority", 10);
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());

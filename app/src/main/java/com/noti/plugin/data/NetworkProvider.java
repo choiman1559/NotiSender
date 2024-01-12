@@ -71,7 +71,6 @@ public class NetworkProvider {
                 notificationBody.put("device_id", DEVICE_ID);
 
                 notificationHead.put("to", TOPIC);
-                notificationHead.put("priority", "high");
                 notificationHead.put("data", notificationBody);
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage());

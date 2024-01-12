@@ -19,7 +19,6 @@ import androidx.core.app.NotificationCompat;
 
 import com.noti.main.Application;
 import com.noti.main.R;
-import com.noti.main.service.FirebaseMessageService;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.ui.pair.PairAcceptActivity;
 
@@ -46,8 +45,8 @@ public class PairingUtils {
             notificationBody.put("type","pair|request_device_list");
             notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
+
             notificationHead.put("to",Topic);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
@@ -67,8 +66,8 @@ public class PairingUtils {
             notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", map.get("device_name"));
             notificationBody.put("send_device_id", map.get("device_id"));
+
             notificationHead.put("to",Topic);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
@@ -92,8 +91,8 @@ public class PairingUtils {
             notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
+
             notificationHead.put("to",Topic);
-            notificationHead.put("priority", "high");
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );

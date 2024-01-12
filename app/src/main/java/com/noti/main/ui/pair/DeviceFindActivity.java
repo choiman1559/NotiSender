@@ -39,9 +39,6 @@ import com.noti.main.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
-import java.util.Date;
-
 public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     String deviceId;
@@ -121,7 +118,6 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private void requestFind(String deviceId, String deviceName, boolean playSound, boolean locationRequired) {
-        Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
@@ -138,7 +134,7 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
             notificationBody.put("device_id", DEVICE_ID);
             notificationBody.put("send_device_name", deviceName);
             notificationBody.put("send_device_id", deviceId);
-            notificationBody.put("date", date);
+            notificationBody.put("date", Application.getDateString());
 
             notificationHead.put("to", TOPIC);
             notificationHead.put("data", notificationBody);
@@ -150,7 +146,6 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
 
     @SuppressLint("MissingPermission")
     public static void responseLocation(Context context, String deviceId, String deviceName) {
-        Date date = Calendar.getInstance().getTime();
         String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
         String DEVICE_ID = getUniqueID();
         String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
@@ -166,9 +161,13 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
 
                         if(task.isSuccessful()) {
                             Location location = task.getResult();
-                            notificationBody.put("isSuccess", true);
-                            notificationBody.put("latitude", location.getLatitude());
-                            notificationBody.put("longitude", location.getLongitude());
+                            if(location != null) {
+                                notificationBody.put("isSuccess", true);
+                                notificationBody.put("latitude", location.getLatitude());
+                                notificationBody.put("longitude", location.getLongitude());
+                            } else {
+                                notificationBody.put("isSuccess", false);
+                            }
                         } else {
                             notificationBody.put("isSuccess", false);
                         }
@@ -177,7 +176,7 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
                         notificationBody.put("device_id", DEVICE_ID);
                         notificationBody.put("send_device_name", deviceName);
                         notificationBody.put("send_device_id", deviceId);
-                        notificationBody.put("date", date);
+                        notificationBody.put("date", Application.getDateString());
 
                         notificationHead.put("to", TOPIC);
                         notificationHead.put("data", notificationBody);
