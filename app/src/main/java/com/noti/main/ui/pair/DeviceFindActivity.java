@@ -41,8 +41,8 @@ import org.json.JSONObject;
 
 public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    String deviceId;
-    String deviceName;
+    private String deviceId;
+    private String deviceName;
     private GoogleMap mGoogleMap;
 
     public static OnLocationResponseListener mOnLocationResponseListener;
@@ -77,7 +77,7 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
         });
 
         mOnLocationResponseListener = (isSuccess, latitude, longitude) -> runOnUiThread(() -> {
-            if(isSuccess) {
+            if(isSuccess && mGoogleMap != null) {
                 mGoogleMap.clear();
 
                 LatLng deviceLocation = new LatLng(latitude, longitude);
@@ -108,6 +108,7 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
     protected void onDestroy() {
         super.onDestroy();
         mOnLocationResponseListener = null;
+        mGoogleMap = null;
     }
 
     @Override
