@@ -28,6 +28,7 @@ import com.google.firebase.storage.StreamDownloadTask;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.refiler.db.RemoteFile;
+import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
@@ -210,6 +211,36 @@ public class ReFileActivity extends AppCompatActivity {
                 layout.setOnClickListener(v -> {
                     if (file.isFile()) {
                         MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
+                        String bigFileWarning = "";
+                        boolean isSubscribed = BillingHelper.getInstance().isSubscribedOrDebugBuild();
+                        if (file.getSize() > (isSubscribed ? 2147483648L : 104857600)) {
+                            bigFileWarning = isSubscribed ? """
+                                    <br>
+                                    The file is too large to download!<br>
+                                    Maximum download file size is 2GB.
+                                    """ : """
+                                    <br>
+                                    The file is too large to download!<br>
+                                    The maximum download file size is 100MB,<br>
+                                    increasing up to 2GB with subscription.
+                                    """;
+                        } else {
+                            if(!file.getPath().startsWith("/storage/emulated/0")) {
+                                bigFileWarning = """
+                                        <br>
+                                        Warning: Downloading files from the SD card may fail.
+                                        """;
+                            }
+
+                            dialog.setPositiveButton("Download", (d, w) -> {
+                                new FileTransferService(this, true)
+                                        .setDownloadProperties(file.getName(), true)
+                                        .execute();
+                                RemoteFileProcess.pushRequestFile(this, device_name, device_id, file.getPath());
+                                ToastHelper.show(this, "Download started at background\nWatch notification to check progress", "Okay", ToastHelper.LENGTH_SHORT);
+                            });
+                        }
+
                         dialog.setTitle("File information/download");
                         dialog.setIcon(R.drawable.ic_fluent_cloud_arrow_down_24_regular);
                         dialog.setMessage(Html.fromHtml(String.format(Locale.getDefault(), """
@@ -217,20 +248,14 @@ public class ReFileActivity extends AppCompatActivity {
                                 <b>Path:</b> %s<br>
                                 <b>Queried time:</b> %s<br>
                                 <b>Size:</b> %s Bytes
+                                <br>%s
                                 """,
                                 file.getName(),
                                 file.getPath().replace(file.getName(), ""),
                                 new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(allFileList.getLastModified()),
-                                file.getSize()
+                                file.getSize(),
+                                bigFileWarning
                         )));
-
-                        dialog.setPositiveButton("Download", (d, w) -> {
-                            new FileTransferService(this, true)
-                                    .setDownloadProperties(file.getName(), true)
-                                    .execute();
-                            RemoteFileProcess.pushRequestFile(this, device_name, device_id, file.getPath());
-                            ToastHelper.show(this, "Download started at background\nWatch notification to check progress", "Okay", ToastHelper.LENGTH_SHORT);
-                        });
 
                         dialog.setNegativeButton("Cancel", (d, w) -> { });
                         dialog.show();
