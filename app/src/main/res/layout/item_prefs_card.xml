@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemParent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal"
+    android:paddingVertical="10dp"
+    tools:ignore="HardcodedText">
+
+    <ImageView
+        android:id="@+id/itemIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="24dp"
+        app:srcCompat="@drawable/ic_info_outline_black_24dp"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/itemTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sans"
+            android:text="Title Placeholder"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/itemDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Description Placeholder"
+            android:textColor="@color/ui_fg_secondary" />
+    </LinearLayout>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchCompat"
+        android:layout_gravity="end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:checked="false"
+        android:clickable="false"
+        android:thumb="@drawable/switch_thumb"
+        app:track="@drawable/switch_track" />
+
+    <ImageView
+        android:id="@+id/itemIconRight"
+        android:layout_gravity="center|end"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
+        android:scaleType="fitEnd"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_info_outline_black_24dp"
+        tools:ignore="ContentDescription" />
+</androidx.appcompat.widget.LinearLayoutCompat>

@@ -22,11 +22,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RemoteFileProcess {
 
@@ -99,7 +106,56 @@ public class RemoteFileProcess {
                     ReFileListeners.m_onFileSendResponseListener.onReceive(map.get(ReFileConst.DATA_PATH), Boolean.parseBoolean(map.get(ReFileConst.DATA_RESULTS)));
                 }
             }
+
+            case ReFileConst.TYPE_REQUEST_METADATA -> {
+                String filePath = map.get(ReFileConst.DATA_PATH);
+                File file = new File(Objects.requireNonNull(filePath));
+
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("hash", getFileMD5Hash(file));
+
+                    pushFileMetadata(context, map.get("device_name"), map.get("device_id"), filePath, true, jsonObject);
+                } catch (JSONException | NoSuchAlgorithmException | IOException e) {
+                    pushFileMetadata(context, map.get("device_name"), map.get("device_id"), filePath, true, null);
+                    e.printStackTrace();
+                }
+            }
+
+            case ReFileConst.TYPE_RESPONSE_METADATA -> {
+                String filePath = map.get(ReFileConst.DATA_PATH);
+                if(FileDetailActivity.mOnFileMetadataReceivedListener != null) {
+                    if(FileDetailActivity.remoteFile != null && FileDetailActivity.remoteFile.getPath().equals(filePath)) {
+                        try {
+                            String result = map.get(ReFileConst.DATA_RESULTS);
+                            if(result == null || result.isEmpty()) {
+                                FileDetailActivity.mOnFileMetadataReceivedListener.onMetadataReceived(null);
+                            } else {
+                                JSONObject object = new JSONObject(result);
+                                FileDetailActivity.mOnFileMetadataReceivedListener.onMetadataReceived(object);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private static String getFileMD5Hash(File file) throws NoSuchAlgorithmException, IOException {
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+        InputStream is = new FileInputStream(file);
+        byte[] buffer = new byte[8192];
+        int read;
+        while ((read = is.read(buffer)) > 0) {
+            digest.update(buffer, 0, read);
+        }
+
+        is.close();
+        byte[] md5sum = digest.digest();
+        BigInteger bigInt = new BigInteger(1, md5sum);
+        return bigInt.toString(16);
     }
 
     public static void pushRequestQuery(Context context, String device_name, String device_id) {
@@ -186,6 +242,34 @@ public class RemoteFileProcess {
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", device_name);
             notificationBody.put("send_device_id", device_id);
+            notificationHead.put("to", TOPIC);
+            notificationHead.put("data", notificationBody);
+        } catch (JSONException e) {
+            Log.e("Noti", "onCreate: " + e.getMessage() );
+        }
+        if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
+        NotiListenerService.sendNotification(notificationHead, "com.noti.main", context);
+    }
+
+    public static void pushFileMetadata(Context context, String device_name, String device_id, String fileName, boolean isResponding, @Nullable JSONObject data) {
+        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
+        String TOPIC = "/topics/" + prefs.getString("UID","");
+
+        JSONObject notificationHead = new JSONObject();
+        JSONObject notificationBody = new JSONObject();
+        try {
+            notificationBody.put("type","pair|remote_file");
+            notificationBody.put(ReFileConst.TASK_TYPE, isResponding ? ReFileConst.TYPE_RESPONSE_METADATA : ReFileConst.TYPE_REQUEST_METADATA);
+            notificationBody.put(ReFileConst.DATA_PATH, fileName);
+            if(data != null) {
+                notificationBody.put(ReFileConst.DATA_RESULTS, data);
+            }
+
+            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_id", NotiListenerService.getUniqueID());
+            notificationBody.put("send_device_name", device_name);
+            notificationBody.put("send_device_id", device_id);
+
             notificationHead.put("to", TOPIC);
             notificationHead.put("data", notificationBody);
         } catch (JSONException e) {

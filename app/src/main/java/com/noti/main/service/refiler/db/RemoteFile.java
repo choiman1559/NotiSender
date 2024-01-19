@@ -5,11 +5,12 @@ import com.noti.main.service.refiler.ReFileConst;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class RemoteFile implements Comparable<RemoteFile>{
+public class RemoteFile implements Comparable<RemoteFile>, Serializable {
     long size;
     long lastModified;
     boolean isFile;
@@ -98,5 +99,13 @@ public class RemoteFile implements Comparable<RemoteFile>{
     @Override
     public int compareTo(RemoteFile o) {
         return o.getName().compareTo(this.getName());
+    }
+
+    public RemoteFile getSerializeOptimized() {
+        RemoteFile tmp = this;
+        list = new ArrayList<>();
+        parent = null;
+
+        return tmp;
     }
 }

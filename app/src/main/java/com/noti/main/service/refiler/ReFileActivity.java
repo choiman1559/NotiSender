@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,11 +24,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StreamDownloadTask;
+
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.refiler.db.RemoteFile;
-import com.noti.main.utils.BillingHelper;
-import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 public class ReFileActivity extends AppCompatActivity {
@@ -141,12 +140,47 @@ public class ReFileActivity extends AppCompatActivity {
 
                 if (remoteFile != null) {
                     allFileList = remoteFile;
+                    if(lastRemoteFile != null) {
+                        findLastMatchedFolder();
+                    }
+
                     runOnUiThread(this::loadFileListLayout);
                 }
             }).start();
         });
 
         downloadTask.addOnFailureListener(e -> loadFreshQuery());
+    }
+
+    void findLastMatchedFolder() {
+        RemoteFile latestFile = allFileList;
+        RemoteFile lastFile = lastRemoteFile;
+        ArrayList<String> folderNameList = new ArrayList<>();
+
+        while (lastFile.getParent() != null) {
+            folderNameList.add(lastFile.getName());
+            lastFile = lastFile.getParent();
+        }
+
+        for(int i = folderNameList.size() - 1; i >= 0; i--) {
+            boolean notFoundMatch = true;
+            List<RemoteFile> folderList = latestFile.getList();
+
+            for(int j = 0; j < folderList.size(); j++) {
+                String name = folderList.get(j).getName();
+                if(name.equals(folderNameList.get(i))) {
+                    latestFile = folderList.get(j);
+                    notFoundMatch = false;
+                    break;
+                }
+            }
+
+            if(notFoundMatch) {
+                lastRemoteFile = latestFile;
+                return;
+            }
+        }
+        lastRemoteFile = latestFile;
     }
 
     @SuppressLint("SetTextI18n")
@@ -210,55 +244,13 @@ public class ReFileActivity extends AppCompatActivity {
 
                 layout.setOnClickListener(v -> {
                     if (file.isFile()) {
-                        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
-                        String bigFileWarning = "";
-                        boolean isSubscribed = BillingHelper.getInstance().isSubscribedOrDebugBuild();
-                        if (file.getSize() > (isSubscribed ? 2147483648L : 104857600)) {
-                            bigFileWarning = isSubscribed ? """
-                                    <br>
-                                    The file is too large to download!<br>
-                                    Maximum download file size is 2GB.
-                                    """ : """
-                                    <br>
-                                    The file is too large to download!<br>
-                                    The maximum download file size is 100MB,<br>
-                                    increasing up to 2GB with subscription.
-                                    """;
-                        } else {
-                            if(!file.getPath().startsWith("/storage/emulated/0")) {
-                                bigFileWarning = """
-                                        <br>
-                                        Warning: Downloading files from the SD card may fail.
-                                        """;
-                            }
-
-                            dialog.setPositiveButton("Download", (d, w) -> {
-                                new FileTransferService(this, true)
-                                        .setDownloadProperties(file.getName(), true)
-                                        .execute();
-                                RemoteFileProcess.pushRequestFile(this, device_name, device_id, file.getPath());
-                                ToastHelper.show(this, "Download started at background\nWatch notification to check progress", "Okay", ToastHelper.LENGTH_SHORT);
-                            });
-                        }
-
-                        dialog.setTitle("File information/download");
-                        dialog.setIcon(R.drawable.ic_fluent_cloud_arrow_down_24_regular);
-                        dialog.setMessage(Html.fromHtml(String.format(Locale.getDefault(), """
-                                <b>Name:</b> %s<br>
-                                <b>Path:</b> %s<br>
-                                <b>Queried time:</b> %s<br>
-                                <b>Size:</b> %s Bytes
-                                <br>%s
-                                """,
-                                file.getName(),
-                                file.getPath().replace(file.getName(), ""),
-                                new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(allFileList.getLastModified()),
-                                file.getSize(),
-                                bigFileWarning
-                        )));
-
-                        dialog.setNegativeButton("Cancel", (d, w) -> { });
-                        dialog.show();
+                        Intent fileDetailIntent = new Intent(this, FileDetailActivity.class);
+                        fileDetailIntent.putExtra(FileDetailActivity.EXTRA_REMOTE_FILE, file.getSerializeOptimized());
+                        fileDetailIntent.putExtra(FileDetailActivity.EXTRA_LAST_MODIFIED, allFileList.getLastModified());
+                        fileDetailIntent.putExtra(FileDetailActivity.EXTRA_DEVICE_ID, device_id);
+                        fileDetailIntent.putExtra(FileDetailActivity.EXTRA_DEVICE_NAME, device_name);
+                        fileDetailIntent.putExtra(FileDetailActivity.EXTRA_FILE_ICON, holder.remoteFileIconId);
+                        startActivity(fileDetailIntent);
                     } else {
                         lastRemoteFile = file;
                         loadFileListLayout();
@@ -308,6 +300,7 @@ public class ReFileActivity extends AppCompatActivity {
 
     static class RemoteFileHolder implements Comparable<RemoteFileHolder> {
 
+        int remoteFileIconId;
         View parentView;
         RemoteFile remoteFile;
         ImageView remoteFileIcon;
@@ -343,10 +336,16 @@ public class ReFileActivity extends AppCompatActivity {
                 remoteFileDescription.setText(description);
 
                 if(remoteFile.isFile()) {
-                    String mime = URLConnection.guessContentTypeFromName(remoteFile.getPath());
+                    String mime = null;
+                    try {
+                        mime = URLConnection.guessContentTypeFromName(remoteFile.getPath());
+                    } catch (StringIndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+
                     if(mime != null) {
                         String[] mimeArr = mime.split("/");
-                        int resId = switch (mimeArr[0]) {
+                        remoteFileIconId = switch (mimeArr[0]) {
                             case "audio" -> R.drawable.ic_fluent_music_note_1_24_regular;
                             case "video" -> R.drawable.ic_fluent_video_clip_24_regular;
                             case "image" -> R.drawable.ic_fluent_image_24_regular;
@@ -359,12 +358,14 @@ public class ReFileActivity extends AppCompatActivity {
                             }
                             default -> R.drawable.ic_fluent_document_24_regular;
                         };
-                        remoteFileIcon.setImageResource(resId);
+                        remoteFileIcon.setImageResource(remoteFileIconId);
                     } else {
-                        remoteFileIcon.setImageResource(R.drawable.ic_fluent_document_24_regular);
+                        remoteFileIconId = R.drawable.ic_fluent_document_24_regular;
+                        remoteFileIcon.setImageResource(remoteFileIconId);
                     }
                 } else {
-                    remoteFileIcon.setImageResource(R.drawable.ic_fluent_folder_24_filled);
+                    remoteFileIconId = R.drawable.ic_fluent_folder_24_filled;
+                    remoteFileIcon.setImageResource(remoteFileIconId);
                 }
             }
         }

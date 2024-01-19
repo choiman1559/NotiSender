@@ -184,7 +184,7 @@ public class StartActivity extends AppCompatActivity {
             count++;
         }
 
-        if(Build.VERSION.SDK_INT <= 23 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if(Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             setButtonCompleted(this, Permit_Background_Location);
             count++;
         }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PrefsCard">
+        <attr name="cardTitle" format="string" />
+        <attr name="cardDescription" format="string" />
+        <attr name="cardSwitchChecked" format="boolean" />
+        <attr name="cardIconAlignEnd" format="boolean" />
+        <attr name="cardIconDrawable" format="reference" />
+
+        <attr name="cardType">
+            <flag name="title" value="1"/>
+            <flag name="description" value="2"/>
+            <flag name="switches" value="4"/> <!-- Not to be "switch", because AAPT can't compile if do so -->
+            <flag name="icon" value="8"/>
+        </attr>
+    </declare-styleable>
+</resources>

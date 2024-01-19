@@ -64,6 +64,7 @@
         android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.receive.ExitActivity" />
         <activity android:name=".service.refiler.ReFileActivity"/>
+        <activity android:name=".service.refiler.FileDetailActivity"/>
         <activity android:name=".ui.pair.PairAcceptActivity"
             android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.pair.PairingActivity"/>
