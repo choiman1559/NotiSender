@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -260,10 +259,10 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             ICONS = res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(NotiListenerService.getResizedBitmap(ICON, res, res)));
         } else ICONS = "none";
 
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = NotiListenerService.getUniqueID();
-        String TOPIC = "/topics/" + prefs.getString("UID", "");
         String APPNAME = null;
+
         try {
             APPNAME = String.valueOf(pm.getApplicationLabel(pm.getApplicationInfo(PackageName, PackageManager.GET_META_DATA)));
         } catch (PackageManager.NameNotFoundException e) {
@@ -271,7 +270,6 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
         }
 
         if (isLogging) Log.d("length", String.valueOf(ICONS.length()));
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {
             notificationBody.put("type", "send|normal");
@@ -288,14 +286,12 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewAdapter.
             if(notificationBody.toString().length() >= dataLimit - 20) {
                 notificationBody.put("icon", "none");
             }
-
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        if (isLogging) Log.d("data", notificationHead.toString());
-        NotiListenerService.sendNotification(notificationHead, PackageName, mContext);
+
+        if (isLogging) Log.d("data", notificationBody.toString());
+        NotiListenerService.sendNotification(notificationBody, PackageName, mContext);
         ToastHelper.show(mContext, "Your request is posted!","OK", ToastHelper.LENGTH_SHORT);
     }
 }

@@ -1,8 +1,16 @@
 package com.noti.main.service.pair;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.noti.main.service.NotiListenerService.getDeviceName;
 import static com.noti.main.service.NotiListenerService.getUniqueID;
 import static com.noti.main.service.NotiListenerService.sendNotification;
+
+import com.noti.main.Application;
+import com.noti.main.R;
+import com.noti.main.receiver.TaskerPairEventKt;
+import com.noti.main.service.NotiListenerService;
+import com.noti.main.service.refiler.FileTransferService;
+import com.noti.main.utils.PowerUtils;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -13,7 +21,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -21,12 +28,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.application.isradeleon.notify.Notify;
-
-import com.noti.main.Application;
-import com.noti.main.R;
-import com.noti.main.receiver.TaskerPairEventKt;
-import com.noti.main.service.refiler.FileTransferService;
-import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,12 +37,10 @@ import java.util.Map;
 
 public class DataProcess {
     public static void pushPluginRemoteAction(Context context, String Device_name, String Device_id, String pluginPackage, String actionType, String actionName, String args) {
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = getDeviceName();
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             notificationBody.put("type", "pair|plugin");
             notificationBody.put("device_name", DEVICE_NAME);
@@ -54,22 +53,17 @@ public class DataProcess {
             notificationBody.put("plugin_action_name", actionName);
             notificationBody.put("plugin_extra_data", args);
             notificationBody.put("plugin_package", pluginPackage);
-
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationHead, context.getPackageName(), context);
+        sendNotification(notificationBody, context.getPackageName(), context);
     }
 
     public static void requestData(Context context, String Device_name, String Device_id, String dataType) {
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             notificationBody.put("type", "pair|request_data");
             notificationBody.put("device_name", DEVICE_NAME);
@@ -78,13 +72,11 @@ public class DataProcess {
             notificationBody.put("send_device_id", Device_id);
             notificationBody.put("request_data", dataType);
             notificationBody.put("date", Application.getDateString());
-
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationHead, context.getPackageName(), context);
+
+        sendNotification(notificationBody, context.getPackageName(), context);
     }
 
     public static void requestAction(Context context, String Device_name, String Device_id, String dataType, String... args) {
@@ -96,12 +88,10 @@ public class DataProcess {
             dataToSend.setCharAt(dataToSend.length() - 1, '\0');
         } else if (args.length == 1) dataToSend.append(args[0]);
 
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             notificationBody.put("type", "pair|request_action");
             notificationBody.put("device_name", DEVICE_NAME);
@@ -111,13 +101,10 @@ public class DataProcess {
             notificationBody.put("request_action", dataType);
             notificationBody.put("date", Application.getDateString());
             if (args.length > 0) notificationBody.put("action_args", dataToSend.toString());
-
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationHead, context.getPackageName(), context);
+        sendNotification(notificationBody, context.getPackageName(), context);
     }
 
     public static void onDataRequested(Map<String, String> map, Context context) {
@@ -147,12 +134,10 @@ public class DataProcess {
         }
 
         if (dataToSend.isEmpty()) return;
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             notificationBody.put("type", "pair|receive_data");
             notificationBody.put("device_name", DEVICE_NAME);
@@ -162,13 +147,10 @@ public class DataProcess {
             notificationBody.put("receive_data", dataToSend);
             notificationBody.put("request_data", dataType);
             notificationBody.put("date", Application.getDateString());
-
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationHead, context.getPackageName(), context);
+        sendNotification(notificationBody, context.getPackageName(), context);
     }
 
     public static void onActionRequested(Map<String, String> map, Context context) {

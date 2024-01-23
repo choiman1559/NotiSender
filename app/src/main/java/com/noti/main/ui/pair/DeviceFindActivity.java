@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -35,6 +34,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.service.NotiListenerService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,12 +119,10 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private void requestFind(String deviceId, String deviceName, boolean playSound, boolean locationRequired) {
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             notificationBody.put("type", "pair|find");
             notificationBody.put("findType", "findRequest");
@@ -137,26 +135,22 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
             notificationBody.put("send_device_id", deviceId);
             notificationBody.put("date", Application.getDateString());
 
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
+            sendNotification(notificationBody, getPackageName(), this);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationHead, getPackageName(), this);
     }
 
     @SuppressLint("MissingPermission")
     public static void responseLocation(Context context, String deviceId, String deviceName) {
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, new CancellationTokenSource().getToken())
                 .addOnCompleteListener(task -> {
-                    JSONObject notificationHead = new JSONObject();
-                    JSONObject notificationBody = new JSONObject();
                     try {
+                        JSONObject notificationBody = new JSONObject();
                         notificationBody.put("type", "pair|find");
                         notificationBody.put("findType", "locationResponse");
 
@@ -179,12 +173,10 @@ public class DeviceFindActivity extends AppCompatActivity implements OnMapReadyC
                         notificationBody.put("send_device_id", deviceId);
                         notificationBody.put("date", Application.getDateString());
 
-                        notificationHead.put("to", TOPIC);
-                        notificationHead.put("data", notificationBody);
+                        sendNotification(notificationBody, context.getPackageName(), context);
                     } catch (JSONException e) {
                         Log.e("Noti", "onCreate: " + e.getMessage());
                     }
-                    sendNotification(notificationHead, context.getPackageName(), context);
                 });
     }
 }

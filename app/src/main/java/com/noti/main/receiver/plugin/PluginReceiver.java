@@ -3,7 +3,6 @@ package com.noti.main.receiver.plugin;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.VisibleForTesting;
@@ -49,7 +48,7 @@ public class PluginReceiver extends BroadcastReceiver {
                     case PluginConst.ACTION_REQUEST_DEVICE_LIST ->
                             PluginActions.responseDeviceList(context, packageName);
                     case PluginConst.ACTION_REQUEST_SELF_DEVICE_INFO -> {
-                        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+                        String DEVICE_NAME = NotiListenerService.getDeviceName();
                         String DEVICE_ID = NotiListenerService.getUniqueID();
                         String DEVICE_TYPE = PairDeviceType.getThisDeviceType(context).getDeviceType();
                         String DEVICE_STRING = String.format("%s|%s|%s", DEVICE_NAME, DEVICE_ID, DEVICE_TYPE);

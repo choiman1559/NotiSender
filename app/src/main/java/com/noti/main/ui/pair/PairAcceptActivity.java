@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -85,25 +84,20 @@ public class PairAcceptActivity extends AppCompatActivity {
     }
 
     public static void sendAcceptedMessage(String Device_name, String Device_id, boolean isAccepted, Context context) {
-        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {
             notificationBody.put("type", "pair|accept_pair");
-            notificationBody.put("device_name", Build.MANUFACTURER + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
             notificationBody.put("pair_accept", isAccepted);
-
-            notificationHead.put("to", Topic);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
 
-        NotiListenerService.sendNotification(notificationHead, "pair.func", context);
+        NotiListenerService.sendNotification(notificationBody, "pair.func", context);
         ExitActivity.exitApplication(context);
 
         if (isAccepted) {

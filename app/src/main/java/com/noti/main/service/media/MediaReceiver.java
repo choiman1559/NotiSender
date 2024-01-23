@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -107,26 +106,13 @@ public class MediaReceiver {
 
         if (np.has("action")) {
             String action = np.getString("action");
-
             switch (action) {
-                case "Play":
-                    player.play();
-                    break;
-                case "Pause":
-                    player.pause();
-                    break;
-                case "PlayPause":
-                    player.playPause();
-                    break;
-                case "Next":
-                    player.next();
-                    break;
-                case "Previous":
-                    player.previous();
-                    break;
-                case "Stop":
-                    player.stop();
-                    break;
+                case "Play" -> player.play();
+                case "Pause" -> player.pause();
+                case "PlayPause" -> player.playPause();
+                case "Next" -> player.next();
+                case "Previous" -> player.previous();
+                case "Stop" -> player.stop();
             }
         }
     }
@@ -189,22 +175,17 @@ public class MediaReceiver {
             np.put("volume", player.getVolume());
             np.put("isAlbumArtSent", isNeedSendAlbumArt);
 
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_NAME = NotiListenerService.getDeviceName();
             String DEVICE_ID = NotiListenerService.getUniqueID();
-            String TOPIC = "/topics/" + prefs.getString("UID", "");
 
-            JSONObject notificationHead = new JSONObject();
+
             JSONObject notificationBody = new JSONObject();
-
             notificationBody.put("type", "media|meta_data");
             notificationBody.put("device_name", DEVICE_NAME);
             notificationBody.put("device_id", DEVICE_ID);
             notificationBody.put("media_data", np.toString());
 
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
-
-            NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
+            NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context);
             if(isNeedSendAlbumArt) {
                 lastSendAlbumArt = albumArt.hashCode();
                 if(prefs.getBoolean("UseFcmWhenSendImage", false)) {
@@ -214,18 +195,13 @@ public class MediaReceiver {
                     np = new JSONObject();
                     np.put("albumArtBytes", albumArtStream);
 
-                    notificationHead = new JSONObject();
                     notificationBody = new JSONObject();
-
                     notificationBody.put("type", "media|meta_data");
                     notificationBody.put("device_name", DEVICE_NAME);
                     notificationBody.put("device_id", DEVICE_ID);
                     notificationBody.put("media_data", np.toString());
 
-                    notificationHead.put("to", TOPIC);
-                    notificationHead.put("data", notificationBody);
-
-                    NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
+                    NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context);
                 } else {
                     StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
                     StorageReference albumArtRef = storageRef.child(prefs.getString("UID", "") + "/albumArt/" + albumArt.hashCode() + ".jpg");
@@ -240,8 +216,6 @@ public class MediaReceiver {
                         try {
                             JSONObject json = new JSONObject();
                             json.put("albumArtHash", albumArt.hashCode());
-
-                            JSONObject newNotificationHead = new JSONObject();
                             JSONObject newNotificationBody = new JSONObject();
 
                             newNotificationBody.put("type", "media|meta_data");
@@ -249,10 +223,7 @@ public class MediaReceiver {
                             newNotificationBody.put("device_id", DEVICE_ID);
                             newNotificationBody.put("media_data", json.toString());
 
-                            newNotificationHead.put("to", TOPIC);
-                            newNotificationHead.put("data", newNotificationBody);
-
-                            NotiListenerService.sendNotification(newNotificationHead, context.getPackageName(), context);
+                            NotiListenerService.sendNotification(newNotificationBody, context.getPackageName(), context);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

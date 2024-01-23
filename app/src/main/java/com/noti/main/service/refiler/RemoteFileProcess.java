@@ -2,7 +2,6 @@ package com.noti.main.service.refiler;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -159,105 +158,83 @@ public class RemoteFileProcess {
     }
 
     public static void pushRequestQuery(Context context, String device_name, String device_id) {
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        String TOPIC = "/topics/" + prefs.getString("UID","");
-
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
         try {
+            JSONObject notificationBody = new JSONObject();
             notificationBody.put("type","pair|remote_file");
             notificationBody.put(ReFileConst.TASK_TYPE, ReFileConst.TYPE_REQUEST_QUERY);
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", device_name);
             notificationBody.put("send_device_id", device_id);
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
+
+            if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
+            NotiListenerService.sendNotification(notificationBody, "com.noti.main", context);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
-        NotiListenerService.sendNotification(notificationHead, "com.noti.main", context);
     }
 
     public static void pushResponseQuery(Context context, String device_name, String device_id, boolean isSuccess, @Nullable String errorCause) {
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        String TOPIC = "/topics/" + prefs.getString("UID","");
-
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
         try {
+            JSONObject notificationBody = new JSONObject();
             notificationBody.put("type","pair|remote_file");
             notificationBody.put(ReFileConst.TASK_TYPE, ReFileConst.TYPE_RESPONSE_QUERY);
             notificationBody.put(ReFileConst.DATA_RESULTS, Boolean.toString(isSuccess));
             if(errorCause != null) notificationBody.put(ReFileConst.DATA_ERROR_CAUSE, errorCause);
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", device_name);
             notificationBody.put("send_device_id", device_id);
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
+
+            if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
+            NotiListenerService.sendNotification(notificationBody, "com.noti.main", context);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
-        NotiListenerService.sendNotification(notificationHead, "com.noti.main", context);
     }
 
     public static void pushRequestFile(Context context, String device_name, String device_id, String path) {
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        String TOPIC = "/topics/" + prefs.getString("UID","");
-
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
         try {
+            JSONObject notificationBody = new JSONObject();
             notificationBody.put("type","pair|remote_file");
             notificationBody.put(ReFileConst.TASK_TYPE, ReFileConst.TYPE_REQUEST_SEND);
             notificationBody.put(ReFileConst.DATA_PATH, path);
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", device_name);
             notificationBody.put("send_device_id", device_id);
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
+
+            if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
+            NotiListenerService.sendNotification(notificationBody, "com.noti.main", context);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
-        NotiListenerService.sendNotification(notificationHead, "com.noti.main", context);
     }
 
     public static void pushResponseFile(Context context, String device_name, String device_id, boolean isSuccess, String fileName) {
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        String TOPIC = "/topics/" + prefs.getString("UID","");
-
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
         try {
+            JSONObject notificationBody = new JSONObject();
             notificationBody.put("type","pair|remote_file");
             notificationBody.put(ReFileConst.TASK_TYPE, ReFileConst.TYPE_RESPONSE_SEND);
             notificationBody.put(ReFileConst.DATA_PATH, fileName);
             notificationBody.put(ReFileConst.DATA_RESULTS, Boolean.toString(isSuccess));
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", device_name);
             notificationBody.put("send_device_id", device_id);
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
+
+            if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
+            NotiListenerService.sendNotification(notificationBody, "com.noti.main", context);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
-        NotiListenerService.sendNotification(notificationHead, "com.noti.main", context);
     }
 
     public static void pushFileMetadata(Context context, String device_name, String device_id, String fileName, boolean isResponding, @Nullable JSONObject data) {
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        String TOPIC = "/topics/" + prefs.getString("UID","");
-
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
         try {
+            JSONObject notificationBody = new JSONObject();
             notificationBody.put("type","pair|remote_file");
             notificationBody.put(ReFileConst.TASK_TYPE, isResponding ? ReFileConst.TYPE_RESPONSE_METADATA : ReFileConst.TYPE_REQUEST_METADATA);
             notificationBody.put(ReFileConst.DATA_PATH, fileName);
@@ -265,17 +242,15 @@ public class RemoteFileProcess {
                 notificationBody.put(ReFileConst.DATA_RESULTS, data);
             }
 
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", device_name);
             notificationBody.put("send_device_id", device_id);
 
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
+            if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
+            NotiListenerService.sendNotification(notificationBody, "com.noti.main", context);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
-        NotiListenerService.sendNotification(notificationHead, "com.noti.main", context);
     }
 }

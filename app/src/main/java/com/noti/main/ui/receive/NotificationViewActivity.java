@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -86,26 +85,22 @@ public class NotificationViewActivity extends Activity {
         SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE);
         boolean isDismiss = prefs.getBoolean("RemoteDismiss", false);
         if(!(isDismiss || isNeedToStartRemotely)) return;
-
-        String TOPIC = "/topics/" + prefs.getString("UID","");
-
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             if(Package != null) notificationBody.put("package", Package);
             if(isDismiss) notificationBody.put("notification_key", KEY);
 
             notificationBody.put("type","reception|normal");
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("send_device_name", DEVICE_NAME);
             notificationBody.put("send_device_id", DEVICE_ID);
             notificationBody.put("start_remote_activity", isNeedToStartRemotely ? "true" : "false");
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        if(BuildConfig.DEBUG) Log.d("data-receive", notificationHead.toString());
-        NotiListenerService.sendNotification(notificationHead, Package, context);
+
+        if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
+        NotiListenerService.sendNotification(notificationBody, Package, context);
     }
 }

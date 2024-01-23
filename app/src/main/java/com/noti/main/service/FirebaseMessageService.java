@@ -261,7 +261,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         case "send|telecom" -> sendTelecomNotification(map);
                     }
                 } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
-                    if ((Build.MANUFACTURER + " " + Build.MODEL).equals(map.get("send_device_name")) && getUniqueID().equals(map.get("send_device_id"))) {
+                    if ((NotiListenerService.getDeviceName()).equals(map.get("send_device_name")) && getUniqueID().equals(map.get("send_device_id"))) {
                         if (type.equals("reception|normal")) {
                             startNewRemoteActivity(map);
                         } else if (type.equals("reception|sms")) {
@@ -473,7 +473,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             Device_name = map.get("send_device_name");
         }
 
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
 
         return DEVICE_NAME.equals(Device_name) && DEVICE_ID.equals(Device_id);
@@ -483,7 +483,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String Device_name = map.get("send_device_name");
         String Device_id = map.get("send_device_id");
 
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
 
         return DEVICE_NAME.equals(Device_name) && DEVICE_ID.equals(Device_id);

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,8 +22,9 @@ import androidx.appcompat.content.res.AppCompatResources;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.noti.main.Application;
+
 import com.noti.main.R;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
@@ -112,26 +112,21 @@ public class PairDetailActivity extends AppCompatActivity {
         });
 
         forgetButton.setOnClickListener(v -> {
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_NAME = NotiListenerService.getDeviceName();
             String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-            JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();
+
             try {
                 notificationBody.put("type", "pair|request_remove");
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
                 notificationBody.put("send_device_name", Device_name);
                 notificationBody.put("send_device_id", Device_id);
-
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notificationBody);
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage());
             }
 
-            sendNotification(notificationHead, getPackageName(), this);
+            sendNotification(notificationBody, getPackageName(), this);
             Set<String> list = new HashSet<>(prefs.getStringSet("paired_list", new HashSet<>()));
             if (Device_type == null) list.remove(Device_name + "|" + Device_id);
             else list.remove(Device_name + "|" + Device_id + "|" + Device_type);

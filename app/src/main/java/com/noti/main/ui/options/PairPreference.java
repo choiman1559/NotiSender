@@ -8,7 +8,6 @@ import static com.noti.main.service.NotiListenerService.sendNotification;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -29,6 +28,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
@@ -102,24 +102,20 @@ public class PairPreference extends PreferenceFragmentCompat  {
                 dialog.setNegativeButton("Cancel", (d, w) -> {
                 });
                 dialog.setPositiveButton("Reset", (d, w) -> {
-                    String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+                    String DEVICE_NAME = NotiListenerService.getDeviceName();
                     String DEVICE_ID = getUniqueID();
-                    String TOPIC = "/topics/" + mContext.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
 
-                    JSONObject notificationHead = new JSONObject();
-                    JSONObject notificationBody = new JSONObject();
                     try {
+                        JSONObject notificationBody = new JSONObject();
                         notificationBody.put("type", "pair|request_remove_all");
                         notificationBody.put("device_name", DEVICE_NAME);
                         notificationBody.put("device_id", DEVICE_ID);
 
-                        notificationHead.put("to", TOPIC);
-                        notificationHead.put("data", notificationBody);
+                        sendNotification(notificationBody, mContext.getPackageName(), mContext);
                     } catch (JSONException e) {
                         Log.e("Noti", "onCreate: " + e.getMessage());
                     }
 
-                    sendNotification(notificationHead, mContext.getPackageName(), mContext);
                     mContext.getSharedPreferences("com.noti.main_pair", MODE_PRIVATE).edit().remove("paired_list").apply();
                     mContext.finish();
                 });

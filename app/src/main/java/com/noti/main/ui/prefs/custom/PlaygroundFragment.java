@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.plugin.data.NotificationData;
 
@@ -78,7 +78,7 @@ public class PlaygroundFragment extends Fragment {
             contentValue.setText(prefs.getString("DefaultMessage", "notification arrived."));
             packageNameValue.setText(mContext.getPackageName());
             appNameValue.setText("Noti Sender");
-            deviceNameValue.setText(Build.MANUFACTURER + " " + Build.MODEL);
+            deviceNameValue.setText(NotiListenerService.getDeviceName());
             dateValue.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date().getTime()));
         });
 

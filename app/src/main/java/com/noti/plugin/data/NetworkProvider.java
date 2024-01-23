@@ -1,15 +1,14 @@
 package com.noti.plugin.data;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.noti.main.service.NotiListenerService.getUniqueID;
 import static com.noti.main.service.NotiListenerService.sendNotification;
 
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
-import com.noti.main.Application;
+
+import com.noti.main.service.NotiListenerService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,25 +58,20 @@ public class NetworkProvider {
         if(onNetworkProviderListener != null) {
             onNetworkProviderListener.onMessageReceived(remoteMessage);
         } else {
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_NAME = NotiListenerService.getDeviceName();
             String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID", "");
-
-            JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();
+
             try {
                 notificationBody.put("type", "send|startup");
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
-
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notificationBody);
             } catch (JSONException e) {
                 Log.e("Noti", "onCreate: " + e.getMessage());
             }
 
             addOnFCMIgnitionCompleteListener(() -> onNetworkProviderListener.onMessageReceived(remoteMessage));
-            sendNotification(notificationHead, context.getPackageName(), context, true);
+            sendNotification(notificationBody, context.getPackageName(), context, true);
         }
     }
 }

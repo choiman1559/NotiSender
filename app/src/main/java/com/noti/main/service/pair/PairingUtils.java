@@ -38,42 +38,35 @@ public class PairingUtils {
 
     public static void requestDeviceListWidely(Context context) {
         Application.isFindingDeviceToPair = true;
-        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID","");
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             notificationBody.put("type","pair|request_device_list");
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
-
-            notificationHead.put("to",Topic);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        NotiListenerService.sendNotification(notificationHead, "pair.func", context);
+
+        NotiListenerService.sendNotification(notificationBody, "pair.func", context);
         if(isShowDebugLog(context)) Log.d("sync sent","request list: " + notificationBody);
     }
 
     public static void responseDeviceInfoToFinder(Map<String, String> map, Context context) {
-        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID","");
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
         try {
+            JSONObject notificationBody = new JSONObject();
             notificationBody.put("type","pair|response_device_list");
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", map.get("device_name"));
             notificationBody.put("send_device_id", map.get("device_id"));
 
-            notificationHead.put("to",Topic);
-            notificationHead.put("data", notificationBody);
+            NotiListenerService.sendNotification(notificationBody, "pair.func", context);
+            if(isShowDebugLog(context)) Log.d("sync sent","response list: " + notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        NotiListenerService.sendNotification(notificationHead, "pair.func", context);
-        if(isShowDebugLog(context)) Log.d("sync sent","response list: " + notificationBody);
     }
 
     public static void onReceiveDeviceInfo(Map<String, String> map) {
@@ -81,24 +74,20 @@ public class PairingUtils {
     }
 
     public static void requestPair(String Device_name, String Device_id, Context context) {
-        String Topic = "/topics/" + context.getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE).getString("UID","");
-        JSONObject notificationHead = new JSONObject();
-        JSONObject notificationBody = new JSONObject();
         try {
+            JSONObject notificationBody = new JSONObject();
             notificationBody.put("type","pair|request_pair");
-            notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("device_type", Application.thisDeviceType.getDeviceType());
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
 
-            notificationHead.put("to",Topic);
-            notificationHead.put("data", notificationBody);
+            NotiListenerService.sendNotification(notificationBody, "pair.func", context);
+            if(isShowDebugLog(context)) Log.d("sync sent","request pair: " + notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
-        NotiListenerService.sendNotification(notificationHead, "pair.func", context);
-        if(isShowDebugLog(context)) Log.d("sync sent","request pair: " + notificationBody);
     }
 
     public static void showPairChoiceAction(Map<String, String> map, Context context) {

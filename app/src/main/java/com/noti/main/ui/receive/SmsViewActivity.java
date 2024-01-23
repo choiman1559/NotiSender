@@ -3,7 +3,6 @@ package com.noti.main.ui.receive;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.button.MaterialButton;
-import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
 
@@ -29,7 +27,6 @@ public class SmsViewActivity extends Activity {
         setFinishOnTouchOutside(false);
         Intent i = getIntent();
 
-        String Topic = "/topics/" + getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE).getString("UID","");
         String address = i.getStringExtra("address");
         String nickname = i.getStringExtra("nickname");
         String message = i.getStringExtra("message");
@@ -55,21 +52,20 @@ public class SmsViewActivity extends Activity {
             String msg = Content.getText().toString();
             if(msg.equals("")) Content.setError("Please type message");
             else {
-                JSONObject notificationHead = new JSONObject();
                 JSONObject notificationBody = new JSONObject();
+
                 try {
                     notificationBody.put("type","reception|sms");
                     notificationBody.put("message",msg);
                     notificationBody.put("address",address);
-                    notificationBody.put("device_name", Build.MANUFACTURER  + " " + Build.MODEL);
+                    notificationBody.put("device_name", NotiListenerService.getDeviceName());
                     notificationBody.put("send_device_name",Device_name);
                     notificationBody.put("send_device_id",i.getStringExtra("device_id"));
-                    notificationHead.put("to",Topic);
-                    notificationHead.put("data", notificationBody);
                 } catch (JSONException e) {
                     Log.e("Noti", "onCreate: " + e.getMessage() );
                 }
-                NotiListenerService.sendNotification(notificationHead, Package, this);
+
+                NotiListenerService.sendNotification(notificationBody, Package, this);
                 ExitActivity.exitApplication(this);
             }
         });

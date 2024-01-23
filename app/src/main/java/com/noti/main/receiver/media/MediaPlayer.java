@@ -3,7 +3,6 @@ package com.noti.main.receiver.media;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.os.Build;
 
 import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
@@ -11,6 +10,7 @@ import com.noti.main.service.NotiListenerService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@SuppressWarnings("unused")
 public class MediaPlayer {
     Context context;
     SharedPreferences prefs;
@@ -218,11 +218,9 @@ public class MediaPlayer {
 
     void sendCommand(JSONObject object) {
         if(prefs.getBoolean("serviceToggle", false)) {
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_NAME = NotiListenerService.getDeviceName();
             String DEVICE_ID = NotiListenerService.getUniqueID();
-            String TOPIC = NotiListenerService.getTopic();
 
-            JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();
             try {
                 notificationBody.put("type", "media|action");
@@ -231,14 +229,11 @@ public class MediaPlayer {
                 notificationBody.put("send_device_name", device_name);
                 notificationBody.put("send_device_id", device_id);
                 notificationBody.put("media_data", object);
-
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notificationBody);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            NotiListenerService.sendNotification(notificationHead, context.getPackageName(), context);
+            NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context);
         }
     }
 }

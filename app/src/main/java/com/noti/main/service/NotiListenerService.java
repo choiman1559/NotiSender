@@ -22,8 +22,11 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.noti.main.Application;
@@ -42,6 +45,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,11 +82,6 @@ public class NotiListenerService extends NotificationListenerService {
 
     public static SharedPreferences getPrefs() {
         return getInstance().prefs;
-    }
-
-    public static String getTopic() {
-        SharedPreferences prefs = getPrefs();
-        return prefs == null ? "" : "/topics/" + prefs.getString("UID", "");
     }
 
     public NotiListenerService() {
@@ -138,6 +137,10 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
+    public static String getDeviceName() {
+        return String.format("%s %s", Build.MANUFACTURER, Build.MODEL);
+    }
+
     @SuppressLint("HardwareIds")
     public static String getUniqueID() {
         SharedPreferences prefs = getPrefs();
@@ -153,6 +156,10 @@ public class NotiListenerService extends NotificationListenerService {
             return str;
         }
         return "";
+    }
+
+    private static String getNonNullString(@Nullable String value) {
+        return value == null ? "" : value;
     }
 
     private void QueryGC() {
@@ -247,9 +254,9 @@ public class NotiListenerService extends NotificationListenerService {
             if (!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
                 String mode = prefs.getString("service", "reception");
                 if (mode.equals("send") || mode.equals("hybrid")) {
-                    String TITLE = extra.getString(Notification.EXTRA_TITLE) + "";
-                    String TEXT = extra.getString(Notification.EXTRA_TEXT) + "";
-                    String TEXT_LINES = extra.getString(Notification.EXTRA_TEXT_LINES) + "";
+                    String TITLE = getNonNullString(extra.getString(Notification.EXTRA_TITLE));
+                    String TEXT = getNonNullString(extra.getString(Notification.EXTRA_TEXT));
+                    String TEXT_LINES = getNonNullString(extra.getString(Notification.EXTRA_TEXT_LINES));
                     if (!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
                     String PackageName = sbn.getPackageName();
 
@@ -326,11 +333,9 @@ public class NotiListenerService extends NotificationListenerService {
         String PackageName = getSystemDialerApp(context);
 
         if (isTelecomIntervalGaped(address, time)) {
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_NAME = NotiListenerService.getDeviceName();
             String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + prefs.getString("UID", "");
 
-            JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();
             try {
                 notificationBody.put("type", "send|telecom");
@@ -340,24 +345,19 @@ public class NotiListenerService extends NotificationListenerService {
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
                 notificationBody.put("date", date);
-
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notificationBody);
             } catch (JSONException e) {
                 if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
             }
-            if (isLogging) Log.d("data", notificationHead.toString());
-            sendNotification(notificationHead, PackageName, context);
+            if (isLogging) Log.d("data", notificationBody.toString());
+            sendNotification(notificationBody, PackageName, context);
         }
     }
 
     public void sendSmsNotification(Context context, Boolean isLogging, String PackageName, String address, String nickname, String message, Date time) {
         if (isSmsIntervalGaped(context, address, message, time)) {
-            String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+            String DEVICE_NAME = NotiListenerService.getDeviceName();
             String DEVICE_ID = getUniqueID();
-            String TOPIC = "/topics/" + prefs.getString("UID", "");
 
-            JSONObject notificationHead = new JSONObject();
             JSONObject notificationBody = new JSONObject();
             try {
                 notificationBody.put("type", "send|sms");
@@ -367,14 +367,11 @@ public class NotiListenerService extends NotificationListenerService {
                 notificationBody.put("device_name", DEVICE_NAME);
                 notificationBody.put("device_id", DEVICE_ID);
                 notificationBody.put("date", Application.getDateString());
-
-                notificationHead.put("to", TOPIC);
-                notificationHead.put("data", notificationBody);
             } catch (JSONException e) {
                 if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
             }
-            if (isLogging) Log.d("data", notificationHead.toString());
-            sendNotification(notificationHead, PackageName, context);
+            if (isLogging) Log.d("data", notificationBody.toString());
+            sendNotification(notificationBody, PackageName, context);
         }
     }
 
@@ -423,10 +420,10 @@ public class NotiListenerService extends NotificationListenerService {
             ICONS = (res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))));
         } else ICONS = "none";
 
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
-        String TOPIC = "/topics/" + prefs.getString("UID", "");
         String APPNAME = null;
+
         try {
             APPNAME = String.valueOf(pm.getApplicationLabel(pm.getApplicationInfo(PackageName, PackageManager.GET_META_DATA)));
         } catch (PackageManager.NameNotFoundException e) {
@@ -434,9 +431,8 @@ public class NotiListenerService extends NotificationListenerService {
         }
 
         if (isLogging) Log.d("length", String.valueOf(ICONS.length()));
-
-        JSONObject notificationHead = new JSONObject();
         JSONObject notificationBody = new JSONObject();
+
         try {
             notificationBody.put("type", "send|normal");
             notificationBody.put("title", TITLE == null || TITLE.equals("null") ? prefs.getString("DefaultTitle", "New notification") : TITLE);
@@ -453,14 +449,11 @@ public class NotiListenerService extends NotificationListenerService {
             if (notificationBody.toString().length() >= dataLimit - 20 && !prefs.getBoolean("UseSplitData", false)) {
                 notificationBody.put("icon", "none");
             }
-
-            notificationHead.put("to", TOPIC);
-            notificationHead.put("data", notificationBody);
         } catch (JSONException e) {
             if (isLogging) Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        if (isLogging) Log.d("data", notificationHead.toString());
-        sendNotification(notificationHead, PackageName, this);
+        if (isLogging) Log.d("data", notificationBody.toString());
+        sendNotification(notificationBody, PackageName, this);
     }
 
     private boolean isBannedWords(String TEXT, String TITLE) {
@@ -599,8 +592,12 @@ public class NotiListenerService extends NotificationListenerService {
         manager.acquire();
 
         try {
-            notification.put("android", new JSONObject().put("priority", "high"));
-            notification.put("priority", 10);
+            JSONObject serializationJson = new JSONObject();
+            for (Iterator<String> it = notification.keys(); it.hasNext(); ) {
+                String key = it.next();
+                serializationJson.put(key, notification.get(key).toString());
+            }
+            notification = serializationJson;
 
             boolean useSplit = prefs.getBoolean("UseSplitData", false) && notification.getString("data").length() > 3072;
             boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
@@ -608,9 +605,9 @@ public class NotiListenerService extends NotificationListenerService {
             int splitInterval = prefs.getInt("SplitInterval", 500);
 
             if (useSplit && !useFCMOnly) {
-                if(useEncryption && splitAfterEncryption) encryptData(notification);
+                if(useEncryption && splitAfterEncryption) notification = encryptData(notification);
                 for (JSONObject object : splitData(notification)) {
-                    if(useEncryption && !splitAfterEncryption) encryptData(object);
+                    if(useEncryption && !splitAfterEncryption) object = encryptData(object);
                     finalProcessData(object, PackageName, context, false);
                     if (splitInterval > 0) {
                         Thread.sleep(splitInterval);
@@ -618,7 +615,7 @@ public class NotiListenerService extends NotificationListenerService {
                 }
                 return;
             } else if (useEncryption) {
-                encryptData(notification);
+                notification = encryptData(notification);
             }
 
             finalProcessData(notification, PackageName, context, useFCMOnly);
@@ -631,13 +628,11 @@ public class NotiListenerService extends NotificationListenerService {
        sendNotification(notification, PackageName, context, false);
     }
 
-    protected static JSONObject[] splitData(JSONObject notification) throws JSONException {
-        String rawData = notification.getString("data");
-
+    protected static JSONObject[] splitData(JSONObject rawData) throws JSONException {
         int size = 1024;
         List<String> arr = new ArrayList<>((rawData.length() + size - 1) / size);
         for (int start = 0; start < rawData.length(); start += size) {
-            arr.add(rawData.substring(start, Math.min(rawData.length(), start + size)));
+            arr.add(rawData.toString().substring(start, Math.min(rawData.length(), start + size)));
         }
 
         JSONObject[] data = new JSONObject[arr.size()];
@@ -648,18 +643,17 @@ public class NotiListenerService extends NotificationListenerService {
             obj.put("split_index", i + "/" + arr.size());
             obj.put("split_unique", Integer.toString(rawData.hashCode()));
             obj.put("split_data", str);
-            obj.put("device_name", Build.MANUFACTURER + " " + Build.MODEL);
+            obj.put("device_name", NotiListenerService.getDeviceName());
             obj.put("device_id", getUniqueID());
             Log.d("unique_id", "id: " + rawData.hashCode());
-            data[i] = new JSONObject(notification.put("data", obj).toString());
+            data[i] = obj;
         }
+
         return data;
     }
 
-    protected static void encryptData(JSONObject notification) throws Exception {
+    protected static JSONObject encryptData(JSONObject data) throws Exception {
         SharedPreferences prefs = getPrefs();
-        JSONObject data = notification.getJSONObject("data");
-
         String rawPassword = prefs.getString("EncryptionPassword", "");
         boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
         boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
@@ -670,7 +664,7 @@ public class NotiListenerService extends NotificationListenerService {
             default -> true;
         };
 
-        String DEVICE_NAME = Build.MANUFACTURER + " " + Build.MODEL;
+        String DEVICE_NAME = NotiListenerService.getDeviceName();
         String DEVICE_ID = getUniqueID();
         String HmacToken = HMACCrypto.generateTokenIdentifier(DEVICE_NAME, DEVICE_ID);
 
@@ -684,7 +678,7 @@ public class NotiListenerService extends NotificationListenerService {
                 newData.put("encrypted", "true");
                 newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
                 newData.put("HmacID", useHmacAuth ? HmacToken : "none");
-                notification.put("data", newData);
+                data = newData;
             }
         } else {
             if (useHmacAuth) {
@@ -693,33 +687,37 @@ public class NotiListenerService extends NotificationListenerService {
                 newData.put("encrypted", "false");
                 newData.put("encryptedData", CompressStringUtil.compressString(encryptedData));
                 newData.put("HmacID", HmacToken);
-                notification.put("data", newData);
+                data = newData;
             } else {
                 data.put("encrypted", "false");
                 data.put("HmacID", "none");
-                notification.put("data", data);
             }
         }
+
+        return data;
     }
 
     protected static void finalProcessData(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) throws JSONException {
         SharedPreferences prefs = getPrefs();
-        JSONObject data = notification.getJSONObject("data");
-        data.put("topic", prefs.getString("UID", ""));
-        notification.put("data", data);
+        //notification.put("topic", prefs.getString("UID", ""));
 
-        if(data.has("encryptedData")) {
-            int uniqueId = data.getString("encryptedData").hashCode();
+        if(notification.has("encryptedData")) {
+            int uniqueId = notification.getString("encryptedData").hashCode();
             FirebaseMessageService.selfReceiveDetectorList.add(uniqueId);
         }
+
+        JSONObject finalObject = new JSONObject();
+        finalObject.put("android", new JSONObject().put("priority", "high"));
+        finalObject.put("data", notification);
+        finalObject.put("topic", prefs.getString("UID", ""));
 
         String networkProvider = useFCMOnly ? "Firebase Cloud Message" : prefs.getString("server", "Firebase Cloud Message");
         switch (networkProvider) {
             case "Firebase Cloud Message" ->
-                    sendFCMNotification(notification, PackageName, context);
+                    sendFCMNotificationWrapper(finalObject, PackageName, context);
             case "Pushy" -> {
                 if (!prefs.getString("ApiKey_Pushy", "").equals(""))
-                    sendPushyNotification(notification, PackageName, context);
+                    sendPushyNotification(finalObject, PackageName, context);
             }
             default -> {
                 boolean isAppInstalled;
@@ -735,10 +733,10 @@ public class NotiListenerService extends NotificationListenerService {
                 if(isAppInstalled) {
                     Bundle extras = new Bundle();
                     extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.NET_PROVIDER_POST);
-                    extras.putSerializable(PluginConst.NET_PROVIDER_DATA, notification.toString());
+                    extras.putSerializable(PluginConst.NET_PROVIDER_DATA, finalObject.toString());
                     PluginActions.sendBroadcast(context, networkProvider, extras);
                 } else {
-                    sendFCMNotification(notification, PackageName, context);
+                    sendFCMNotificationWrapper(finalObject, PackageName, context);
                 }
             }
         }
@@ -746,23 +744,34 @@ public class NotiListenerService extends NotificationListenerService {
         System.gc();
     }
 
-    private static void sendFCMNotification(JSONObject notification, String PackageName, Context context) {
-        SharedPreferences prefs = getPrefs();
-        PowerUtils manager = getInstance().manager;
+    private static void sendFCMNotificationWrapper(JSONObject notification, String PackageName, Context context) {
+        new Thread(() -> {
+            try {
+                sendFCMNotification(notification, PackageName, context);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
 
-        final String FCM_API = "https://fcm.googleapis.com/fcm/send";
-        final String serverKey = "key=" + prefs.getString("ApiKey_FCM", "");
-        final String contentType = "application/json";
+    private static void sendFCMNotification(JSONObject notification, String PackageName, Context context) throws JSONException {
+        PowerUtils manager = getInstance().manager;
+        JSONObject objToSend = new JSONObject();
+        objToSend.put("message", notification);
+
+        final String FCM_API = "https://fcm.googleapis.com/v1/projects/notisender-41c1b/messages:send";
+        final String serverKey = "Bearer " + getGoogleOAuthAccessToken(context);
+        final String contentType =  "application/json; UTF-8";
         final String TAG = "NOTIFICATION TAG";
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, FCM_API, notification,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, FCM_API, objToSend,
                 response -> {
                     Log.i(TAG, "onResponse: " + response.toString() + " ,package: " + PackageName);
                     manager.release();
                 },
                 error -> {
                     Toast.makeText(context, "Failed to send Notification! Please check internet and try again!", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "onErrorResponse: Didn't work" + " ,package: " + PackageName);
+                    Log.e(TAG, "onErrorResponse: Didn't work, message: " + error.toString() + " ,package: " + PackageName);
                     manager.release();
                 }) {
             @Override
@@ -773,7 +782,22 @@ public class NotiListenerService extends NotificationListenerService {
                 return params;
             }
         };
+
+        Log.d("ddd", String.valueOf(objToSend));
         JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
+    }
+
+    private static String getGoogleOAuthAccessToken(Context context) {
+        try {
+            GoogleCredentials googleCredentials = GoogleCredentials
+                    .fromStream(context.getAssets().open("service-account.json"))
+                    .createScoped(List.of("https://www.googleapis.com/auth/firebase.messaging"));
+            googleCredentials.refreshIfExpired();
+            return googleCredentials.getAccessToken().getTokenValue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     private static void sendPushyNotification(JSONObject notification, String PackageName, Context context) {
