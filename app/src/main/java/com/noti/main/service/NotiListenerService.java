@@ -699,7 +699,7 @@ public class NotiListenerService extends NotificationListenerService {
 
     protected static void finalProcessData(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) throws JSONException {
         SharedPreferences prefs = getPrefs();
-        //notification.put("topic", prefs.getString("UID", ""));
+        notification.put("topic", prefs.getString("UID", ""));
 
         if(notification.has("encryptedData")) {
             int uniqueId = notification.getString("encryptedData").hashCode();
