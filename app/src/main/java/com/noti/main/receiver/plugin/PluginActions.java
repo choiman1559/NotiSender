@@ -74,7 +74,7 @@ public class PluginActions {
             return;
         }
 
-        if (keyToFind.startsWith("com.noti.main_preferences")) {
+        if (keyToFind.startsWith(Application.PREFS_NAME)) {
             PluginActions.pushException(context, packageName, new Exception("Preference not allowed due to data security reason: " + keyToFind));
             return;
         }
@@ -91,7 +91,7 @@ public class PluginActions {
         try {
             data = prefs.getString(keyToFind, "");
         } catch (ClassCastException e) {
-            data = prefs.getBoolean(keyToFind, false) + "";
+            data = String.valueOf(prefs.getBoolean(keyToFind, false));
         }
 
         Bundle extras = new Bundle();
@@ -115,14 +115,14 @@ public class PluginActions {
 
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_SERVICE_STATUS);
-        extras.putString(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, isRunning + "");
+        extras.putString(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, String.valueOf(isRunning));
         sendBroadcast(context, packageName, extras);
     }
 
     public static void responsePluginToggle(Context context, String packageName, boolean isEnabled) {
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_PLUGIN_TOGGLE);
-        extras.putString(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, isEnabled + "");
+        extras.putString(PluginConst.DATA_KEY_IS_SERVICE_RUNNING, String.valueOf(isEnabled));
         sendBroadcast(context, packageName, extras);
     }
 

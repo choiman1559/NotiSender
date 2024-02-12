@@ -783,7 +783,7 @@ public class NotiListenerService extends NotificationListenerService {
             }
         };
 
-        Log.d("ddd", String.valueOf(objToSend));
+        if(BuildConfig.DEBUG) Log.d("DATA_TO_POST", String.valueOf(objToSend));
         JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
     }
 

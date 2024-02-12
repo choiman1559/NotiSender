@@ -98,7 +98,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     public static HashMap<String, MediaSession> playingSessionMap;
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
     public static final ArrayList<Integer> selfReceiveDetectorList = new ArrayList<>();
-    private final NetworkProvider.onProviderMessageListener onProviderMessageListener = this::onMessageReceived;
+
+    private final NetworkProvider.onProviderMessageListener onProviderMessageListener = (message) -> {
+        if(message != null) {
+            this.onMessageReceived(message);
+        }
+    };
     public static final Thread ringtonePlayedThread = new Thread(() -> {
         while (true) {
             if (lastPlayedRingtone != null && !lastPlayedRingtone.isPlaying())

@@ -207,6 +207,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".receiver.BootCompleteReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
         <receiver android:name=".service.BitmapIPCManager$BitmapDismissBroadcastListener" android:exported="false"/>
 
         <receiver android:name=".receiver.FindDeviceCancelReceiver" />

@@ -6,6 +6,8 @@ import static com.noti.main.service.NotiListenerService.sendNotification;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.messaging.RemoteMessage;
 
 import com.noti.main.service.NotiListenerService;
@@ -21,7 +23,7 @@ public class NetworkProvider {
     public static ArrayList<onFCMIgnitionCompleteListener> onFCMIgnitionCompleteListenerList;
 
     public interface onProviderMessageListener {
-        void onMessageReceived(RemoteMessage message);
+        void onMessageReceived(@Nullable RemoteMessage message);
     }
 
     public interface onFCMIgnitionCompleteListener {
@@ -54,7 +56,7 @@ public class NetworkProvider {
         processReception(context, remoteMessage);
     }
 
-    public static void processReception (Context context, RemoteMessage remoteMessage) {
+    public static void processReception (Context context, @Nullable RemoteMessage remoteMessage) {
         if(onNetworkProviderListener != null) {
             onNetworkProviderListener.onMessageReceived(remoteMessage);
         } else {

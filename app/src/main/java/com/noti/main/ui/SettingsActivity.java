@@ -58,6 +58,7 @@ import me.pushy.sdk.Pushy;
 
 public class SettingsActivity extends MonetCompatActivity {
 
+    @SuppressLint("StaticFieldLeak")
     public static BillingHelper mBillingHelper;
     public static MonetSwitch ServiceToggle;
 
@@ -111,7 +112,7 @@ public class SettingsActivity extends MonetCompatActivity {
         setContentView(R.layout.activity_main);
 
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG);
-        prefs = getSharedPreferences("com.noti.main_preferences", MODE_PRIVATE);
+        prefs = getSharedPreferences(Application.PREFS_NAME, MODE_PRIVATE);
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
         getAPIKeyFromCloud(this);
 
@@ -153,40 +154,16 @@ public class SettingsActivity extends MonetCompatActivity {
 
             MaterialCardView lastSelectedCardView;
             if (getLastSelectedItem() != null) {
-                switch (getLastSelectedItem()) {
-                    case "PairMain":
-                        lastSelectedCardView = PairPreferences;
-                        break;
-
-                    case "Send":
-                        lastSelectedCardView = SendPreferences;
-                        break;
-
-                    case "Reception":
-                        lastSelectedCardView = ReceptionPreferences;
-                        break;
-
-                    case "Other":
-                        lastSelectedCardView = OtherPreferences;
-                        break;
-
-                    case "Customize":
-                        lastSelectedCardView = CustomizePreferences;
-                        break;
-
-                    case "History":
-                        lastSelectedCardView = HistoryPreferences;
-                        break;
-
-                    case "About":
-                        lastSelectedCardView = InfoPreferences;
-                        break;
-
-                    case "Account":
-                    default:
-                        lastSelectedCardView = AccountPreferences;
-                        break;
-                }
+                lastSelectedCardView = switch (getLastSelectedItem()) {
+                    case "PairMain" -> PairPreferences;
+                    case "Send" -> SendPreferences;
+                    case "Reception" -> ReceptionPreferences;
+                    case "Other" -> OtherPreferences;
+                    case "Customize" -> CustomizePreferences;
+                    case "History" -> HistoryPreferences;
+                    case "About" -> InfoPreferences;
+                    default -> AccountPreferences;
+                };
 
                 markSelectedMenu(lastSelectedCardView);
                 fragment.setType(getLastSelectedItem());
@@ -208,41 +185,17 @@ public class SettingsActivity extends MonetCompatActivity {
         @SuppressLint("NonConstantResourceId")
         View.OnClickListener onClickListener = v -> {
             if (selectedCardView == null || selectedCardView.getId() != v.getId()) {
-                String fragmentType = "";
-
-                switch (v.getId()) {
-                    case R.id.PairPreferences:
-                        fragmentType = "PairMain";
-                        break;
-
-                    case R.id.AccountPreferences:
-                        fragmentType = "Account";
-                        break;
-
-                    case R.id.SendPreferences:
-                        fragmentType = "Send";
-                        break;
-
-                    case R.id.ReceptionPreferences:
-                        fragmentType = "Reception";
-                        break;
-
-                    case R.id.OtherPreferences:
-                        fragmentType = "Other";
-                        break;
-
-                    case R.id.CustomizePreferences:
-                        fragmentType = "Customize";
-                        break;
-
-                    case R.id.HistoryPreferences:
-                        fragmentType = "History";
-                        break;
-
-                    case R.id.InfoPreferences:
-                        fragmentType = "About";
-                        break;
-                }
+                String fragmentType = switch (v.getId()) {
+                    case R.id.PairPreferences -> "PairMain";
+                    case R.id.AccountPreferences -> "Account";
+                    case R.id.SendPreferences -> "Send";
+                    case R.id.ReceptionPreferences -> "Reception";
+                    case R.id.OtherPreferences -> "Other";
+                    case R.id.CustomizePreferences -> "Customize";
+                    case R.id.HistoryPreferences -> "History";
+                    case R.id.InfoPreferences -> "About";
+                    default -> "";
+                };
 
                 if (Application.isTablet()) {
                     markSelectedMenu((MaterialCardView) v);
