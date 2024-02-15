@@ -211,7 +211,10 @@ public class PluginFragment extends Fragment {
                             builder.setNegativeButton("Cancel", (dialog, which) -> {});
                             builder.show();
                         } else {
-                            pluginPrefs.setAllowSensitiveAPI(false).apply();
+                            pluginPrefs
+                                    .setPluginEnabled(true)
+                                    .setAllowSensitiveAPI(false)
+                                    .apply();
                         }
                     } else {
                         pluginPrefs.setPluginEnabled(isChecked).apply();
