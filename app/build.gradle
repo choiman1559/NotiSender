@@ -24,8 +24,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 1012007
-        versionName "1.20.7"
+        versionCode 1012008
+        versionName "1.20.8"
 
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -39,8 +39,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
+        var testProguardMode = true
         debug {
-            minifyEnabled false
+            if (testProguardMode) {
+                shrinkResources true
+                minifyEnabled true
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            } else {
+                minifyEnabled false
+            }
         }
     }
 
