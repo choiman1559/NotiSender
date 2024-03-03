@@ -8,7 +8,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -278,7 +280,7 @@ public class PluginFragment extends Fragment {
 
     @SuppressLint("DiscouragedApi")
     void initPluginMarketItem(TrimProperties properties) {
-        if (isAppInstalled(properties.getProperty("packageName"))) return;
+        if (isAppInstalled(mContext, properties.getProperty("packageName"))) return;
         if ("false".equals(properties.getProperty("visible"))) return;
 
         CoordinatorLayout layout = (CoordinatorLayout) View.inflate(mContext, R.layout.cardview_plugin_market, null);
@@ -289,7 +291,14 @@ public class PluginFragment extends Fragment {
 
         String useFluentIcon = properties.getProperty("useFluentIcon");
         if ("true".equals(useFluentIcon)) {
-            holder.pluginIcon.setImageDrawable(AppCompatResources.getDrawable(mContext, mContext.getResources().getIdentifier(String.format("ic_fluent_%s_24_regular", properties.getProperty("iconName")), "drawable", mContext.getPackageName())));
+            try {
+                int resId = mContext.getResources().getIdentifier(String.format("ic_fluent_%s_24_regular", properties.getProperty("iconName")), "drawable", mContext.getPackageName());
+                Drawable drawable = AppCompatResources.getDrawable(mContext, resId);
+                holder.pluginIcon.setImageDrawable(drawable == null ? AppCompatResources.getDrawable(mContext, R.drawable.ic_broken_image) : drawable);
+            } catch (Resources.NotFoundException e) {
+                e.printStackTrace();
+                holder.pluginIcon.setImageDrawable(AppCompatResources.getDrawable(mContext, R.drawable.ic_broken_image));
+            }
         } else if ("false".equals(useFluentIcon)) {
             Glide.with(mContext).load(properties.getProperty("iconUrl")).into(holder.pluginIcon);
         }
@@ -413,8 +422,8 @@ public class PluginFragment extends Fragment {
         }
     }
 
-    boolean isAppInstalled(String packageName) {
-        PackageManager packageManager = mContext.getPackageManager();
+    public static boolean isAppInstalled(Context context, String packageName) {
+        PackageManager packageManager = context.getPackageManager();
         try {
             packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
             return true;

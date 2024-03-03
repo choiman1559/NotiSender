@@ -189,6 +189,8 @@ public class ReFileActivity extends AppCompatActivity {
         ReFileListeners.setOnFileQueryResponseListener((isSuccess, errorCause) -> runOnUiThread(() -> {
             if (isSuccess) {
                 loadQueryFromDB();
+            } else if (errorCause.startsWith("Plugin Not Installed")){
+                showError("Remote File Plugin is not installed on the other device!\n\nPlease install/activate the plugin and try again.");
             } else {
                 showError("An error occurred: " + errorCause);
             }

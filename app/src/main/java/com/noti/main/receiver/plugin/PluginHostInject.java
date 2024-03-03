@@ -18,6 +18,8 @@ import java.util.Calendar;
 
 public class PluginHostInject {
     public static class HostInjectAPIName {
+        public static final String PLUGIN_TELEPHONY_PACKAGE = "com.noti.plugin.telephony";
+        public static final String ACTION_REQUEST_SEND_SMS = "request_send_sms";
         public static final String ACTION_PUSH_MESSAGE_DATA = "push_message_data";
         public static final String ACTION_PUSH_CALL_DATA = "push_call_data";
 
@@ -40,7 +42,7 @@ public class PluginHostInject {
             case HostInjectAPIName.ACTION_PUSH_CALL_DATA ->
                     NotiListenerService.getInstance().sendTelecomNotification(context, BuildConfig.DEBUG, data[0], data.length > 1 ? data[1] : "");
             case HostInjectAPIName.ACTION_PUSH_MESSAGE_DATA ->
-                    NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data[1], data[2], Calendar.getInstance().getTime());
+                    NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data.length > 2 ? data[2] : "", data[1], Calendar.getInstance().getTime());
             case HostInjectAPIName.ACTION_RESPONSE_FILE_LIST ->
                     RemoteFileProcess.onFileListReceived(context, deviceInfo[0], deviceInfo[1], data[0]);
             case HostInjectAPIName.ACTION_RESPONSE_UPLOAD ->

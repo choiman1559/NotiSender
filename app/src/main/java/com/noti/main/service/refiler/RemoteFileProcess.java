@@ -16,6 +16,7 @@ import com.noti.main.BuildConfig;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginHostInject;
 import com.noti.main.service.NotiListenerService;
+import com.noti.main.ui.prefs.custom.PluginFragment;
 import com.noti.main.utils.PowerUtils;
 
 import org.json.JSONException;
@@ -41,6 +42,11 @@ public class RemoteFileProcess {
                 if (isBusy) {
                     pushResponseQuery(context, map.get("device_name"), map.get("device_id"), false, "Query process is already busy");
                 }
+
+                if(!PluginFragment.isAppInstalled(context, PluginHostInject.HostInjectAPIName.PLUGIN_FILE_LIST_PACKAGE)) {
+                    pushResponseQuery(context, map.get("device_name"), map.get("device_id"), false, "Plugin Not Installed");
+                }
+
                 isBusy = true;
 
                 SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
