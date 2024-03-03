@@ -6,6 +6,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -26,9 +28,8 @@ import com.noti.main.R;
 import com.noti.main.service.pair.DataProcess;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 public class FileTransferService {
@@ -38,6 +39,9 @@ public class FileTransferService {
     private String fileType;
     private String device_name;
     private String device_id;
+
+    private String channelName;
+    private boolean isError;
     private boolean isUri;
     private boolean isNeedToWaitUpload;
     private final boolean isDownloadTask;
@@ -54,12 +58,25 @@ public class FileTransferService {
         return this;
     }
 
-    public FileTransferService setUploadProperties(String fileName, String fileType, boolean isUri, String deviceName, String deviceId) {
+    public FileTransferService setUploadProperties(String fileName, String fileType, String deviceName, String deviceId) {
         this.fileName = fileName;
         this.fileType = fileType;
-        this.isUri = isUri;
+        this.isUri = true;
         this.device_id = deviceId;
         this.device_name = deviceName;
+        this.isError = false;
+
+        return this;
+    }
+
+    public FileTransferService setUploadProperties(String fileName, String fileType, String channelName, boolean isError, String deviceName, String deviceId) {
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.isUri = false;
+        this.device_id = deviceId;
+        this.device_name = deviceName;
+        this.isError = isError;
+        this.channelName = channelName;
 
         return this;
     }
@@ -177,8 +194,12 @@ public class FileTransferService {
                 uploadTask = fileRef.putFile(fileUri, metadata);
             } else {
                 try {
-                    uploadTask = fileRef.putStream(new FileInputStream(fileName));
-                } catch (FileNotFoundException e) {
+                    LocalSocket clientSocket = new LocalSocket();
+                    clientSocket.connect(new LocalSocketAddress(channelName));
+                    InputStream inputStream = clientSocket.getInputStream();
+                    uploadTask = fileRef.putStream(inputStream);
+                } catch (IOException e) {
+                    e.printStackTrace();
                     onFailureListener.onFailure(e);
                 }
             }
@@ -225,6 +246,8 @@ public class FileTransferService {
             } else {
                 downloadThread.start();
             }
+        } else if(isError){
+            onFailureListener.onFailure(new Exception("Upload failed"));
         } else {
             uploadThread.start();
         }

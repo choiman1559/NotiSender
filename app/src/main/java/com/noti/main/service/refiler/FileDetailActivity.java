@@ -16,7 +16,6 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.noti.main.R;
-import com.noti.main.service.refiler.db.RemoteFile;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.PrefsCard;
 import com.noti.main.utils.ui.ToastHelper;

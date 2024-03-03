@@ -43,6 +43,15 @@ public class PluginActions {
         sendBroadcast(context, packageName, extras);
     }
 
+    public static void requestHostApiInject(Context context, String device, String packageName, String type, String args) {
+        Bundle extras = new Bundle();
+        extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_REQUEST_HOST_INJECT);
+        extras.putString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME, type);
+        extras.putString(PluginConst.DATA_KEY_REMOTE_TARGET_DEVICE, device);
+        extras.putString(PluginConst.DATA_KEY_EXTRA_DATA, args);
+        sendBroadcast(context, packageName, extras);
+    }
+
     public static void responseData(Context context, String packageName, String type, String extra) {
         Bundle extras = new Bundle();
         extras.putString(PluginConst.DATA_KEY_TYPE, PluginConst.ACTION_RESPONSE_REMOTE_DATA);

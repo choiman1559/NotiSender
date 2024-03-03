@@ -27,7 +27,6 @@ import com.google.firebase.storage.StreamDownloadTask;
 
 import com.noti.main.Application;
 import com.noti.main.R;
-import com.noti.main.service.refiler.db.RemoteFile;
 
 import org.json.JSONException;
 import org.json.JSONObject;

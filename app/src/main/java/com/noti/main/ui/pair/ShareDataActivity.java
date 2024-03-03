@@ -144,7 +144,7 @@ public class ShareDataActivity extends AppCompatActivity {
 
                             String[] array = rawList.get(deviceSelection.get()).split("\\|");
                             new FileTransferService(this, false)
-                                    .setUploadProperties(dataUri.toString(), type,true, array[0], array[1])
+                                    .setUploadProperties(dataUri.toString(), type, array[0], array[1])
                                     .execute();
 
                             MaterialAlertDialogBuilder completeDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));

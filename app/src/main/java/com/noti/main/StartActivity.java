@@ -12,7 +12,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.Html;
@@ -61,7 +60,6 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_File;
     MaterialButton Permit_Location;
     MaterialButton Permit_Background_Location;
-    MaterialButton Permit_AllFiles;
     MaterialButton Permit_Alarm;
     MaterialButton Permit_Privacy;
     MaterialButton Permit_Collect_Data;
@@ -86,13 +84,6 @@ public class StartActivity extends AppCompatActivity {
         Set<String> sets = NotificationManagerCompat.getEnabledListenerPackages(this);
         if (sets.contains(getPackageName())) {
             setButtonCompleted(this, Permit_Alarm);
-            checkPermissionsAndEnableComplete();
-        }
-    });
-
-    ActivityResultLauncher<Intent> startAllFilesPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        if(Build.VERSION.SDK_INT >= 30 && Environment.isExternalStorageManager()) {
-            setButtonCompleted(this, Permit_AllFiles);
             checkPermissionsAndEnableComplete();
         }
     });
@@ -135,7 +126,6 @@ public class StartActivity extends AppCompatActivity {
         Permit_File = findViewById(R.id.Permit_File);
         Permit_Location = findViewById(R.id.Permit_Location);
         Permit_Background_Location = findViewById(R.id.Permit_Background_Location);
-        Permit_AllFiles = findViewById(R.id.Permit_AllFiles);
         Permit_Alarm = findViewById(R.id.Permit_Alarm);
         Permit_Privacy = findViewById(R.id.Permit_Privacy);
         Permit_Collect_Data = findViewById(R.id.Permit_Collect_Data);
@@ -163,11 +153,6 @@ public class StartActivity extends AppCompatActivity {
         if(Build.VERSION.SDK_INT > 28 || (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
             setButtonCompleted(this, Permit_File);
-            count++;
-        }
-
-        if (Build.VERSION.SDK_INT < 30 || Environment.isExternalStorageManager()) {
-            setButtonCompleted(this, Permit_AllFiles);
             count++;
         }
 
@@ -241,7 +226,7 @@ public class StartActivity extends AppCompatActivity {
             }
         }
 
-        if(count >= 10) {
+        if(count >= 9) {
             startActivity(new Intent(this, SettingsActivity.class));
             finish();
         }
@@ -256,13 +241,6 @@ public class StartActivity extends AppCompatActivity {
         Permit_Alarm.setOnClickListener((v) -> startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
         Permit_File.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101));
         Permit_Location.setOnClickListener((v) -> locationPermissionRequest.launch(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}));
-        Permit_AllFiles.setOnClickListener((v) -> {
-            if(Build.VERSION.SDK_INT >= 30) {
-                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-                startAllFilesPermit.launch(intent);
-            }
-        });
         Permit_Background_Location.setOnClickListener((v) -> {
             MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
             dialog.setTitle("Background Location");
@@ -367,7 +345,7 @@ public class StartActivity extends AppCompatActivity {
     }
 
     void checkPermissionsAndEnableComplete() {
-        Start_App.setEnabled(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_AllFiles.isEnabled() && !Permit_Overlay.isEnabled() && (!Permit_Alarm.isEnabled() || Skip_Alarm.isChecked()) && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled());
+        Start_App.setEnabled(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && (!Permit_Alarm.isEnabled() || Skip_Alarm.isChecked()) && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled());
     }
 
     @Override

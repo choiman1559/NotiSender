@@ -1,6 +1,4 @@
-package com.noti.main.service.refiler.db;
-
-import com.noti.main.service.refiler.ReFileConst;
+package com.noti.main.service.refiler;
 
 import org.json.JSONException;
 import org.json.JSONObject;

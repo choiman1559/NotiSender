@@ -142,20 +142,6 @@
                 android:background="@drawable/round_corner"/>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/Permit_AllFiles"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="File management permission"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:layout_marginBottom="12dp"
-                android:layout_marginHorizontal="24dp"
-                android:textColor="@color/ui_bg"
-                app:iconTint="@color/ui_bg"
-                app:icon="@drawable/ic_fluent_folder_sync_24_regular"
-                android:background="@drawable/round_corner"/>
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/Permit_Location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

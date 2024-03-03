@@ -72,11 +72,9 @@ public class PluginReceiver extends BroadcastReceiver {
                         } else
                             PluginActions.pushException(context, packageName, new IllegalAccessException("ACTION_REQUEST_PREFS requires sensitiveAPI=true" + packageName));
                     }
-                    case PluginConst.ACTION_PUSH_CALL_DATA ->
-                            NotiListenerService.getInstance().sendTelecomNotification(context, BuildConfig.DEBUG, data[0], data.length > 1 ? data[1] : "");
-                    case PluginConst.ACTION_PUSH_MESSAGE_DATA ->
-                            NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data[1], data[2], Calendar.getInstance().getTime());
-                    case PluginConst.ACTION_RESPONSE_REMOTE_DATA ->
+                    case PluginConst.ACTION_RESPONSE_HOST_INJECT ->
+                            PluginHostInject.onHostInjectResponse(context, rawData.getString(PluginConst.DATA_KEY_REMOTE_TARGET_DEVICE), rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data);
+                   case PluginConst.ACTION_RESPONSE_REMOTE_DATA ->
                             DataProcess.pushPluginRemoteAction(context, data[0], data[1], packageName, PluginConst.ACTION_RESPONSE_REMOTE_DATA, rawData.getString(PluginConst.DATA_KEY_REMOTE_ACTION_NAME), data[2]);
                     case PluginConst.NET_PROVIDER_RECEIVED -> {
                         if(context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getString("server", "Firebase Cloud Message").equals(packageName)) {
