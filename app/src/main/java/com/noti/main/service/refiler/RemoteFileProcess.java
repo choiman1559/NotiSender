@@ -41,10 +41,17 @@ public class RemoteFileProcess {
             case ReFileConst.TYPE_REQUEST_QUERY -> {
                 if (isBusy) {
                     pushResponseQuery(context, map.get("device_name"), map.get("device_id"), false, "Query process is already busy");
+                    return;
                 }
 
                 if(!PluginFragment.isAppInstalled(context, PluginHostInject.HostInjectAPIName.PLUGIN_FILE_LIST_PACKAGE)) {
                     pushResponseQuery(context, map.get("device_name"), map.get("device_id"), false, "Plugin Not Installed");
+                    return;
+                }
+
+                if(!new PluginPrefs(context, PluginHostInject.HostInjectAPIName.PLUGIN_FILE_LIST_PACKAGE).isPluginEnabled()) {
+                    pushResponseQuery(context, map.get("device_name"), map.get("device_id"), false, "Plugin Not Enabled");
+                    return;
                 }
 
                 isBusy = true;
