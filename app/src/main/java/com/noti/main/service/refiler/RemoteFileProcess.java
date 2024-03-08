@@ -15,6 +15,7 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginHostInject;
+import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.ui.prefs.custom.PluginFragment;
 import com.noti.main.utils.PowerUtils;
