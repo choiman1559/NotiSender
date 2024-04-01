@@ -1,0 +1,149 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string-array name="services_shown">
+        <item>karşılama</item>
+        <item>gönder</item>
+        <item>hibrit (Önerilmez)</item>
+    </string-array>
+
+    <string-array name="services">
+        <item>karşılama</item>
+        <item>gönder</item>
+        <item>hibrit</item>
+    </string-array>
+
+    <string-array name="importance">
+        <item>Yüksek</item>
+        <item>Varsayılan</item>
+        <item>Düşük</item>
+        <item>Özel…</item>
+    </string-array>
+
+    <string-array name="deadline_units">
+        <item>saniye</item>
+        <item>min</item>
+        <item>saat</item>
+        <item>gün</item>
+        <item>hafta</item>
+        <item>ay</item>
+        <item>yıl</item>
+    </string-array>
+
+    <string-array name="receive_deadline">
+        <item>Son tarih yok</item>
+        <item>Özel…</item>
+        <item>1 dakika</item>
+        <item>10 dk.</item>
+        <item>30 dk.</item>
+        <item>1 saat</item>
+        <item>3 saat</item>
+        <item>6 saat</item>
+        <item>9 saat</item>
+        <item>1 gün</item>
+        <item>3 gün</item>
+        <item>5 gün</item>
+        <item>1 hafta</item>
+        <item>3 hafta</item>
+        <item>1 ay</item>
+        <item>3 ay</item>
+        <item>6 ay</item>
+        <item>1 yıl</item>
+    </string-array>
+
+    <string-array name="resolution">
+        <item>68 x 68 (Önerilmez)</item>
+        <item>52 x 52 (Varsayılan)</item>
+        <item>36 x 36</item>
+    </string-array>
+
+    <string-array name="interval">
+        <item>Tüm uygulama</item>
+        <item>Uygulama başına</item>
+    </string-array>
+
+    <string-array name="updateChannel">
+        <item>Otomatik olarak belirtildi</item>
+        <item>Github</item>
+        <item>Play Store</item>
+        <item>Güncellemeyi kontrol etme</item>
+    </string-array>
+
+    <string-array name="uniqueIdMethod">
+        <item>Küresel - Benzersiz Kimlik</item>
+        <item>Firebase Kimliği</item>
+        <item>Android Kimliği</item>
+        <item>Cihaz MAC KİMLİĞİ</item>
+    </string-array>
+
+    <string-array name="uniqueIdMethod_description">
+        <item>Küresel - Benzersiz Kimlik</item>
+        <item>Firebase Kimliği</item>
+        <item>Android Kimliği</item>
+        <item>Aygıt MAC Kimliği\n(Önerilmez)</item>
+    </string-array>
+
+    <string-array name="pairAction">
+        <item>Bildirimi metinle göster</item>
+        <item>Metni panoya kopyala</item>
+        <item>Bağlantıyı tarayıcıda aç</item>
+        <item>Tasker etkinliğini tetikle</item>
+        <item>Uygulamayı çalıştır</item>
+        <item>Terminal komutunu çalıştır</item>
+    </string-array>
+
+    <string-array name="device_type_list">
+        <item>Otomatik Algıla</item>
+        <item>Telefon</item>
+        <item>Tablet</item>
+        <item>Televizyon</item>
+        <item>Masaüstü</item>
+        <item>Dizüstü bilgisayar</item>
+        <item>Akıllı saat</item>
+        <item>IOT_Device</item>
+        <item>VR_Gear</item>
+        <item>Otomobil</item>
+    </string-array>
+
+    <string-array name="material_color_low" 
+        tools:ignore="Typos">
+        <item>#FFCDD2</item>
+        <item>#F8BBD0</item>
+        <item>#E1BEE7</item>
+        <item>#D1C4E9</item>
+        <item>#C5CAE9</item>
+        <item>#BBDEFB</item>
+        <item>#B3E5FC</item>
+        <item>#B2EBF2</item>
+        <item>#B2DFDB</item>
+        <item>#C8E6C9</item>
+        <item>#DCEDC8</item>
+        <item>#F0F4C3</item>
+        <item>#FFF9C4</item>
+        <item>#FFECB3</item>
+        <item>#FFE0B2</item>
+        <item>#FFCCBC</item>
+        <item>#D7CCC8</item>
+        <item>#CFD8DC</item>
+    </string-array>
+
+    <string-array name="material_color_high" 
+        tools:ignore="Typos">
+        <item>#F44336</item>
+        <item>#E91E63</item>
+        <item>#9C27B0</item>
+        <item>#673AB7</item>
+        <item>#3F51B5</item>
+        <item>#2196F3</item>
+        <item>#03A9F4</item>
+        <item>#00BCD4</item>
+        <item>#009688</item>
+        <item>#4CAF50</item>
+        <item>#8BC34A</item>
+        <item>#CDDC39</item>
+        <item>#FFEB3B</item>
+        <item>#FFC107</item>
+        <item>#FF9800</item>
+        <item>#FF5722</item>
+        <item>#795548</item>
+        <item>#607D8B</item>
+    </string-array>
+</resources>

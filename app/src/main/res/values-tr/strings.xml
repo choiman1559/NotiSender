@@ -1,0 +1,60 @@
+<resources>
+    <string name="app_name">Noti Sender</string>
+    <string name="title_activity_settings">Noti Sender</string>
+
+    <string name="account">hesap</string>
+    <string name="Login">Google\'da oturum aç</string>
+    <string name="Logout">Google\'da oturumu kapat</string>
+    <string name="UID_default">Giriş yapılmadı</string>
+
+    <string name="serviceToggle">Servisi aç/kapat</string>
+
+    <string name="select_package">Uygulama Seç</string>
+    <string name="all">Tüm bildirimleri gönder</string>
+
+    <string name="App_info">Uygulama bilgisi</string>
+    <string name="App_info_des">Bu uygulama hakkında bilgi</string>
+    <string name="App_info_about">Hakkında</string>
+    <string name="gotogit">Git deposuna git</string>
+
+    <string name="History_title">Bildirim Geçmişi</string>
+
+    <string name="tasker_label">Görev türü</string>
+    <string name="tasker_label_des">Yürütülecek görev türü</string>
+
+    <string name="notify_channel_id">NotiSender</string>
+    <string name="notify_channel_name">Noti Sender</string>
+    <string name="notify_channel_description">Başka bir cihaza bildirim gönder</string>
+
+    <string name="notiDetail_ok">Uzaktan çalıştır</string>
+    <string name="notiDetail_cancel">Kapat</string>
+
+    <string name="dialog_update_title">Güncelleme mevcut</string>
+    <string name="dialog_update_message">Bir güncelleme var. Güncellemek istiyor musunuz?</string>
+
+    <string name="Server_information">FCM : Firebase Cloud Messaging olarak da bilinen bu, Google tarafından sağlanan ücretsiz bir mesaj push API\'sidir. Stabildir ve daha az pil tüketir ancak push edilen mesajlar gecikirse veya cihaz derin uyku modundaysa push edilen mesajlar gelmeyebilir.\n\nPushy : Pushy.org tarafından sağlanan bir mesaj push API\'sidir. FCM\'den daha hızlıdır ve gecikmelere neden olmaz, ancak cihazın performansı ve pil tüketimi yüksektir ve yalnızca ücretli bir abonelikle kullanılabilir.\n\nÜçüncü taraf sağlayıcılar : Uygulama geliştiricileri, Plugin API aracılığıyla NotiSender\'ın veri iletimini ve alımını özelleştirebilir. \n\nYASAL UYARI : NotiSender, üçüncü parti sağlayıcıların kullanımından doğacak sorunlardan sorumlu değildir.</string>
+    <string name="Interval_information">Bildirimler için aralığı ayarlayın. Örneğin, 100 ms\'lik bir aralık ayarlanırsa ve 'A' bildirimi görünürse, 'A' bildirimi göründükten sonra 100 ms boyunca başka hiçbir bildirim gönderilmez ve yok sayılır.\n\nSeçenek ayrıntıları\nTüm uygulama : Tüm uygulamalardan gelen bildirimleri tek bir uygulama olarak ele alır ve aralıkları uygular.\n\nUygulama başına : Her uygulama için bildirim aralığı uygular.\n\n\nNot: Bu seçenek SMS ve Çağrı bildirimleri göndermek için de geçerlidir.</string>
+    <string name="Encryption_information">Veri gönderirken/alırken, kullanıcıların kişisel bilgilerini korumak için AES-128 kullanılır.\n\nAyrıca, kullanıcı tarafından girilen ve belirlenen şifreleme için kullanılacak anahtar, Google tarafından sağlanan her kullanıcıya atanan bir belirteç kullanılarak bir kez daha şifrelenir.\n\nDikkat 1. Noti Sender\'ın geliştirme ekibi (Norix Ekibi), güvenlik anahtarının veya tüm verilerin ifşa edilmesinden dolayı meydana gelen herhangi bir şeyden sorumlu değildir.\n\nDikkat 2. Şifreleme ayarlanmışsa, şifrelenmiş Bildirim verileri gönderilemeyecek kadar büyük olabilir ve bu durumda veriler iletilmeyecektir.\n\nDikkat 3. Şifreleme etkinleştirilmişse, Simge Gönder seçeneği açık olsa bile hiçbir simge gönderilmez.</string>
+    <string name="Dialog_rather_github">SMS &amp; Arama kaydı erişim izninin Google Play politikası tarafından bastırılması nedeniyle, bu işlevi kullanmak için Noti Sender\'ı Play Store yerine Github\'dan indirmeniz gerekir.</string>
+    <string name="Dialog_Tasker_compatible">Eklentiler aşağıda gösterilen uygulamalarda mevcuttur.\n\n - Tasker\n(net.dinglisch.android.taskerm)\n\n - Automate\n(com.llamalab.automate)\n\n - Locale X\n(com.twofortyfouram.locale.x)\n\n - MacroDroid\n(com.arlosoft.macrodroid)</string>
+    <string name="Premium_information">NotiSender Premium aşağıdaki avantajlarla birlikte gelir:\n\n - Dosyaları diğer cihazlara aktarırken dosya boyutu sınırı 2GB\'a yükseltildi\n - 3\'ten fazla cihazı eşleştirebilir\n - Medyayı uzaktan kontrol ederken albüm resmini kullanabilir\n - 3 veya daha fazla özel regex nesnesi ekleyebilir\n - Veri aktarımı için Pushy sunucusunu kullanabilir\n\nFaydalar önceden haber verilmeksizin eklenebilir veya azaltılabilir ve masaüstü için NotiSender için geçerli değildir.</string>
+    <string name="Premium_waring">\n\nLütfen NotiSender Premium\'a abone olun ve tekrar deneyin!\n\nİpucu: \"Servis &amp; Hesap\" menüsünden abone olabilirsiniz.</string>
+    <string name="Lack_Alarm_Permission_waring">Hizmet türünün değiştirilmesi yalnızca bildirim erişim izni verildiğinde mümkündür.\n\nAnd, Bildirim erişim izni yoksa, yalnızca alım moduna sabitlenir.</string>
+    <string name="Sensitive_API_Plugin_waring">Bu eklenti hassas bir API kullanıyor, böylece NotiSender\'dan bildirimleri ve verileri okuyabilir.\n\nEtkinleştirmek ister misiniz?</string>
+
+    <string name="updater_loading">Yükleniyor… Lütfen bekleyin</string>
+    <string name="updater_checkupdate">Güncelleme kontrol ediliyor…</string>
+    <string name="updater_manager_deprecated_title">Kullanımdan kaldırılmış uygulama bulundu</string>
+    <string name="updater_manager_deprecated_message">Yönetici ve ana uygulama yeniden entegre edildiğinden, Noti Sender Manager (com.noti.sender) kullanımdan kaldırılmıştır ve artık gerekli değildir. \n\nDilerseniz yöneticiyi silebilirsiniz. Yöneticiyi silmek istiyor musunuz? </string>
+    <string name="Start_Activity_Completed">Tamamlandı</string>
+    <string name="ServiceToggle">Servis Açık/Kapalı</string>
+    <string name="edit_item">Kullanıcı komut dosyası</string>
+    <string name="playground">Regex Oyun Alanı</string>
+    <string name="plugin">Eklenti</string>
+
+    <string name="media_play">Oynat</string>
+    <string name="media_pause">Durdur</string>
+    <string name="media_previous">Önceki</string>
+    <string name="media_next">Sonraki</string>
+    <string name="media_close">Kapat</string>
+</resources>
