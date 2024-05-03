@@ -27,6 +27,7 @@ import com.google.firebase.storage.StreamDownloadTask;
 
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,6 +103,27 @@ public class ReFileActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener((v) -> this.finish());
+
+        remoteFileRefreshLayout.setOnRefreshListener(() -> {
+            remoteFileRefreshLayout.setRefreshing(false);
+            if(remoteFileStateProgress.getVisibility() == View.GONE) {
+                MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
+                dialog.setTitle("Reload File List");
+                dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                dialog.setMessage("""
+                    Select where to get the list:
+                    
+                    Database: Data cached and uploaded in advance
+                    Target device: Overwrite pre-cached data and query the list anew
+                    """);
+                dialog.setNegativeButton("Database", (d, w) -> loadQueryFromDB());
+                dialog.setPositiveButton("Target Device", (d, w) -> loadFreshQuery());
+                dialog.setNeutralButton("Cancel", (d, w) -> { });
+                dialog.show();
+            } else {
+                ToastHelper.show(this, "Working in progress!", ToastHelper.LENGTH_SHORT);
+            }
+        });
 
         getOnBackPressedDispatcher().addCallback(backPressedCallback);
         loadQueryFromDB();
@@ -200,23 +222,6 @@ public class ReFileActivity extends AppCompatActivity {
     void loadFileListLayout() {
         showProgress("Showing file list...");
         boolean listFolderFirst = prefs.getBoolean("listFolderFirst", true);
-
-        remoteFileRefreshLayout.setOnRefreshListener(() -> {
-            remoteFileRefreshLayout.setRefreshing(false);
-            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
-            dialog.setTitle("Reload File List");
-            dialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-            dialog.setMessage("""
-                    Select where to get the list:
-                    
-                    Database: Data cached and uploaded in advance
-                    Target device: Overwrite pre-cached data and query the list anew
-                    """);
-            dialog.setNegativeButton("Database", (d, w) -> loadQueryFromDB());
-            dialog.setPositiveButton("Target Device", (d, w) -> loadFreshQuery());
-            dialog.setNeutralButton("Cancel", (d, w) -> { });
-            dialog.show();
-        });
         remoteFileLayout.removeViews(0, remoteFileLayout.getChildCount());
 
         if (lastRemoteFile == null) lastRemoteFile = allFileList;
