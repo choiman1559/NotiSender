@@ -24,7 +24,7 @@ public class LowBatteryReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if(Objects.equals(intent.getAction(), Intent.ACTION_BATTERY_LOW)) {
             SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-            if(prefs.getString("UID", "").isEmpty() || prefs.getBoolean("sendBatteryLowWarning", true)) {
+            if(prefs.getString("UID", "").isEmpty() || !prefs.getBoolean("sendBatteryLowWarning", true)) {
                 return;
             }
 
