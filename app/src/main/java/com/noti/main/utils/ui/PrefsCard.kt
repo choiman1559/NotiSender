@@ -3,12 +3,14 @@ package com.noti.main.utils.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.LinearLayoutCompat
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.noti.main.R
+import java.lang.RuntimeException
 import kotlin.properties.Delegates
 
 @Suppress("unused")
@@ -155,6 +157,12 @@ class PrefsCard(context: Context?, attrs: AttributeSet?) : LinearLayoutCompat(co
 
     override fun setOnClickListener(l: OnClickListener?) {
         itemParent.setOnClickListener(l)
+    }
+
+    fun setOnCheckedChangedListener(l: CompoundButton.OnCheckedChangeListener?) {
+        if (containsTypeFlag(TYPE_SWITCH)) {
+            itemSwitch.setOnCheckedChangeListener(l)
+        } else throw RuntimeException("Not an Switch-Type card but tried to register OnCheckedChangeListener")
     }
 
     private fun containsTypeFlag(flag: Int): Boolean {

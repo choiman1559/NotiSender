@@ -51,6 +51,13 @@
             android:title="Unpair all paired devices"
             android:summary="Reset and delete all previous connected devices"
             android:icon="@drawable/ic_fluent_arrow_reset_24_regular" />
+
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="true"
+            android:key="sendBatteryLowWarning"
+            android:title="Send Battery Low Warning"
+            android:summary="Send warning to another device when battery is low"
+            android:icon="@drawable/ic_fluent_battery_warning_24_regular" />
     </PreferenceCategory>
 
     <PreferenceCategory

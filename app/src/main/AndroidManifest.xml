@@ -211,6 +211,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".receiver.LowBatteryReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BATTERY_LOW" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name=".service.BitmapIPCManager$BitmapDismissBroadcastListener" android:exported="false"/>
 
         <receiver android:name=".receiver.FindDeviceCancelReceiver" />

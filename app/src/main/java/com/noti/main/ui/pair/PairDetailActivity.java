@@ -29,6 +29,7 @@ import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
 import com.noti.main.service.refiler.ReFileActivity;
+import com.noti.main.utils.ui.PrefsCard;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +41,10 @@ import java.util.Set;
 
 public class PairDetailActivity extends AppCompatActivity {
 
+    String Device_id;
+    SharedPreferences prefs;
+    SharedPreferences deviceDetailPrefs;
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,11 +52,12 @@ public class PairDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pair_detail);
 
         Intent intent = getIntent();
+        Device_id = intent.getStringExtra("device_id");
         String Device_name = intent.getStringExtra("device_name");
-        String Device_id = intent.getStringExtra("device_id");
         String Device_type = intent.getStringExtra("device_type");
-        SharedPreferences prefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
-        SharedPreferences deviceBlacksPrefs = getSharedPreferences("com.noti.main_device.blacklist", MODE_PRIVATE);
+
+        prefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
+        deviceDetailPrefs = getSharedPreferences("com.noti.main_device.detail", MODE_PRIVATE);
 
         ImageView icon = findViewById(R.id.icon);
         ImageView batteryIcon = findViewById(R.id.batteryIcon);
@@ -62,6 +68,7 @@ public class PairDetailActivity extends AppCompatActivity {
         Button findButton = findViewById(R.id.findButton);
         SwitchMaterial blockToggle = findViewById(R.id.switchCompat);
         SwitchMaterial remoteToggle = findViewById(R.id.remoteToggleSwitch);
+        PrefsCard batteryWarningReceive = findViewById(R.id.batteryWarningReceive);
 
         LinearLayout batterySaveEnabled = findViewById(R.id.batterySaveEnabled);
         LinearLayout batteryLayout = findViewById(R.id.batteryLayout);
@@ -71,11 +78,14 @@ public class PairDetailActivity extends AppCompatActivity {
         LinearLayout remoteFileLayout = findViewById(R.id.remoteFileExplorer);
 
         boolean isComputer = Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_DESKTOP) || Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_LAPTOP);
-        boolean isBlocked = deviceBlacksPrefs.getBoolean(Device_id, false);
+        boolean isBlocked = getDevicePrefsOrDefault(0);
         blockToggle.setChecked(isBlocked);
-        blockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> deviceBlacksPrefs.edit().putBoolean(Device_id, isChecked).apply());
+        blockToggle.setOnCheckedChangeListener((buttonView, isChecked) -> setDeviceDetailPrefs(isChecked, 0));
         deviceBlackListLayout.setOnClickListener((v) -> blockToggle.setChecked(!blockToggle.isChecked()));
         deviceBlackListLayout.setVisibility(isComputer ? View.GONE : View.VISIBLE);
+
+        batteryWarningReceive.setSwitchChecked(getDevicePrefsOrDefault(1));
+        batteryWarningReceive.setOnCheckedChangedListener((buttonView, isChecked) -> setDeviceDetailPrefs(isChecked, 1));
 
         remoteToggleLayout.setOnClickListener((v) -> {
             boolean targetToggle = !remoteToggle.isChecked();
@@ -194,5 +204,48 @@ public class PairDetailActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener((v) -> this.finish());
+    }
+
+    void setDeviceDetailPrefs(boolean input, int index) {
+        boolean[] devicePrefs = getDevicePrefsAsArray();
+        StringBuilder result = new StringBuilder();
+
+        for(int i = 0; i < devicePrefs.length; i++) {
+            if(i == index) {
+                result.append(input).append("|");
+            } else {
+                result.append(devicePrefs[i]).append("|");
+            }
+        }
+
+        if(devicePrefs.length <= index) {
+            for(int i = 0; i < index - devicePrefs.length; i++) {
+                result.append(false).append("|");
+            }
+
+            result.append(input).append("|");
+        }
+
+        deviceDetailPrefs.edit().putString(Device_id, result.toString()).apply();
+    }
+
+    boolean getDevicePrefsOrDefault(int index) {
+        boolean[] devicePrefs = getDevicePrefsAsArray();
+        if(devicePrefs.length <= index) {
+            return false;
+        }
+
+        return devicePrefs[index];
+    }
+
+    boolean[] getDevicePrefsAsArray() {
+        String[] list = prefs.getString(Device_id, "").split("\\|");
+        boolean[] result = new boolean[list.length];
+
+        for(int i = 0; i < list.length; i++) {
+            result[i] = Boolean.parseBoolean(list[i]);
+        }
+
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:item="http://schemas.android.com/apk/res-auto"
     android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -375,6 +376,14 @@
                     android:thumb="@drawable/switch_thumb"
                     app:track="@drawable/switch_track" />
             </LinearLayout>
+
+            <com.noti.main.utils.ui.PrefsCard
+                android:id="@+id/batteryWarningReceive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                item:cardType="title|description|switches"
+                item:cardTitle="Low Battery Warning"
+                item:cardDescription="Receives Battery Information" />
 
             <ImageView
                 android:layout_width="23dp"

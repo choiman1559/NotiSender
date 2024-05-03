@@ -31,6 +31,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.application.isradeleon.notify.Notify;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -92,7 +93,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     SharedPreferences logPrefs;
     SharedPreferences pairPrefs;
     SharedPreferences regexPrefs;
-    SharedPreferences deviceBlacksPrefs;
+    SharedPreferences deviceDetailPrefs;
 
     private static PowerUtils manager;
     public static volatile Ringtone lastPlayedRingtone;
@@ -125,7 +126,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         logPrefs = getSharedPreferences("com.noti.main_logs", MODE_PRIVATE);
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         regexPrefs = getSharedPreferences("com.noti.main_regex", MODE_PRIVATE);
-        deviceBlacksPrefs = getSharedPreferences("com.noti.main_device.blacklist", MODE_PRIVATE);
+        deviceDetailPrefs = getSharedPreferences("com.noti.main_device.detail", MODE_PRIVATE);
         playingSessionMap = new HashMap<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
@@ -161,7 +162,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             }
 
             boolean isAlwaysEncryptData = prefs.getBoolean("AlwaysEncryptData", true);
-            if ((useEncryption && !rawPassword.equals("")) || isAlwaysEncryptData) {
+            if ((useEncryption && !rawPassword.isEmpty()) || isAlwaysEncryptData) {
                 try {
                     String uid = prefs.getString("UID", "");
                     if (!uid.isEmpty()) {
@@ -221,7 +222,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         String type = map.get("type");
         String mode = prefs.getString("service", "reception");
 
-        if (type != null && !prefs.getString("UID", "").equals("")) {
+        if (type != null && !prefs.getString("UID", "").isEmpty()) {
             if ("send|startup".equals(type) && isDeviceItself(map)) {
                 NetworkProvider.fcmIgnitionComplete();
                 return;
@@ -255,7 +256,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 }
 
-                if (deviceBlacksPrefs.getBoolean(map.get("device_id"), false)) {
+                if (deviceDetailPrefs.getBoolean(map.get("device_id"), false)) {
                     return;
                 }
 
@@ -418,6 +419,23 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         case "pair|remote_file" -> {
                             if (isTargetDevice(map) && isPairedDevice(map)) {
                                 RemoteFileProcess.onReceive(map, context);
+                            }
+                        }
+                        case "pair|battery_warning" -> {
+                            String[] deviceDetailPrefsList = deviceDetailPrefs.getString(map.get("device_id"), "").split("\\|");
+                            if(deviceDetailPrefsList.length >= 2 && Boolean.parseBoolean(deviceDetailPrefsList[1])) {
+                                Notify.build(context)
+                                        .setTitle(String.format("Warning: %s's battery is low", map.get("device_name")))
+                                        .setContent(String.format(Locale.getDefault(), "Battery level is %d%%.\nCharging device is recommended.",
+                                                Integer.parseInt(Objects.requireNonNull(map.get("battery_level")))))
+                                        .setLargeIcon(R.mipmap.ic_launcher)
+                                        .largeCircularIcon()
+                                        .setSmallIcon(R.drawable.ic_fluent_battery_warning_24_regular)
+                                        .setChannelName("Remote Battery Warning")
+                                        .setChannelId("battery_warning")
+                                        .enableVibration(true)
+                                        .setAutoCancel(true)
+                                        .show();
                             }
                         }
                         case "pair|plugin" -> {
@@ -754,7 +772,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 JSONObject object = new JSONObject();
                 String originString = logPrefs.getString("receivedLogs", "");
 
-                if (!originString.equals("")) array = new JSONArray(originString);
+                if (!originString.isEmpty()) array = new JSONArray(originString);
                 object.put("date", Date);
                 object.put("package", Package);
                 object.put("title", title);
@@ -1004,7 +1022,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        if (!prefs.getString("UID", "").equals(""))
+        if (!prefs.getString("UID", "").isEmpty())
             FirebaseMessaging.getInstance().subscribeToTopic(prefs.getString("UID", ""));
     }
 }
