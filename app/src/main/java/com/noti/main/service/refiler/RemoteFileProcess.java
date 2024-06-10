@@ -27,12 +27,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
 public class RemoteFileProcess {
 
-    private static boolean isBusy = false;
+    public static boolean isBusy = false;
+    public static Thread pluginWaitThread;
+    private static ArrayList<String> waitingDeviceList;
 
     public static void onReceive(Map<String, String> map, Context context) {
         PowerUtils.getInstance(context).acquire(8 * 60 * 1000L); // 8 Minutes Timeout until re-locked
@@ -40,8 +43,14 @@ public class RemoteFileProcess {
 
         if (type != null) switch (type) {
             case ReFileConst.TYPE_REQUEST_QUERY -> {
+                String deviceInfo = map.get("device_name") + "|" + map.get("device_id");
+
                 if (isBusy) {
-                    pushResponseQuery(context, map.get("device_name"), map.get("device_id"), false, "Query process is already busy");
+                    if(!waitingDeviceList.contains(deviceInfo)) {
+                        waitingDeviceList.add(deviceInfo);
+                    }
+
+                    pushResponseQuery(context, map.get("device_name"), map.get("device_id"), false, "Query process is already busy!\nWaiting for process to finish...");
                     return;
                 }
 
@@ -56,11 +65,14 @@ public class RemoteFileProcess {
                 }
 
                 isBusy = true;
+                waitingDeviceList = new ArrayList<>();
+                waitingDeviceList.add(deviceInfo);
 
                 SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-                String deviceInfo = map.get("device_name") + "|" + map.get("device_id");
                 String args = String.format(Locale.getDefault(),"%d|%s", prefs.getInt("indexMaximumSize", 150), prefs.getBoolean("indexHiddenFiles", false));
+
                 PluginActions.requestHostApiInject(context, deviceInfo, PluginHostInject.HostInjectAPIName.PLUGIN_FILE_LIST_PACKAGE, PluginHostInject.HostInjectAPIName.ACTION_REQUEST_FILE_LIST, args);
+                startFilePluginWaitThread(context);
             }
 
             case ReFileConst.TYPE_REQUEST_SEND -> {
@@ -108,7 +120,35 @@ public class RemoteFileProcess {
         }
     }
 
-    public static void onFileListReceived(Context context, String deviceName, String deviceId, String channelName) {
+    private static void startFilePluginWaitThread(final Context context) {
+        pluginWaitThread = new Thread(() -> {
+            try {
+                Thread.sleep(15000);
+                isBusy = false;
+
+                for(String devices : waitingDeviceList) {
+                    String[] devicesInfo = devices.split("\\|");
+                    pushResponseQuery(context, devicesInfo[0], devicesInfo[1], false, "File plugin is not responding");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        pluginWaitThread.start();
+    }
+
+    public static void killFilePluginWaitThread() {
+        if(RemoteFileProcess.isBusy && RemoteFileProcess.pluginWaitThread.isAlive()) {
+            if(BuildConfig.DEBUG)
+                Log.d("File Process", "Killed plugin wait thread");
+            RemoteFileProcess.pluginWaitThread.interrupt();
+        }
+    }
+
+    public static void onFileListReceived(Context context, String channelName) {
+        RemoteFileProcess.killFilePluginWaitThread();
+
         try(LocalSocket clientSocket = new LocalSocket()) {
             clientSocket.connect(new LocalSocketAddress(channelName));
             InputStream inputStream = clientSocket.getInputStream();
@@ -131,10 +171,16 @@ public class RemoteFileProcess {
             if(!jsonData.isEmpty()) {
                 fileRef.putBytes(new JSONObject(jsonData).toString().getBytes(StandardCharsets.UTF_8), metadata)
                         .addOnSuccessListener(task -> {
-                            pushResponseQuery(context, deviceName, deviceId, true, null);
+                            for(String devices : waitingDeviceList) {
+                                String[] devicesInfo = devices.split("\\|");
+                                pushResponseQuery(context, devicesInfo[0], devicesInfo[1], true, null);
+                            }
                             isBusy = false;
                         }).addOnFailureListener(e -> {
-                            pushResponseQuery(context, deviceName, deviceId, true, e.getMessage());
+                            for(String devices : waitingDeviceList) {
+                                String[] devicesInfo = devices.split("\\|");
+                                pushResponseQuery(context, devicesInfo[0], devicesInfo[1], false, e.getMessage());
+                            }
                             isBusy = false;
                         });
             }

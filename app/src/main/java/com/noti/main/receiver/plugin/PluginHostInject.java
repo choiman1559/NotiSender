@@ -24,6 +24,7 @@ public class PluginHostInject {
         public static final String ACTION_PUSH_CALL_DATA = "push_call_data";
 
         public static final String PLUGIN_FILE_LIST_PACKAGE = "com.noti.plugin.filer";
+        public static final String ACTION_RESPONSE_FILE_QUERY_READY = "response_file_query_ready";
         public static final String ACTION_REQUEST_FILE_LIST = "request_file_list";
         public static final String ACTION_RESPONSE_FILE_LIST = "response_file_list";
         public static final String ACTION_REQUEST_UPLOAD = "request_file_upload";
@@ -44,9 +45,11 @@ public class PluginHostInject {
             case HostInjectAPIName.ACTION_PUSH_MESSAGE_DATA ->
                     NotiListenerService.getInstance().sendSmsNotification(context, BuildConfig.DEBUG, "noti.func", data[0], data.length > 2 ? data[2] : "", data[1], Calendar.getInstance().getTime());
             case HostInjectAPIName.ACTION_RESPONSE_FILE_LIST ->
-                    RemoteFileProcess.onFileListReceived(context, deviceInfo[0], deviceInfo[1], data[0]);
+                    RemoteFileProcess.onFileListReceived(context, data[0]);
             case HostInjectAPIName.ACTION_RESPONSE_UPLOAD ->
                     RemoteFileProcess.onFileUploadReceived(context, deviceInfo[0], deviceInfo[1], data[0], data[1]);
+            case HostInjectAPIName.ACTION_RESPONSE_FILE_QUERY_READY ->
+                    RemoteFileProcess.killFilePluginWaitThread();
             case HostInjectAPIName.ACTION_RESPONSE_METADATA -> {
                 String filePath = data[0];
                 String hashData = data[1];
