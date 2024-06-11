@@ -70,7 +70,8 @@
         <activity android:name=".ui.pair.PresentationActivity"
             android:theme="@style/Theme.App.Material3" />
         <activity android:name=".ui.pair.DeviceFindActivity"/>
-        <activity android:name=".ui.pair.RequestActionActivity"/>
+        <activity android:name=".ui.pair.action.ActionArgsActivity"/>
+        <activity android:name=".ui.pair.action.PairActionActivity"/>
         <activity
             android:label="Share Data"
             android:name=".ui.pair.ShareDataActivity"

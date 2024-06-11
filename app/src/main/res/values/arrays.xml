@@ -82,12 +82,17 @@
     </string-array>
 
     <string-array name="pairAction">
-        <item>Show notification with text</item>
-        <item>Copy text to clipboard</item>
-        <item>Open link in Browser</item>
-        <item>Trigger tasker event</item>
-        <item>Run application</item>
-        <item>Run terminal command</item>
+        <!-- Actions that need argument activity -->
+        <item>"{\"actionType\":\"Show notification with text\", \"actionDescription\":\"\", \"actionIcon\"=\"alert\", \"needArgsCount\": 2, \"argsHintTexts\": [\"Notification Title\", \"Notification Content\"], \"isNeedArgs\": true, \"actionClass\": \"\", \"targetDeviceTypeScope\":[]}"</item>
+        <item>"{\"actionType\":\"Copy text to clipboard\", \"actionDescription\":\"\", \"actionIcon\"=\"clipboard\", \"needArgsCount\": 1, \"argsHintTexts\": [\"Text to send\"], \"isNeedArgs\": true, \"actionClass\": \"\", \"targetDeviceTypeScope\":[]}"</item>
+        <item>"{\"actionType\":\"Open link in Browser\", \"actionDescription\":\"\", \"actionIcon\"=\"link\", \"needArgsCount\": 1, \"argsHintTexts\": [\"Url to open in browser\"], \"isNeedArgs\": true, \"actionClass\": \"\", \"targetDeviceTypeScope\":[]}"</item>
+        <item>"{\"actionType\":\"Run application\", \"actionDescription\":\"\", \"actionIcon\"=\"apps\", \"needArgsCount\": 1, \"argsHintTexts\": [\"App's package name to open\"], \"isNeedArgs\": true, \"actionClass\": \"\", \"targetDeviceTypeScope\":[]}"</item>
+        <item>"{\"actionType\":\"Run terminal command\", \"actionDescription\":\"\", \"actionIcon\"=\"desktop_keyboard\", \"needArgsCount\": 1, \"argsHintTexts\": [\"Terminal command to run\"], \"isNeedArgs\": true, \"actionClass\": \"\", \"targetDeviceTypeScope\":[]}"</item>
+
+        <!-- Actions that doesn't need argument activity -->
+        <item>"{\"actionType\":\"Trigger tasker event\", \"actionDescription\":\"Remotely call events defined in tasker\", \"actionIcon\"=\"star_settings\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": true, \"actionClass\": \"\", \"targetDeviceTypeScope\":[]}"</item>
+        <item>"{\"actionType\":\"Remote File Explorer\", \"actionDescription\":\"Browse files of other devices\", \"actionIcon\"=\"folder\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": false, \"actionClass\": \"com.noti.main.service.refiler.ReFileActivity\", \"targetDeviceTypeScope\": [\"Phone\", \"Tablet\", \"Television\", \"Smartwatch\"]}"</item>
+        <item>"{\"actionType\":\"Presentation remote control\", \"actionDescription\":\"Use this device as remote controller\", \"actionIcon\"=\"device_meeting_room_remote\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": false, \"actionClass\": \"com.noti.main.ui.pair.PresentationActivity\", \"targetDeviceTypeScope\": [\"Desktop\", \"Laptop\"]}"</item>
     </string-array>
 
     <string-array name="device_type_list">

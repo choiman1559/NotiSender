@@ -302,6 +302,7 @@ public class ReFileActivity extends AppCompatActivity {
     void setFileListVisibility(boolean visible) {
         remoteFileLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
         remoteFileStateLayout.setVisibility(visible ? View.GONE : View.VISIBLE);
+        remoteFileStateProgress.setVisibility(visible ? View.GONE : View.VISIBLE);
     }
 
     static class RemoteFileHolder implements Comparable<RemoteFileHolder> {

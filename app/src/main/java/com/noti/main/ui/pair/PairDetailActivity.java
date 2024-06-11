@@ -28,7 +28,6 @@ import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.pair.DataProcess;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.service.pair.PairListener;
-import com.noti.main.service.refiler.ReFileActivity;
 import com.noti.main.utils.ui.PrefsCard;
 
 import org.json.JSONException;
@@ -73,9 +72,7 @@ public class PairDetailActivity extends AppCompatActivity {
         LinearLayout batterySaveEnabled = findViewById(R.id.batterySaveEnabled);
         LinearLayout batteryLayout = findViewById(R.id.batteryLayout);
         LinearLayout deviceBlackListLayout = findViewById(R.id.deviceBlackListLayout);
-        LinearLayout remotePresentation = findViewById(R.id.remotePresentation);
         LinearLayout remoteToggleLayout = findViewById(R.id.remoteToggleLayout);
-        LinearLayout remoteFileLayout = findViewById(R.id.remoteFileExplorer);
 
         boolean isComputer = Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_DESKTOP) || Objects.equals(Device_type, PairDeviceType.DEVICE_TYPE_LAPTOP);
         boolean isBlocked = getDevicePrefsOrDefault(0);
@@ -103,23 +100,6 @@ public class PairDetailActivity extends AppCompatActivity {
         icon.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorLow[randomIndex])));
         deviceName.setText(Device_name);
         deviceIdInfo.setText("Device's unique address: " + Device_id);
-
-        remotePresentation.setVisibility(isComputer ? View.VISIBLE : View.GONE);
-        remotePresentation.setOnClickListener(v -> {
-            Intent presentationIntent = new Intent(PairDetailActivity.this, PresentationActivity.class);
-            presentationIntent.putExtra("device_name", Device_name);
-            presentationIntent.putExtra("device_id", Device_id);
-            presentationIntent.putExtra("device_type", Device_type);
-            startActivity(presentationIntent);
-        });
-
-        remoteFileLayout.setOnClickListener(v -> {
-            Intent presentationIntent = new Intent(PairDetailActivity.this, ReFileActivity.class);
-            presentationIntent.putExtra("device_name", Device_name);
-            presentationIntent.putExtra("device_id", Device_id);
-            presentationIntent.putExtra("device_type", Device_type);
-            startActivity(presentationIntent);
-        });
 
         forgetButton.setOnClickListener(v -> {
             String DEVICE_NAME = NotiListenerService.getDeviceName();

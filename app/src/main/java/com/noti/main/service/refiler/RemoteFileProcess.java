@@ -1,9 +1,11 @@
 package com.noti.main.service.refiler;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -30,12 +32,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class RemoteFileProcess {
 
     public static boolean isBusy = false;
     public static Thread pluginWaitThread;
     private static ArrayList<String> waitingDeviceList;
+    public static final boolean USE_CONTENT_PROVIDER_IPC = true;
 
     public static void onReceive(Map<String, String> map, Context context) {
         PowerUtils.getInstance(context).acquire(8 * 60 * 1000L); // 8 Minutes Timeout until re-locked
@@ -123,7 +127,9 @@ public class RemoteFileProcess {
     private static void startFilePluginWaitThread(final Context context) {
         pluginWaitThread = new Thread(() -> {
             try {
-                Thread.sleep(15000);
+                if(!pluginWaitThread.isInterrupted()) {
+                    Thread.sleep(15000);
+                }
                 isBusy = false;
 
                 for(String devices : waitingDeviceList) {
@@ -149,44 +155,55 @@ public class RemoteFileProcess {
     public static void onFileListReceived(Context context, String channelName) {
         RemoteFileProcess.killFilePluginWaitThread();
 
-        try(LocalSocket clientSocket = new LocalSocket()) {
+        if(USE_CONTENT_PROVIDER_IPC) {
+            try {
+                Uri fileUri = Uri.parse("content://com.noti.plugin.filer.ReFileStreamProvider/" + channelName);
+                ContentResolver contentResolver = context.getContentResolver();
+                processFileList(context, Objects.requireNonNull(contentResolver.openInputStream(fileUri)));
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+        } else try(LocalSocket clientSocket = new LocalSocket()) {
             clientSocket.connect(new LocalSocketAddress(channelName));
             InputStream inputStream = clientSocket.getInputStream();
-
-            int i;
-            StringBuilder buffer = new StringBuilder();
-            byte[] b = new byte[4096];
-            while((i = inputStream.read(b)) != -1){
-                buffer.append(new String(b, 0, i));
-            }
-            String jsonData = buffer.toString();
-
-            SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-
-            StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-            StorageReference fileRef = storageRef.child(prefs.getString("UID", "") + "/deviceFileQuery/" + NotiListenerService.getUniqueID());
-            StorageMetadata metadata = new StorageMetadata.Builder().setContentType("application/json").build();
-
-            if(!jsonData.isEmpty()) {
-                fileRef.putBytes(new JSONObject(jsonData).toString().getBytes(StandardCharsets.UTF_8), metadata)
-                        .addOnSuccessListener(task -> {
-                            for(String devices : waitingDeviceList) {
-                                String[] devicesInfo = devices.split("\\|");
-                                pushResponseQuery(context, devicesInfo[0], devicesInfo[1], true, null);
-                            }
-                            isBusy = false;
-                        }).addOnFailureListener(e -> {
-                            for(String devices : waitingDeviceList) {
-                                String[] devicesInfo = devices.split("\\|");
-                                pushResponseQuery(context, devicesInfo[0], devicesInfo[1], false, e.getMessage());
-                            }
-                            isBusy = false;
-                        });
-            }
+            processFileList(context, inputStream);
         } catch (JSONException | IOException e) {
             e.printStackTrace();
             isBusy = false;
+        }
+    }
+
+    static void processFileList(Context context, InputStream inputStream) throws IOException, JSONException {
+        int i;
+        StringBuilder buffer = new StringBuilder();
+        byte[] b = new byte[4096];
+        while((i = inputStream.read(b)) != -1){
+            buffer.append(new String(b, 0, i));
+        }
+        String jsonData = buffer.toString();
+
+        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
+        StorageReference fileRef = storageRef.child(prefs.getString("UID", "") + "/deviceFileQuery/" + NotiListenerService.getUniqueID());
+        StorageMetadata metadata = new StorageMetadata.Builder().setContentType("application/json").build();
+
+        if(!jsonData.isEmpty()) {
+            fileRef.putBytes(new JSONObject(jsonData).toString().getBytes(StandardCharsets.UTF_8), metadata)
+                    .addOnSuccessListener(task -> {
+                        for(String devices : waitingDeviceList) {
+                            String[] devicesInfo = devices.split("\\|");
+                            pushResponseQuery(context, devicesInfo[0], devicesInfo[1], true, null);
+                        }
+                        isBusy = false;
+                    }).addOnFailureListener(e -> {
+                        for(String devices : waitingDeviceList) {
+                            String[] devicesInfo = devices.split("\\|");
+                            pushResponseQuery(context, devicesInfo[0], devicesInfo[1], false, e.getMessage());
+                        }
+                        isBusy = false;
+                    });
         }
     }
 

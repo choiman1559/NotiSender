@@ -127,7 +127,7 @@ public class SettingsActivity extends MonetCompatActivity {
 
         mBillingHelper.setBillingCallback(productId -> {
             if (productId.equals(BillingHelper.SubscribeID)) {
-                ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+                ServiceToggle.setEnabled(!prefs.getString("UID", "").isEmpty());
                 new RegisterForPushNotificationsAsync(SettingsActivity.this).execute();
             }
 
@@ -239,7 +239,7 @@ public class SettingsActivity extends MonetCompatActivity {
         boolean isNightMode = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         ServiceToggle.setTextColor(getResources().getColor(isNightMode ? R.color.ui_bg : R.color.ui_fg));
 
-        boolean isUIDBlank = prefs.getString("UID", "").equals("");
+        boolean isUIDBlank = prefs.getString("UID", "").isEmpty();
         if (isUIDBlank) {
             ServiceToggle.setEnabled(false);
             ServiceToggle.setChecked(false);
@@ -300,7 +300,7 @@ public class SettingsActivity extends MonetCompatActivity {
         try {
             if (!prefs.getBoolean("IsPushyTopicSubscribed", false) && BillingHelper.getInstance().isSubscribedOrDebugBuild()) {
                 String UID = prefs.getString("UID", "");
-                if (!UID.equals("")) {
+                if (!UID.isEmpty()) {
                     new Thread(() -> {
                         try {
                             Pushy.subscribe(UID, this);
@@ -438,6 +438,7 @@ public class SettingsActivity extends MonetCompatActivity {
     }
 
     private void updateProfileImage() {
+        AccountIcon.setVisibility(View.GONE);
         if (!prefs.getString("UID", "").isEmpty() && mAuth.getCurrentUser() != null) {
             Uri imageUri = mAuth.getCurrentUser().getPhotoUrl();
             if (imageUri != null) {
@@ -459,15 +460,13 @@ public class SettingsActivity extends MonetCompatActivity {
                         if (imageData != null) {
                             Bitmap finalImageData = imageData;
                             runOnUiThread(() -> {
-                                AccountIcon.setImageBitmap(finalImageData);
                                 AccountIcon.setVisibility(View.VISIBLE);
+                                AccountIcon.setImageBitmap(finalImageData);
                             });
                         }
                     }
                 }).start();
             }
-        } else {
-            AccountIcon.setVisibility(View.GONE);
         }
     }
 }

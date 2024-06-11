@@ -29,6 +29,7 @@ import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.ui.OptionActivity;
+import com.noti.main.ui.pair.action.PairActionActivity;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 
@@ -141,9 +142,10 @@ public class PairMainFragment extends Fragment {
                 startActivity(intent);
             });
             holder.baseLayout.setOnClickListener(v -> {
-                Intent intent = new Intent(mActivity, RequestActionActivity.class);
+                Intent intent = new Intent(mActivity, PairActionActivity.class);
                 intent.putExtra("device_name", data[0]);
                 intent.putExtra("device_id", data[1]);
+                if(data.length > 2) intent.putExtra("device_type", data[2]);
                 startActivity(intent);
             });
 

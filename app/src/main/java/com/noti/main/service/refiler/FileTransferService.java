@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.LocalSocket;
@@ -12,7 +13,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.OpenableColumns;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -194,10 +194,22 @@ public class FileTransferService {
                 uploadTask = fileRef.putFile(fileUri, metadata);
             } else {
                 try {
-                    LocalSocket clientSocket = new LocalSocket();
-                    clientSocket.connect(new LocalSocketAddress(channelName));
-                    InputStream inputStream = clientSocket.getInputStream();
-                    uploadTask = fileRef.putStream(inputStream);
+                    InputStream inputStream;
+                    if(RemoteFileProcess.USE_CONTENT_PROVIDER_IPC) {
+                        Uri providerFileUri = Uri.parse("content://com.noti.plugin.filer.ReFileStreamProvider/" + channelName);
+                        ContentResolver contentResolver = mContext.getContentResolver();
+                        inputStream = contentResolver.openInputStream(providerFileUri);
+                    } else {
+                        LocalSocket clientSocket = new LocalSocket();
+                        clientSocket.connect(new LocalSocketAddress(channelName));
+                        inputStream = clientSocket.getInputStream();
+                    }
+
+                    if(inputStream != null) {
+                        uploadTask = fileRef.putStream(inputStream);
+                    } else {
+                        throw new IOException("UploadTask Failed to upload - closed InputStream IPC channel: " + channelName);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     onFailureListener.onFailure(e);
@@ -236,7 +248,6 @@ public class FileTransferService {
                     String[] fileNameArr = fileName.split("/");
                     if(fileNameArr[fileNameArr.length - 1].equals(this.fileName)) {
                         if (isSuccess) {
-                            Log.d("ddd", "ddd4");
                             downloadThread.start();
                         } else {
                             onFailureListener.onFailure(new Exception("Upload failed"));

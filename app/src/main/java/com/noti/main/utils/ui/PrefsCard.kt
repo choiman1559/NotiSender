@@ -8,13 +8,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.LinearLayoutCompat
+import com.google.android.gms.common.annotation.KeepForSdk
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.noti.main.R
-import java.lang.RuntimeException
 import kotlin.properties.Delegates
 
 @Suppress("unused")
 class PrefsCard(context: Context?, attrs: AttributeSet?) : LinearLayoutCompat(context!!, attrs) {
+
+    @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
+    @KeepForSdk
+    annotation class DynamicOnly
+    private var isDynamicDeclare = false
 
     private lateinit var itemTitle: TextView
     private lateinit var itemDescription: TextView
@@ -33,8 +38,15 @@ class PrefsCard(context: Context?, attrs: AttributeSet?) : LinearLayoutCompat(co
     init {
         if (attrs != null) {
             initAttrs(attrs)
+            initView()
+        } else {
+            iconAlignEnd = false
+            checked = false
+            itemType = TYPE_NONE_DEFAULT
+            imageSrc = TYPE_NONE_DEFAULT
+
+            isDynamicDeclare = true
         }
-        initView()
     }
 
     private fun initAttrs(attrs: AttributeSet) {
@@ -98,6 +110,47 @@ class PrefsCard(context: Context?, attrs: AttributeSet?) : LinearLayoutCompat(co
         }
     }
 
+    @DynamicOnly
+    fun initDynamic() {
+        if(isDynamicDeclare) {
+            inflate(context, R.layout.item_prefs_card, this)
+
+            itemTitle = findViewById(R.id.itemTitle)
+            itemDescription = findViewById(R.id.itemDescription)
+            itemSwitch = findViewById(R.id.switchCompat)
+            itemParent = findViewById(R.id.itemParent)
+
+            if (!containsTypeFlag(TYPE_SWITCH) && iconAlignEnd) {
+                itemIcon = findViewById(R.id.itemIconRight)
+                (findViewById<ImageView>(R.id.itemIcon)).visibility = View.GONE
+            } else {
+                itemIcon = findViewById(R.id.itemIcon)
+                (findViewById<ImageView>(R.id.itemIconRight)).visibility = View.GONE
+            }
+
+            itemTitle.visibility = View.GONE
+            itemDescription.visibility = View.GONE
+            itemIcon.visibility = View.GONE
+            itemSwitch.visibility = View.GONE
+
+            if (containsTypeFlag(TYPE_TITLE)) {
+                itemTitle.visibility = View.VISIBLE
+            }
+
+            if (containsTypeFlag(TYPE_DESCRIPTION)) {
+                itemDescription.visibility = View.VISIBLE
+            }
+
+            if (containsTypeFlag(TYPE_ICON)) {
+                itemIcon.visibility = View.VISIBLE
+            }
+
+            if (containsTypeFlag(TYPE_SWITCH)) {
+                itemSwitch.visibility = View.VISIBLE
+            }
+        }
+    }
+
     fun setSwitchChecked(checked: Boolean) {
         if (containsTypeFlag(TYPE_SWITCH)) {
             itemSwitch.isChecked = checked
@@ -129,10 +182,21 @@ class PrefsCard(context: Context?, attrs: AttributeSet?) : LinearLayoutCompat(co
         }
     }
 
+    @DynamicOnly
     fun setCardType(itemType: Int) {
         this.itemType = itemType
-        initView()
-        requestLayout()
+
+        if (!isDynamicDeclare) {
+            initView()
+            requestLayout()
+        }
+    }
+
+    @DynamicOnly
+    fun setIsIconAlignEnd(isAlignEnd: Boolean) {
+        if(isDynamicDeclare) {
+            this.iconAlignEnd = isAlignEnd
+        }
     }
 
     fun getTitleString(): String {
