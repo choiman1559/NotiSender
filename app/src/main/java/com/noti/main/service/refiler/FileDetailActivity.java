@@ -12,8 +12,11 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
+
 import com.google.android.material.appbar.MaterialToolbar;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.noti.main.R;
 import com.noti.main.utils.BillingHelper;
@@ -24,8 +27,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FileDetailActivity extends AppCompatActivity {
 
@@ -99,12 +105,48 @@ public class FileDetailActivity extends AppCompatActivity {
         }
 
         downloadButton.setOnClickListener(v -> {
-            new FileTransferService(this, true)
-                    .setDownloadProperties(remoteFile.getName(), true)
-                    .execute();
-            RemoteFileProcess.pushRequestFile(this, deviceName, deviceId, remoteFile.getPath());
-            ToastHelper.show(this, "Download started at background\nWatch notification to check progress", "Okay", ToastHelper.LENGTH_SHORT);
-            downloadButton.setEnabled(false);
+            if(deviceId == null) {
+                throw new IllegalStateException("Device ID is Null");
+            }
+
+            AtomicInteger deviceSelection = new AtomicInteger();
+            Set<String> deviceLists = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE).getStringSet("paired_list", new HashSet<>());
+
+            String[] deviceNameList = new String[deviceLists.size()];
+            String[] deviceIdList = new String[deviceLists.size()];
+
+            int deviceCount = 1;
+            deviceNameList[0] = "This Device";
+
+            for(String string : deviceLists) {
+                String[] data = string.split("\\|");
+                if(deviceId.equals(data[1])) {
+                    continue;
+                }
+
+                deviceNameList[deviceCount] = data[0];
+                deviceIdList[deviceCount] = data[1];
+                deviceCount += 1;
+            }
+
+            MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(this, R.style.Theme_App_Palette_Dialog));
+            dialog.setTitle("Select device to download the file");
+            dialog.setSingleChoiceItems(deviceNameList, 0, (dialog12, which) -> deviceSelection.set(which - 1));
+            dialog.setPositiveButton("Download", (dialog1, which) -> {
+                FileTransferService transferService = new FileTransferService(this, true)
+                        .setDownloadProperties(remoteFile.getName(), true);
+
+                if(deviceSelection.get() > 0) {
+                    transferService.setProxyDownload(deviceIdList[deviceSelection.get() + 1], deviceNameList[deviceSelection.get() + 1]);
+                }
+
+                transferService.execute();
+                RemoteFileProcess.pushRequestFile(this, deviceName, deviceId, remoteFile.getPath());
+                ToastHelper.show(this, "Download started at background\nWatch notification to check progress", "Okay", ToastHelper.LENGTH_SHORT);
+                downloadButton.setEnabled(false);
+            });
+            dialog.setNegativeButton("Cancel", (dialog1, which) -> { });
+            dialog.show();
         });
 
         fileHashItem.setOnClickListener(v -> {

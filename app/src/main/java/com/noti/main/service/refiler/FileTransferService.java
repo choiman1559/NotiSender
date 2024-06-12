@@ -46,6 +46,10 @@ public class FileTransferService {
     private boolean isNeedToWaitUpload;
     private final boolean isDownloadTask;
 
+    private boolean isProxyDownload = false;
+    private String Proxy_Target_Device_ID;
+    private String Proxy_Target_Device_Name;
+
     public FileTransferService(Context context, boolean isDownloadTask) {
         this.mContext = context;
         this.isDownloadTask = isDownloadTask;
@@ -79,6 +83,12 @@ public class FileTransferService {
         this.channelName = channelName;
 
         return this;
+    }
+
+    public void setProxyDownload(String DeviceId, String DeviceName) {
+        this.isProxyDownload = true;
+        this.Proxy_Target_Device_ID = DeviceId;
+        this.Proxy_Target_Device_Name = DeviceName;
     }
 
     public void execute() {
@@ -248,7 +258,19 @@ public class FileTransferService {
                     String[] fileNameArr = fileName.split("/");
                     if(fileNameArr[fileNameArr.length - 1].equals(this.fileName)) {
                         if (isSuccess) {
-                            downloadThread.start();
+                            if(isProxyDownload) {
+                                String[] proxyFileNameArr = fileName.split("/");
+                                String proxyFileName = proxyFileNameArr[proxyFileNameArr.length - 1];
+
+                                DataProcess.requestAction(mContext, Proxy_Target_Device_Name, Proxy_Target_Device_ID, "Share file", proxyFileName);
+                                mBuilder.setContentTitle("File Download Completed")
+                                        .setContentText(String.format("Check %s to see download.\nFile name: %s", Proxy_Target_Device_Name, fileName))
+                                        .setProgress(0, 0, false)
+                                        .setOngoing(false);
+                                mNotifyManager.notify(notificationId, mBuilder.build());
+                            } else {
+                                downloadThread.start();
+                            }
                         } else {
                             onFailureListener.onFailure(new Exception("Upload failed"));
                         }
