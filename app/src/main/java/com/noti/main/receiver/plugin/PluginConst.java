@@ -9,6 +9,7 @@ public class PluginConst {
     public static final String PLUGIN_DESCRIPTION = "description";
     public static final String PLUGIN_PACKAGE_NAME = "package_name";
     public static final String PLUGIN_READY = "is_plugin_ready";
+    public static final String PLUGIN_REMOTE_ACTIONS_LIST = "remote_actions_list";
     public static final String PLUGIN_SETTING_ACTIVITY = "setting_activity";
     public static final String PLUGIN_REQUIRE_SENSITIVE_API = "require_sensitive_api";
     public static final String PLUGIN_REQUIRE_VERSION = "require_host_version";

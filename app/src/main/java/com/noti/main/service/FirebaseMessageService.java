@@ -751,7 +751,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         Bitmap Icon_original;
         Bitmap Icon = null;
         if (!"none".equals(map.get("icon")) && !prefs.getBoolean("OverrideReceivedIcon", false)) {
-            Icon_original = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(map.get("icon")));
+            Icon_original = CompressStringUtil.getBitmapFromString(CompressStringUtil.decompressString(map.get("icon")));
             if (Icon_original != null) {
                 Icon = Bitmap.createBitmap(Icon_original.getWidth(), Icon_original.getHeight(), Icon_original.getConfig());
                 Canvas canvas = new Canvas(Icon);

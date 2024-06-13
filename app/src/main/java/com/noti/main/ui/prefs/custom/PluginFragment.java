@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
@@ -48,6 +50,7 @@ import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.receiver.plugin.PluginReceiver;
 import com.noti.main.updater.tasks.Version;
 import com.noti.main.utils.network.JsonRequest;
+import com.noti.plugin.data.PairRemoteAction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -159,7 +162,7 @@ public class PluginFragment extends Fragment {
             PluginAppHolder holder = new PluginAppHolder(layout);
             String packageName = data.getString(PluginConst.PLUGIN_PACKAGE_NAME);
             PluginPrefs pluginPrefs = new PluginPrefs(mContext, packageName);
-            pluginPrefs.setRequireSensitiveAPI(data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API, false)).apply();
+            pluginPrefs.setRequireSensitiveAPI(data.getBoolean(PluginConst.PLUGIN_REQUIRE_SENSITIVE_API, false));
 
             if(data.containsKey(PluginConst.NET_PROVIDER_METADATA)) {
                 String[] providerMetadata = Objects.requireNonNull(data.getString(PluginConst.NET_PROVIDER_METADATA)).split("\\|");
@@ -167,8 +170,20 @@ public class PluginFragment extends Fragment {
                 if (providerMetadata.length > 1) {
                     pluginPrefs.setNetworkProviderName(providerMetadata[1]);
                 }
-                pluginPrefs.apply();
             }
+
+            if(data.containsKey(PluginConst.PLUGIN_REMOTE_ACTIONS_LIST)) {
+                Parcelable[] parcelables = data.getParcelableArray(PluginConst.PLUGIN_REMOTE_ACTIONS_LIST);
+                if(parcelables != null) {
+                    PairRemoteAction[] remoteActions = new PairRemoteAction[parcelables.length];
+                    for(int i = 0; i < remoteActions.length; i++) {
+                        remoteActions[i] = (PairRemoteAction) parcelables[i];
+                    }
+
+                    pluginPrefs.setPairRemoteActions(remoteActions);
+                }
+            }
+            pluginPrefs.apply();
 
             try {
                 String title = data.getString(PluginConst.PLUGIN_TITLE);

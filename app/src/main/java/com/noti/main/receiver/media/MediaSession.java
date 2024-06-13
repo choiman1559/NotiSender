@@ -131,7 +131,7 @@ public class MediaSession {
                 albumArtRef.delete();
             }).start());
         } else if(np.has("albumArtBytes")) {
-            Bitmap albumArtRaw = CompressStringUtil.StringToBitmap(CompressStringUtil.decompressString(np.getString("albumArtBytes")));
+            Bitmap albumArtRaw = CompressStringUtil.getBitmapFromString(CompressStringUtil.decompressString(np.getString("albumArtBytes")));
             Bitmap albumArt = null;
             if (albumArtRaw != null) {
                 albumArt = Bitmap.createBitmap(albumArtRaw.getWidth(), albumArtRaw.getHeight(), albumArtRaw.getConfig());
@@ -343,7 +343,7 @@ public class MediaSession {
                 .setContentIntent(piOpenActivity)
                 .setSmallIcon(R.mipmap.ic_notification)
                 .setShowWhen(false)
-                .setColor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? context.getColor(R.color.primary) : context.getResources().getColor(R.color.primary))
+                .setColor(context.getColor(R.color.primary))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setSubText(deviceName);
 
@@ -438,7 +438,7 @@ public class MediaSession {
     }
 
     private int getIntentFlag() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT;
+        return PendingIntent.FLAG_IMMUTABLE;
     }
 
     public void closeMediaNotification() {

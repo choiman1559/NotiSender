@@ -71,12 +71,12 @@ public class CompressStringUtil {
         byte[] bytes = new byte[hex.length() / 2];
         for (int i = 0; i < hex.length(); i += 2) {
             byte value = (byte) Integer.parseInt(hex.substring(i, i + 2), 16);
-            bytes[(int) Math.floor(i / 2)] = value;
+            bytes[(int) (double) (i / 2)] = value;
         }
         return bytes;
     }
 
-    public static Bitmap StringToBitmap(String encodedString) {
+    public static Bitmap getBitmapFromString(String encodedString) {
         try {
             byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
             return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);

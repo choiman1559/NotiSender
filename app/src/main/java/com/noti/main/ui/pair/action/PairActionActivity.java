@@ -1,7 +1,7 @@
 package com.noti.main.ui.pair.action;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 
@@ -10,9 +10,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.noti.main.R;
+import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.utils.ui.PrefsCard;
+import com.noti.plugin.data.PairRemoteAction;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class PairActionActivity extends AppCompatActivity {
 
@@ -40,12 +43,35 @@ public class PairActionActivity extends AppCompatActivity {
             }
         }
 
+        for(String pluginName : PluginPrefs.getPluginList(this)) {
+            PluginPrefs pluginPrefs = new PluginPrefs(this, pluginName);
+            PairRemoteAction[] pairRemoteActions = pluginPrefs.getPairRemoteActions();
+
+            if(pluginPrefs.isPluginEnabled() && pairRemoteActions != null) {
+                for (PairRemoteAction action : pairRemoteActions) {
+                    if(action.getTargetDeviceTypeScope().length > 0
+                            && !Arrays.asList(action.getTargetDeviceTypeScope()).contains(Device_type)) {
+                        continue;
+                    }
+
+                    PrefsCard prefsCard = buildPrefsCard(new PairActionObj(action));
+                    toolsListLayout.addView(prefsCard);
+                }
+            }
+        }
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener((v) -> this.finish());
     }
 
     private PrefsCard buildPrefsCard(PairActionObj pairActionObj) {
-        int displayMode = 1 | 8;
+        int displayMode = 1;
+
+        Drawable actionIcon = pairActionObj.getDrawable(PairActionActivity.this);
+        if(actionIcon != null) {
+            displayMode |= 8;
+        }
+
         if(pairActionObj.actionDescription != null && !pairActionObj.actionDescription.isEmpty()) {
             displayMode |= 2;
         }
@@ -55,12 +81,12 @@ public class PairActionActivity extends AppCompatActivity {
         prefsCard.setIsIconAlignEnd(false);
         prefsCard.initDynamic();
 
-        @SuppressLint("DiscouragedApi")
-        int resId = getResources().getIdentifier(String.format("ic_fluent_%s_24_regular", pairActionObj.actionIcon), "drawable", getPackageName());
-        prefsCard.setIconDrawable(resId);
+        if(actionIcon != null) {
+            prefsCard.setIconDrawable(actionIcon);
+        }
 
-        prefsCard.setTitle(pairActionObj.actionType);
-        prefsCard.setDescription(pairActionObj.actionDescription);
+        prefsCard.setTitle(Objects.requireNonNullElse(pairActionObj.actionType, ""));
+        prefsCard.setDescription(Objects.requireNonNullElse(pairActionObj.actionDescription, ""));
         prefsCard.setOnClickListener((v) -> {
             try {
                 pairActionObj.openArgActivity(PairActionActivity.this, Device_name, Device_id, Device_type);

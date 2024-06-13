@@ -1,6 +1,7 @@
 package com.noti.main.utils.ui
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 import android.widget.CompoundButton
@@ -178,6 +179,13 @@ class PrefsCard(context: Context?, attrs: AttributeSet?) : LinearLayoutCompat(co
         if (containsTypeFlag(TYPE_ICON)) {
             imageSrc = resId
             itemIcon.setImageDrawable(AppCompatResources.getDrawable(context, resId))
+            requestLayout()
+        }
+    }
+
+    fun setIconDrawable(drawable: Drawable) {
+        if (containsTypeFlag(TYPE_ICON)) {
+            itemIcon.setImageDrawable(drawable)
             requestLayout()
         }
     }
