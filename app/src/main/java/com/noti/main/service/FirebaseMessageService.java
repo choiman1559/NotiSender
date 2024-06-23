@@ -256,7 +256,8 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 }
 
-                if (deviceDetailPrefs.getBoolean(map.get("device_id"), false)) {
+                String[] deviceDetails = deviceDetailPrefs.getString(map.get("device_id"), "").split("\\|");
+                if (deviceDetails.length > 0 && "true".equals(deviceDetails[0])) {
                     return;
                 }
 

@@ -47,7 +47,13 @@ public class PairActionObj implements Serializable {
     }
 
     public static PairActionObj buildFrom(String rawJson) {
-        return new Gson().fromJson(rawJson, PairActionObj.class);
+        PairActionObj obj = new Gson().fromJson(rawJson, PairActionObj.class);
+
+        if (obj.targetDeviceTypeScope == null) {
+            obj.targetDeviceTypeScope = new String[0];
+        }
+
+        return obj;
     }
 
     @Nullable

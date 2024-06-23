@@ -82,6 +82,7 @@ public class PairDetailActivity extends AppCompatActivity {
         deviceBlackListLayout.setVisibility(isComputer ? View.GONE : View.VISIBLE);
 
         batteryWarningReceive.setSwitchChecked(getDevicePrefsOrDefault(1));
+        batteryWarningReceive.setOnClickListener((v) -> batteryWarningReceive.setSwitchChecked(!batteryWarningReceive.isChecked()));
         batteryWarningReceive.setOnCheckedChangedListener((buttonView, isChecked) -> setDeviceDetailPrefs(isChecked, 1));
 
         remoteToggleLayout.setOnClickListener((v) -> {
@@ -206,7 +207,8 @@ public class PairDetailActivity extends AppCompatActivity {
             result.append(input).append("|");
         }
 
-        deviceDetailPrefs.edit().putString(Device_id, result.toString()).apply();
+        String resultString = result.toString();
+        deviceDetailPrefs.edit().putString(Device_id, resultString.substring(0, resultString.length() - 1)).apply();
     }
 
     boolean getDevicePrefsOrDefault(int index) {
@@ -219,7 +221,7 @@ public class PairDetailActivity extends AppCompatActivity {
     }
 
     boolean[] getDevicePrefsAsArray() {
-        String[] list = prefs.getString(Device_id, "").split("\\|");
+        String[] list = deviceDetailPrefs.getString(Device_id, "").split("\\|");
         boolean[] result = new boolean[list.length];
 
         for(int i = 0; i < list.length; i++) {

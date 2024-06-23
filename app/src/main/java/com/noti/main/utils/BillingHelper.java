@@ -15,6 +15,7 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.R;
 
+import com.vojtkovszky.billinghelper.BillingBuilderConfig;
 import com.vojtkovszky.billinghelper.BillingEvent;
 import com.vojtkovszky.billinghelper.BillingListener;
 
@@ -75,6 +76,7 @@ public class BillingHelper implements BillingListener {
                 ImmutableList.of(DonateID),
                 ImmutableList.of(SubscribeID),
                 true, APIKey.isEmpty() ? null : APIKey,
+                new BillingBuilderConfig(),
                 true, true, true,
                 BuildConfig.DEBUG, billingHelper
         );

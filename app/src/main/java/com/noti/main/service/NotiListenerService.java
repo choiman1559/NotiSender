@@ -3,10 +3,8 @@ package com.noti.main.service;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -210,13 +208,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     private String getSystemDialerApp(Context context) {
-        if (Build.VERSION.SDK_INT > 22) {
-            return ((TelecomManager) context.getSystemService(Context.TELECOM_SERVICE)).getDefaultDialerPackage();
-        } else {
-            Intent dialerIntent = new Intent(Intent.ACTION_DIAL).addCategory(Intent.CATEGORY_DEFAULT);
-            List<ResolveInfo> mResolveInfoList = context.getPackageManager().queryIntentActivities(dialerIntent, 0);
-            return mResolveInfoList.get(0).activityInfo.packageName;
-        }
+        return ((TelecomManager) context.getSystemService(Context.TELECOM_SERVICE)).getDefaultDialerPackage();
     }
 
     private boolean isTelephonyApp(Context context, String packageName) {
@@ -227,6 +219,11 @@ public class NotiListenerService extends NotificationListenerService {
         } catch (NullPointerException e) {
             return false;
         }
+    }
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        super.onNotificationRemoved(sbn);
     }
 
     @Override
@@ -251,7 +248,7 @@ public class NotiListenerService extends NotificationListenerService {
 
             boolean isLogging = BuildConfig.DEBUG;
 
-            if (!prefs.getString("UID", "").equals("") && prefs.getBoolean("serviceToggle", false)) {
+            if (!prefs.getString("UID", "").isEmpty() && prefs.getBoolean("serviceToggle", false)) {
                 String mode = prefs.getString("service", "reception");
                 if (mode.equals("send") || mode.equals("hybrid")) {
                     String TITLE = getNonNullString(extra.getString(Notification.EXTRA_TITLE));
@@ -290,7 +287,7 @@ public class NotiListenerService extends NotificationListenerService {
                                 JSONObject object = new JSONObject();
                                 String originString = logPrefs.getString("sendLogs", "");
 
-                                if (!originString.equals("")) array = new JSONArray(originString);
+                                if (!originString.isEmpty()) array = new JSONArray(originString);
                                 object.put("date", DATE);
                                 object.put("package", PackageName);
                                 object.put("title", extra.getString(Notification.EXTRA_TITLE));
@@ -382,25 +379,15 @@ public class NotiListenerService extends NotificationListenerService {
         try {
             if (prefs.getBoolean("IconUseNotification", false)) {
                 Context packageContext = createPackageContext(PackageName, CONTEXT_IGNORE_SECURITY);
+                Icon LargeIcon = notification.getLargeIcon();
+                Icon SmallIcon = notification.getSmallIcon();
 
-                if (Build.VERSION.SDK_INT > 22) {
-                    Icon LargeIcon = notification.getLargeIcon();
-                    Icon SmallIcon = notification.getSmallIcon();
-
-                    if (LargeIcon != null)
-                        ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(packageContext));
-                    else if (SmallIcon != null)
-                        ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(packageContext));
-                    else
-                        ICON = getBitmapFromDrawable(pm.getApplicationIcon(PackageName));
-                } else {
-                    Bitmap LargeIcon = notification.largeIcon;
-                    int SmallIcon = notification.icon;
-
-                    if (LargeIcon != null) ICON = LargeIcon;
-                    else if (SmallIcon != 0)
-                        ICON = getBitmapFromDrawable(packageContext.getDrawable(SmallIcon));
-                }
+                if (LargeIcon != null)
+                    ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(packageContext));
+                else if (SmallIcon != null)
+                    ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(packageContext));
+                else
+                    ICON = getBitmapFromDrawable(pm.getApplicationIcon(PackageName));
             } else {
                 ICON = getBitmapFromDrawable(pm.getApplicationIcon(PackageName));
             }
@@ -459,7 +446,7 @@ public class NotiListenerService extends NotificationListenerService {
     private boolean isBannedWords(String TEXT, String TITLE) {
         if (prefs.getBoolean("UseBannedOption", false)) {
             String word = prefs.getString("BannedWords", "");
-            if (!word.equals("")) {
+            if (!word.isEmpty()) {
                 String[] words = word.split("/");
                 for (String s : words) {
                     if ((TEXT != null && TEXT.contains(s)) || (TITLE != null && TITLE.contains(s)))
@@ -668,7 +655,7 @@ public class NotiListenerService extends NotificationListenerService {
         String DEVICE_ID = getUniqueID();
         String HmacToken = HMACCrypto.generateTokenIdentifier(DEVICE_NAME, DEVICE_ID);
 
-        if ((useEncryption && !rawPassword.equals("")) || isAlwaysEncryptData) {
+        if ((useEncryption && !rawPassword.isEmpty()) || isAlwaysEncryptData) {
             String uid = FirebaseAuth.getInstance().getUid();
             if (uid != null) {
                 String finalPassword = AESCrypto.parseAESToken(useEncryption ? AESCrypto.decrypt(rawPassword, AESCrypto.parseAESToken(uid)) : Base64.encodeToString(prefs.getString("Email", "").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
@@ -716,7 +703,7 @@ public class NotiListenerService extends NotificationListenerService {
             case "Firebase Cloud Message" ->
                     sendFCMNotificationWrapper(finalObject, PackageName, context);
             case "Pushy" -> {
-                if (!prefs.getString("ApiKey_Pushy", "").equals(""))
+                if (!prefs.getString("ApiKey_Pushy", "").isEmpty())
                     sendPushyNotification(finalObject, PackageName, context);
             }
             default -> {
