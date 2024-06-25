@@ -32,8 +32,9 @@ public class PairActionObj implements Serializable {
     Integer needArgsCount;
     String[] argsHintTexts;
 
+    @SuppressWarnings("unused")
     public PairActionObj() {
-
+        //Declare to prevent instant creator not found exception
     }
 
     public PairActionObj(PairRemoteAction pairRemoteAction) {

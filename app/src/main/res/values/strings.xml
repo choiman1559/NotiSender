@@ -57,4 +57,7 @@
     <string name="media_previous">Previous</string>
     <string name="media_next">Next</string>
     <string name="media_close">Close</string>
+
+    <string name="foreground_description_noti">A service used to read notifications in the background and synchronize notifications with other devices over the network</string>
+    <string name="foreground_description_fcm">A service used to interact with other devices over the FCM network</string>
 </resources>

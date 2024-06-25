@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.noti.main.utils.network.CompressStringUtil;
 
@@ -112,8 +113,9 @@ public class PairRemoteAction implements Parcelable {
         return targetDeviceTypeScope;
     }
 
+    @Nullable
     public Bitmap getActionIcon() {
-        return CompressStringUtil.getBitmapFromString(actionIcon);
+        return actionIcon == null ? null : CompressStringUtil.getBitmapFromString(actionIcon);
     }
 
     public String getPluginPackageName() {
