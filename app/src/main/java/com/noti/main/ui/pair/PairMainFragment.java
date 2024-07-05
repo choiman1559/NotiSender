@@ -29,7 +29,7 @@ import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.service.pair.PairDeviceType;
 import com.noti.main.ui.OptionActivity;
-import com.noti.main.ui.pair.action.PairActionActivity;
+import com.noti.main.ui.pair.action.impl.PairActionActivity;
 import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 

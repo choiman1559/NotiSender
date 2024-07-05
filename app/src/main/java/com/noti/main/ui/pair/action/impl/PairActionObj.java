@@ -1,4 +1,4 @@
-package com.noti.main.ui.pair.action;
+package com.noti.main.ui.pair.action.impl;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;

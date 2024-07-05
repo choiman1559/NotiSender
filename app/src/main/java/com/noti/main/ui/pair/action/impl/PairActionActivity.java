@@ -1,4 +1,4 @@
-package com.noti.main.ui.pair.action;
+package com.noti.main.ui.pair.action.impl;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -36,9 +36,10 @@ public class PairActionActivity extends AppCompatActivity {
         LinearLayout toolsListLayout = findViewById(R.id.tools_list);
         String[] actionArray = getResources().getStringArray(R.array.pairAction);
 
-        for(String action: actionArray) {
+        for(String action : actionArray) {
             PairActionObj obj = PairActionObj.buildFrom(action);
-            if(obj.targetDeviceTypeScope.length == 0 || Arrays.asList(obj.targetDeviceTypeScope).contains(Device_type)) {
+            if((obj.targetDeviceTypeScope == null || obj.targetDeviceTypeScope.length == 0)
+                    || Arrays.asList(obj.targetDeviceTypeScope).contains(Device_type)) {
                 toolsListLayout.addView(buildPrefsCard(obj));
             }
         }

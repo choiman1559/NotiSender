@@ -92,7 +92,8 @@
         <!-- Actions that doesn't need argument activity -->
         <item>"{\"actionType\":\"Trigger tasker event\", \"actionDescription\":\"Remotely call events defined in tasker\", \"actionIcon\"=\"star_settings\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": true, \"actionClass\": \"\", \"targetDeviceTypeScope\":[]}"</item>
         <item>"{\"actionType\":\"Remote File Explorer\", \"actionDescription\":\"Browse files of other devices\", \"actionIcon\"=\"folder\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": false, \"actionClass\": \"com.noti.main.service.refiler.ReFileActivity\", \"targetDeviceTypeScope\": [\"Phone\", \"Tablet\", \"Television\", \"Smartwatch\"]}"</item>
-        <item>"{\"actionType\":\"Presentation remote control\", \"actionDescription\":\"Use this device as remote controller\", \"actionIcon\"=\"device_meeting_room_remote\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": false, \"actionClass\": \"com.noti.main.ui.pair.PresentationActivity\", \"targetDeviceTypeScope\": [\"Desktop\", \"Laptop\"]}"</item>
+        <item>"{\"actionType\":\"Live Notifications\", \"actionDescription\":\"View all real-time notifications remotely\", \"actionIcon\"=\"iot_alert\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": false, \"actionClass\": \"com.noti.main.ui.pair.action.LiveNotificationActivity\", \"targetDeviceTypeScope\": [\"Phone\", \"Tablet\", \"Television\", \"Smartwatch\"]}"</item>
+        <item>"{\"actionType\":\"Presentation remote control\", \"actionDescription\":\"Use this device as remote controller\", \"actionIcon\"=\"device_meeting_room_remote\", \"needArgsCount\": 0, \"argsHintTexts\": [], \"isNeedArgs\": false, \"actionClass\": \"com.noti.main.ui.pair.action.PresentationActivity\", \"targetDeviceTypeScope\": [\"Desktop\", \"Laptop\"]}"</item>
     </string-array>
 
     <string-array name="device_type_list">

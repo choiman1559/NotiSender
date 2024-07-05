@@ -31,6 +31,7 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
+import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.media.MediaReceiver;
 import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.network.HMACCrypto;
@@ -156,7 +157,7 @@ public class NotiListenerService extends NotificationListenerService {
         return "";
     }
 
-    private static String getNonNullString(@Nullable String value) {
+    public static String getNonNullString(@Nullable String value) {
         return value == null ? "" : value;
     }
 
@@ -222,8 +223,9 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     @Override
-    public void onNotificationRemoved(StatusBarNotification sbn) {
-        super.onNotificationRemoved(sbn);
+    public void onListenerConnected() {
+        super.onListenerConnected();
+        LiveNotiProcess.mOnNotificationListListener = NotiListenerService.this::getActiveNotifications;
     }
 
     @Override

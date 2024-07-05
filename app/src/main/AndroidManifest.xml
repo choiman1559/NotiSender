@@ -71,14 +71,15 @@
             android:theme="@style/Theme.App.Palette.Dialog"/>
         <activity android:name=".ui.pair.PairingActivity"/>
         <activity android:name=".ui.pair.PairDetailActivity"/>
-        <activity android:name=".ui.pair.PresentationActivity"
+        <activity android:name=".ui.pair.action.PresentationActivity"
             android:theme="@style/Theme.App.Material3" />
         <activity android:name=".ui.pair.DeviceFindActivity"/>
-        <activity android:name=".ui.pair.action.ActionArgsActivity"/>
-        <activity android:name=".ui.pair.action.PairActionActivity"/>
+        <activity android:name=".ui.pair.action.impl.ActionArgsActivity"/>
+        <activity android:name=".ui.pair.action.impl.PairActionActivity"/>
+        <activity android:name=".ui.pair.action.LiveNotificationActivity"/>
         <activity
             android:label="Share Data"
-            android:name=".ui.pair.ShareDataActivity"
+            android:name=".ui.pair.action.ShareDataActivity"
             android:exported="true"
             android:theme="@style/Theme.App.Palette.Dialog">
             <intent-filter>

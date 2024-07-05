@@ -1,4 +1,4 @@
-package com.noti.main.ui.pair;
+package com.noti.main.ui.pair.action;
 
 
 import android.content.Intent;

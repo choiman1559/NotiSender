@@ -42,6 +42,7 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.receiver.plugin.PluginHostInject;
+import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.refiler.RemoteFileProcess;
 import com.noti.main.ui.pair.DeviceFindActivity;
 import com.noti.main.utils.network.HMACCrypto;
@@ -420,6 +421,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                         case "pair|remote_file" -> {
                             if (isTargetDevice(map) && isPairedDevice(map)) {
                                 RemoteFileProcess.onReceive(map, context);
+                            }
+                        }
+                        case "pair|live_notification" -> {
+                            if (isTargetDevice(map) && isPairedDevice(map)) {
+                                LiveNotiProcess.onProcessReceive(map, context);
                             }
                         }
                         case "pair|battery_warning" -> {
