@@ -1,6 +1,7 @@
 package com.noti.main.service.livenoti;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
@@ -18,11 +19,6 @@ import me.pushy.sdk.lib.jackson.core.JsonProcessingException;
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
 public class LiveNotiProcess {
-    /* TODO
-        - Swipe to remote notification remotely
-        - Transfer notification small icon
-        - Click to start notification action activity
-     */
 
     public static final String REQUEST_LIVE_NOTIFICATION = "request_live_notification";
     public static final String RESPONSE_LIVE_NOTIFICATION = "response_live_notification";
@@ -61,7 +57,7 @@ public class LiveNotiProcess {
         }
     }
 
-    public static String toStringLiveNotificationList(Context context) throws JsonProcessingException {
+    public static String toStringLiveNotificationList(Context context) throws JsonProcessingException, PackageManager.NameNotFoundException {
         if(mOnNotificationListListener != null) {
             ArrayList<StatusBarNotification> statusBarNotifications = new ArrayList<>(Arrays.asList(mOnNotificationListListener.onRequested()));
             ArrayList<String> keyList = new ArrayList<>();

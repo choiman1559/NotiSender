@@ -1,11 +1,15 @@
 package com.noti.main.ui.pair.action;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -23,6 +27,8 @@ import com.noti.main.R;
 import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.livenoti.LiveNotiRequests;
 import com.noti.main.service.livenoti.LiveNotificationData;
+import com.noti.main.ui.receive.NotificationViewActivity;
+import com.noti.main.utils.network.CompressStringUtil;
 
 import java.util.Locale;
 
@@ -30,6 +36,7 @@ public class LiveNotificationActivity extends AppCompatActivity {
 
     String Device_name;
     String Device_id;
+    LiveNotiItemHolder lastSelectedItemHolder = null;
 
     ScrollView liveNotiScrollView;
     SwipeRefreshLayout liveNotiRefreshLayout;
@@ -115,25 +122,100 @@ public class LiveNotificationActivity extends AppCompatActivity {
         liveNotiStateProgress.setVisibility(visible ? View.GONE : View.VISIBLE);
     }
 
-    private void makeListView(LiveNotificationData[] liveNotificationList) {
-        if(liveNotificationList.length > 0) for(LiveNotificationData liveNotificationObj : liveNotificationList) {
-            CoordinatorLayout liveNotiItem = (CoordinatorLayout) View.inflate(this, R.layout.cardview_rilenoti_item, null);
-            MaterialCardView liveNotiItemParent = liveNotiItem.findViewById(R.id.liveNotiItemParent);
+    private class LiveNotiItemHolder {
+        CoordinatorLayout liveNotiItem;
+        MaterialCardView liveNotiItemParent;
 
-            TextView liveNotiTitle = liveNotiItem.findViewById(R.id.notiTitle);
-            TextView liveNotiDescription = liveNotiItem.findViewById(R.id.notiDescription);
-            TextView liveNotiAppName = liveNotiItem.findViewById(R.id.appName);
+        RelativeLayout liveNotiActionMenuLayout;
+        Button remoteRunButton;
+        Button dismissButton;
+
+        TextView liveNotiTitle;
+        TextView liveNotiDescription;
+        TextView liveNotiAppName;
+
+        ImageView liveNotiSmallIcon;
+        ImageView liveNotiBigIcon;
+
+        public LiveNotiItemHolder(Context context, LiveNotificationData liveNotificationObj) {
+            liveNotiItem = (CoordinatorLayout) View.inflate(context, R.layout.cardview_rilenoti_item, null);
+            liveNotiItemParent = liveNotiItem.findViewById(R.id.liveNotiItemParent);
+
+            liveNotiTitle = liveNotiItem.findViewById(R.id.notiTitle);
+            liveNotiDescription = liveNotiItem.findViewById(R.id.notiDescription);
+            liveNotiAppName = liveNotiItem.findViewById(R.id.appName);
+            liveNotiSmallIcon = liveNotiItem.findViewById(R.id.notificationSmallIcon);
+            liveNotiBigIcon = liveNotiItem.findViewById(R.id.notificationBigIcon);
+
+            liveNotiActionMenuLayout = liveNotiItem.findViewById(R.id.liveNotiActionMenuLayout);
+            remoteRunButton = liveNotiItem.findViewById(R.id.remoteRunButton);
+            dismissButton = liveNotiItem.findViewById(R.id.dismissButton);
 
             liveNotiTitle.setText(liveNotificationObj.title);
             liveNotiDescription.setText(liveNotificationObj.message);
             liveNotiAppName.setText(String.format(Locale.getDefault(),"%s • %s",
                     liveNotificationObj.appName, getReadableTimeDiff(liveNotificationObj.postTime)));
 
-            liveNotiItemParent.setOnClickListener(v -> {
+            if(liveNotificationObj.smallIcon != null && !liveNotificationObj.smallIcon.isEmpty()) {
+                Bitmap smallBitmap = CompressStringUtil.getBitmapFromString(
+                        CompressStringUtil.decompressString(liveNotificationObj.smallIcon));
+                if(smallBitmap != null) {
+                    liveNotiSmallIcon.setImageBitmap(smallBitmap);
+                }
+            }
 
+            if(liveNotificationObj.bigIcon != null && !liveNotificationObj.bigIcon.isEmpty()) {
+                Bitmap smallBitmap = CompressStringUtil.getBitmapFromString(
+                        CompressStringUtil.decompressString(liveNotificationObj.bigIcon));
+                if(smallBitmap != null) {
+                    liveNotiBigIcon.setImageBitmap(smallBitmap);
+                } else {
+                    liveNotiBigIcon.setVisibility(View.GONE);
+                }
+            } else {
+                liveNotiBigIcon.setVisibility(View.GONE);
+            }
+
+            //TODO: wont work without noti listener service disabled
+            remoteRunButton.setOnClickListener((v) -> NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, true));
+            dismissButton.setOnClickListener((v) -> {
+                liveNotiLayout.removeView(liveNotiItem);
+                if(lastSelectedItemHolder == this) {
+                    lastSelectedItemHolder = null;
+                }
+                NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, false);
             });
 
-            liveNotiLayout.addView(liveNotiItem);
+            liveNotiActionMenuLayout.setVisibility(View.GONE);
+            liveNotiItemParent.setOnClickListener(v -> {
+                if(lastSelectedItemHolder != this) {
+                    if(lastSelectedItemHolder != null) {
+                        lastSelectedItemHolder.liveNotiTitle.setSingleLine(true);
+                        lastSelectedItemHolder.liveNotiDescription.setSingleLine(true);
+                        lastSelectedItemHolder.liveNotiActionMenuLayout.setVisibility(View.GONE);
+                    }
+                    lastSelectedItemHolder = this;
+                }
+
+                if(liveNotiActionMenuLayout.getVisibility() == View.GONE) {
+                    liveNotiTitle.setSingleLine(false);
+                    liveNotiDescription.setSingleLine(false);
+                    liveNotiActionMenuLayout.setVisibility(View.VISIBLE);
+                } else {
+                    liveNotiTitle.setSingleLine(true);
+                    liveNotiDescription.setSingleLine(true);
+                    liveNotiActionMenuLayout.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
+    private void makeListView(LiveNotificationData[] liveNotificationList) {
+        if(liveNotificationList.length > 0) {
+            for(LiveNotificationData liveNotificationObj : liveNotificationList) {
+                LiveNotiItemHolder liveNotiItemHolder = new LiveNotiItemHolder(this, liveNotificationObj);
+                liveNotiLayout.addView(liveNotiItemHolder.liveNotiItem);
+            }
             setNotiListVisibility(true);
         } else {
             showError("There are currently no notifications\ndisplayed on your device.", true);

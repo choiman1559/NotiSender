@@ -5,10 +5,17 @@ import static com.noti.main.service.NotiListenerService.getNonNullString;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
 import androidx.annotation.NonNull;
+
+import com.noti.main.service.NotiListenerService;
+import com.noti.main.utils.network.CompressStringUtil;
 
 import java.io.IOException;
 
@@ -29,13 +36,17 @@ public class LiveNotificationData {
     public String title;
     @JsonProperty
     public String message;
+    @JsonProperty
+    public String smallIcon;
+    @JsonProperty
+    public String bigIcon;
 
     @SuppressWarnings("unused")
     public LiveNotificationData() {
         // Default constructor for creating instance by ObjectMapper
     }
 
-    public LiveNotificationData(Context context, StatusBarNotification statusBarNotification) {
+    public LiveNotificationData(Context context, StatusBarNotification statusBarNotification) throws PackageManager.NameNotFoundException {
         this.postTime = statusBarNotification.getPostTime();
         this.key = statusBarNotification.getKey();
 
@@ -47,7 +58,9 @@ public class LiveNotificationData {
             this.appName = "";
         }
 
-        Bundle extras = statusBarNotification.getNotification().extras;
+        Notification notification = statusBarNotification.getNotification();
+        Bundle extras = notification.extras;
+
         String TITLE = getNonNullString(extras.getString(Notification.EXTRA_TITLE));
         String TEXT = getNonNullString(extras.getString(Notification.EXTRA_TEXT));
         String TEXT_LINES = getNonNullString(extras.getString(Notification.EXTRA_TEXT_LINES));
@@ -55,6 +68,34 @@ public class LiveNotificationData {
 
         this.title = TITLE;
         this.message = TEXT;
+
+        Context packageContext = context.createPackageContext(this.appPackage, Context.CONTEXT_IGNORE_SECURITY);
+        Icon smallIconObj = notification.getSmallIcon();
+        Icon bigIconObj = notification.getLargeIcon();
+
+        if(smallIconObj != null) {
+            Drawable iconDrawable = smallIconObj.loadDrawable(packageContext);
+            if(iconDrawable != null) {
+                iconDrawable.setTint(Color.BLACK);
+                Bitmap iconBitmap = NotiListenerService.getBitmapFromDrawable(iconDrawable);
+
+                if(iconBitmap != null) {
+                    iconBitmap.setHasAlpha(true);
+                    this.smallIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
+                            NotiListenerService.getResizedBitmap(iconBitmap,52,52, Color.BLACK)));
+                }
+            }
+        } else {
+            this.smallIcon = "";
+        }
+
+        if(bigIconObj != null) {
+            Bitmap bigIconBitmap = NotiListenerService.getBitmapFromDrawable(bigIconObj.loadDrawable(packageContext));
+            this.bigIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
+                    NotiListenerService.getResizedBitmap(bigIconBitmap,64,64)));
+        } else {
+            this.bigIcon = "";
+        }
     }
 
     public static LiveNotificationData parseFrom(String serializedMessage) throws IOException {

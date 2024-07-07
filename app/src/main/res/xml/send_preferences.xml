@@ -37,8 +37,8 @@
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:key="IconUseNotification"
-            android:summary="If notification icon isn't exists, app icon will be sent."
-            android:title="Send notification's icon instead of app icon (Unstable)" />
+            android:summary="Instead of app icon, Send notification's own icon"
+            android:title="Send notification icon" />
         <Preference
             android:icon="@drawable/ic_info_outline_black_24dp"
             android:key="IconWaring"

@@ -7,7 +7,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Build;
@@ -110,6 +115,10 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        return getResizedBitmap(bm, newWidth, newHeight, null);
+    }
+
+    public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight, @Nullable Integer backgroundColor) {
         int width = bm.getWidth();
         int height = bm.getHeight();
         float scaleWidth = ((float) newWidth) / width;
@@ -117,8 +126,17 @@ public class NotiListenerService extends NotificationListenerService {
 
         Matrix matrix = new Matrix();
         matrix.postScale(scaleWidth, scaleHeight);
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+
+        if(backgroundColor != null) {
+            Paint paint = new Paint();
+            ColorFilter filter = new PorterDuffColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN);
+            paint.setColorFilter(filter);
+
+            Canvas canvas = new Canvas(resizedBitmap);
+            canvas.drawBitmap(resizedBitmap, 0, 0, paint);
+        }
+
         bm.recycle();
         return resizedBitmap;
     }
@@ -378,6 +396,8 @@ public class NotiListenerService extends NotificationListenerService {
     private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT, String KEY) {
         PackageManager pm = this.getPackageManager();
         Bitmap ICON = null;
+        Integer iconTintColor = null;
+
         try {
             if (prefs.getBoolean("IconUseNotification", false)) {
                 Context packageContext = createPackageContext(PackageName, CONTEXT_IGNORE_SECURITY);
@@ -386,8 +406,14 @@ public class NotiListenerService extends NotificationListenerService {
 
                 if (LargeIcon != null)
                     ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(packageContext));
-                else if (SmallIcon != null)
-                    ICON = getBitmapFromDrawable(SmallIcon.loadDrawable(packageContext));
+                else if (SmallIcon != null) {
+                    Drawable iconDrawable = SmallIcon.loadDrawable(packageContext);
+                    if(iconDrawable != null) {
+                        iconTintColor = Color.BLACK;
+                        iconDrawable.setTint(iconTintColor);
+                        ICON = NotiListenerService.getBitmapFromDrawable(iconDrawable);
+                    }
+                }
                 else
                     ICON = getBitmapFromDrawable(pm.getApplicationIcon(PackageName));
             } else {
@@ -406,7 +432,9 @@ public class NotiListenerService extends NotificationListenerService {
                 case "36 x 36" -> 36;
                 default -> 0;
             };
-            ICONS = (res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(getResizedBitmap(ICON, res, res))));
+
+            Bitmap finalBitmap = (iconTintColor == null ? getResizedBitmap(ICON, res, res) : getResizedBitmap(ICON, res, res, iconTintColor));
+            ICONS = (res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(finalBitmap)));
         } else ICONS = "none";
 
         String DEVICE_NAME = NotiListenerService.getDeviceName();

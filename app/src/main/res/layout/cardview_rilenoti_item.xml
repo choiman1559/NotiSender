@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:theme="@style/Theme.App.Palette"
@@ -13,68 +12,138 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:backgroundTint="@color/ui_bg_surface"
         android:clickable="true"
         android:focusable="true"
-        android:backgroundTint="@color/ui_bg_surface"
         app:cardCornerRadius="24dp"
         app:cardElevation="3dp">
 
-        <RelativeLayout
+        <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="16dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/notificationIcon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_gravity="center"
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="16dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/notificationSmallIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginTop="2dp"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_fluent_alert_24_regular"
+                    tools:ignore="ContentDescription" />
+
+                <LinearLayout
+                    android:id="@+id/liveNotiLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/notificationSmallIcon"
+                    android:layout_toStartOf="@id/notificationBigIcon"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/appName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxEms="20"
+                        android:singleLine="true"
+                        android:text="AppName • 10m ago"
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/notiTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:maxEms="20"
+                        android:singleLine="true"
+                        android:text="Label or Title"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/notiDescription"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxEms="20"
+                        android:singleLine="true"
+                        android:text="Notification Description"
+                        android:textAppearance="?attr/textAppearanceSubtitle1"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/notificationBigIcon"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginTop="2dp"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_fluent_heart_broken_24_regular"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="ContentDescription" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/liveNotiActionMenuLayout"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_alignBottom="@id/liveNotiLayout"
                 android:layout_marginHorizontal="12dp"
-                android:layout_marginTop="2dp"
-                app:srcCompat="@drawable/ic_fluent_alert_24_regular"
-                tools:ignore="ContentDescription"
-                android:layout_alignParentStart="true"/>
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/round_corner"
+                android:backgroundTint="@color/ui_pair_device_action_background">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_toEndOf="@id/notificationIcon">
+                <Button
+                    android:id="@+id/remoteRunButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_toStartOf="@id/separator"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:backgroundTint="@android:color/transparent"
+                    android:drawableTop="@drawable/ic_fluent_open_24_regular"
+                    android:drawableTint="@color/ui_accent"
+                    android:text="Remote Run"
+                    android:textAllCaps="false"
+                    android:textColor="@color/ui_accent"
+                    tools:ignore="UnusedAttribute" />
 
-                <TextView
-                    android:id="@+id/appName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="AppName • 10m ago"
-                    android:textAppearance="?attr/textAppearanceSubtitle2"
-                    android:textSize="12sp"
-                    android:singleLine="true"
-                    android:maxEms="20"/>
+                <View
+                    android:id="@+id/separator"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/ui_bg" />
 
-                <TextView
-                    android:id="@+id/notiTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Label or Title"
-                    android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textSize="18sp"
-                    android:singleLine="true"
-                    android:maxEms="20"
-                    android:layout_marginTop="8dp"/>
-
-                <TextView
-                    android:id="@+id/notiDescription"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Notification Description"
-                    android:textAppearance="?attr/textAppearanceSubtitle1"
-                    android:textSize="15sp"
-                    android:singleLine="true"
-                    android:maxEms="20"
-                    android:layout_marginTop="2dp"/>
-            </LinearLayout>
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/dismissButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_toEndOf="@id/separator"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:backgroundTint="@android:color/transparent"
+                    android:drawableTop="@drawable/ic_fluent_dismiss_24_regular"
+                    android:drawableTint="@color/ui_accent"
+                    android:text="Dismiss"
+                    android:textAllCaps="false"
+                    android:textColor="@color/ui_accent"
+                    tools:ignore="UnusedAttribute" />
+            </RelativeLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>
     </com.google.android.material.card.MaterialCardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
