@@ -79,7 +79,7 @@ public class LiveNotiRequests {
         notificationBody.put(PacketConst.KEY_SEND_DEVICE_ID, sendDeviceId);
 
         JSONObject serverBody = new JSONObject();
-        serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_POST_LIVE_NOTIFICATION);
+        serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_POST_SHORT_TERM_DATA);
         serverBody.put(PacketConst.KEY_DATA_KEY, finalUniqueId);
         serverBody.put(PacketConst.KEY_UID, userId);
         serverBody.put(PacketConst.KEY_EXTRA_DATA, notificationData);
@@ -135,7 +135,7 @@ public class LiveNotiRequests {
         String finalUniqueId = shaAndHex(holdUniqueId + receivedUniqueId);
 
         JSONObject serverBody = new JSONObject();
-        serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_GET_LIVE_NOTIFICATION);
+        serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_GET_SHORT_TERM_DATA);
         serverBody.put(PacketConst.KEY_DATA_KEY, finalUniqueId);
         serverBody.put(PacketConst.KEY_UID, prefs.getString("UID", ""));
 

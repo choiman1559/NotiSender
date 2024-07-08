@@ -9,8 +9,8 @@ public class PacketConst {
     public final static String SERVICE_TYPE_FILE_TRANSFER = "type_file_transfer";
     public final static String SERVICE_TYPE_PING_SERVER = "type_ping";
 
-    public final static String REQUEST_POST_LIVE_NOTIFICATION = "request_post_live_notification";
-    public final static String REQUEST_GET_LIVE_NOTIFICATION = "request_get_live_notification";
+    public final static String REQUEST_POST_SHORT_TERM_DATA = "request_post_short_term_data";
+    public final static String REQUEST_GET_SHORT_TERM_DATA = "request_get_short_term_data";
 
     public final static String STATUS_ERROR = "error";
     public final static String STATUS_OK = "ok";
