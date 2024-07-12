@@ -1,5 +1,7 @@
 package com.noti.main.service.media;
 
+import static com.noti.main.utils.network.AESCrypto.shaAndHex;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,29 +17,36 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+
 import com.noti.main.Application;
+import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
+import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.ResultPacket;
+import com.noti.main.utils.PowerUtils;
 import com.noti.main.utils.network.CompressStringUtil;
+import com.noti.main.utils.network.JsonRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MediaReceiver {
     private MediaSessionChangeListener mediaSessionChangeListener;
     private final HashMap<String, MediaReceiverPlayer> players;
-    private final FirebaseStorage storage;
 
     private final SharedPreferences prefs;
     private final Context context;
 
-    private volatile int lastSendAlbumArt = 0;
+    private volatile String lastSentPacket = "";
+    private volatile String lastSendAlbumArt = "";
 
     private final class MediaSessionChangeListener implements MediaSessionManager.OnActiveSessionsChangedListener {
         @Override
@@ -55,7 +64,6 @@ public class MediaReceiver {
         this.context = context;
         players = new HashMap<>();
         prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        storage = FirebaseStorage.getInstance();
 
         try {
             MediaSessionManager manager = ContextCompat.getSystemService(context, MediaSessionManager.class);
@@ -142,7 +150,8 @@ public class MediaReceiver {
         players.put(player.getName(), player);
     }
 
-    void sendMetadata(MediaReceiverPlayer player) {
+    synchronized void sendMetadata(MediaReceiverPlayer player) {
+        PowerUtils.getInstance(context).acquire();
         if(!prefs.getBoolean("serviceToggle", false) || !prefs.getBoolean("UseMediaSync", false)) {
             return;
         }
@@ -152,7 +161,17 @@ public class MediaReceiver {
             if(player.getTitle().isEmpty()) return;
 
             Bitmap albumArt = player.getAlbumArt();
-            boolean isNeedSendAlbumArt = prefs.getBoolean("UseAlbumArt", false) && albumArt != null && lastSendAlbumArt != albumArt.hashCode();
+            boolean isNeedSendAlbumArt = false;
+            String serializedBitmap = "";
+
+            if(albumArt != null) {
+                serializedBitmap = CompressStringUtil.getStringFromBitmap(albumArt);
+                isNeedSendAlbumArt = prefs.getBoolean("UseAlbumArt", false) && !lastSendAlbumArt.equals(serializedBitmap);
+            }
+
+            if(BuildConfig.DEBUG) {
+                Log.d("AlbumArt", "isNeedTransfer: " + isNeedSendAlbumArt + " serialLength: " + serializedBitmap.length());
+            }
 
             np.put("player", player.getName());
             if (player.getArtist().isEmpty()) {
@@ -178,16 +197,21 @@ public class MediaReceiver {
             String DEVICE_NAME = NotiListenerService.getDeviceName();
             String DEVICE_ID = NotiListenerService.getUniqueID();
 
-
             JSONObject notificationBody = new JSONObject();
             notificationBody.put("type", "media|meta_data");
             notificationBody.put("device_name", DEVICE_NAME);
             notificationBody.put("device_id", DEVICE_ID);
             notificationBody.put("media_data", np.toString());
 
-            NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context);
+            if(lastSentPacket.isEmpty() || !notificationBody.toString().equals(lastSentPacket)) {
+                NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context);
+                lastSentPacket = notificationBody.toString();
+            } else {
+                return;
+            }
+
             if(isNeedSendAlbumArt) {
-                lastSendAlbumArt = albumArt.hashCode();
+                lastSendAlbumArt = serializedBitmap;
                 if(prefs.getBoolean("UseFcmWhenSendImage", false)) {
                     albumArt.setHasAlpha(true);
                     String albumArtStream = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(NotiListenerService.getResizedBitmap(albumArt, 16, 16)));
@@ -203,34 +227,54 @@ public class MediaReceiver {
 
                     NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context);
                 } else {
-                    StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-                    StorageReference albumArtRef = storageRef.child(prefs.getString("UID", "") + "/albumArt/" + albumArt.hashCode() + ".jpg");
-
-                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                    albumArt.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-                    byte[] data = bytes.toByteArray();
+                    int bitmapHashCode = albumArt.hashCode();
+                    String finalUniqueId = shaAndHex(DEVICE_ID + bitmapHashCode);
                     albumArt.recycle();
 
-                    UploadTask uploadTask = albumArtRef.putBytes(data);
-                    uploadTask.addOnSuccessListener(taskSnapshot -> {
+                    JSONObject serverBody = new JSONObject();
+                    serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_POST_SHORT_TERM_DATA);
+                    serverBody.put(PacketConst.KEY_DATA_KEY, finalUniqueId);
+                    serverBody.put(PacketConst.KEY_UID, prefs.getString("UID", ""));
+                    serverBody.put(PacketConst.KEY_EXTRA_DATA, serializedBitmap);
+
+                    serverBody.put(PacketConst.KEY_DEVICE_ID, DEVICE_ID);
+                    serverBody.put(PacketConst.KEY_DEVICE_NAME, DEVICE_NAME);
+
+                    final String URI = PacketConst.getApiAddress(PacketConst.SERVICE_TYPE_IMAGE_CACHE);
+                    final String contentType = "application/json";
+
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, serverBody, response -> {
                         try {
-                            JSONObject json = new JSONObject();
-                            json.put("albumArtHash", albumArt.hashCode());
-                            JSONObject newNotificationBody = new JSONObject();
+                            ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
+                            if(resultPacket.isResultOk()) {
+                                JSONObject json = new JSONObject();
+                                json.put("albumArtHash", bitmapHashCode);
+                                JSONObject newNotificationBody = new JSONObject();
 
-                            newNotificationBody.put("type", "media|meta_data");
-                            newNotificationBody.put("device_name", DEVICE_NAME);
-                            newNotificationBody.put("device_id", DEVICE_ID);
-                            newNotificationBody.put("media_data", json.toString());
+                                newNotificationBody.put("type", "media|meta_data");
+                                newNotificationBody.put("device_name", DEVICE_NAME);
+                                newNotificationBody.put("device_id", DEVICE_ID);
+                                newNotificationBody.put("media_data", json.toString());
 
-                            NotiListenerService.sendNotification(newNotificationBody, context.getPackageName(), context);
-                        } catch (JSONException e) {
+                                NotiListenerService.sendNotification(newNotificationBody, context.getPackageName(), context);
+                            }  else {
+                                throw new IOException(resultPacket.getErrorCause());
+                            }
+                        } catch (IOException | JSONException e) {
                             e.printStackTrace();
                         }
-                    });
+                    }, error -> { }) {
+                        @Override
+                        public Map<String, String> getHeaders() {
+                            Map<String, String> params = new HashMap<>();
+                            params.put("Content-Type", contentType);
+                            return params;
+                        }
+                    };
+                    JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
                 }
             }
-        } catch (JSONException e) {
+        } catch (JSONException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }

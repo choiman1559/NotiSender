@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.session.MediaSession;
-import android.util.Log;
 
 import com.noti.main.Application;
 import com.noti.main.service.FirebaseMessageService;
@@ -20,7 +19,6 @@ public class MediaBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if(!context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE).getBoolean("UseMediaSync", true)) return;
-        if(FirebaseMessageService.playingSessionMap == null) return;
 
         com.noti.main.receiver.media.MediaSession mMediaSession = FirebaseMessageService.playingSessionMap.get(intent.getStringExtra(EXTRA_DEVICE_ID));
         if (mMediaSession == null) return;

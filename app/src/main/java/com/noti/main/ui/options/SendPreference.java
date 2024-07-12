@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
@@ -24,14 +23,12 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreference;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 
 import com.noti.main.Application;
 import com.noti.main.R;
-import com.noti.main.utils.BillingHelper;
 import com.noti.main.utils.ui.ToastHelper;
 import com.noti.main.ui.prefs.BlacklistActivity;
 
@@ -130,11 +127,6 @@ public class SendPreference extends PreferenceFragmentCompat {
         SplitInterval = findPreference("SplitInterval");
         SplitAfterEncryption = findPreference("SplitAfterEncryption");
 
-        boolean isntUpOsM = Build.VERSION.SDK_INT < 22;
-        if (isntUpOsM) {
-            IconUseNotification.setEnabled(false);
-            IconUseNotification.setSummary("Works only on Android M and above!");
-        }
         boolean isSendIconEnabled = prefs.getBoolean("SendIcon", false);
         IconResolution.setVisible(isSendIconEnabled);
         IconWarning.setVisible(isSendIconEnabled);
@@ -213,24 +205,6 @@ public class SendPreference extends PreferenceFragmentCompat {
             return true;
         }));
 
-        try {
-            BillingHelper billingHelper = BillingHelper.getInstance();
-            if (!billingHelper.isSubscribedOrDebugBuild()) {
-                ((SwitchPreference) UseAlbumArt).setChecked(false);
-                UseAlbumArt.setEnabled(false);
-                ((SwitchPreference) UseFcmWhenSendImage).setChecked(false);
-                UseFcmWhenSendImage.setEnabled(false);
-                UseAlbumArt.setSummary("Requires Premium subscription");
-            }
-        } catch (IllegalStateException e) {
-            ToastHelper.show(mContext, "Error: Can't get purchase information!", ToastHelper.LENGTH_SHORT);
-            ((SwitchPreference) UseAlbumArt).setChecked(false);
-            UseAlbumArt.setEnabled(false);
-            ((SwitchPreference) UseFcmWhenSendImage).setChecked(false);
-            UseFcmWhenSendImage.setEnabled(false);
-            UseAlbumArt.setSummary("Requires Premium subscription");
-        }
-
         UseFcmWhenSendImage.setOnPreferenceChangeListener(((preference, newValue) -> {
             FcmWhenSendImageInfo.setVisible((boolean) newValue);
             return true;
@@ -295,7 +269,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
@@ -340,7 +314,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
@@ -395,7 +369,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else prefs.edit().putString("BannedWords", value).apply();
                 });
@@ -429,7 +403,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else prefs.edit().putString("DefaultTitle", value).apply();
                 });
@@ -463,7 +437,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else prefs.edit().putString("DefaultMessage", value).apply();
                 });
@@ -497,7 +471,7 @@ public class SendPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);

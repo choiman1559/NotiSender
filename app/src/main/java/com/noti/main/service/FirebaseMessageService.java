@@ -72,15 +72,16 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
@@ -98,7 +99,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     private static PowerUtils manager;
     public static volatile Ringtone lastPlayedRingtone;
-    public static HashMap<String, MediaSession> playingSessionMap;
+    public static final ConcurrentHashMap<String, MediaSession> playingSessionMap = new ConcurrentHashMap<>();
     public static final ArrayList<SplitDataObject> splitDataList = new ArrayList<>();
     public static final ArrayList<Integer> selfReceiveDetectorList = new ArrayList<>();
 
@@ -128,7 +129,6 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         pairPrefs = getSharedPreferences("com.noti.main_pair", MODE_PRIVATE);
         regexPrefs = getSharedPreferences("com.noti.main_regex", MODE_PRIVATE);
         deviceDetailPrefs = getSharedPreferences("com.noti.main_device.detail", MODE_PRIVATE);
-        playingSessionMap = new HashMap<>();
         manager = PowerUtils.getInstance(this);
         manager.acquire();
         NetworkProvider.setOnNetworkProviderListener(this.onProviderMessageListener);
@@ -289,16 +289,18 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             switch (type) {
                                 case "media|meta_data" -> {
                                     if (!isDeviceItself(map)) {
-                                        MediaSession current;
-                                        if (!playingSessionMap.containsKey(map.get("device_id"))) {
-                                            current = new MediaSession(this, map.get("device_name"), map.get("device_id"), prefs.getString("UID", ""));
-                                            playingSessionMap.put(map.get("device_id"), current);
-                                        } else {
-                                            current = playingSessionMap.get(map.get("device_id"));
-                                        }
+                                        synchronized (playingSessionMap) {
+                                            MediaSession current;
+                                            if (!playingSessionMap.containsKey(map.get("device_id"))) {
+                                                current = new MediaSession(this, map.get("device_name"), map.get("device_id"), prefs.getString("UID", ""));
+                                                playingSessionMap.put(map.get("device_id"), current);
+                                            } else {
+                                                current = playingSessionMap.get(map.get("device_id"));
+                                            }
 
-                                        assert current != null;
-                                        current.update(object);
+                                            assert current != null;
+                                            current.update(object);
+                                        }
                                     }
                                 }
                                 case "media|action" -> {
@@ -308,7 +310,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                                 }
                             }
                         }
-                    } catch (JSONException e) {
+                    } catch (JSONException | NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
                 }

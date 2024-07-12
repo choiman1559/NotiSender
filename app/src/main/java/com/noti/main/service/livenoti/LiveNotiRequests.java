@@ -1,11 +1,12 @@
 package com.noti.main.service.livenoti;
 
+import static com.noti.main.utils.network.AESCrypto.shaAndHex;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.common.util.Hex;
 
 import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
@@ -18,8 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
@@ -181,11 +180,5 @@ public class LiveNotiRequests {
         } else {
             LiveNotiProcess.callLiveNotificationUploadCompleteListener(false, null);
         }
-    }
-
-    public static String shaAndHex(String plainText) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        md.update(plainText.getBytes(StandardCharsets.UTF_8));
-        return Hex.bytesToStringLowercase(md.digest());
     }
 }

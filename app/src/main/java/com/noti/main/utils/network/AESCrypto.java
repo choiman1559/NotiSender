@@ -2,8 +2,12 @@ package com.noti.main.utils.network;
 
 import android.util.Base64;
 
+import com.google.android.gms.common.util.Hex;
+
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -44,5 +48,11 @@ public class AESCrypto {
         if (string.length() == 32) return string;
         string += "D~L*e/`/Q*a&h~e0jy$zU!sg?}X`CU*I";
         return string.substring(0, 32);
+    }
+
+    public static String shaAndHex(String plainText) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.update(plainText.getBytes(StandardCharsets.UTF_8));
+        return Hex.bytesToStringLowercase(md.digest());
     }
 }

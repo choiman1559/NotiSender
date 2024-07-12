@@ -2,16 +2,14 @@ package com.noti.main.service.media;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
-
-import androidx.annotation.Nullable;
 
 import com.noti.main.Application;
 
 class MediaReceiverCallback extends MediaController.Callback {
 
+    private volatile PlaybackState lastState;
     private final MediaReceiverPlayer player;
     private final MediaReceiver plugin;
     private final SharedPreferences prefs;
@@ -25,21 +23,12 @@ class MediaReceiverCallback extends MediaController.Callback {
     @Override
     public void onPlaybackStateChanged(PlaybackState state) {
         if(prefs.getBoolean("UseMediaSync", false)) {
-            plugin.sendMetadata(player);
-        }
-    }
+            if(lastState != null && lastState.equals(state)) {
+                return;
+            }
 
-    @Override
-    public void onMetadataChanged(@Nullable MediaMetadata metadata) {
-        if(prefs.getBoolean("UseMediaSync", false)) {
             plugin.sendMetadata(player);
-        }
-    }
-
-    @Override
-    public void onAudioInfoChanged(MediaController.PlaybackInfo info) {
-        if(prefs.getBoolean("UseMediaSync", false)) {
-            plugin.sendMetadata(player);
+            lastState = state;
         }
     }
 }
