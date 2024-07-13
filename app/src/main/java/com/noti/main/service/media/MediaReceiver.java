@@ -17,17 +17,14 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.utils.PowerUtils;
 import com.noti.main.utils.network.CompressStringUtil;
-import com.noti.main.utils.network.JsonRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +33,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MediaReceiver {
     private MediaSessionChangeListener mediaSessionChangeListener;
@@ -240,10 +236,7 @@ public class MediaReceiver {
                     serverBody.put(PacketConst.KEY_DEVICE_ID, DEVICE_ID);
                     serverBody.put(PacketConst.KEY_DEVICE_NAME, DEVICE_NAME);
 
-                    final String URI = PacketConst.getApiAddress(PacketConst.SERVICE_TYPE_IMAGE_CACHE);
-                    final String contentType = "application/json";
-
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, serverBody, response -> {
+                    PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_IMAGE_CACHE, serverBody, response -> {
                         try {
                             ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
                             if(resultPacket.isResultOk()) {
@@ -263,15 +256,7 @@ public class MediaReceiver {
                         } catch (IOException | JSONException e) {
                             e.printStackTrace();
                         }
-                    }, error -> { }) {
-                        @Override
-                        public Map<String, String> getHeaders() {
-                            Map<String, String> params = new HashMap<>();
-                            params.put("Content-Type", contentType);
-                            return params;
-                        }
-                    };
-                    JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
+                    }, error -> { });
                 }
             }
         } catch (JSONException | NoSuchAlgorithmException e) {

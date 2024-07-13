@@ -61,9 +61,9 @@ public class LiveNotificationData {
         Notification notification = statusBarNotification.getNotification();
         Bundle extras = notification.extras;
 
-        String TITLE = getNonNullString(extras.getString(Notification.EXTRA_TITLE));
-        String TEXT = getNonNullString(extras.getString(Notification.EXTRA_TEXT));
-        String TEXT_LINES = getNonNullString(extras.getString(Notification.EXTRA_TEXT_LINES));
+        String TITLE = getNonNullString(extras.getCharSequence(Notification.EXTRA_TITLE));
+        String TEXT = getNonNullString(extras.getCharSequence(Notification.EXTRA_TEXT));
+        String TEXT_LINES = getNonNullString(extras.getCharSequence(Notification.EXTRA_TEXT_LINES));
         if (!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
 
         this.title = TITLE;

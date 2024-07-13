@@ -5,22 +5,18 @@ import static com.noti.main.utils.network.AESCrypto.shaAndHex;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-
 import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.utils.network.AESCrypto;
-import com.noti.main.utils.network.JsonRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -88,10 +84,7 @@ public class LiveNotiRequests {
         serverBody.put(PacketConst.KEY_DEVICE_ID, deviceId);
         serverBody.put(PacketConst.KEY_DEVICE_NAME, deviceName);
 
-        final String URI = PacketConst.getApiAddress(PacketConst.SERVICE_TYPE_LIVE_NOTIFICATION);
-        final String contentType = "application/json";
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, serverBody, response -> {
+        PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_LIVE_NOTIFICATION, serverBody, response -> {
             try {
                 notificationBody.put(PacketConst.KEY_IS_SUCCESS, "true");
                 NotiListenerService.sendNotification(notificationBody, TAG, context);
@@ -105,15 +98,7 @@ public class LiveNotiRequests {
             } catch (JSONException e) {
                 //ignore exception
             }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> params = new HashMap<>();
-                params.put("Content-Type", contentType);
-                return params;
-            }
-        };
-        JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
+        });
     }
 
     public static void getLiveNotificationData(Context context, Map<String, String> map) throws NoSuchAlgorithmException, JSONException {
@@ -143,37 +128,26 @@ public class LiveNotiRequests {
         serverBody.put(PacketConst.KEY_DEVICE_ID, deviceId);
         serverBody.put(PacketConst.KEY_DEVICE_NAME, deviceName);
 
-        final String URI = PacketConst.getApiAddress(PacketConst.SERVICE_TYPE_LIVE_NOTIFICATION);
-        final String contentType = "application/json";
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, serverBody, response -> {
-            try {
-                ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
-                if(resultPacket.isResultOk()) {
-                    String[] rawArray = new ObjectMapper().readValue(resultPacket.getExtraData(), String[].class);
-                    LiveNotificationData[] liveNotiArray = new LiveNotificationData[rawArray.length];
-                    for (int i = 0; i < rawArray.length; i++) {
-                        liveNotiArray[i] = LiveNotificationData.parseFrom(rawArray[i]);
-                    }
-                    LiveNotiProcess.callLiveNotificationUploadCompleteListener(true, liveNotiArray);
-                }  else {
-                    throw new IOException(resultPacket.getErrorCause());
-                }
-            } catch (IOException e) {
-                LiveNotiProcess.callLiveNotificationUploadCompleteListener(false, null);
-                e.printStackTrace();
-            }
-        }, error -> LiveNotiProcess.callLiveNotificationUploadCompleteListener(false, null)) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> params = new HashMap<>();
-                params.put("Content-Type", contentType);
-                return params;
-            }
-        };
-
         if("true".equals(map.get(PacketConst.KEY_IS_SUCCESS))) {
-            JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
+            PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_LIVE_NOTIFICATION, serverBody, response -> {
+                try {
+                    ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
+                    if(resultPacket.isResultOk()) {
+                        String[] rawArray = new ObjectMapper().readValue(resultPacket.getExtraData(), String[].class);
+                        LiveNotificationData[] liveNotiArray = new LiveNotificationData[rawArray.length];
+                        for (int i = 0; i < rawArray.length; i++) {
+                            liveNotiArray[i] = LiveNotificationData.parseFrom(rawArray[i]);
+                        }
+                        LiveNotiProcess.callLiveNotificationUploadCompleteListener(true, liveNotiArray);
+                    }  else {
+                        throw new IOException(resultPacket.getErrorCause());
+                    }
+                } catch (IOException e) {
+                    LiveNotiProcess.callLiveNotificationUploadCompleteListener(false, null);
+                    e.printStackTrace();
+                }
+            }, error -> LiveNotiProcess.callLiveNotificationUploadCompleteListener(false, null));
+
             if(LiveNotiProcess.mOnLiveNotificationUploadCompleteListener != null) {
                 LiveNotiProcess.mOnLiveNotificationUploadCompleteListener.onReceive(true, null);
             }

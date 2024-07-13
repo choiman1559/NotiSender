@@ -212,11 +212,22 @@ public class LiveNotificationActivity extends AppCompatActivity {
 
     private void makeListView(LiveNotificationData[] liveNotificationList) {
         if(liveNotificationList.length > 0) {
+            int liveNotificationCount = 0;
             for(LiveNotificationData liveNotificationObj : liveNotificationList) {
+                if(liveNotificationObj.title.isEmpty() && liveNotificationObj.message.isEmpty() && liveNotificationObj.bigIcon.isEmpty()) {
+                    continue;
+                }
+
                 LiveNotiItemHolder liveNotiItemHolder = new LiveNotiItemHolder(this, liveNotificationObj);
                 liveNotiLayout.addView(liveNotiItemHolder.liveNotiItem);
+                liveNotificationCount += 1;
             }
-            setNotiListVisibility(true);
+
+            if(liveNotificationCount > 0) {
+                setNotiListVisibility(true);
+            } else {
+                showError("There are currently no notifications\ndisplayed on your device.", true);
+            }
         } else {
             showError("There are currently no notifications\ndisplayed on your device.", true);
         }

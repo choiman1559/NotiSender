@@ -35,6 +35,25 @@
             android:title="Check data integrity" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Server">
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_server_link_24_regular"
+            android:key="useDebugBackend"
+            android:title="Use test server"
+            android:summary="Use debug-enabled server for development" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_lock_closed_key_24_regular"
+            android:key="notUseAuthentication"
+            android:title="Disable token authentication"
+            android:summary="Communication may fail depending on the server's configuration" />
+        <Preference
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:key="EncryptionInfo"
+            android:summary="Changing options on these backend servers does not guarantee availability or reliability." />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Interface">
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"

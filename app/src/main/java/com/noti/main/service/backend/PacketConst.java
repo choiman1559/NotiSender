@@ -1,7 +1,5 @@
 package com.noti.main.service.backend;
 
-import com.noti.main.BuildConfig;
-
 @SuppressWarnings("unused")
 public class PacketConst {
 
@@ -35,12 +33,9 @@ public class PacketConst {
     public final static String KEY_DATA_KEY = "data_key";
     public final static String KEY_EXTRA_DATA = "extra_data";
 
+    public final static String contentType = "application/json";
     public final static String API_ROUTE_SCHEMA = "%s/%s/v1/service=%s";
     public final static String API_DOMAIN = "https://cuj1559.asuscomm.com";
     public final static String API_PUBLIC_ROUTE = "api";
     public final static String API_DEBUG_ROUTE = "api_test";
-
-    public static String getApiAddress(String serviceType) {
-        return String.format(API_ROUTE_SCHEMA, API_DOMAIN, BuildConfig.DEBUG ? API_DEBUG_ROUTE : API_PUBLIC_ROUTE, serviceType);
-    }
 }

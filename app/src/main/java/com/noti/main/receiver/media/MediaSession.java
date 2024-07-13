@@ -20,27 +20,22 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.StartActivity;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.utils.PowerUtils;
-import com.noti.main.utils.network.JsonRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MediaSession {
     private static final int NOTIFICATION_ID = 0xbdd2e171;
@@ -138,10 +133,7 @@ public class MediaSession {
             serverBody.put(PacketConst.KEY_SEND_DEVICE_ID, deviceId);
             serverBody.put(PacketConst.KEY_SEND_DEVICE_NAME, deviceName);
 
-            final String URI = PacketConst.getApiAddress(PacketConst.SERVICE_TYPE_IMAGE_CACHE);
-            final String contentType = "application/json";
-
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URI, serverBody, response -> {
+            PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_IMAGE_CACHE, serverBody, response -> {
                 try {
                     ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
                     if(resultPacket.isResultOk()) {
@@ -157,16 +149,7 @@ public class MediaSession {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }, error -> { }) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("Content-Type", contentType);
-                    return params;
-                }
-            };
-
-            JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
+            }, error -> { });
         } else if(np.has("albumArtBytes")) {
             Bitmap albumArtRaw = CompressStringUtil.getBitmapFromString(CompressStringUtil.decompressString(np.getString("albumArtBytes")));
             Bitmap albumArt = null;
@@ -372,7 +355,8 @@ public class MediaSession {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification = new NotificationCompat.Builder(context, MEDIA_CONTROL);
         } else {
-            notification = new NotificationCompat.Builder(context);
+            //noinspection deprecation: For compatibility with lower Android SDKs
+            notification = new NotificationCompat.Builder(context); //
         }
 
         notification

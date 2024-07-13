@@ -175,8 +175,14 @@ public class NotiListenerService extends NotificationListenerService {
         return "";
     }
 
-    public static String getNonNullString(@Nullable String value) {
-        return value == null ? "" : value;
+    public static String getNonNullString(@Nullable Object value) {
+        if(value == null) {
+            return "";
+        } else if(value instanceof CharSequence) {
+            return value.toString();
+        }
+
+        return "";
     }
 
     private void QueryGC() {
@@ -271,9 +277,9 @@ public class NotiListenerService extends NotificationListenerService {
             if (!prefs.getString("UID", "").isEmpty() && prefs.getBoolean("serviceToggle", false)) {
                 String mode = prefs.getString("service", "reception");
                 if (mode.equals("send") || mode.equals("hybrid")) {
-                    String TITLE = getNonNullString(extra.getString(Notification.EXTRA_TITLE));
-                    String TEXT = getNonNullString(extra.getString(Notification.EXTRA_TEXT));
-                    String TEXT_LINES = getNonNullString(extra.getString(Notification.EXTRA_TEXT_LINES));
+                    String TITLE = getNonNullString(extra.getCharSequence(Notification.EXTRA_TITLE));
+                    String TEXT = getNonNullString(extra.getCharSequence(Notification.EXTRA_TEXT));
+                    String TEXT_LINES = getNonNullString(extra.getCharSequence(Notification.EXTRA_TEXT_LINES));
                     if (!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
                     String PackageName = sbn.getPackageName();
 
