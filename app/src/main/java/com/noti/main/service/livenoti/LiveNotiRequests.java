@@ -76,13 +76,9 @@ public class LiveNotiRequests {
         JSONObject serverBody = new JSONObject();
         serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_POST_SHORT_TERM_DATA);
         serverBody.put(PacketConst.KEY_DATA_KEY, finalUniqueId);
-        serverBody.put(PacketConst.KEY_UID, userId);
         serverBody.put(PacketConst.KEY_EXTRA_DATA, notificationData);
-
         serverBody.put(PacketConst.KEY_SEND_DEVICE_ID, sendDeviceId);
         serverBody.put(PacketConst.KEY_SEND_DEVICE_NAME, sendDeviceName);
-        serverBody.put(PacketConst.KEY_DEVICE_ID, deviceId);
-        serverBody.put(PacketConst.KEY_DEVICE_NAME, deviceName);
 
         PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_LIVE_NOTIFICATION, serverBody, response -> {
             try {
@@ -102,10 +98,6 @@ public class LiveNotiRequests {
     }
 
     public static void getLiveNotificationData(Context context, Map<String, String> map) throws NoSuchAlgorithmException, JSONException {
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-
-        String deviceId = NotiListenerService.getUniqueID();
-        String deviceName = NotiListenerService.getDeviceName();
         String sendDeviceId = map.get(PacketConst.KEY_DEVICE_ID);
         String sendDeviceName = map.get(PacketConst.KEY_DEVICE_NAME);
 
@@ -121,12 +113,8 @@ public class LiveNotiRequests {
         JSONObject serverBody = new JSONObject();
         serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_GET_SHORT_TERM_DATA);
         serverBody.put(PacketConst.KEY_DATA_KEY, finalUniqueId);
-        serverBody.put(PacketConst.KEY_UID, prefs.getString("UID", ""));
-
         serverBody.put(PacketConst.KEY_SEND_DEVICE_ID, sendDeviceId);
         serverBody.put(PacketConst.KEY_SEND_DEVICE_NAME, sendDeviceName);
-        serverBody.put(PacketConst.KEY_DEVICE_ID, deviceId);
-        serverBody.put(PacketConst.KEY_DEVICE_NAME, deviceName);
 
         if("true".equals(map.get(PacketConst.KEY_IS_SUCCESS))) {
             PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_LIVE_NOTIFICATION, serverBody, response -> {

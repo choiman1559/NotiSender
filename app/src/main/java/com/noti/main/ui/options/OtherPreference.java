@@ -28,11 +28,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
+import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.ui.prefs.custom.CustomFragment;
 import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.ui.ToastHelper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.Date;
+import java.util.Locale;
 
 import me.pushy.sdk.Pushy;
 
@@ -51,6 +59,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
     Preference UpdateChannel;
     Preference SaveLastSelectedItem;
     Preference NewCardRadius;
+    Preference PingTestBackend;
 
     Preference UseDataEncryption;
     Preference UseDataEncryptionPassword;
@@ -95,6 +104,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
         UpdateChannel = findPreference("UpdateChannel");
         SaveLastSelectedItem = findPreference("SaveLastSelectedItem");
         NewCardRadius = findPreference("NewCardRadius");
+        PingTestBackend = findPreference("PingTestBackend");
 
         UseDataEncryption = findPreference("UseDataEncryption");
         UseDataEncryptionPassword = findPreference("UseDataEncryptionPassword");
@@ -120,7 +130,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
             return true;
         });
 
-        boolean ifUIDBlank = prefs.getString("UID", "").equals("");
+        boolean ifUIDBlank = prefs.getString("UID", "").isEmpty();
         if(ifUIDBlank) {
             ((SwitchPreference)UseDataEncryption).setChecked(false);
             UseDataEncryption.setEnabled(false);
@@ -189,7 +199,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value", "DISMISS", ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
@@ -236,7 +246,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String value = editText.getText().toString();
-                    if (value.equals("")) {
+                    if (value.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input Value", "DISMISS", ToastHelper.LENGTH_SHORT);
                     } else {
                         int IntValue = Integer.parseInt(value);
@@ -293,20 +303,12 @@ public class OtherPreference extends PreferenceFragmentCompat {
             case "TestNotification":
                 Notify.NotifyImportance importance;
                 String value = prefs.getString("importance", "Default");
-                switch (value) {
-                    case "Default":
-                        importance = Notify.NotifyImportance.MAX;
-                        break;
-                    case "Low":
-                        importance = Notify.NotifyImportance.LOW;
-                        break;
-                    case "High":
-                        importance = Notify.NotifyImportance.HIGH;
-                        break;
-                    default:
-                        importance = Notify.NotifyImportance.MIN;
-                        break;
-                }
+                importance = switch (value) {
+                    case "Default" -> Notify.NotifyImportance.MAX;
+                    case "Low" -> Notify.NotifyImportance.LOW;
+                    case "High" -> Notify.NotifyImportance.HIGH;
+                    default -> Notify.NotifyImportance.MIN;
+                };
 
                 Notify.build(mContext)
                         .setTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
@@ -339,7 +341,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 editText.setGravity(Gravity.START);
 
                 String rawPassword = prefs.getString("EncryptionPassword", "");
-                if(rawPassword.equals("")) editText.setText("");
+                if(rawPassword.isEmpty()) editText.setText("");
                 else {
                     String uid = mAuth.getUid();
                     if(uid != null) {
@@ -362,7 +364,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
                 dialog.setPositiveButton("Apply", (d, w) -> {
                     String values = editText.getText().toString();
-                    if (values.equals("")) {
+                    if (values.isEmpty()) {
                         ToastHelper.show(mContext, "Please Input password","DISMISS", ToastHelper.LENGTH_SHORT);
                     } else if(values.length() > 20) {
                         ToastHelper.show(mContext, "Password too long! maximum 20 chars.", "DISMISS",ToastHelper.LENGTH_SHORT);
@@ -388,6 +390,53 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 dialog.setMessage(getString(R.string.Encryption_information));
                 dialog.setPositiveButton("Close", (d, w) -> { });
                 dialog.show();
+                break;
+
+            case "PingTestBackend":
+                ToastHelper.show(mContext, "Please wait for a minute to check...", ToastHelper.LENGTH_LONG);
+                long currentTime = System.currentTimeMillis();
+
+                try {
+                    JSONObject serverBody = new JSONObject();
+                    PacketRequester.addToRequestQueue(mContext, PacketConst.SERVICE_TYPE_PING_SERVER, serverBody, response -> {
+                        String cause = """
+                                Time taken: %d (ms)
+                                Server Version: %s
+                                """;
+                        try {
+                            MaterialAlertDialogBuilder successDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                            successDialog.setTitle("Test Success");
+                            successDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                            successDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), ResultPacket.parseFrom(response.toString()).getExtraData()));
+                            successDialog.setPositiveButton("Close", (d, w) -> { });
+                            successDialog.show();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, error -> {
+                        String cause = """
+                                Time taken: %d (ms)
+                                Error code: %d
+                                """;
+                        MaterialAlertDialogBuilder errorDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                        errorDialog.setTitle("Test Failed");
+                        errorDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                        errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), error.networkResponse.statusCode));
+                        errorDialog.setPositiveButton("Close", (d, w) -> { });
+                        errorDialog.show();
+                    });
+                } catch (JSONException e) {
+                    String cause = """
+                                Time taken: %d (ms)
+                                Exception: %s
+                                """;
+                    MaterialAlertDialogBuilder errorDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                    errorDialog.setTitle("Test Failed");
+                    errorDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
+                    errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), e.getCause()));
+                    errorDialog.setPositiveButton("Close", (d, w) -> { });
+                    errorDialog.show();
+                }
                 break;
         }
         return super.onPreferenceTreeClick(preference);

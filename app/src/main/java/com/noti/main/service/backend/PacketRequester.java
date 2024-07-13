@@ -12,8 +12,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import com.noti.main.Application;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.utils.network.JsonRequest;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -22,11 +24,15 @@ import java.util.Objects;
 
 public class PacketRequester {
     public static void addToRequestQueue(Context context, String serviceType, JSONObject packetBody,
-                                         Response.Listener<org. json. JSONObject> listener, @Nullable Response.ErrorListener errorListener) {
+                                         Response.Listener<org. json. JSONObject> listener, @Nullable Response.ErrorListener errorListener) throws JSONException {
 
         SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
         final String URI = getApiAddress(serviceType, prefs.getBoolean("useDebugBackend", false));
         boolean notUseAuthentication = prefs.getBoolean("notUseAuthentication", false);
+
+        packetBody.put(PacketConst.KEY_UID, prefs.getString("UID", ""));
+        packetBody.put(PacketConst.KEY_DEVICE_ID, NotiListenerService.getUniqueID());
+        packetBody.put(PacketConst.KEY_DEVICE_NAME, NotiListenerService.getDeviceName());
 
         if(notUseAuthentication) {
             postPacket(context, null, URI, packetBody, listener, errorListener);

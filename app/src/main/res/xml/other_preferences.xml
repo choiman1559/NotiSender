@@ -52,6 +52,11 @@
             android:icon="@drawable/ic_info_outline_black_24dp"
             android:key="EncryptionInfo"
             android:summary="Changing options on these backend servers does not guarantee availability or reliability." />
+        <Preference
+            android:key="PingTestBackend"
+            android:icon="@drawable/ic_fluent_checkbox_checked_24_regular"
+            android:title="Perform ping test to server"
+            android:summary="Press this menu to check\nwhether server is alive or not" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Interface">

@@ -230,11 +230,7 @@ public class MediaReceiver {
                     JSONObject serverBody = new JSONObject();
                     serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_POST_SHORT_TERM_DATA);
                     serverBody.put(PacketConst.KEY_DATA_KEY, finalUniqueId);
-                    serverBody.put(PacketConst.KEY_UID, prefs.getString("UID", ""));
                     serverBody.put(PacketConst.KEY_EXTRA_DATA, serializedBitmap);
-
-                    serverBody.put(PacketConst.KEY_DEVICE_ID, DEVICE_ID);
-                    serverBody.put(PacketConst.KEY_DEVICE_NAME, DEVICE_NAME);
 
                     PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_IMAGE_CACHE, serverBody, response -> {
                         try {

@@ -23,7 +23,6 @@ import androidx.core.content.ContextCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
 import com.noti.main.StartActivity;
-import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.backend.PacketConst;
 import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
@@ -43,7 +42,6 @@ public class MediaSession {
     public final static String MEDIA_CONTROL = "media_control";
 
     private final SharedPreferences prefs;
-    private final String UID;
     private static String deviceId = "";
     private static String deviceName = "";
 
@@ -91,14 +89,13 @@ public class MediaSession {
         }
     };
 
-    public MediaSession(Context context, String device_name, String device_id, String userID) {
+    public MediaSession(Context context, String device_name, String device_id) {
         this.context = context;
         this.notificationPlayer = new MediaPlayer(context, device_name, device_id);
 
         prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
         deviceId = device_id;
         deviceName = device_name;
-        UID = userID;
         initMediaSession();
     }
 
@@ -125,11 +122,6 @@ public class MediaSession {
             JSONObject serverBody = new JSONObject();
             serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_GET_SHORT_TERM_DATA);
             serverBody.put(PacketConst.KEY_DATA_KEY, finalUniqueId);
-            serverBody.put(PacketConst.KEY_UID, UID);
-
-            serverBody.put(PacketConst.KEY_DEVICE_ID, NotiListenerService.getUniqueID());
-            serverBody.put(PacketConst.KEY_DEVICE_NAME, NotiListenerService.getDeviceName());
-
             serverBody.put(PacketConst.KEY_SEND_DEVICE_ID, deviceId);
             serverBody.put(PacketConst.KEY_SEND_DEVICE_NAME, deviceName);
 

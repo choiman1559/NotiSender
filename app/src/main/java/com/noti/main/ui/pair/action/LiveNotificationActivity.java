@@ -1,6 +1,7 @@
 package com.noti.main.ui.pair.action;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -29,6 +30,7 @@ import com.noti.main.service.livenoti.LiveNotiRequests;
 import com.noti.main.service.livenoti.LiveNotificationData;
 import com.noti.main.ui.receive.NotificationViewActivity;
 import com.noti.main.utils.network.CompressStringUtil;
+import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.Locale;
 
@@ -176,13 +178,18 @@ public class LiveNotificationActivity extends AppCompatActivity {
                 liveNotiBigIcon.setVisibility(View.GONE);
             }
 
-            remoteRunButton.setOnClickListener((v) -> NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, true, true));
+            remoteRunButton.setOnClickListener((v) -> {
+                NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, true, true);
+                ToastHelper.show((Activity) context, "Remote run request has been sent","Ok", ToastHelper.LENGTH_SHORT);
+            });
+
             dismissButton.setOnClickListener((v) -> {
                 liveNotiLayout.removeView(liveNotiItem);
                 if(lastSelectedItemHolder == this) {
                     lastSelectedItemHolder = null;
                 }
                 NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, false, true);
+                ToastHelper.show((Activity) context, "Dismiss request has been sent","Ok", ToastHelper.LENGTH_SHORT);
             });
 
             liveNotiActionMenuLayout.setVisibility(View.GONE);
