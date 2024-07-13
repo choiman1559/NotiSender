@@ -7,10 +7,7 @@
 
 [![version](https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQKUUtefY6l9YGHF0GmQAijrUAUueZcJqwGIA&usqp=CAU)](https://play.google.com/store/apps/details?id=com.noti.main)
 
-Send notifications to other android devices easily 
-
-**Plugin for NotiSender is now Available!**<br>
-Check full library document at [here](https://github.com/choiman1559/NotiSender-PluginLibrary)
+Send notifications to other android devices easily
 
 ## Awards
 
@@ -52,3 +49,27 @@ and mode "reception" is setting phone by client, get notifications from "send" m
 - Multiple customizable parameters
 
 **The Noti Sender development team always welcomes your issues, PRs.**
+
+## Related Repositories
+
+### Client & Server
+- [ServerBackend](https://github.com/choiman1559/NotiSender-ServerBackend) : Lightweight on-premises CDN backend
+- [Desktop](https://github.com/choiman1559/NotiSender-Desktop) : Electron-based Notisender desktop client
+
+### Plugins
+ - [PluginLibrary](https://github.com/choiman1559/NotiSender-PluginLibrary) : Framework library for creating plugins
+ - [PluginShowcase](https://github.com/choiman1559/NotiSender-PluginShowcase) : PluginLibrary usage live showcase
+ - [PluginMarket](https://github.com/choiman1559/NotiSender-PluginMarket) : Version control repository for managing plugins list
+ - [FileListPlugin](https://github.com/choiman1559/NotiSender-FileListPlugin) : API proxy plugin for file IO processing
+ - [TelephonyPlugin](https://github.com/choiman1559/NotiSender-TelephonyPlugin) : Plugin for reading phone and text information
+
+### Deprecated
+ - [Manager](https://github.com/choiman1559/NotiSender-manager) : Proxy application for installing and managing NotiSender
+ - [WearOS](https://github.com/choiman1559/NotiSender-WearOS) : Lightweight client specialized for WearOS
+
+### Related/Derived Projects
+ - [RemoteSync](https://github.com/choiman1559/RemoteSync) : Standardized modular implementation of the NotiSender P2P protocol
+ - [RemoteSync-Node](https://github.com/choiman1559/RemoteSync-Node) : Lightweight NodeJS implementation of RemoteSync
+ - [electron-push-receiver](https://github.com/choiman1559/electron-push-receiver) : Library for FCM HTTP v1 API response in NodeJS environment
+ - [SyncTAK](https://github.com/choiman1559/SyncTAK) : Tactical communications layer for ATAK using NotiSender's protocol technology
+ - [AmusePermit](https://github.com/choiman1559/AmusePermit) : A universal proxy framework for Android permission bypass
