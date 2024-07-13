@@ -19,6 +19,8 @@ import com.noti.main.BuildConfig;
 import com.noti.main.service.BitmapIPCManager;
 import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
+import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.livenoti.LiveNotiProcess;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,18 +83,30 @@ public class NotificationViewActivity extends Activity {
         receptionNotification(context, null, DEVICE_NAME, DEVICE_ID, KEY, isNeedToStartRemotely);
     }
 
+
     public static void receptionNotification(Context context, @Nullable String Package, String DEVICE_NAME, String DEVICE_ID, String KEY, boolean isNeedToStartRemotely) {
+        receptionNotification(context, Package, DEVICE_NAME, DEVICE_ID, KEY, isNeedToStartRemotely, false);
+    }
+
+    public static void receptionNotification(Context context, @Nullable String Package, String DEVICE_NAME, String DEVICE_ID, String KEY, boolean isNeedToStartRemotely, boolean isLiveNotiResponse) {
         SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE);
         boolean isDismiss = prefs.getBoolean("RemoteDismiss", false);
-        if(!(isDismiss || isNeedToStartRemotely)) return;
+        if(!(isDismiss || isNeedToStartRemotely || isLiveNotiResponse)) return;
         JSONObject notificationBody = new JSONObject();
 
         try {
             if(Package != null) notificationBody.put("package", Package);
-            if(isDismiss) notificationBody.put("notification_key", KEY);
+            if(isDismiss || isLiveNotiResponse) notificationBody.put("notification_key", KEY);
 
-            notificationBody.put("type","reception|normal");
+            if(isLiveNotiResponse) {
+                notificationBody.put("type","pair|live_notification");
+                notificationBody.put(PacketConst.KEY_ACTION_TYPE, LiveNotiProcess.REQUEST_NOTIFICATION_ACTION);
+            } else {
+                notificationBody.put("type","reception|normal");
+            }
+
             notificationBody.put("device_name", NotiListenerService.getDeviceName());
+            notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", DEVICE_NAME);
             notificationBody.put("send_device_id", DEVICE_ID);
             notificationBody.put("start_remote_activity", isNeedToStartRemotely ? "true" : "false");

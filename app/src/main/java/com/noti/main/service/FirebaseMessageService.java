@@ -272,7 +272,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
                     if ((NotiListenerService.getDeviceName()).equals(map.get("send_device_name")) && getUniqueID().equals(map.get("send_device_id"))) {
                         if (type.equals("reception|normal")) {
-                            startNewRemoteActivity(map);
+                            startNewRemoteActivity(this, map);
                         } else if (type.equals("reception|sms")) {
                             startNewRemoteSms(map);
                         }
@@ -549,21 +549,22 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         pairPrefs.edit().putStringSet("paired_list", list).apply();
     }
 
-    protected void startNewRemoteActivity(Map<String, String> map) {
+    public static void startNewRemoteActivity(Context context, Map<String, String> map) {
         if (map.containsKey("notification_key") && removeListener != null) {
             removeListener.onRequested(map.get("notification_key"));
         }
 
         if (!map.containsKey("start_remote_activity") || "true".equals(map.get("start_remote_activity"))) {
-            new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(FirebaseMessageService.this, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> Toast.makeText(context, "Remote run by NotiSender\nfrom " + map.get("device_name"), Toast.LENGTH_SHORT).show(), 0);
             String Package = map.get("package");
-            try {
-                getPackageManager().getPackageInfo(Package, PackageManager.GET_ACTIVITIES);
-                Intent intent = getPackageManager().getLaunchIntentForPackage(Package);
-                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            if(Package != null) try {
+                PackageManager pm = context.getPackageManager();
+                pm.getPackageInfo(Package, PackageManager.GET_ACTIVITIES);
+                Intent intent = pm.getLaunchIntentForPackage(Package);
+                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             } catch (Exception e) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
-                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             }
         }
     }

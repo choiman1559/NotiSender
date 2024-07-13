@@ -2,7 +2,6 @@ package com.noti.main.service.backend;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -39,7 +38,6 @@ public class PacketRequester {
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 String idToken = task.getResult().getToken();
-                                Log.d("ddd", "ddd3: " + idToken);
                                 postPacket(context, idToken, URI, packetBody, listener, errorListener);
                             } else {
                                 Objects.requireNonNull(task.getException()).printStackTrace();

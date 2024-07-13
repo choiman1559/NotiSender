@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.noti.main.BuildConfig;
+import com.noti.main.service.FirebaseMessageService;
 import com.noti.main.service.backend.PacketConst;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class LiveNotiProcess {
 
     public static final String REQUEST_LIVE_NOTIFICATION = "request_live_notification";
     public static final String RESPONSE_LIVE_NOTIFICATION = "response_live_notification";
+    public static final String REQUEST_NOTIFICATION_ACTION = "response_notification_action";
 
     public static onLiveNotificationUploadCompleteListener mOnLiveNotificationDownloadCompleteListener;
     public static onLiveNotificationUploadCompleteListener mOnLiveNotificationUploadCompleteListener;
@@ -46,6 +48,7 @@ public class LiveNotiProcess {
             switch (Objects.requireNonNull(map.get(PacketConst.KEY_ACTION_TYPE))) {
                 case REQUEST_LIVE_NOTIFICATION -> LiveNotiRequests.postLiveNotificationData(context, map);
                 case RESPONSE_LIVE_NOTIFICATION -> LiveNotiRequests.getLiveNotificationData(context, map);
+                case REQUEST_NOTIFICATION_ACTION -> FirebaseMessageService.startNewRemoteActivity(context, map);
                 default -> {
                     if(BuildConfig.DEBUG) {
                         Log.e("LiveNotification", "onProcessReceive failed: Action type is not supported: " + map.get(PacketConst.KEY_ACTION_TYPE));

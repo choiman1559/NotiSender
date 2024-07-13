@@ -176,14 +176,13 @@ public class LiveNotificationActivity extends AppCompatActivity {
                 liveNotiBigIcon.setVisibility(View.GONE);
             }
 
-            //TODO: wont work without noti listener service disabled
-            remoteRunButton.setOnClickListener((v) -> NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, true));
+            remoteRunButton.setOnClickListener((v) -> NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, true, true));
             dismissButton.setOnClickListener((v) -> {
                 liveNotiLayout.removeView(liveNotiItem);
                 if(lastSelectedItemHolder == this) {
                     lastSelectedItemHolder = null;
                 }
-                NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, false);
+                NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, false, true);
             });
 
             liveNotiActionMenuLayout.setVisibility(View.GONE);
