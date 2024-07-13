@@ -32,7 +32,7 @@ public class HolderFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_options, container, false);
-        view.setBackgroundColor(getResources().getColor(R.color.ui_bg_surface));
+        view.setBackgroundColor(getResources().getColor(R.color.ui_bg_surface, null));
 
         mToolbar = view.findViewById(R.id.toolbar);
         mToolbar.setTitle(R.string.app_name);

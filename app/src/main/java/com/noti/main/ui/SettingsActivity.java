@@ -237,7 +237,7 @@ public class SettingsActivity extends MonetCompatActivity {
         });
 
         boolean isNightMode = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-        ServiceToggle.setTextColor(getResources().getColor(isNightMode ? R.color.ui_bg : R.color.ui_fg));
+        ServiceToggle.setTextColor(getResources().getColor(isNightMode ? R.color.ui_bg : R.color.ui_fg, null));
 
         boolean isUIDBlank = prefs.getString("UID", "").isEmpty();
         if (isUIDBlank) {
@@ -377,31 +377,31 @@ public class SettingsActivity extends MonetCompatActivity {
         if (Application.isTablet()) {
             if (selectedCardView == null) {
                 selectedCardView = cardView;
-                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent));
+                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent, null));
 
                 if (isNightMode) {
                     ImageView icon = (ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0);
-                    icon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
+                    icon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg, null)));
 
                     LinearLayout layout = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
-                    ((TextView) layout.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
-                    ((TextView) layout.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+                    ((TextView) layout.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg, null));
+                    ((TextView) layout.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg, null));
                 }
             } else if (selectedCardView.getId() != cardView.getId()) {
-                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_bg));
-                cardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent));
+                selectedCardView.setCardBackgroundColor(getResources().getColor(R.color.ui_bg, null));
+                cardView.setCardBackgroundColor(getResources().getColor(R.color.ui_menu_accent, null));
 
                 if (isNightMode) {
-                    ((ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_fg)));
-                    ((ImageView) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg)));
+                    ((ImageView) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_fg, null)));
+                    ((ImageView) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(0)).setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.ui_bg, null)));
 
                     LinearLayout layout1 = (LinearLayout) ((RelativeLayout) selectedCardView.getChildAt(0)).getChildAt(1);
-                    ((TextView) layout1.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_fg));
-                    ((TextView) layout1.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_fg));
+                    ((TextView) layout1.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_fg, null));
+                    ((TextView) layout1.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_fg, null));
 
                     LinearLayout layout2 = (LinearLayout) ((RelativeLayout) cardView.getChildAt(0)).getChildAt(1);
-                    ((TextView) layout2.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg));
-                    ((TextView) layout2.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg));
+                    ((TextView) layout2.getChildAt(0)).setTextColor(getResources().getColor(R.color.ui_bg, null));
+                    ((TextView) layout2.getChildAt(1)).setTextColor(getResources().getColor(R.color.ui_bg, null));
                 }
                 selectedCardView = cardView;
             }
