@@ -18,12 +18,13 @@ import com.noti.main.service.NotiListenerService;
 import com.noti.main.utils.network.CompressStringUtil;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import me.pushy.sdk.lib.jackson.annotation.JsonProperty;
 import me.pushy.sdk.lib.jackson.core.JsonProcessingException;
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
-public class LiveNotificationData {
+public class LiveNotificationData implements Serializable {
     @JsonProperty
     public long postTime;
     @JsonProperty

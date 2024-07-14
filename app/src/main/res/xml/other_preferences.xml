@@ -50,7 +50,7 @@
             android:summary="Communication may fail depending on the server's configuration" />
         <Preference
             android:icon="@drawable/ic_info_outline_black_24dp"
-            android:key="EncryptionInfo"
+            android:key="backendOptionWarning"
             android:summary="Changing options on these backend servers does not guarantee availability or reliability." />
         <Preference
             android:key="PingTestBackend"

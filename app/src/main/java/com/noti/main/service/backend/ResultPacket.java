@@ -1,13 +1,14 @@
 package com.noti.main.service.backend;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Objects;
 
 import me.pushy.sdk.lib.jackson.annotation.JsonProperty;
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("unused")
-public class ResultPacket {
+public class ResultPacket implements Serializable {
     @JsonProperty
     private String status;
     @JsonProperty

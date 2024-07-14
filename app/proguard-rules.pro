@@ -21,6 +21,8 @@
 #-renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable        # Keep file names and line numbers.
 -keep public class * extends java.lang.Exception  # Optional: Keep custom exceptions.
+-keep class com.noti.** implements java.io.Serializable { *; }
+-keep class com.noti.** implements android.os.Parcelable { *; }
 
 -keep public class com.google.firebase.** { *; }
 -keep class com.google.auth.** { *; }
