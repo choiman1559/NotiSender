@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import androidx.annotation.Nullable;
 
@@ -20,7 +21,6 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class PacketRequester {
     public static void addToRequestQueue(Context context, String serviceType, JSONObject packetBody,
@@ -40,13 +40,20 @@ public class PacketRequester {
             FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
             if(mUser != null) {
                 mUser.getIdToken(true)
-                        .addOnFailureListener(task -> Objects.requireNonNull(task.getCause()).printStackTrace())
+                        .addOnFailureListener(task -> {
+                            if(errorListener != null) {
+                                errorListener.onErrorResponse(new VolleyError("Firebase Authentication Failed"));
+                            }
+                        })
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 String idToken = task.getResult().getToken();
                                 postPacket(context, idToken, URI, packetBody, listener, errorListener);
                             } else {
-                                Objects.requireNonNull(task.getException()).printStackTrace();
+                                Exception exception = task.getException();
+                                if(exception != null && errorListener != null) {
+                                    errorListener.onErrorResponse(new VolleyError(exception.getMessage()));
+                                }
                             }
                         });
             }

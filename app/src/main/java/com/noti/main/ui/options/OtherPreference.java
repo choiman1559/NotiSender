@@ -35,7 +35,6 @@ import com.noti.main.ui.prefs.custom.CustomFragment;
 import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.ui.ToastHelper;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -414,18 +413,29 @@ public class OtherPreference extends PreferenceFragmentCompat {
                             throw new RuntimeException(e);
                         }
                     }, error -> {
-                        String cause = """
-                                Time taken: %d (ms)
-                                Error code: %d
-                                """;
                         MaterialAlertDialogBuilder errorDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                        String cause;
+
+                        if(error.networkResponse == null) {
+                            cause = """
+                                Time taken: %d (ms)
+                                Exception: %s
+                                """;
+                            errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), error.getMessage()));
+                        } else {
+                            cause = """
+                                Time taken: %d (ms)
+                                Error code: %s
+                                """;
+                            errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), error.networkResponse.statusCode));
+                        }
+
                         errorDialog.setTitle("Test Failed");
                         errorDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-                        errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), error.networkResponse.statusCode));
                         errorDialog.setPositiveButton("Close", (d, w) -> { });
                         errorDialog.show();
                     });
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     String cause = """
                                 Time taken: %d (ms)
                                 Exception: %s
@@ -433,7 +443,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                     MaterialAlertDialogBuilder errorDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
                     errorDialog.setTitle("Test Failed");
                     errorDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-                    errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), e.getCause()));
+                    errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), e.getMessage()));
                     errorDialog.setPositiveButton("Close", (d, w) -> { });
                     errorDialog.show();
                 }
