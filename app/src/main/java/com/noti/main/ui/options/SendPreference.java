@@ -66,10 +66,6 @@ public class SendPreference extends PreferenceFragmentCompat {
     Preference UseFcmWhenSendImage;
     Preference FcmWhenSendImageInfo;
 
-    Preference UseSplitData;
-    Preference SplitInterval;
-    Preference SplitAfterEncryption;
-
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -122,10 +118,6 @@ public class SendPreference extends PreferenceFragmentCompat {
         UseAlbumArt = findPreference("UseAlbumArt");
         UseFcmWhenSendImage = findPreference("UseFcmWhenSendImage");
         FcmWhenSendImageInfo = findPreference("FcmWhenSendImageInfo");
-
-        UseSplitData = findPreference("UseSplitData");
-        SplitInterval = findPreference("SplitInterval");
-        SplitAfterEncryption = findPreference("SplitAfterEncryption");
 
         boolean isSendIconEnabled = prefs.getBoolean("SendIcon", false);
         IconResolution.setVisible(isSendIconEnabled);
@@ -207,17 +199,6 @@ public class SendPreference extends PreferenceFragmentCompat {
 
         UseFcmWhenSendImage.setOnPreferenceChangeListener(((preference, newValue) -> {
             FcmWhenSendImageInfo.setVisible((boolean) newValue);
-            return true;
-        }));
-
-        int splitIntervalValue = prefs.getInt("SplitInterval", 500);
-        boolean useSplit = prefs.getBoolean("UseSplitData", false);
-        SplitInterval.setVisible(useSplit);
-        SplitAfterEncryption.setVisible(useSplit);
-        SplitInterval.setSummary("Now : " + (splitIntervalValue == 500 ? "500 ms (Default)" : (splitIntervalValue < 1 ? "0 ms (Disabled)" : splitIntervalValue + " ms")));
-        UseSplitData.setOnPreferenceChangeListener(((preference, newValue) -> {
-            SplitInterval.setVisible((boolean) newValue);
-            SplitAfterEncryption.setVisible((boolean) newValue);
             return true;
         }));
 
@@ -444,50 +425,6 @@ public class SendPreference extends PreferenceFragmentCompat {
                 dialog.setNeutralButton("Reset Default", (d, w) -> prefs.edit().putString("DefaultMessage", "notification arrived.").apply());
                 dialog.setNegativeButton("Cancel", (d, w) -> {
                 });
-                dialog.show();
-                break;
-
-            case "SplitInterval":
-                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
-                dialog.setCancelable(false);
-                dialog.setTitle("Input Value");
-                dialog.setMessage("The interval maximum limit is 2147483647 ms and Input 0 or lower to disable this option.");
-
-                editText = new EditText(mContext);
-                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                editText.setHint("Input interval value");
-                editText.setGravity(Gravity.CENTER);
-                editText.setText(String.valueOf(prefs.getInt("SplitInterval", 0)));
-
-                parentLayout = new LinearLayout(mContext);
-                layoutParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutParams.setMargins(30, 16, 30, 16);
-                editText.setLayoutParams(layoutParams);
-                parentLayout.addView(editText);
-                dialog.setView(parentLayout);
-
-                dialog.setPositiveButton("Apply", (d, w) -> {
-                    String value = editText.getText().toString();
-                    if (value.isEmpty()) {
-                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
-                    } else {
-                        int IntValue = Integer.parseInt(value);
-                        if (IntValue > 0x7FFFFFFF - 1) {
-                            ToastHelper.show(mContext, "Value must be lower than 2147483647", "DISMISS",ToastHelper.LENGTH_SHORT);
-                        } else {
-                            prefs.edit().putInt("SplitInterval", IntValue).apply();
-                            SplitInterval.setSummary("Now : " + (IntValue == 500 ? "500 ms (Default)" : (IntValue < 1 ? "0 ms (Disabled)" : IntValue + " ms")));
-                        }
-                    }
-                });
-                dialog.setNeutralButton("Reset Default", (d, w) -> {
-                    prefs.edit().putInt("SplitInterval", 500).apply();
-                    SplitInterval.setSummary("Now : 500 ms (Default)");
-                });
-                dialog.setNegativeButton("Cancel", (d, w) -> {});
                 dialog.show();
                 break;
         }

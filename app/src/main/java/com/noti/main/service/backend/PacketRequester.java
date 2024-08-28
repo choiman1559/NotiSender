@@ -27,7 +27,7 @@ public class PacketRequester {
                                          Response.Listener<org. json. JSONObject> listener, @Nullable Response.ErrorListener errorListener) throws JSONException {
 
         SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        final String URI = getApiAddress(serviceType, prefs.getBoolean("useDebugBackend", false));
+        final String URI = getDefaultApiAddress(prefs, serviceType, prefs.getBoolean("useDebugBackend", false));
         boolean notUseAuthentication = prefs.getBoolean("notUseAuthentication", false);
 
         packetBody.put(PacketConst.KEY_UID, prefs.getString("UID", ""));
@@ -71,8 +71,10 @@ public class PacketRequester {
         JsonRequest.getInstance(context).addToRequestQueue(jsonObjectRequest);
     }
 
-    public static String getApiAddress(String serviceType, boolean isDebug) {
-        return String.format(PacketConst.API_ROUTE_SCHEMA, PacketConst.API_DOMAIN,
+    public static String getDefaultApiAddress(SharedPreferences prefs, String serviceType, boolean isDebug) {
+        // TODO: Auto-find available API addresses
+        String apiDomain = prefs.getString(PacketConst.API_PREFS_DOMAIN_KEY, PacketConst.API_DOMAIN);
+        return String.format(PacketConst.API_ROUTE_SCHEMA, apiDomain,
                 isDebug ? PacketConst.API_DEBUG_ROUTE : PacketConst.API_PUBLIC_ROUTE, serviceType);
     }
 

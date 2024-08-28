@@ -33,6 +33,7 @@ import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.ui.prefs.custom.CustomFragment;
 import com.noti.main.utils.network.AESCrypto;
+import com.noti.main.utils.ui.SwitchedPreference;
 import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONObject;
@@ -66,6 +67,12 @@ public class OtherPreference extends PreferenceFragmentCompat {
     Preference AlwaysEncryptData;
     Preference AllowOnlyPaired;
     Preference UseHMacAuth;
+
+    Preference UseBackendProxy;
+    Preference EnforceBackendProxy;
+    Preference UseSplitData;
+    Preference SplitInterval;
+    Preference SplitAfterEncryption;
 
     @NonNull
     @Override
@@ -112,6 +119,12 @@ public class OtherPreference extends PreferenceFragmentCompat {
         AllowOnlyPaired = findPreference("AllowOnlyPaired");
         UseHMacAuth = findPreference("UseHMacAuth");
 
+        UseBackendProxy = findPreference("UseBackendProxy");
+        EnforceBackendProxy = findPreference("EnforceBackendProxy");
+        UseSplitData = findPreference("UseSplitData");
+        SplitInterval = findPreference("SplitInterval");
+        SplitAfterEncryption = findPreference("SplitAfterEncryption");
+
         UseWiFiSleepPolicy.setOnPreferenceChangeListener((p, n) -> {
             Pushy.toggleWifiPolicyCompliance((boolean) n, mContext);
             return true;
@@ -156,6 +169,36 @@ public class OtherPreference extends PreferenceFragmentCompat {
             UseHMacAuth.setVisible((Boolean) newValue);
             return true;
         });
+
+        boolean useProxy = prefs.getBoolean("UseBackendProxy", true);
+        EnforceBackendProxy.setVisible(useProxy);
+        UseBackendProxy.setOnPreferenceChangeListener((preference, newValue) -> {
+            EnforceBackendProxy.setVisible((boolean) newValue);
+            if((boolean)(newValue)) {
+                prefs.edit().putBoolean("UseBackendProxy", false).apply();
+                ((SwitchedPreference)UseSplitData).setChecked(false);
+                SplitInterval.setVisible(false);
+                SplitAfterEncryption.setVisible(false);
+            }
+           return true;
+        });
+
+        int splitIntervalValue = prefs.getInt("SplitInterval", 500);
+        boolean useSplit = prefs.getBoolean("UseSplitData", false);
+        SplitInterval.setVisible(useSplit);
+        SplitAfterEncryption.setVisible(useSplit);
+        SplitInterval.setSummary("Now : " + (splitIntervalValue == 500 ? "500 ms (Default)" : (splitIntervalValue < 1 ? "0 ms (Disabled)" : splitIntervalValue + " ms")));
+        UseSplitData.setOnPreferenceChangeListener(((preference, newValue) -> {
+            if((boolean)(newValue)) {
+                ((SwitchedPreference)UseBackendProxy).setChecked(false);
+                prefs.edit().putBoolean("UseBackendProxy", false).apply();
+                EnforceBackendProxy.setVisible(false);
+            }
+
+            SplitInterval.setVisible((boolean) newValue);
+            SplitAfterEncryption.setVisible((boolean) newValue);
+            return true;
+        }));
 
         if(Application.isTablet()) {
             SaveLastSelectedItem.setVisible(true);
@@ -301,8 +344,8 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
             case "TestNotification":
                 Notify.NotifyImportance importance;
-                String value = prefs.getString("importance", "Default");
-                importance = switch (value) {
+                String importanceValue = prefs.getString("importance", "Default");
+                importance = switch (importanceValue) {
                     case "Default" -> Notify.NotifyImportance.MAX;
                     case "Low" -> Notify.NotifyImportance.LOW;
                     case "High" -> Notify.NotifyImportance.HIGH;
@@ -447,6 +490,50 @@ public class OtherPreference extends PreferenceFragmentCompat {
                     errorDialog.setPositiveButton("Close", (d, w) -> { });
                     errorDialog.show();
                 }
+                break;
+
+            case "SplitInterval":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
+                dialog.setCancelable(false);
+                dialog.setTitle("Input Value");
+                dialog.setMessage("The interval maximum limit is 2147483647 ms and Input 0 or lower to disable this option.");
+
+                editText = new EditText(mContext);
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                editText.setHint("Input interval value");
+                editText.setGravity(Gravity.CENTER);
+                editText.setText(String.valueOf(prefs.getInt("SplitInterval", 0)));
+
+                parentLayout = new LinearLayout(mContext);
+                layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(30, 16, 30, 16);
+                editText.setLayoutParams(layoutParams);
+                parentLayout.addView(editText);
+                dialog.setView(parentLayout);
+
+                dialog.setPositiveButton("Apply", (d, w) -> {
+                    String value = editText.getText().toString();
+                    if (value.isEmpty()) {
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
+                    } else {
+                        int IntValue = Integer.parseInt(value);
+                        if (IntValue > 0x7FFFFFFF - 1) {
+                            ToastHelper.show(mContext, "Value must be lower than 2147483647", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        } else {
+                            prefs.edit().putInt("SplitInterval", IntValue).apply();
+                            SplitInterval.setSummary("Now : " + (IntValue == 500 ? "500 ms (Default)" : (IntValue < 1 ? "0 ms (Disabled)" : IntValue + " ms")));
+                        }
+                    }
+                });
+                dialog.setNeutralButton("Reset Default", (d, w) -> {
+                    prefs.edit().putInt("SplitInterval", 500).apply();
+                    SplitInterval.setSummary("Now : 500 ms (Default)");
+                });
+                dialog.setNegativeButton("Cancel", (d, w) -> {});
+                dialog.show();
                 break;
         }
         return super.onPreferenceTreeClick(preference);

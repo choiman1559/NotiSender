@@ -25,8 +25,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 1012104
-        versionName "1.21.4"
+        versionCode 1012105
+        versionName "1.21.5"
 
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -75,7 +75,7 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
@@ -97,9 +97,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:21.2.0'
     implementation 'com.google.android.gms:play-services-location:21.3.0'
     implementation 'com.google.android.gms:play-services-maps:19.0.0'
-    implementation 'com.google.auth:google-auth-library-oauth2-http:1.24.0'
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.24.1'
 
-    implementation platform('com.google.firebase:firebase-bom:33.1.2')
+    implementation platform('com.google.firebase:firebase-bom:33.2.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
@@ -108,15 +108,15 @@ dependencies {
     implementation 'com.google.firebase:firebase-config'
     implementation 'com.google.firebase:firebase-storage'
 
-    implementation 'me.pushy:sdk:1.0.112'
+    implementation 'me.pushy:sdk:1.0.113'
     implementation "com.github.mvojtkovszky:BillingHelper:3.0.0"
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     implementation 'com.github.isradeleon:Notify-Android:1.0.4'
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.10'
-    implementation 'com.microsoft.design:fluent-system-icons:1.1.249@aar'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0'
+    implementation 'com.microsoft.design:fluent-system-icons:1.1.253@aar'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.20'
 }
 
 repositories {

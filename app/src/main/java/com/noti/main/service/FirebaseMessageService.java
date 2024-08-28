@@ -42,6 +42,9 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.receiver.plugin.PluginHostInject;
+import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
+import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.refiler.RemoteFileProcess;
 import com.noti.main.ui.pair.DeviceFindActivity;
@@ -230,6 +233,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             }
 
             if (prefs.getBoolean("serviceToggle", false)) {
+                if (PacketConst.SERVICE_TYPE_PACKET_PROXY.equals(type) && !isDeviceItself(map)) {
+                    processProxyData(map, context);
+                    return;
+                }
+
                 if ("split_data".equals(type) && !isDeviceItself(map)) {
                     processSplitData(map, context);
                     return;
@@ -468,6 +476,35 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     }
                 }
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void processProxyData(Map<String, String> map, Context context) {
+        try {
+            if (BuildConfig.DEBUG) Log.d("proxy_data", "Encountered proxy needs: " + map.get(PacketConst.KEY_DATA_KEY));
+            String sendDeviceId = map.get(PacketConst.KEY_DEVICE_ID);
+            String dataHashKey = AESCrypto.shaAndHex(sendDeviceId + map.get(PacketConst.KEY_DATA_KEY));
+
+            JSONObject serverBody = new JSONObject();
+            serverBody.put(PacketConst.KEY_SEND_DEVICE_NAME, map.get(PacketConst.KEY_DEVICE_NAME));
+            serverBody.put(PacketConst.KEY_SEND_DEVICE_ID, sendDeviceId);
+            serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_GET_SHORT_TERM_DATA);
+            serverBody.put(PacketConst.KEY_DATA_KEY, dataHashKey);
+
+            PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_PACKET_PROXY, serverBody, response -> {
+                try {
+                    ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
+                    if (resultPacket.isResultOk()) {
+                        Map<String, String> newMap = new ObjectMapper().readValue(resultPacket.getExtraData(), Map.class);
+                        preProcessReception(newMap, context);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }, Throwable::printStackTrace);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

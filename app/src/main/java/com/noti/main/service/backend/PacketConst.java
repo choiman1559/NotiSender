@@ -6,6 +6,7 @@ public class PacketConst {
     public final static String SERVICE_TYPE_LIVE_NOTIFICATION = "type_live_notification";
     public final static String SERVICE_TYPE_FILE_TRANSFER = "type_file_transfer";
     public final static String SERVICE_TYPE_IMAGE_CACHE = "type_image_cache";
+    public final static String SERVICE_TYPE_PACKET_PROXY = "type_packet_proxy";
     public final static String SERVICE_TYPE_PING_SERVER = "type_ping";
 
     public final static String REQUEST_POST_SHORT_TERM_DATA = "request_post_short_term_data";
@@ -35,7 +36,8 @@ public class PacketConst {
 
     public final static String contentType = "application/json";
     public final static String API_ROUTE_SCHEMA = "%s/%s/v1/service=%s";
-    public final static String API_DOMAIN = "https://cuj1559.asuscomm.com";
+    public final static String API_DOMAIN = "https://cuj1559.ddns.net";
     public final static String API_PUBLIC_ROUTE = "api";
     public final static String API_DEBUG_ROUTE = "api_test";
+    public final static String API_PREFS_DOMAIN_KEY = "preferred_domain";
 }

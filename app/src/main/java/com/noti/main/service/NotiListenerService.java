@@ -36,6 +36,9 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
+import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
+import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.media.MediaReceiver;
 import com.noti.main.utils.network.AESCrypto;
@@ -51,6 +54,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -622,12 +626,14 @@ public class NotiListenerService extends NotificationListenerService {
             }
             notification = serializationJson;
 
-            boolean useSplit = prefs.getBoolean("UseSplitData", false) && notification.getString("data").length() > 3072;
+            boolean useSplit = prefs.getBoolean("UseSplitData", false) && notification.length() > 3072;
             boolean useEncryption = prefs.getBoolean("UseDataEncryption", false);
             boolean splitAfterEncryption = prefs.getBoolean("SplitAfterEncryption", false);
+            boolean useBackendProxy = prefs.getBoolean("UseBackendProxy", true);
+            boolean enforceBackendProxy = prefs.getBoolean("EnforceBackendProxy", false);
             int splitInterval = prefs.getInt("SplitInterval", 500);
 
-            if (useSplit && !useFCMOnly) {
+            if (useSplit && !useFCMOnly && !useBackendProxy) {
                 if(useEncryption && splitAfterEncryption) notification = encryptData(notification);
                 for (JSONObject object : splitData(notification)) {
                     if(useEncryption && !splitAfterEncryption) object = encryptData(object);
@@ -641,7 +647,11 @@ public class NotiListenerService extends NotificationListenerService {
                 notification = encryptData(notification);
             }
 
-            finalProcessData(notification, PackageName, context, useFCMOnly);
+            if(useBackendProxy && (enforceBackendProxy || notification.length() > 2048)) {
+                proxyToBackend(notification, PackageName, context, useFCMOnly);
+            } else {
+                finalProcessData(notification, PackageName, context, useFCMOnly);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -673,6 +683,35 @@ public class NotiListenerService extends NotificationListenerService {
         }
 
         return data;
+    }
+
+    protected static void proxyToBackend(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) throws JSONException, NoSuchAlgorithmException {
+        String finalData = notification.toString();
+        String deviceId = getUniqueID();
+        String deviceName = getDeviceName();
+        String dataHashKey = AESCrypto.shaAndHex(deviceId + finalData.hashCode());
+
+        JSONObject serverBody = new JSONObject();
+        serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_POST_SHORT_TERM_DATA);
+        serverBody.put(PacketConst.KEY_DATA_KEY, dataHashKey);
+        serverBody.put(PacketConst.KEY_EXTRA_DATA, finalData);
+
+        PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_PACKET_PROXY, serverBody, response -> {
+            try {
+                ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
+                if(resultPacket.isResultOk()) {
+                    JSONObject responseObject = new JSONObject();
+                    responseObject.put(PacketConst.KEY_DEVICE_ID, deviceId);
+                    responseObject.put(PacketConst.KEY_DEVICE_NAME, deviceName);
+                    responseObject.put(PacketConst.KEY_DATA_KEY, Integer.toString(finalData.hashCode()));
+                    responseObject.put("type", PacketConst.SERVICE_TYPE_PACKET_PROXY);
+
+                    finalProcessData(responseObject, PackageName, context, useFCMOnly);
+                }
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            }
+        }, Throwable::printStackTrace);
     }
 
     protected static JSONObject encryptData(JSONObject data) throws Exception {

@@ -35,6 +35,39 @@
             android:title="Check data integrity" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Data downsize">
+        <Preference
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:key="downsizeOptionInfo"
+            android:summary="An alternative option for transmitting packets when the packet exceeds the maximum size limit (greater than 4Kb). There is only one choice between these alternative methods." />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_fluent_communication_24_regular"
+            android:key="UseBackendProxy"
+            android:summary="Packets are sent through a server operated by the NotiSender team"
+            android:title="Use Proxy" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="EnforceBackendProxy"
+            android:summary="Always using a proxy server regardless of packet size"
+            android:title="Enforce Proxy" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_fluent_split_vertical_24_regular"
+            android:key="UseSplitData"
+            android:summary="Transmitting packet in fragments if necessary"
+            android:title="Use data split transmission" />
+        <Preference
+            android:key="SplitInterval"
+            android:summary="Now : 500 ms (Default)"
+            android:title="Transmission interval between segmented packets" />
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="SplitAfterEncryption"
+            android:summary="Proceed data split after encrypting is done"
+            android:title="Split after encryption" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Server">
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
@@ -55,7 +88,7 @@
         <Preference
             android:key="PingTestBackend"
             android:icon="@drawable/ic_fluent_checkbox_checked_24_regular"
-            android:title="Perform ping test to server"
+            android:title="Perform server availability test"
             android:summary="Press this menu to check\nwhether server is alive or not" />
     </PreferenceCategory>
 

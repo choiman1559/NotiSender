@@ -133,22 +133,4 @@
             android:summary="Click here to set default message string"
             android:title="Customizing default message string" />
     </PreferenceCategory>
-
-    <PreferenceCategory android:title="Data split">
-        <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_fluent_split_vertical_24_regular"
-            android:key="UseSplitData"
-            android:summary="If the data is too large to be transmitted, it will be transmitted in fragments."
-            android:title="Use data split transmission" />
-        <Preference
-            android:key="SplitInterval"
-            android:summary="Now : 500 ms (Default)"
-            android:title="Transmission interval between segmented packets" />
-        <com.noti.main.utils.ui.SwitchedPreference
-            android:defaultValue="false"
-            android:key="SplitAfterEncryption"
-            android:summary="Proceed data split after encrypting is done"
-            android:title="Split after encryption" />
-    </PreferenceCategory>
 </PreferenceScreen>
