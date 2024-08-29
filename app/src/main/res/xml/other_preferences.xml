@@ -88,8 +88,8 @@
         <Preference
             android:key="PingTestBackend"
             android:icon="@drawable/ic_fluent_checkbox_checked_24_regular"
-            android:title="Perform server availability test"
-            android:summary="Press this menu to check\nwhether server is alive or not" />
+            android:title="Perform server calibration and availability test"
+            android:summary="Refresh the server address from the DB and test the response speed" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Interface">

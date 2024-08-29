@@ -72,7 +72,6 @@ public class PacketRequester {
     }
 
     public static String getDefaultApiAddress(SharedPreferences prefs, String serviceType, boolean isDebug) {
-        // TODO: Auto-find available API addresses
         String apiDomain = prefs.getString(PacketConst.API_PREFS_DOMAIN_KEY, PacketConst.API_DOMAIN);
         return String.format(PacketConst.API_ROUTE_SCHEMA, apiDomain,
                 isDebug ? PacketConst.API_DEBUG_ROUTE : PacketConst.API_PUBLIC_ROUTE, serviceType);

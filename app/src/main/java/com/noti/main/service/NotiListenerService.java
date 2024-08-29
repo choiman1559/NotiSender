@@ -26,6 +26,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -413,6 +414,12 @@ public class NotiListenerService extends NotificationListenerService {
                 Context packageContext = createPackageContext(PackageName, CONTEXT_IGNORE_SECURITY);
                 Icon LargeIcon = notification.getLargeIcon();
                 Icon SmallIcon = notification.getSmallIcon();
+
+                if(BuildConfig.DEBUG) {
+                    //TODO: refactor notification logic to LiveNotificationData Class
+                    Bitmap BigIcon = (Bitmap) notification.extras.get(NotificationCompat.EXTRA_LARGE_ICON_BIG);
+                    Bitmap BigPicture = (Bitmap) notification.extras.get(NotificationCompat.EXTRA_PICTURE);
+                }
 
                 if (LargeIcon != null)
                     ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(packageContext));

@@ -28,20 +28,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
-import com.noti.main.service.backend.PacketConst;
-import com.noti.main.service.backend.PacketRequester;
-import com.noti.main.service.backend.ResultPacket;
+import com.noti.main.ui.prefs.ServerPingActivity;
 import com.noti.main.ui.prefs.custom.CustomFragment;
 import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.ui.SwitchedPreference;
 import com.noti.main.utils.ui.ToastHelper;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.Date;
-import java.util.Locale;
-
 import me.pushy.sdk.Pushy;
 
 public class OtherPreference extends PreferenceFragmentCompat {
@@ -435,61 +428,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 break;
 
             case "PingTestBackend":
-                ToastHelper.show(mContext, "Please wait for a minute to check...", ToastHelper.LENGTH_LONG);
-                long currentTime = System.currentTimeMillis();
-
-                try {
-                    JSONObject serverBody = new JSONObject();
-                    PacketRequester.addToRequestQueue(mContext, PacketConst.SERVICE_TYPE_PING_SERVER, serverBody, response -> {
-                        String cause = """
-                                Time taken: %d (ms)
-                                Server Version: %s
-                                """;
-                        try {
-                            MaterialAlertDialogBuilder successDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                            successDialog.setTitle("Test Success");
-                            successDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-                            successDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), ResultPacket.parseFrom(response.toString()).getExtraData()));
-                            successDialog.setPositiveButton("Close", (d, w) -> { });
-                            successDialog.show();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }, error -> {
-                        MaterialAlertDialogBuilder errorDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                        String cause;
-
-                        if(error.networkResponse == null) {
-                            cause = """
-                                Time taken: %d (ms)
-                                Exception: %s
-                                """;
-                            errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), error.getMessage()));
-                        } else {
-                            cause = """
-                                Time taken: %d (ms)
-                                Error code: %s
-                                """;
-                            errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), error.networkResponse.statusCode));
-                        }
-
-                        errorDialog.setTitle("Test Failed");
-                        errorDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-                        errorDialog.setPositiveButton("Close", (d, w) -> { });
-                        errorDialog.show();
-                    });
-                } catch (Exception e) {
-                    String cause = """
-                                Time taken: %d (ms)
-                                Exception: %s
-                                """;
-                    MaterialAlertDialogBuilder errorDialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
-                    errorDialog.setTitle("Test Failed");
-                    errorDialog.setIcon(R.drawable.ic_info_outline_black_24dp);
-                    errorDialog.setMessage(String.format(Locale.getDefault(), cause, (System.currentTimeMillis() - currentTime), e.getMessage()));
-                    errorDialog.setPositiveButton("Close", (d, w) -> { });
-                    errorDialog.show();
-                }
+                startActivity(new Intent(mContext, ServerPingActivity.class));
                 break;
 
             case "SplitInterval":
