@@ -5,6 +5,10 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class NotificationData implements Parcelable {
     public String TITLE;
     public String CONTENT;
@@ -24,6 +28,15 @@ public class NotificationData implements Parcelable {
         APP_NAME = in.readString();
         DEVICE_NAME = in.readString();
         DATE = in.readString();
+    }
+
+    public NotificationData(com.noti.main.service.mirnoti.NotificationData data, String deviceName) {
+        this.TITLE = data.title;
+        this.CONTENT = data.message;
+        this.PACKAGE_NAME = data.appPackage;
+        this.APP_NAME = data.appName;
+        this.DATE =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date(data.postTime));
+        this.DEVICE_NAME = deviceName;
     }
 
     public static final Creator<NotificationData> CREATOR = new Creator<>() {

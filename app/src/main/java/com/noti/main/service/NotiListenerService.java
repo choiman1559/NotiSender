@@ -26,7 +26,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -42,6 +41,7 @@ import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.media.MediaReceiver;
+import com.noti.main.service.mirnoti.NotificationRequest;
 import com.noti.main.utils.network.AESCrypto;
 import com.noti.main.utils.network.HMACCrypto;
 import com.noti.main.utils.network.JsonRequest;
@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class NotiListenerService extends NotificationListenerService {
 
@@ -321,8 +322,8 @@ public class NotiListenerService extends NotificationListenerService {
                                 if (!originString.isEmpty()) array = new JSONArray(originString);
                                 object.put("date", DATE);
                                 object.put("package", PackageName);
-                                object.put("title", extra.getString(Notification.EXTRA_TITLE));
-                                object.put("text", extra.getString(Notification.EXTRA_TEXT));
+                                object.put("title", Objects.requireNonNullElse(extra.getCharSequence(Notification.EXTRA_TITLE), prefs.getString("DefaultTitle", "New notification")).toString());
+                                object.put("text", Objects.requireNonNullElse(extra.getCharSequence(Notification.EXTRA_TEXT), prefs.getString("DefaultMessage", "notification arrived.")).toString());
                                 array.put(object);
                                 logPrefs.edit().putString("sendLogs", array.toString()).apply();
 
@@ -337,7 +338,12 @@ public class NotiListenerService extends NotificationListenerService {
                                 e.printStackTrace();
                             }
                         }).start();
-                        sendNormalNotification(notification, PackageName, isLogging, DATE, TITLE, TEXT, KEY);
+
+                        if (prefs.getBoolean("useLegacyAPI", false)) {
+                            sendNormalNotificationOld(notification, PackageName, isLogging, DATE, TITLE, TEXT, KEY);
+                        } else {
+                            NotificationRequest.sendMirrorNotification(this, isLogging, sbn);
+                        }
                     }
 
                     if (queryAccessCount > prefs.getInt("IntervalQueryGCTrigger", 50)) {
@@ -403,8 +409,7 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private void sendNormalNotification(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT, String KEY) {
+    private void sendNormalNotificationOld(Notification notification, String PackageName, boolean isLogging, String DATE, String TITLE, String TEXT, String KEY) {
         PackageManager pm = this.getPackageManager();
         Bitmap ICON = null;
         Integer iconTintColor = null;
@@ -414,12 +419,6 @@ public class NotiListenerService extends NotificationListenerService {
                 Context packageContext = createPackageContext(PackageName, CONTEXT_IGNORE_SECURITY);
                 Icon LargeIcon = notification.getLargeIcon();
                 Icon SmallIcon = notification.getSmallIcon();
-
-                if(BuildConfig.DEBUG) {
-                    //TODO: refactor notification logic to LiveNotificationData Class
-                    Bitmap BigIcon = (Bitmap) notification.extras.get(NotificationCompat.EXTRA_LARGE_ICON_BIG);
-                    Bitmap BigPicture = (Bitmap) notification.extras.get(NotificationCompat.EXTRA_PICTURE);
-                }
 
                 if (LargeIcon != null)
                     ICON = getBitmapFromDrawable(LargeIcon.loadDrawable(packageContext));
@@ -469,18 +468,20 @@ public class NotiListenerService extends NotificationListenerService {
 
         try {
             notificationBody.put("type", "send|normal");
+            notificationBody.put("device_name", DEVICE_NAME);
+            notificationBody.put("device_id", DEVICE_ID);
+
             notificationBody.put("title", TITLE == null || TITLE.equals("null") ? prefs.getString("DefaultTitle", "New notification") : TITLE);
             notificationBody.put("message", TEXT == null || TEXT.equals("null") ? prefs.getString("DefaultMessage", "notification arrived.") : TEXT);
             notificationBody.put("package", PackageName);
             notificationBody.put("appname", APPNAME);
-            notificationBody.put("device_name", DEVICE_NAME);
-            notificationBody.put("device_id", DEVICE_ID);
             notificationBody.put("date", DATE);
             notificationBody.put("icon", ICONS);
             notificationBody.put("notification_key", KEY);
 
             int dataLimit = prefs.getInt("DataLimit", 4096);
-            if (notificationBody.toString().length() >= dataLimit - 20 && !prefs.getBoolean("UseSplitData", false)) {
+            if (notificationBody.toString().length() >= dataLimit - 20 &&
+                    !(prefs.getBoolean("UseSplitData", false) || prefs.getBoolean("UseBackendProxy", true))) {
                 notificationBody.put("icon", "none");
             }
         } catch (JSONException e) {
@@ -654,7 +655,7 @@ public class NotiListenerService extends NotificationListenerService {
                 notification = encryptData(notification);
             }
 
-            if(useBackendProxy && (enforceBackendProxy || notification.length() > 2048)) {
+            if(useBackendProxy && (enforceBackendProxy || notification.toString().length() > 2048)) {
                 proxyToBackend(notification, PackageName, context, useFCMOnly);
             } else {
                 finalProcessData(notification, PackageName, context, useFCMOnly);

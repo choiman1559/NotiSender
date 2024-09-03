@@ -133,4 +133,12 @@
             android:summary="Click here to set default message string"
             android:title="Customizing default message string" />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="API Compatibility">
+        <com.noti.main.utils.ui.SwitchedPreference
+            android:defaultValue="false"
+            android:key="useLegacyAPI"
+            android:summary="Use deprecated lagecy API for backwards compatibility"
+            android:title="Use legacy notification API" />
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -233,6 +233,7 @@
         </receiver>
 
         <receiver android:name=".service.BitmapIPCManager$BitmapDismissBroadcastListener" android:exported="false"/>
+        <receiver android:name=".service.mirnoti.NotificationActionProcess$NotificationActionRaiseBroadcastReceiver" android:exported="false"/>
 
         <receiver android:name=".receiver.FindDeviceCancelReceiver" />
 

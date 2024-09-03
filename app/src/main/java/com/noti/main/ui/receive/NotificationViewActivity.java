@@ -1,12 +1,9 @@
 package com.noti.main.ui.receive;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,16 +11,15 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.button.MaterialButton;
-import com.noti.main.Application;
-import com.noti.main.BuildConfig;
 import com.noti.main.service.BitmapIPCManager;
-import com.noti.main.service.NotiListenerService;
 import com.noti.main.R;
-import com.noti.main.service.backend.PacketConst;
-import com.noti.main.service.livenoti.LiveNotiProcess;
+import com.noti.main.service.mirnoti.NotificationData;
+import com.noti.main.service.mirnoti.NotificationRequest;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Objects;
 
 public class NotificationViewActivity extends Activity {
 
@@ -36,7 +32,6 @@ public class NotificationViewActivity extends Activity {
         setFinishOnTouchOutside(false);
 
         Intent intent = getIntent();
-        String Package = intent.getStringExtra("package");
         icon = BitmapIPCManager.getInstance().getBitmap(intent.getIntExtra("bitmapId", -1));
 
         MaterialButton OK = findViewById(R.id.ok);
@@ -45,30 +40,50 @@ public class NotificationViewActivity extends Activity {
         TextView NAME = findViewById(R.id.titleDetail);
         TextView DETAIL = findViewById(R.id.contentDetail);
 
-        String APP_NAME = intent.getStringExtra("appname");
-        String TITLE = intent.getStringExtra("title");
         String DEVICE_NAME = intent.getStringExtra("device_name");
         String DEVICE_ID = intent.getStringExtra("device_id");
-        String DATE = intent.getStringExtra("date");
-        String KEY = intent.getStringExtra("notification_key");
+        String KEY, Package;
 
-        String detail = "";
-        detail += "Noti Title  : " + TITLE + "\n";
-        detail += "Device      : " + DEVICE_NAME + "\n";
-        detail += "Posted Time : " + DATE + "\n";
+        if(intent.hasExtra(NotificationRequest.KEY_NOTIFICATION_KEY)) {
+            NotificationData notificationData = (NotificationData) BitmapIPCManager.getInstance().getSerialize(intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_KEY, 0));
+            KEY = Objects.requireNonNull(notificationData).key;
+            Package = notificationData.appPackage;
 
-        if(icon != null) ICON.setImageBitmap(icon);
-        else ICON.setVisibility(View.GONE);
-        NAME.setText(APP_NAME);
-        DETAIL.setText(detail);
+            String detail = "";
+            detail += "Noti Title  : " + notificationData.title + "\n";
+            detail += "Device      : " + DEVICE_NAME + "\n";
+            detail += "Posted Time : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(notificationData.postTime)) + "\n";
+
+            if(icon != null) ICON.setImageBitmap(icon);
+            else ICON.setVisibility(View.GONE);
+            NAME.setText(notificationData.appName);
+            DETAIL.setText(detail);
+        } else {
+            String APP_NAME = intent.getStringExtra("appname");
+            String TITLE = intent.getStringExtra("title");
+            String DATE = intent.getStringExtra("date");
+
+            KEY = intent.getStringExtra("notification_key");
+            Package = intent.getStringExtra("package");
+
+            String detail = "";
+            detail += "Noti Title  : " + TITLE + "\n";
+            detail += "Device      : " + DEVICE_NAME + "\n";
+            detail += "Posted Time : " + DATE + "\n";
+
+            if(icon != null) ICON.setImageBitmap(icon);
+            else ICON.setVisibility(View.GONE);
+            NAME.setText(APP_NAME);
+            DETAIL.setText(detail);
+        }
 
         OK.setOnClickListener(v -> {
-            receptionNotification(this, Package, DEVICE_NAME, DEVICE_ID, KEY, true);
+            NotificationRequest.receptionNotification(this, Package, DEVICE_NAME, DEVICE_ID, KEY, true);
             ExitActivity.exitApplication(this);
         });
 
         NO.setOnClickListener(v -> {
-            receptionNotification(this, DEVICE_NAME, DEVICE_ID, KEY, false);
+            NotificationRequest.receptionNotification(this, DEVICE_NAME, DEVICE_ID, KEY, false);
             ExitActivity.exitApplication(this);
         });
     }
@@ -77,44 +92,5 @@ public class NotificationViewActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         if (icon != null) icon.recycle();
-    }
-
-    public static void receptionNotification(Context context, String DEVICE_NAME, String DEVICE_ID, String KEY, boolean isNeedToStartRemotely) {
-        receptionNotification(context, null, DEVICE_NAME, DEVICE_ID, KEY, isNeedToStartRemotely);
-    }
-
-
-    public static void receptionNotification(Context context, @Nullable String Package, String DEVICE_NAME, String DEVICE_ID, String KEY, boolean isNeedToStartRemotely) {
-        receptionNotification(context, Package, DEVICE_NAME, DEVICE_ID, KEY, isNeedToStartRemotely, false);
-    }
-
-    public static void receptionNotification(Context context, @Nullable String Package, String DEVICE_NAME, String DEVICE_ID, String KEY, boolean isNeedToStartRemotely, boolean isLiveNotiResponse) {
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME,MODE_PRIVATE);
-        boolean isDismiss = prefs.getBoolean("RemoteDismiss", false);
-        if(!(isDismiss || isNeedToStartRemotely || isLiveNotiResponse)) return;
-        JSONObject notificationBody = new JSONObject();
-
-        try {
-            if(Package != null) notificationBody.put("package", Package);
-            if(isDismiss || isLiveNotiResponse) notificationBody.put("notification_key", KEY);
-
-            if(isLiveNotiResponse) {
-                notificationBody.put("type","pair|live_notification");
-                notificationBody.put(PacketConst.KEY_ACTION_TYPE, LiveNotiProcess.REQUEST_NOTIFICATION_ACTION);
-            } else {
-                notificationBody.put("type","reception|normal");
-            }
-
-            notificationBody.put("device_name", NotiListenerService.getDeviceName());
-            notificationBody.put("device_id", NotiListenerService.getUniqueID());
-            notificationBody.put("send_device_name", DEVICE_NAME);
-            notificationBody.put("send_device_id", DEVICE_ID);
-            notificationBody.put("start_remote_activity", isNeedToStartRemotely ? "true" : "false");
-        } catch (JSONException e) {
-            Log.e("Noti", "onCreate: " + e.getMessage() );
-        }
-
-        if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
-        NotiListenerService.sendNotification(notificationBody, Package, context);
     }
 }

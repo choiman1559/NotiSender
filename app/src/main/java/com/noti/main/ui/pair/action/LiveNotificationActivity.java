@@ -28,7 +28,7 @@ import com.noti.main.R;
 import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.livenoti.LiveNotiRequests;
 import com.noti.main.service.livenoti.LiveNotificationData;
-import com.noti.main.ui.receive.NotificationViewActivity;
+import com.noti.main.service.mirnoti.NotificationRequest;
 import com.noti.main.utils.network.CompressStringUtil;
 import com.noti.main.utils.ui.ToastHelper;
 
@@ -179,7 +179,7 @@ public class LiveNotificationActivity extends AppCompatActivity {
             }
 
             remoteRunButton.setOnClickListener((v) -> {
-                NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, true, true);
+                NotificationRequest.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, true, true);
                 ToastHelper.show((Activity) context, "Remote run request has been sent","Ok", ToastHelper.LENGTH_SHORT);
             });
 
@@ -188,7 +188,7 @@ public class LiveNotificationActivity extends AppCompatActivity {
                 if(lastSelectedItemHolder == this) {
                     lastSelectedItemHolder = null;
                 }
-                NotificationViewActivity.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, false, true);
+                NotificationRequest.receptionNotification(context, liveNotificationObj.appPackage, Device_name, Device_id, liveNotificationObj.key, false, true);
                 ToastHelper.show((Activity) context, "Dismiss request has been sent","Ok", ToastHelper.LENGTH_SHORT);
             });
 

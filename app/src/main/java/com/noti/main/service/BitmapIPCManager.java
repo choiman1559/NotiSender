@@ -8,17 +8,20 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.noti.main.ui.receive.NotificationViewActivity;
+import com.noti.main.service.mirnoti.NotificationRequest;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 public class BitmapIPCManager {
     private static BitmapIPCManager instance;
     private final Map<Integer, Bitmap> bitmapMap;
+    private final Map<Integer, Serializable> serializableMap;
 
     private BitmapIPCManager() {
         bitmapMap = new HashMap<>();
+        serializableMap = new HashMap<>();
     }
 
     public static BitmapIPCManager getInstance() {
@@ -31,12 +34,27 @@ public class BitmapIPCManager {
         bitmapMap.put(id, bitmap);
     }
 
+    public void addSerialize(Integer id, @Nullable Serializable serializable) {
+        if(serializable == null) return;
+        serializableMap.put(id, serializable);
+    }
+
     @Nullable
     public Bitmap getBitmap(Integer id) {
-        if(id < 0) return null;
+        if(id == -1 || bitmapMap.isEmpty()) return null;
+
         Bitmap bitmap = bitmapMap.get(id);
         bitmapMap.remove(id);
         return bitmap;
+    }
+
+    @Nullable
+    public Serializable getSerialize(Integer id) {
+        if(serializableMap.isEmpty()) return null;
+
+        Serializable serializable = serializableMap.get(id);
+        serializableMap.remove(id);
+        return serializable;
     }
 
     private void dismissBitmap(Integer id) {
@@ -62,7 +80,7 @@ public class BitmapIPCManager {
             String DEVICE_ID = intent.getStringExtra("device_id");
             String KEY = intent.getStringExtra("notification_key");
 
-            NotificationViewActivity.receptionNotification(context, DEVICE_NAME, DEVICE_ID, KEY, false);
+            NotificationRequest.receptionNotification(context, DEVICE_NAME, DEVICE_ID, KEY, false);
         }
     }
 }

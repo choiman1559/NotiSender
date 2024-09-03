@@ -1,5 +1,6 @@
 package com.noti.main.service;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -46,6 +47,8 @@ import com.noti.main.service.backend.PacketConst;
 import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.service.livenoti.LiveNotiProcess;
+import com.noti.main.service.mirnoti.NotificationActionProcess;
+import com.noti.main.service.mirnoti.NotificationRequest;
 import com.noti.main.service.refiler.RemoteFileProcess;
 import com.noti.main.ui.pair.DeviceFindActivity;
 import com.noti.main.utils.network.HMACCrypto;
@@ -273,16 +276,22 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 if (mode.equals("reception") || mode.equals("hybrid") && type.contains("send")) {
                     if (mode.equals("hybrid") && isDeviceItself(map)) return;
                     switch (type) {
-                        case "send|normal" -> sendNotification(map);
                         case "send|sms" -> sendSmsNotification(map);
                         case "send|telecom" -> sendTelecomNotification(map);
+                        case "send|normal" -> {
+                            if(map.containsKey(NotificationRequest.KEY_NOTIFICATION_API)) {
+                                sendNotificationNew(map);
+                            } else {
+                                sendNotificationOld(map);
+                            }
+                        }
                     }
                 } else if ((mode.equals("send") || mode.equals("hybrid")) && type.contains("reception")) {
                     if ((NotiListenerService.getDeviceName()).equals(map.get("send_device_name")) && getUniqueID().equals(map.get("send_device_id"))) {
-                        if (type.equals("reception|normal")) {
-                            startNewRemoteActivity(this, map);
-                        } else if (type.equals("reception|sms")) {
-                            startNewRemoteSms(map);
+                        switch (type) {
+                            case "reception|perform_action" -> sendNotificationAction(map);
+                            case "reception|normal" -> startNewRemoteActivity(this, map);
+                            case "reception|sms" -> startNewRemoteSms(map);
                         }
                     }
                 }
@@ -598,7 +607,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 PackageManager pm = context.getPackageManager();
                 pm.getPackageInfo(Package, PackageManager.GET_ACTIVITIES);
                 Intent intent = pm.getLaunchIntentForPackage(Package);
-                context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                context.startActivity(Objects.requireNonNull(intent).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             } catch (Exception e) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + Package));
                 context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -785,7 +794,139 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         playRingtoneAndVibrate();
     }
 
-    protected void sendNotification(Map<String, String> map) {
+    protected void sendNotificationAction(Map<String, String> map) {
+        String key = map.get(NotificationRequest.KEY_NOTIFICATION_KEY);
+        int actionIndex = Integer.parseInt(map.get(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX));
+        NotificationActionProcess.raiseAction(key, actionIndex);
+    }
+
+    protected void sendNotificationNew(Map<String, String> map) {
+        try {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            String notificationStr = map.get(NotificationRequest.KEY_NOTIFICATION_DATA);
+
+            if(notificationStr != null) {
+                final int uniqueCode = notificationStr.hashCode();
+                final String deviceId = map.get("device_id");
+                final String deviceName = map.get("device_name");
+
+                com.noti.main.service.mirnoti.NotificationData notificationData = com.noti.main.service.mirnoti.NotificationData.parseFrom(notificationStr);
+                Notification.Builder builder = notificationData.getBuilder(FirebaseMessageService.this);
+                builder.setPriority(Build.VERSION.SDK_INT > 23 ? getPriority() : Notification.PRIORITY_DEFAULT);
+
+                Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
+                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                BitmapIPCManager.getInstance().addSerialize(uniqueCode, notificationData);
+
+                notificationIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY, uniqueCode);
+                notificationIntent.putExtra("device_name", deviceName);
+                notificationIntent.putExtra("device_id", deviceId);
+
+                Intent onDismissIntent = new Intent(this, BitmapIPCManager.BitmapDismissBroadcastListener.class);
+                onDismissIntent.putExtra("bitmapId", uniqueCode);
+                onDismissIntent.putExtra("device_id", deviceId);
+                onDismissIntent.putExtra("device_name", deviceName);
+                onDismissIntent.putExtra("notification_key", notificationData.key);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent onDismissPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onDismissIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+                builder.setContentIntent(pendingIntent);
+                builder.setDeleteIntent(onDismissPendingIntent);
+
+                for(int i = 0; i < notificationData.actions.length; i++) {
+                    Intent onActionIntent = new Intent(this, NotificationActionProcess.NotificationActionRaiseBroadcastReceiver.class);
+                    onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY, notificationData.key);
+                    onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX, i);
+                    onActionIntent.putExtra("device_name", deviceName);
+                    onActionIntent.putExtra("device_id", deviceId);
+                    PendingIntent onActionPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onActionIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+                    builder.addAction(new Notification.Action.Builder(null, notificationData.actions[i], onActionPendingIntent).build());
+                }
+
+                NotificationData data = new NotificationData(notificationData, deviceName);
+                postPluginNotification(data);
+                saveNotificationHistory(data);
+
+                String regexData = regexPrefs.getString("RegexData", "");
+                if (regexData.isEmpty()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        CharSequence channelName = getString(R.string.notify_channel_name);
+                        String description = getString(R.string.notify_channel_description);
+                        NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
+
+                        channel.setDescription(description);
+                        assert notificationManager != null;
+                        notificationManager.createNotificationChannel(channel);
+                    }
+
+                    notificationManager.notify(uniqueCode, builder.build());
+                    playRingtoneAndVibrate();
+                } else {
+                    try {
+                        JSONArray array = new JSONArray(regexData);
+                        String[] regexArray = new String[array.length()];
+                        NotificationData[] dataArray = new NotificationData[array.length()];
+
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject object = array.getJSONObject(i);
+                            boolean isEnabled = object.optBoolean("enabled");
+
+                            String regex = isEnabled ? object.getString("regex") : "false";
+                            regexArray[i] = regex;
+                            dataArray[i] = data;
+                        }
+
+                        AtomicReference<Bitmap> finalIcon = new AtomicReference<>();
+                        RegexInterpreter.evalRegexWithArray(this, regexArray, dataArray, (obj) -> {
+                            String bitmapUri = "";
+                            String ringtoneUri = "";
+
+                            if (obj == null || obj.equals("null")) return;
+                            int targetIndex = Integer.parseInt((String) obj);
+                            if (targetIndex > -1) {
+                                try {
+                                    JSONObject object = array.getJSONObject(targetIndex);
+                                    if (object.has("bitmap")) bitmapUri = object.getString("bitmap");
+                                    if (object.has("ringtone")) ringtoneUri = object.getString("ringtone");
+
+                                    if (!bitmapUri.isEmpty()) {
+                                        Uri uri = Uri.parse(bitmapUri);
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                            finalIcon.set(ImageDecoder.decodeBitmap(ImageDecoder.createSource(FirebaseMessageService.this.getContentResolver(), uri)));
+                                        } else {
+                                            finalIcon.set(MediaStore.Images.Media.getBitmap(FirebaseMessageService.this.getContentResolver(), uri));
+                                        }
+                                    }
+                                } catch (JSONException | IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            if (finalIcon.get() != null) builder.setLargeIcon(finalIcon.get());
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                CharSequence channelName = getString(R.string.notify_channel_name);
+                                String description = getString(R.string.notify_channel_description);
+                                NotificationChannel channel = new NotificationChannel(getString(R.string.notify_channel_id), channelName, getImportance());
+
+                                channel.setDescription(description);
+                                assert notificationManager != null;
+                                notificationManager.createNotificationChannel(channel);
+                            } else builder.setSmallIcon(R.mipmap.ic_notification);
+
+                            notificationManager.notify(uniqueCode, builder.build());
+                            playRingtoneAndVibrate(ringtoneUri);
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void sendNotificationOld(Map<String, String> map) {
         String title = map.get("title");
         String content = map.get("message");
         String Package = map.get("package");
@@ -807,38 +948,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             }
         } else if (prefs.getBoolean("UseAlternativeIcon", false)) {
             try {
-                Icon = NotiListenerService.getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(Package));
+                Icon = NotiListenerService.getBitmapFromDrawable(this.getPackageManager().getApplicationIcon(Objects.requireNonNull(Package)));
             } catch (PackageManager.NameNotFoundException e) {
                 //Ignore this case
             }
         }
-
-        new Thread(() -> {
-            try {
-                JSONArray array = new JSONArray();
-                JSONObject object = new JSONObject();
-                String originString = logPrefs.getString("receivedLogs", "");
-
-                if (!originString.isEmpty()) array = new JSONArray(originString);
-                object.put("date", Date);
-                object.put("package", Package);
-                object.put("title", title);
-                object.put("text", content);
-                object.put("device", Device_name);
-                array.put(object);
-                logPrefs.edit().putString("receivedLogs", array.toString()).apply();
-
-                if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
-                    int a = array.length() - prefs.getInt("HistoryLimit", 150);
-                    for (int i = 0; i < a; i++) {
-                        array.remove(i);
-                    }
-                    logPrefs.edit().putString("receivedLogs", array.toString()).apply();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }).start();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
@@ -895,6 +1009,9 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         data.PACKAGE_NAME = Package;
         data.APP_NAME = AppName;
         data.DATE = Date;
+
+        postPluginNotification(data);
+        saveNotificationHistory(data);
 
         String regexData = regexPrefs.getString("RegexData", "");
         if (regexData.isEmpty()) {
@@ -973,7 +1090,38 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 e.printStackTrace();
             }
         }
+    }
 
+    private void saveNotificationHistory(NotificationData data) {
+        new Thread(() -> {
+            try {
+                JSONArray array = new JSONArray();
+                JSONObject object = new JSONObject();
+                String originString = logPrefs.getString("receivedLogs", "");
+
+                if (!originString.isEmpty()) array = new JSONArray(originString);
+                object.put("date", data.DATE);
+                object.put("package", data.PACKAGE_NAME);
+                object.put("title", data.TITLE);
+                object.put("text", data.CONTENT);
+                object.put("device", data.DEVICE_NAME);
+                array.put(object);
+                logPrefs.edit().putString("receivedLogs", array.toString()).apply();
+
+                if (array.length() >= prefs.getInt("HistoryLimit", 150)) {
+                    int a = array.length() - prefs.getInt("HistoryLimit", 150);
+                    for (int i = 0; i < a; i++) {
+                        array.remove(i);
+                    }
+                    logPrefs.edit().putString("receivedLogs", array.toString()).apply();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void postPluginNotification(NotificationData data) {
         SharedPreferences pluginPrefs = getSharedPreferences("com.noti.main_plugin", Context.MODE_PRIVATE);
         Map<String, ?> pluginMap = pluginPrefs.getAll();
 
