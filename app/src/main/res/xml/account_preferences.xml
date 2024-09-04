@@ -54,5 +54,10 @@
             android:title="Donate to developer"
             android:summary="Please help us make the app even better!"
             android:icon="@drawable/ic_fluent_gift_24_regular"/>
+        <Preference
+            android:key="GithubSponsors"
+            android:title="Github Sponsors"
+            android:summary="Please help keep NotiSender open source!"
+            android:icon="@drawable/ic_fluent_gift_open_24_regular"/>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -102,7 +103,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
                     ServiceToggle.setChecked(false);
                 }
             } else {
-                ServiceToggle.setEnabled(!prefs.getString("UID", "").equals(""));
+                ServiceToggle.setEnabled(!prefs.getString("UID", "").isEmpty());
             }
         }
     };
@@ -129,7 +130,7 @@ public class AccountPreference extends PreferenceFragmentCompat {
                     AlreadySubscribed.setVisible(true);
 
                     String UID = prefs.getString("UID", "");
-                    if (!UID.equals("")) {
+                    if (!UID.isEmpty()) {
                         new Thread(() -> {
                             try {
                                 Pushy.subscribe(UID, mContext);
@@ -174,11 +175,11 @@ public class AccountPreference extends PreferenceFragmentCompat {
         AlreadySubscribed = findPreference("AlreadySubscribed");
         ServerInfo = findPreference("ServerInfo");
 
-        boolean ifUIDBlank = prefs.getString("UID", "").equals("");
+        boolean ifUIDBlank = prefs.getString("UID", "").isEmpty();
         if (!ifUIDBlank) {
             Login.setSummary("Logined as " + prefs.getString("Email", ""));
             Login.setTitle(R.string.Logout);
-            if (prefs.getString("Email", "").equals("") && mAuth.getCurrentUser() != null)
+            if (prefs.getString("Email", "").isEmpty() && mAuth.getCurrentUser() != null)
                 prefs.edit().putString("Email", mAuth.getCurrentUser().getEmail()).apply();
             if (prefs.getString("server", "Firebase Cloud Message").equals("Pushy")) {
                 if (mBillingHelper.isSubscribed()) {
@@ -315,12 +316,16 @@ public class AccountPreference extends PreferenceFragmentCompat {
             case "serverSelect":
                 mContext.startActivity(new Intent(mContext, NetSelectActivity.class));
                 break;
+
+            case "GithubSponsors":
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sponsors/choiman1559")));
+                break;
         }
         return super.onPreferenceTreeClick(preference);
     }
 
     private void accountTask() {
-        if (prefs.getString("UID", "").equals("")) {
+        if (prefs.getString("UID", "").isEmpty()) {
             ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
