@@ -127,6 +127,11 @@ public class NotiListenerService extends NotificationListenerService {
     public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight, @Nullable Integer backgroundColor) {
         int width = bm.getWidth();
         int height = bm.getHeight();
+
+        if(width <= 0 || height <= 0) {
+            return null;
+        }
+
         float scaleWidth = ((float) newWidth) / width;
         float scaleHeight = ((float) newHeight) / height;
 

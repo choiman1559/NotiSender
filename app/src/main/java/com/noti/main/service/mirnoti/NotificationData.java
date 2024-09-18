@@ -106,32 +106,37 @@ public class NotificationData implements Serializable {
         Bitmap largeIconBitmap = convertImage(packageContext, notification.extras.get(NotificationCompat.EXTRA_LARGE_ICON_BIG));
         Bitmap bigPictureBitmap = convertImage(packageContext, notification.extras.get(NotificationCompat.EXTRA_PICTURE));
 
+        this.smallIcon = "";
         if (smallIconObj != null) {
             Drawable iconDrawable = smallIconObj.loadDrawable(packageContext);
             if (iconDrawable != null) {
                 iconDrawable.setTint(Color.BLACK);
                 Bitmap iconBitmap = NotiListenerService.getBitmapFromDrawable(iconDrawable);
 
-                if (iconBitmap != null) {
+                if (iconBitmap != null && iconBitmap.getWidth() > 0 && iconBitmap.getHeight() > 0) {
                     iconBitmap.setHasAlpha(true);
-                    this.smallIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
-                            NotiListenerService.getResizedBitmap(iconBitmap, resizeIconRes, resizeIconRes, Color.BLACK)));
+                    Bitmap resizedBitmap = NotiListenerService.getResizedBitmap(iconBitmap, resizeIconRes, resizeIconRes, Color.BLACK);
+
+                    if(resizedBitmap != null) {
+                        this.smallIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(resizedBitmap));
+                    }
                 }
             }
-        } else {
-            this.smallIcon = "";
         }
 
-        if (largeIconBitmap != null) {
+        this.bigIcon = "";
+        if (largeIconBitmap != null && largeIconBitmap.getWidth() > 0 && largeIconBitmap.getHeight() > 0) {
             this.bigIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
                     NotiListenerService.getResizedBitmap(largeIconBitmap, resizeIconRes, resizeIconRes)));
         } else if (bigIconObj != null) {
-            this.bigIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
-                    NotiListenerService.getResizedBitmap(convertImage(packageContext, bigIconObj), resizeIconRes, resizeIconRes)));
-        } else {
-            this.bigIcon = "";
+            Bitmap bigIconBitmap = convertImage(packageContext, bigIconObj);
+            if(bigIconBitmap != null && bigIconBitmap.getWidth() > 0 && bigIconBitmap.getHeight() > 0) {
+                this.bigIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
+                        NotiListenerService.getResizedBitmap(bigIconBitmap, resizeIconRes, resizeIconRes)));
+            }
         }
 
+        this.bigPicture = "";
         if (bigPictureBitmap != null) {
             this.bigPicture = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
                     NotiListenerService.getResizedBitmap(bigPictureBitmap, bigPictureBitmap.getWidth() / 2, bigPictureBitmap.getHeight() / 2)));

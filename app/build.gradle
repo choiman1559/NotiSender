@@ -25,8 +25,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 1012200
-        versionName "1.22.0"
+        versionCode 1012201
+        versionName "1.22.1"
 
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -99,7 +99,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:19.0.0'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.24.1'
 
-    implementation platform('com.google.firebase:firebase-bom:33.2.0')
+    implementation platform('com.google.firebase:firebase-bom:33.3.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
