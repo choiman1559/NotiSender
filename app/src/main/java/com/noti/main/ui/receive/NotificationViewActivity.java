@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.button.MaterialButton;
 import com.noti.main.service.BitmapIPCManager;
 import com.noti.main.R;
-import com.noti.main.service.mirnoti.NotificationData;
+import com.noti.main.service.mirnoti.NotificationsData;
 import com.noti.main.service.mirnoti.NotificationRequest;
 
 import java.text.SimpleDateFormat;
@@ -45,18 +45,18 @@ public class NotificationViewActivity extends Activity {
         String KEY, Package;
 
         if(intent.hasExtra(NotificationRequest.KEY_NOTIFICATION_KEY)) {
-            NotificationData notificationData = (NotificationData) BitmapIPCManager.getInstance().getSerialize(intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_KEY, 0));
-            KEY = Objects.requireNonNull(notificationData).key;
-            Package = notificationData.appPackage;
+            NotificationsData notificationsData = (NotificationsData) BitmapIPCManager.getInstance().getSerialize(intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_KEY, 0));
+            KEY = Objects.requireNonNull(notificationsData).key;
+            Package = notificationsData.appPackage;
 
             String detail = "";
-            detail += "Noti Title  : " + notificationData.title + "\n";
+            detail += "Noti Title  : " + notificationsData.title + "\n";
             detail += "Device      : " + DEVICE_NAME + "\n";
-            detail += "Posted Time : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(notificationData.postTime)) + "\n";
+            detail += "Posted Time : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(notificationsData.postTime)) + "\n";
 
             if(icon != null) ICON.setImageBitmap(icon);
             else ICON.setVisibility(View.GONE);
-            NAME.setText(notificationData.appName);
+            NAME.setText(notificationsData.appName);
             DETAIL.setText(detail);
         } else {
             String APP_NAME = intent.getStringExtra("appname");

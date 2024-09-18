@@ -31,11 +31,13 @@ import me.pushy.sdk.lib.jackson.annotation.JsonProperty;
 import me.pushy.sdk.lib.jackson.core.JsonProcessingException;
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
-public class NotificationData implements Serializable {
+public class NotificationsData implements Serializable {
     @JsonProperty
     public long postTime;
     @JsonProperty
     public String key;
+    @JsonProperty
+    public String groupKey;
     @JsonProperty
     public String appPackage;
     @JsonProperty
@@ -56,14 +58,14 @@ public class NotificationData implements Serializable {
     public String bigPicture;
 
     @SuppressWarnings("unused")
-    public NotificationData() {
+    public NotificationsData() {
         // Default constructor for creating instance by ObjectMapper
     }
 
-    public NotificationData(Context context, StatusBarNotification statusBarNotification) throws PackageManager.NameNotFoundException {
+    public NotificationsData(Context context, StatusBarNotification statusBarNotification) throws PackageManager.NameNotFoundException {
         this.postTime = statusBarNotification.getPostTime();
         this.key = statusBarNotification.getKey();
-
+        this.groupKey = statusBarNotification.getGroupKey();
 
         PackageManager pm = context.getPackageManager();
         this.appPackage = statusBarNotification.getPackageName();
@@ -92,6 +94,7 @@ public class NotificationData implements Serializable {
             int i = 0;
             for (Notification.Action action : actionArray) {
                 this.actions[i++] = action.title.toString();
+                //TODO: Add RemoteInput in order to Remote Reply action implementation
             }
         } else {
             this.actions = new String[0];
@@ -153,8 +156,8 @@ public class NotificationData implements Serializable {
         };
     }
 
-    public static NotificationData parseFrom(String serializedMessage) throws IOException {
-        return new ObjectMapper().readValue(serializedMessage, NotificationData.class);
+    public static NotificationsData parseFrom(String serializedMessage) throws IOException {
+        return new ObjectMapper().readValue(serializedMessage, NotificationsData.class);
     }
 
     public Notification.Builder getBuilder(Context context) {
@@ -186,8 +189,12 @@ public class NotificationData implements Serializable {
         }
 
         if (Build.VERSION.SDK_INT < 33) {
-            builder.setGroup(context.getPackageName() + ".NOTIFICATION")
-                    .setGroupSummary(true);
+            builder.setGroupSummary(true);
+            if(groupKey != null && !groupKey.isEmpty()) {
+                builder.setGroup(groupKey);
+            } else {
+                builder.setGroup(context.getPackageName() + ".NOTIFICATION");
+            }
         }
 
         return builder;

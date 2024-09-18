@@ -49,6 +49,7 @@ import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.mirnoti.NotificationActionProcess;
 import com.noti.main.service.mirnoti.NotificationRequest;
+import com.noti.main.service.mirnoti.NotificationsData;
 import com.noti.main.service.refiler.RemoteFileProcess;
 import com.noti.main.ui.pair.DeviceFindActivity;
 import com.noti.main.utils.network.HMACCrypto;
@@ -806,17 +807,17 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             String notificationStr = map.get(NotificationRequest.KEY_NOTIFICATION_DATA);
 
             if(notificationStr != null) {
-                final int uniqueCode = notificationStr.hashCode();
                 final String deviceId = map.get("device_id");
                 final String deviceName = map.get("device_name");
+                final NotificationsData notificationsData = NotificationsData.parseFrom(notificationStr);
+                final int uniqueCode = notificationsData.key.hashCode();
 
-                com.noti.main.service.mirnoti.NotificationData notificationData = com.noti.main.service.mirnoti.NotificationData.parseFrom(notificationStr);
-                Notification.Builder builder = notificationData.getBuilder(FirebaseMessageService.this);
+                Notification.Builder builder = notificationsData.getBuilder(FirebaseMessageService.this);
                 builder.setPriority(Build.VERSION.SDK_INT > 23 ? getPriority() : Notification.PRIORITY_DEFAULT);
 
                 Intent notificationIntent = new Intent(FirebaseMessageService.this, NotificationViewActivity.class);
                 notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                BitmapIPCManager.getInstance().addSerialize(uniqueCode, notificationData);
+                BitmapIPCManager.getInstance().addSerialize(uniqueCode, notificationsData);
 
                 notificationIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY, uniqueCode);
                 notificationIntent.putExtra("device_name", deviceName);
@@ -826,24 +827,24 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 onDismissIntent.putExtra("bitmapId", uniqueCode);
                 onDismissIntent.putExtra("device_id", deviceId);
                 onDismissIntent.putExtra("device_name", deviceName);
-                onDismissIntent.putExtra("notification_key", notificationData.key);
+                onDismissIntent.putExtra("notification_key", notificationsData.key);
 
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueCode, notificationIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
                 PendingIntent onDismissPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onDismissIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
                 builder.setContentIntent(pendingIntent);
                 builder.setDeleteIntent(onDismissPendingIntent);
 
-                for(int i = 0; i < notificationData.actions.length; i++) {
+                for(int i = 0; i < notificationsData.actions.length; i++) {
                     Intent onActionIntent = new Intent(this, NotificationActionProcess.NotificationActionRaiseBroadcastReceiver.class);
-                    onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY, notificationData.key);
+                    onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY, notificationsData.key);
                     onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX, i);
                     onActionIntent.putExtra("device_name", deviceName);
                     onActionIntent.putExtra("device_id", deviceId);
                     PendingIntent onActionPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onActionIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.addAction(new Notification.Action.Builder(null, notificationData.actions[i], onActionPendingIntent).build());
+                    builder.addAction(new Notification.Action.Builder(null, notificationsData.actions[i], onActionPendingIntent).build());
                 }
 
-                NotificationData data = new NotificationData(notificationData, deviceName);
+                NotificationData data = new NotificationData(notificationsData, deviceName);
                 postPluginNotification(data);
                 saveNotificationHistory(data);
 

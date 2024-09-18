@@ -29,7 +29,7 @@ public class NotificationRequest {
 
     public static void sendMirrorNotification(Context context, boolean isLogging, StatusBarNotification notification) {
         try {
-            NotificationData notificationData = new NotificationData(context, notification);
+            NotificationsData notificationsData = new NotificationsData(context, notification);
             NotificationActionProcess.registerAction(notification);
 
             JSONObject notificationBody = new JSONObject();
@@ -37,7 +37,7 @@ public class NotificationRequest {
             notificationBody.put("device_name", NotiListenerService.getDeviceName());
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put(KEY_NOTIFICATION_API, "1");
-            notificationBody.put(KEY_NOTIFICATION_DATA, notificationData.toString());
+            notificationBody.put(KEY_NOTIFICATION_DATA, notificationsData.toString());
 
             if (isLogging) Log.d("NOTIFICATION_DATA", notificationBody.toString());
             NotiListenerService.sendNotification(notificationBody, "NOTIFICATION_SEND", context);
