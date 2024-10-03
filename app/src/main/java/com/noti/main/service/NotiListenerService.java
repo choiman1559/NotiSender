@@ -309,10 +309,17 @@ public class NotiListenerService extends NotificationListenerService {
                             return;
                         }
 
+                        if(notification.contentView != null &&
+                                notification.contentView.getLayoutId() == androidx.media.R.layout.notification_template_media) {
+                            manager.release();
+                            return;
+                        }
+
                         if (prefs.getBoolean("StrictStringNull", false) && ((TITLE.isEmpty() || TITLE.equals("null")) || (TEXT.isEmpty() || TEXT.equals("null")))) {
                             manager.release();
                             return;
                         }
+
                         if (isBannedWords(TEXT, TITLE) || isIntervalNotGaped(isLogging, PackageName, time)) {
                             manager.release();
                             return;

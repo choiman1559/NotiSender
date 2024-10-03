@@ -25,7 +25,13 @@ public class NotificationRequest {
     public static final String KEY_NOTIFICATION_API = PREFIX_KEY_NOTIFICATION + "api";
     public static final String KEY_NOTIFICATION_DATA = PREFIX_KEY_NOTIFICATION + "data";
     public static final String KEY_NOTIFICATION_KEY = PREFIX_KEY_NOTIFICATION + "key";
+
     public static final String KEY_NOTIFICATION_ACTION_INDEX = PREFIX_KEY_NOTIFICATION + "action_index";
+    public static final String KEY_NOTIFICATION_HASHCODE = PREFIX_KEY_NOTIFICATION + "hashcode";
+
+    public static final String KEY_NOTIFICATION_HAS_INPUT = PREFIX_KEY_NOTIFICATION + "has_input";
+    public static final String KEY_NOTIFICATION_KEY_INPUT = PREFIX_KEY_NOTIFICATION + "key_input";
+    public static final String KEY_NOTIFICATION_DATA_INPUT = PREFIX_KEY_NOTIFICATION + "data_input";
 
     public static void sendMirrorNotification(Context context, boolean isLogging, StatusBarNotification notification) {
         try {
@@ -56,9 +62,33 @@ public class NotificationRequest {
             notificationBody.put("device_id", NotiListenerService.getUniqueID());
             notificationBody.put("send_device_name", deviceName);
             notificationBody.put("send_device_id", deviceId);
+
             notificationBody.put(KEY_NOTIFICATION_API, "1");
             notificationBody.put(KEY_NOTIFICATION_KEY, key);
             notificationBody.put(KEY_NOTIFICATION_ACTION_INDEX, index);
+            notificationBody.put(KEY_NOTIFICATION_HAS_INPUT, "false");
+
+            NotiListenerService.sendNotification(notificationBody, "NOTIFICATION_ACTION", context);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendPerformActionWithInput(Context context, String key, int index, String inputKey, String inputValue, String deviceName, String deviceId) {
+        try {
+            JSONObject notificationBody = new JSONObject();
+            notificationBody.put("type", "reception|perform_action");
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
+            notificationBody.put("device_id", NotiListenerService.getUniqueID());
+            notificationBody.put("send_device_name", deviceName);
+            notificationBody.put("send_device_id", deviceId);
+
+            notificationBody.put(KEY_NOTIFICATION_API, "1");
+            notificationBody.put(KEY_NOTIFICATION_KEY, key);
+            notificationBody.put(KEY_NOTIFICATION_ACTION_INDEX, index);
+            notificationBody.put(KEY_NOTIFICATION_HAS_INPUT, "true");
+            notificationBody.put(KEY_NOTIFICATION_KEY_INPUT, inputKey);
+            notificationBody.put(KEY_NOTIFICATION_DATA_INPUT, inputValue);
 
             NotiListenerService.sendNotification(notificationBody, "NOTIFICATION_ACTION", context);
         } catch (JSONException e) {

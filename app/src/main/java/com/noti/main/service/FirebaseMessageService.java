@@ -47,6 +47,7 @@ import com.noti.main.service.backend.PacketConst;
 import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.service.livenoti.LiveNotiProcess;
+import com.noti.main.service.mirnoti.NotificationAction;
 import com.noti.main.service.mirnoti.NotificationActionProcess;
 import com.noti.main.service.mirnoti.NotificationRequest;
 import com.noti.main.service.mirnoti.NotificationsData;
@@ -798,7 +799,14 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     protected void sendNotificationAction(Map<String, String> map) {
         String key = map.get(NotificationRequest.KEY_NOTIFICATION_KEY);
         int actionIndex = Integer.parseInt(map.get(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX));
-        NotificationActionProcess.raiseAction(key, actionIndex);
+
+        if(Objects.equals(map.get(NotificationRequest.KEY_NOTIFICATION_HAS_INPUT), "true")) {
+            NotificationActionProcess.raiseActionWithInput(this, key, actionIndex,
+                    map.get(NotificationRequest.KEY_NOTIFICATION_KEY_INPUT),
+                    map.get(NotificationRequest.KEY_NOTIFICATION_DATA_INPUT));
+        } else {
+            NotificationActionProcess.raiseAction(key, actionIndex);
+        }
     }
 
     protected void sendNotificationNew(Map<String, String> map) {
@@ -837,11 +845,25 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 for(int i = 0; i < notificationsData.actions.length; i++) {
                     Intent onActionIntent = new Intent(this, NotificationActionProcess.NotificationActionRaiseBroadcastReceiver.class);
                     onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY, notificationsData.key);
+                    onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_HASHCODE, uniqueCode);
                     onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX, i);
+
+                    NotificationAction action = notificationsData.actions[i];
+                    int flags;
+
+                    if(action.isInputAction) {
+                        flags = PendingIntent.FLAG_MUTABLE;
+                        onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_HAS_INPUT, true);
+                        onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY_INPUT, action.inputResultKey);
+                    } else {
+                        flags = Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT;
+                        onActionIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_HAS_INPUT, false);
+                    }
+
                     onActionIntent.putExtra("device_name", deviceName);
                     onActionIntent.putExtra("device_id", deviceId);
-                    PendingIntent onActionPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onActionIntent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.addAction(new Notification.Action.Builder(null, notificationsData.actions[i], onActionPendingIntent).build());
+                    PendingIntent onActionPendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), uniqueCode, onActionIntent, flags);
+                    builder.addAction(action.getAction(onActionPendingIntent));
                 }
 
                 NotificationData data = new NotificationData(notificationsData, deviceName);

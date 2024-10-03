@@ -3,9 +3,12 @@ package com.noti.main.ui.options;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
@@ -18,6 +21,8 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.RemoteInput;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
@@ -28,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.service.mirnoti.NotificationActionProcess;
 import com.noti.main.ui.prefs.ServerPingActivity;
 import com.noti.main.ui.prefs.custom.CustomFragment;
 import com.noti.main.utils.network.AESCrypto;
@@ -35,6 +41,7 @@ import com.noti.main.utils.ui.SwitchedPreference;
 import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.Date;
+
 import me.pushy.sdk.Pushy;
 
 public class OtherPreference extends PreferenceFragmentCompat {
@@ -345,6 +352,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                     default -> Notify.NotifyImportance.MIN;
                 };
 
+                NotificationCompat.Builder builder =
                 Notify.build(mContext)
                         .setTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
                         .setContent("messageTest")
@@ -356,7 +364,21 @@ public class OtherPreference extends PreferenceFragmentCompat {
                         .setImportance(importance)
                         .enableVibration(true)
                         .setAutoCancel(true)
-                        .show();
+                        .getNotificationBuilder();
+
+                final String inputActionValueKey = "ddd";
+                Intent intent = new Intent(mContext, NotificationActionProcess.NotificationActionRaiseBroadcastReceiver.class);
+                intent.putExtra(NotificationActionProcess.NotificationActionRaiseBroadcastReceiver.TEST_INPUT_ACTION_KET, inputActionValueKey);
+
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 1, intent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_MUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+                RemoteInput remoteInput = new RemoteInput.Builder(inputActionValueKey).setLabel("Reply message").build();
+                builder.setSmallIcon(R.drawable.ic_broken_image)
+                        .setContentTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
+                        .addAction(new NotificationCompat.Action.Builder(null, "Reply", pendingIntent).addRemoteInput(remoteInput).build())
+                        .setContentText("messageTest");
+
+                NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(1111, builder.build());
                 break;
 
             case "StartRegexAction":

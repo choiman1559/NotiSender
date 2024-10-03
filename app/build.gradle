@@ -34,21 +34,19 @@ android {
     }
 
     buildTypes {
-        release {
+        final var proguardMode = {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
+        release proguardMode
         var testProguardMode = false
-        debug {
-            if (testProguardMode) {
-                shrinkResources true
-                minifyEnabled true
-                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            } else {
-                minifyEnabled false
-            }
+
+        if (testProguardMode) {
+            debug proguardMode
+        } else debug {
+            minifyEnabled false
         }
     }
 
@@ -81,8 +79,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.8.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.8.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.8.2'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.8.2'
     implementation "androidx.documentfile:documentfile:1.0.1"
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.palette:palette-ktx:1.0.0'
@@ -99,7 +97,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:19.0.0'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.24.1'
 
-    implementation platform('com.google.firebase:firebase-bom:33.3.0')
+    implementation platform('com.google.firebase:firebase-bom:33.4.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'

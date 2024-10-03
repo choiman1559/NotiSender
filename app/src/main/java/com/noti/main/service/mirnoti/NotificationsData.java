@@ -48,7 +48,7 @@ public class NotificationsData implements Serializable {
     public String message;
     public String priority;
     @JsonProperty
-    public String[] actions;
+    public NotificationAction[] actions;
 
     @JsonProperty
     public String smallIcon;
@@ -90,14 +90,13 @@ public class NotificationsData implements Serializable {
 
         Notification.Action[] actionArray = notification.actions;
         if(actionArray != null && actionArray.length > 0) {
-            this.actions = new String[actionArray.length];
+            this.actions = new NotificationAction[actionArray.length];
             int i = 0;
             for (Notification.Action action : actionArray) {
-                this.actions[i++] = action.title.toString();
-                //TODO: Add RemoteInput in order to Remote Reply action implementation
+                this.actions[i++] = new NotificationAction(action);
             }
         } else {
-            this.actions = new String[0];
+            this.actions = new NotificationAction[0];
         }
 
         int resizeIconRes = getIconSize();
