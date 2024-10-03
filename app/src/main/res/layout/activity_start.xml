@@ -59,9 +59,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="24dp"
+                android:layout_marginVertical="8dp"
                 android:fontFamily="@font/sans"
                 android:text="Before we start,\nWe need to grant some permissions."
                 android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginVertical="15dp"
+                android:text="Notification permissions"
+                android:textColor="@color/ui_accent" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="15dp"
+                android:fontFamily="@font/sans"
+                android:text="This permission is required for NotiSender to allow read, mirror, and post notifications on device."
+                android:textColor="@color/ui_fg_secondary" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/Permit_Notification"
@@ -70,7 +88,6 @@
                 android:text="Notification Permission"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:layout_marginTop="24dp"
                 android:layout_marginHorizontal="24dp"
                 android:background="@drawable/round_corner"
                 android:textColor="@color/ui_bg"
@@ -99,6 +116,24 @@
                 android:text="Skip Alarm access permission for now"
                 android:gravity="center"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginVertical="15dp"
+                android:text="Application Optimization permissions"
+                android:textColor="@color/ui_accent" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="15dp"
+                android:fontFamily="@font/sans"
+                android:text="This permission is required to allow NotiSender to run in the background."
+                android:textColor="@color/ui_fg_secondary" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/Permit_Overlay"
                 android:layout_width="match_parent"
@@ -106,7 +141,7 @@
                 android:text="Overlay Permission"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:layout_marginVertical="12dp"
+                android:layout_marginVertical="6dp"
                 android:layout_marginHorizontal="24dp"
                 android:textColor="@color/ui_bg"
                 app:iconTint="@color/ui_bg"
@@ -141,6 +176,24 @@
                 app:icon="@drawable/ic_fluent_folder_24_regular"
                 android:background="@drawable/round_corner"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginVertical="15dp"
+                android:text="Location Permissions"
+                android:textColor="@color/ui_accent" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="15dp"
+                android:fontFamily="@font/sans"
+                android:text="This permission is used to retrieve location information to remotely locate this device from another device.\n\nYou can choose not to grant this permission, but doing so will limit the ability to find locations."
+                android:textColor="@color/ui_fg_secondary" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/Permit_Location"
                 android:layout_width="match_parent"
@@ -168,6 +221,32 @@
                 app:iconTint="@color/ui_bg"
                 app:icon="@drawable/ic_fluent_globe_location_24_regular"
                 android:background="@drawable/round_corner"/>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/Skip_Location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:text="Skip Location permission"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginVertical="15dp"
+                android:text="Legal &amp; Regulatory "
+                android:textColor="@color/ui_accent" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="15dp"
+                android:fontFamily="@font/sans"
+                android:text="EULA that Norix Team and Google requires from its users. You can review this license at any time in the 'App Information' menu."
+                android:textColor="@color/ui_fg_secondary" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/Permit_Privacy"

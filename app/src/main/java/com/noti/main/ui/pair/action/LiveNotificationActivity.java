@@ -48,6 +48,8 @@ public class LiveNotificationActivity extends AppCompatActivity {
     TextView liveNotiStateDescription;
     ProgressBar liveNotiStateProgress;
 
+    final String BLANK_INFO_TEXT = "There are currently no notifications\ndisplayed on your device.";
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -185,6 +187,11 @@ public class LiveNotificationActivity extends AppCompatActivity {
 
             dismissButton.setOnClickListener((v) -> {
                 liveNotiLayout.removeView(liveNotiItem);
+
+                if(liveNotiLayout.getChildCount() == 0) {
+                    showError(BLANK_INFO_TEXT, true);
+                }
+
                 if(lastSelectedItemHolder == this) {
                     lastSelectedItemHolder = null;
                 }
@@ -232,10 +239,10 @@ public class LiveNotificationActivity extends AppCompatActivity {
             if(liveNotificationCount > 0) {
                 setNotiListVisibility(true);
             } else {
-                showError("There are currently no notifications\ndisplayed on your device.", true);
+                showError(BLANK_INFO_TEXT, true);
             }
         } else {
-            showError("There are currently no notifications\ndisplayed on your device.", true);
+            showError(BLANK_INFO_TEXT, true);
         }
     }
 

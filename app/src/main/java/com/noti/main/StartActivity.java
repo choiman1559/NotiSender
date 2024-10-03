@@ -64,6 +64,7 @@ public class StartActivity extends AppCompatActivity {
     MaterialButton Permit_Privacy;
     MaterialButton Permit_Collect_Data;
     MaterialCheckBox Skip_Alarm;
+    MaterialCheckBox Skip_Location;
 
     ActivityResultLauncher<Intent> startOverlayPermit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if(Build.VERSION.SDK_INT < 29 || Settings.canDrawOverlays(this)) {
@@ -74,7 +75,7 @@ public class StartActivity extends AppCompatActivity {
 
     ActivityResultLauncher<Intent> startBatteryOptimizations = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT < 23 || pm.isIgnoringBatteryOptimizations(getPackageName())) {
+        if (pm.isIgnoringBatteryOptimizations(getPackageName())) {
             setButtonCompleted(this, Permit_Battery);
             checkPermissionsAndEnableComplete();
         }
@@ -130,6 +131,7 @@ public class StartActivity extends AppCompatActivity {
         Permit_Privacy = findViewById(R.id.Permit_Privacy);
         Permit_Collect_Data = findViewById(R.id.Permit_Collect_Data);
         Skip_Alarm = findViewById(R.id.Skip_Alarm);
+        Skip_Location = findViewById(R.id.Skip_Location);
         Start_App = findViewById(R.id.Start_App);
 
         int count = 0;
@@ -145,7 +147,7 @@ public class StartActivity extends AppCompatActivity {
         }
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (Build.VERSION.SDK_INT < 23 || isTelevisionsEnabled || pm.isIgnoringBatteryOptimizations(getPackageName())) {
+        if (isTelevisionsEnabled || pm.isIgnoringBatteryOptimizations(getPackageName())) {
             setButtonCompleted(this, Permit_Battery);
             count++;
         }
@@ -162,16 +164,21 @@ public class StartActivity extends AppCompatActivity {
             count++;
         }
 
-        boolean isFineLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean isCoarseLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        if(isCoarseLocation || isFineLocation) {
-            setButtonCompleted(this, Permit_Location);
-            count++;
-        }
+        if(prefs.getBoolean("SkipLocationAccessPermission", false)) {
+            Skip_Location.setChecked(true);
+            count += 2;
+        } else {
+            boolean isFineLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            boolean isCoarseLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            if(isCoarseLocation || isFineLocation) {
+                setButtonCompleted(this, Permit_Location);
+                count++;
+            }
 
-        if(Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            setButtonCompleted(this, Permit_Background_Location);
-            count++;
+            if(Build.VERSION.SDK_INT < 29 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                setButtonCompleted(this, Permit_Background_Location);
+                count++;
+            }
         }
 
         if(prefs.getBoolean("SkipAlarmAccessPermission", false)) {
@@ -232,12 +239,8 @@ public class StartActivity extends AppCompatActivity {
         }
 
         Permit_Notification.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[] { "android.permission.POST_NOTIFICATIONS" }, 100));
-        Permit_Overlay.setOnClickListener((v) -> {
-            if (Build.VERSION.SDK_INT > 22) startOverlayPermit.launch(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        });
-        Permit_Battery.setOnClickListener((v) -> {
-            if (Build.VERSION.SDK_INT > 22) startBatteryOptimizations.launch(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:" + getPackageName())));
-        });
+        Permit_Overlay.setOnClickListener((v) -> startOverlayPermit.launch(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)));
+        Permit_Battery.setOnClickListener((v) -> startBatteryOptimizations.launch(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:" + getPackageName()))));
         Permit_Alarm.setOnClickListener((v) -> startAlarmAccessPermit.launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
         Permit_File.setOnClickListener((v) -> ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 101));
         Permit_Location.setOnClickListener((v) -> locationPermissionRequest.launch(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}));
@@ -298,6 +301,10 @@ public class StartActivity extends AppCompatActivity {
             checkPermissionsAndEnableComplete();
             prefs.edit().putBoolean("SkipAlarmAccessPermission", b).apply();
         });
+        Skip_Location.setOnCheckedChangeListener((compoundButton, b) -> {
+            checkPermissionsAndEnableComplete();
+            prefs.edit().putBoolean("SkipLocationAccessPermission", b).apply();
+        });
         Start_App.setOnClickListener((v) -> {
             boolean isBadCondition = Permit_Notification.isEnabled();
 
@@ -321,11 +328,7 @@ public class StartActivity extends AppCompatActivity {
                 isBadCondition = true;
             }
 
-            if(Permit_Location.isEnabled()) {
-                isBadCondition = true;
-            }
-
-            if(Permit_Background_Location.isEnabled()) {
+            if((Permit_Location.isEnabled() || Permit_Background_Location.isEnabled()) && !Skip_Location.isChecked()) {
                 isBadCondition = true;
             }
 
@@ -345,7 +348,11 @@ public class StartActivity extends AppCompatActivity {
     }
 
     void checkPermissionsAndEnableComplete() {
-        Start_App.setEnabled(!Permit_Notification.isEnabled() && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled() && (!Permit_Alarm.isEnabled() || Skip_Alarm.isChecked()) && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled());
+        Start_App.setEnabled(!Permit_Notification.isEnabled()
+                && !Permit_Battery.isEnabled() && !Permit_File.isEnabled() && !Permit_Overlay.isEnabled()
+                && (!(Permit_Location.isEnabled() || Permit_Background_Location.isEnabled()) || Skip_Location.isChecked())
+                && (!Permit_Alarm.isEnabled() || Skip_Alarm.isChecked())
+                && !Permit_Privacy.isEnabled() && !Permit_Collect_Data.isEnabled());
     }
 
     @Override
