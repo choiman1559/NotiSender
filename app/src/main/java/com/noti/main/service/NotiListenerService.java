@@ -522,7 +522,11 @@ public class NotiListenerService extends NotificationListenerService {
             };
 
             Bitmap finalBitmap = (iconTintColor == null ? getResizedBitmap(ICON, res, res) : getResizedBitmap(ICON, res, res, iconTintColor));
-            ICONS = (res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(finalBitmap)));
+            if(finalBitmap != null) {
+                ICONS = (res == 0 ? "none" : CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(finalBitmap)));
+            } else {
+                ICONS = "none";
+            }
         } else ICONS = "none";
 
         String DEVICE_NAME = NotiListenerService.getDeviceName();
