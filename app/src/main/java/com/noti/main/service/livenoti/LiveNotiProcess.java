@@ -1,7 +1,6 @@
 package com.noti.main.service.livenoti;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
@@ -60,7 +59,7 @@ public class LiveNotiProcess {
         }
     }
 
-    public static String toStringLiveNotificationList(Context context) throws JsonProcessingException, PackageManager.NameNotFoundException {
+    public static String toStringLiveNotificationList(Context context) throws JsonProcessingException {
         if(mOnNotificationListListener != null) {
             ArrayList<StatusBarNotification> statusBarNotifications = new ArrayList<>(Arrays.asList(mOnNotificationListListener.onRequested()));
             ArrayList<String> keyList = new ArrayList<>();
@@ -72,8 +71,15 @@ public class LiveNotiProcess {
                     continue;
                 }
 
-                finalDataList.add(new LiveNotificationData(context, statusBarNotification).toString());
-                keyList.add(statusBarNotification.getKey());
+                try {
+                    finalDataList.add(new LiveNotificationData(context, statusBarNotification).toString());
+                    keyList.add(statusBarNotification.getKey());
+                } catch (Exception e) {
+                    if(BuildConfig.DEBUG) {
+                        Log.e("LiveNotiProcess", "Error while serializing LiveNotification data: " + statusBarNotification.getKey());
+                        e.printStackTrace();
+                    }
+                }
             }
 
             return new ObjectMapper().writeValueAsString(finalDataList.toArray());

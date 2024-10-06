@@ -4,6 +4,7 @@ import static com.noti.main.utils.network.AESCrypto.shaAndHex;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.noti.main.Application;
 import com.noti.main.service.NotiListenerService;
@@ -17,6 +18,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -122,10 +124,17 @@ public class LiveNotiRequests {
                     ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
                     if(resultPacket.isResultOk()) {
                         String[] rawArray = new ObjectMapper().readValue(resultPacket.getExtraData(), String[].class);
-                        LiveNotificationData[] liveNotiArray = new LiveNotificationData[rawArray.length];
-                        for (int i = 0; i < rawArray.length; i++) {
-                            liveNotiArray[i] = LiveNotificationData.parseFrom(rawArray[i]);
+                        ArrayList<LiveNotificationData> dataArrayList = new ArrayList<>();
+                        for (String s : rawArray) {
+                            try {
+                                dataArrayList.add(LiveNotificationData.parseFrom(s));
+                            } catch (Exception e) {
+                                Log.d("LiveNotiProcess", "Error parsing LiveNotification => Raw data: " + s);
+                            }
                         }
+
+                        LiveNotificationData[] liveNotiArray = new LiveNotificationData[dataArrayList.size()];
+                        dataArrayList.toArray(liveNotiArray);
                         LiveNotiProcess.callLiveNotificationUploadCompleteListener(true, liveNotiArray);
                     }  else {
                         throw new IOException(resultPacket.getErrorCause());

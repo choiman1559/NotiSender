@@ -47,7 +47,7 @@ public class LiveNotificationData implements Serializable {
         // Default constructor for creating instance by ObjectMapper
     }
 
-    public LiveNotificationData(Context context, StatusBarNotification statusBarNotification) throws PackageManager.NameNotFoundException {
+    public LiveNotificationData(Context context, StatusBarNotification statusBarNotification) throws Exception {
         this.postTime = statusBarNotification.getPostTime();
         this.key = statusBarNotification.getKey();
 
@@ -82,8 +82,12 @@ public class LiveNotificationData implements Serializable {
 
                 if(iconBitmap != null) {
                     iconBitmap.setHasAlpha(true);
-                    this.smallIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(
-                            NotiListenerService.getResizedBitmap(iconBitmap,52,52, Color.BLACK)));
+                    Bitmap resizedBitmap = NotiListenerService.getResizedBitmap(iconBitmap,52,52, Color.BLACK);
+                    if(resizedBitmap != null) {
+                        this.smallIcon = CompressStringUtil.compressString(CompressStringUtil.getStringFromBitmap(resizedBitmap));
+                    } else {
+                        this.smallIcon = "";
+                    }
                 }
             }
         } else {
