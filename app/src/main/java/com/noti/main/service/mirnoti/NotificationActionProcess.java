@@ -13,9 +13,11 @@ import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import org.jetbrains.annotations.TestOnly;
+
+import com.noti.main.service.FirebaseMessageService;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -114,6 +116,7 @@ public class NotificationActionProcess {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.hasExtra(TEST_INPUT_ACTION_KET)) {
+                // For testing purposes only; must do nothing on other packages
                 notifyTestInputAction(context, intent);
                 return;
             }
@@ -133,13 +136,17 @@ public class NotificationActionProcess {
 
             final int uniqueCode = intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_HASHCODE, -1);
             if(uniqueCode != -1) {
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancel(uniqueCode);
+                if(FirebaseMessageService.removeListenerById == null) {
+                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.cancel(uniqueCode);
+                } else {
+                    FirebaseMessageService.removeListenerById.onRequested(key);
+                }
             }
         }
 
         @TestOnly
-        protected void notifyTestInputAction(Context context, Intent intent) {
+        protected void notifyTestInputAction(@NonNull Context context, Intent intent) {
             Log.d("ReplyData", "InputType action receiver: " + RemoteInput.getResultsFromIntent(intent).get(intent.getStringExtra(TEST_INPUT_ACTION_KET)));
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(1111);

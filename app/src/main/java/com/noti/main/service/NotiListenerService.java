@@ -76,6 +76,16 @@ public class NotiListenerService extends NotificationListenerService {
     private static final Object pastNotificationLock = new Object();
     private volatile StatusBarNotification pastNotification = null;
     private final FirebaseMessageService.OnNotificationRemoveRequest onRemoveRequestListener = this::cancelNotification;
+    private final FirebaseMessageService.OnNotificationRemoveRequest onRemoveRequestListenerById = key -> {
+        StatusBarNotification[] notifications = this.getActiveNotifications();
+        for (StatusBarNotification statusBarNotification : notifications) {
+            String notificationKey = statusBarNotification.getKey();
+            if(statusBarNotification.getPackageName().equals(getPackageName()) && notificationKey.contains(Integer.toString(key.hashCode()))) {
+                cancelNotification(notificationKey);
+                break;
+            }
+        }
+    };
 
     private static int queryAccessCount = 0;
     private static volatile long intervalTimestamp = 0;
@@ -103,6 +113,7 @@ public class NotiListenerService extends NotificationListenerService {
         super.onCreate();
         if (instance == null) initService(this);
         FirebaseMessageService.removeListener = onRemoveRequestListener;
+        FirebaseMessageService.removeListenerById = onRemoveRequestListenerById;
     }
 
     void initService(Context context) {
@@ -261,6 +272,55 @@ public class NotiListenerService extends NotificationListenerService {
     public void onListenerConnected() {
         super.onListenerConnected();
         LiveNotiProcess.mOnNotificationListListener = NotiListenerService.this::getActiveNotifications;
+    }
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        super.onNotificationRemoved(sbn);
+        if(BuildConfig.DEBUG) {
+            Log.d("NotificationListener", "onNotificationRemoved: " + sbn.getPackageName());
+        }
+
+        if (manager == null) manager = PowerUtils.getInstance(this);
+        manager.acquire();
+
+        if(!prefs.getBoolean("RemoteDismiss", false)) {
+            manager.release();
+            return;
+        }
+
+        if (!prefs.getString("UID", "").isEmpty() && prefs.getBoolean("serviceToggle", false)) {
+            String mode = prefs.getString("service", "reception");
+            if (mode.equals("send") || mode.equals("hybrid")) {
+                Notification notification = sbn.getNotification();
+                String PackageName = sbn.getPackageName();
+                String TITLE = getNonNullString(notification.extras.getCharSequence(Notification.EXTRA_TITLE));
+
+                if (PackageName.equals(getPackageName()) && (!TITLE.toLowerCase().contains("test") || TITLE.contains("main"))) {
+                    manager.release();
+                } else if (isWhitelist(PackageName)) {
+                    if (prefs.getBoolean("IgnoreOngoing", false) &&
+                            (notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0 ||
+                            (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0 ||
+                            (notification.flags & Notification.FLAG_LOCAL_ONLY) != 0) {
+                        manager.release();
+                        return;
+                    }
+
+                    if (notification.contentView != null &&
+                            notification.contentView.getLayoutId() == androidx.media.R.layout.notification_template_media) {
+                        manager.release();
+                        return;
+                    }
+
+                    if (prefs.getBoolean("useLegacyAPI", false)) {
+                        manager.release();
+                    } else {
+                        NotificationRequest.sendOriginNotificationDismissed(this, BuildConfig.DEBUG, sbn.getKey());
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -54,6 +54,24 @@ public class NotificationRequest {
         }
     }
 
+    public static void sendOriginNotificationDismissed(Context context, boolean isLogging, String notificationKey) {
+        try {
+            JSONObject notificationBody = new JSONObject();
+            notificationBody.put("type", "send|dismiss");
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
+            notificationBody.put("device_id", NotiListenerService.getUniqueID());
+            notificationBody.put(KEY_NOTIFICATION_API, "1");
+            notificationBody.put(KEY_NOTIFICATION_KEY, notificationKey);
+
+            if (isLogging) Log.d("NOTIFICATION_DATA", notificationBody.toString());
+            NotiListenerService.sendNotification(notificationBody, "NOTIFICATION_SEND", context);
+        } catch (JSONException e) {
+            if(isLogging) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     public static void sendPerformAction(Context context, String key, int index, String deviceName, String deviceId) {
         try {
             JSONObject notificationBody = new JSONObject();

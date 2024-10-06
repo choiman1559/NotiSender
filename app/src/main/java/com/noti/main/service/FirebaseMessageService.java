@@ -128,6 +128,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     public static OnNotificationRemoveRequest removeListener;
+    public static OnNotificationRemoveRequest removeListenerById;
 
     @Override
     public void onCreate() {
@@ -280,6 +281,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     switch (type) {
                         case "send|sms" -> sendSmsNotification(map);
                         case "send|telecom" -> sendTelecomNotification(map);
+                        case "send|dismiss" -> dismissMirroredNotification(map);
                         case "send|normal" -> {
                             if(map.containsKey(NotificationRequest.KEY_NOTIFICATION_API)) {
                                 sendNotificationNew(map);
@@ -794,6 +796,17 @@ public class FirebaseMessageService extends FirebaseMessagingService {
         assert notificationManager != null;
         notificationManager.notify(uniqueCode, builder.build());
         playRingtoneAndVibrate();
+    }
+
+    protected void dismissMirroredNotification(Map<String, String> map) {
+        if(!map.containsKey(NotificationRequest.KEY_NOTIFICATION_API)) {
+            return;
+        }
+
+        String key = map.get(NotificationRequest.KEY_NOTIFICATION_KEY);
+        if(key != null && !key.isEmpty() && removeListenerById != null) {
+            removeListenerById.onRequested(key);
+        }
     }
 
     protected void sendNotificationAction(Map<String, String> map) {

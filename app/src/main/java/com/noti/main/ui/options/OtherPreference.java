@@ -3,6 +3,7 @@ package com.noti.main.ui.options;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.Activity;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -359,8 +360,6 @@ public class OtherPreference extends PreferenceFragmentCompat {
                         .setLargeIcon(R.drawable.ic_launcher_splash)
                         .setPicture(R.drawable.ic_launcher_background)
                         .setSmallIcon(R.drawable.ic_broken_image)
-                        .setChannelName("Testing Channel")
-                        .setChannelId("Notification Test")
                         .setImportance(importance)
                         .enableVibration(true)
                         .setAutoCancel(true)
@@ -378,6 +377,15 @@ public class OtherPreference extends PreferenceFragmentCompat {
                         .setContentText("messageTest");
 
                 NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    CharSequence channelName = "Testing Channel";
+                    String description = "Test Notification Channel";
+
+                    NotificationChannel channel = new NotificationChannel("Notification Test", channelName, importance.ordinal());
+                    channel.setDescription(description);
+                    notificationManager.createNotificationChannel(channel);
+                }
+
                 notificationManager.notify(1111, builder.build());
                 break;
 
