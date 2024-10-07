@@ -36,6 +36,7 @@ import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginConst;
+import com.noti.main.service.backend.PacketBonding;
 import com.noti.main.service.backend.PacketConst;
 import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
@@ -693,7 +694,8 @@ public class NotiListenerService extends NotificationListenerService {
         return -1;
     }
 
-    public static void sendNotification(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) {
+    public static void sendNotification(JSONObject notification, String PackageName, Context context,
+                                        boolean useFCMOnly, boolean notUseBonding /* TODO: Add false to Real-Time needed requests (eg. Pair Request) */) {
         SharedPreferences prefs = getPrefs();
         PowerUtils manager = getInstance().manager;
 
@@ -731,7 +733,15 @@ public class NotiListenerService extends NotificationListenerService {
                 notification = encryptData(notification);
             }
 
-            if(useBackendProxy && (enforceBackendProxy || notification.toString().length() > 2048)) {
+            if(useBackendProxy && !notUseBonding) {
+                PacketBonding.runBondingSchedule(context, notification, (singleNotification) -> {
+                    if(enforceBackendProxy || singleNotification.toString().length() > 2048) {
+                        proxyToBackend(singleNotification, PackageName, context, useFCMOnly);
+                    } else {
+                        finalProcessData(singleNotification, PackageName, context, useFCMOnly);
+                    }
+                });
+            } else if(useBackendProxy && (enforceBackendProxy || notification.toString().length() > 2048)) {
                 proxyToBackend(notification, PackageName, context, useFCMOnly);
             } else {
                 finalProcessData(notification, PackageName, context, useFCMOnly);
@@ -741,8 +751,12 @@ public class NotiListenerService extends NotificationListenerService {
         }
     }
 
+    public static void sendNotification(JSONObject notification, String PackageName, Context context, boolean notUseBonding) {
+        sendNotification(notification, PackageName, context, false, notUseBonding);
+    }
+
     public static void sendNotification(JSONObject notification, String PackageName, Context context) {
-       sendNotification(notification, PackageName, context, false);
+       sendNotification(notification, PackageName, context, false, false);
     }
 
     protected static JSONObject[] splitData(JSONObject rawData) throws JSONException {
@@ -769,7 +783,7 @@ public class NotiListenerService extends NotificationListenerService {
         return data;
     }
 
-    protected static void proxyToBackend(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) throws JSONException, NoSuchAlgorithmException {
+    public static void proxyToBackend(JSONObject notification, String PackageName, Context context, boolean useFCMOnly) throws JSONException, NoSuchAlgorithmException {
         String finalData = notification.toString();
         String deviceId = getUniqueID();
         String deviceName = getDeviceName();

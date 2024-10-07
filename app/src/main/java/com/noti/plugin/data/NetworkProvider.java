@@ -73,7 +73,7 @@ public class NetworkProvider {
             }
 
             addOnFCMIgnitionCompleteListener(() -> onNetworkProviderListener.onMessageReceived(remoteMessage));
-            sendNotification(notificationBody, context.getPackageName(), context, true);
+            sendNotification(notificationBody, context.getPackageName(), context, true, true);
         }
     }
 }

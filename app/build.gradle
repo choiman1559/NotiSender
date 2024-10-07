@@ -25,8 +25,8 @@ android {
         applicationId "com.noti.main"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 1012201
-        versionName "1.22.1"
+        versionCode 1012202
+        versionName "1.22.2"
 
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'

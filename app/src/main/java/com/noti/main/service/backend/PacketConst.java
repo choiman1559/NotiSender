@@ -7,6 +7,7 @@ public class PacketConst {
     public final static String SERVICE_TYPE_FILE_TRANSFER = "type_file_transfer";
     public final static String SERVICE_TYPE_IMAGE_CACHE = "type_image_cache";
     public final static String SERVICE_TYPE_PACKET_PROXY = "type_packet_proxy";
+    public final static String SERVICE_TYPE_PACKET_BONDING = "type_packet_bonding";
     public final static String SERVICE_TYPE_PING_SERVER = "type_ping";
 
     public final static String REQUEST_POST_SHORT_TERM_DATA = "request_post_short_term_data";
@@ -28,6 +29,7 @@ public class PacketConst {
     public final static String KEY_SEND_DEVICE_ID = "send_device_id";
     public final static String KEY_SEND_DEVICE_NAME = "send_device_name";
     public static final String KEY_IS_SUCCESS = "is_success";
+    public final static String KEY_PACKET_BONDING_ARRAY = "packet_bonding_array";
 
     public final static String KEY_ACTION_TYPE = "action_type";
     public final static String KEY_UID = "uid";

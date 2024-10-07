@@ -353,9 +353,10 @@ public class OtherPreference extends PreferenceFragmentCompat {
                     default -> Notify.NotifyImportance.MIN;
                 };
 
+                int uniqueId = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
                 NotificationCompat.Builder builder =
                 Notify.build(mContext)
-                        .setTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
+                        .setTitle("test (" + uniqueId + ")")
                         .setContent("messageTest")
                         .setLargeIcon(R.drawable.ic_launcher_splash)
                         .setPicture(R.drawable.ic_launcher_background)
@@ -365,14 +366,14 @@ public class OtherPreference extends PreferenceFragmentCompat {
                         .setAutoCancel(true)
                         .getNotificationBuilder();
 
-                final String inputActionValueKey = "ddd";
+                final String inputActionValueKey = Integer.toString(uniqueId);
                 Intent intent = new Intent(mContext, NotificationActionProcess.NotificationActionRaiseBroadcastReceiver.class);
                 intent.putExtra(NotificationActionProcess.NotificationActionRaiseBroadcastReceiver.TEST_INPUT_ACTION_KET, inputActionValueKey);
 
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 1, intent, Build.VERSION.SDK_INT > 30 ? PendingIntent.FLAG_MUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
                 RemoteInput remoteInput = new RemoteInput.Builder(inputActionValueKey).setLabel("Reply message").build();
                 builder.setSmallIcon(R.drawable.ic_broken_image)
-                        .setContentTitle("test (" + (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE) + ")")
+                        .setContentTitle("test (" + uniqueId + ")")
                         .addAction(new NotificationCompat.Action.Builder(null, "Reply", pendingIntent).addRemoteInput(remoteInput).build())
                         .setContentText("messageTest");
 
@@ -386,7 +387,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                     notificationManager.createNotificationChannel(channel);
                 }
 
-                notificationManager.notify(1111, builder.build());
+                notificationManager.notify(uniqueId, builder.build());
                 break;
 
             case "StartRegexAction":

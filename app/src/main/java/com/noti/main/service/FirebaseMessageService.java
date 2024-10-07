@@ -43,6 +43,7 @@ import com.noti.main.R;
 import com.noti.main.receiver.FindDeviceCancelReceiver;
 import com.noti.main.receiver.media.MediaSession;
 import com.noti.main.receiver.plugin.PluginHostInject;
+import com.noti.main.service.backend.PacketBonding;
 import com.noti.main.service.backend.PacketConst;
 import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
@@ -239,14 +240,20 @@ public class FirebaseMessageService extends FirebaseMessagingService {
             }
 
             if (prefs.getBoolean("serviceToggle", false)) {
-                if (PacketConst.SERVICE_TYPE_PACKET_PROXY.equals(type) && !isDeviceItself(map)) {
-                    processProxyData(map, context);
-                    return;
-                }
-
-                if ("split_data".equals(type) && !isDeviceItself(map)) {
-                    processSplitData(map, context);
-                    return;
+                if(!isDeviceItself(map)) switch (type) {
+                        case PacketConst.SERVICE_TYPE_PACKET_PROXY -> {
+                            processProxyData(map, context);
+                            return;
+                        }
+                        case PacketConst.SERVICE_TYPE_PACKET_BONDING -> {
+                            PacketBonding.processPacketBonding(map,
+                                    (newMap) -> preProcessReception(newMap, context));
+                            return;
+                        }
+                        case "split_data" -> {
+                            processSplitData(map, context);
+                            return;
+                        }
                 }
 
                 if (prefs.getBoolean("AllowOnlyPaired", false) && !isPairedDevice(map)) {

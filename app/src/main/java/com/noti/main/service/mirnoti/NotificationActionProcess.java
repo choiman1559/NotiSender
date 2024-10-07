@@ -149,7 +149,7 @@ public class NotificationActionProcess {
         protected void notifyTestInputAction(@NonNull Context context, Intent intent) {
             Log.d("ReplyData", "InputType action receiver: " + RemoteInput.getResultsFromIntent(intent).get(intent.getStringExtra(TEST_INPUT_ACTION_KET)));
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(1111);
+            notificationManager.cancel(Integer.parseInt(intent.getStringExtra(TEST_INPUT_ACTION_KET)));
         }
     }
 }
