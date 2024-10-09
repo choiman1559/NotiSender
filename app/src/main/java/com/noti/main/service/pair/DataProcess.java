@@ -56,7 +56,7 @@ public class DataProcess {
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationBody, context.getPackageName(), context);
+        sendNotification(notificationBody, context.getPackageName(), context, true);
     }
 
     public static void requestData(Context context, String Device_name, String Device_id, String dataType) {
@@ -76,7 +76,7 @@ public class DataProcess {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
 
-        sendNotification(notificationBody, context.getPackageName(), context);
+        sendNotification(notificationBody, context.getPackageName(), context, true);
     }
 
     public static void requestAction(Context context, String Device_name, String Device_id, String dataType, String... args) {
@@ -104,7 +104,7 @@ public class DataProcess {
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationBody, context.getPackageName(), context);
+        sendNotification(notificationBody, context.getPackageName(), context, true);
     }
 
     public static void onDataRequested(Map<String, String> map, Context context) {
@@ -150,7 +150,7 @@ public class DataProcess {
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
-        sendNotification(notificationBody, context.getPackageName(), context);
+        sendNotification(notificationBody, context.getPackageName(), context, true);
     }
 
     public static void onActionRequested(Map<String, String> map, Context context) {

@@ -51,11 +51,11 @@ public class NotificationsData implements Serializable {
     public NotificationAction[] actions;
 
     @JsonProperty
-    public String smallIcon;
+    protected String smallIcon;
     @JsonProperty
-    public String bigIcon;
+    protected String bigIcon;
     @JsonProperty
-    public String bigPicture;
+    protected String bigPicture;
 
     @SuppressWarnings("unused")
     public NotificationsData() {
@@ -147,11 +147,10 @@ public class NotificationsData implements Serializable {
 
     private int getIconSize() {
         SharedPreferences prefs = NotiListenerService.getPrefs();
-        return switch (prefs.getString("IconRes", "")) {
+        return switch (prefs.getString("IconRes", "52 x 52 (Default)")) {
             case "68 x 68 (Not Recommend)" -> 68;
-            case "52 x 52 (Default)" -> 52;
             case "36 x 36" -> 36;
-            default -> 0;
+            default -> 52;
         };
     }
 

@@ -27,9 +27,8 @@ import com.google.android.material.card.MaterialCardView;
 import com.noti.main.R;
 import com.noti.main.service.livenoti.LiveNotiProcess;
 import com.noti.main.service.livenoti.LiveNotiRequests;
-import com.noti.main.service.livenoti.LiveNotificationData;
 import com.noti.main.service.mirnoti.NotificationRequest;
-import com.noti.main.utils.network.CompressStringUtil;
+import com.noti.main.service.mirnoti.NotificationsData;
 import com.noti.main.utils.ui.ToastHelper;
 
 import java.util.Locale;
@@ -141,7 +140,7 @@ public class LiveNotificationActivity extends AppCompatActivity {
         ImageView liveNotiSmallIcon;
         ImageView liveNotiBigIcon;
 
-        public LiveNotiItemHolder(Context context, LiveNotificationData liveNotificationObj) {
+        public LiveNotiItemHolder(Context context, NotificationsData liveNotificationObj) {
             liveNotiItem = (CoordinatorLayout) View.inflate(context, R.layout.cardview_rilenoti_item, null);
             liveNotiItemParent = liveNotiItem.findViewById(R.id.liveNotiItemParent);
 
@@ -160,22 +159,14 @@ public class LiveNotificationActivity extends AppCompatActivity {
             liveNotiAppName.setText(String.format(Locale.getDefault(),"%s • %s",
                     liveNotificationObj.appName, getReadableTimeDiff(liveNotificationObj.postTime)));
 
-            if(liveNotificationObj.smallIcon != null && !liveNotificationObj.smallIcon.isEmpty()) {
-                Bitmap smallBitmap = CompressStringUtil.getBitmapFromString(
-                        CompressStringUtil.decompressString(liveNotificationObj.smallIcon));
-                if(smallBitmap != null) {
-                    liveNotiSmallIcon.setImageBitmap(smallBitmap);
-                }
+            Bitmap smallBitmap = liveNotificationObj.getSmallIcon();
+            if(smallBitmap != null) {
+                liveNotiSmallIcon.setImageBitmap(smallBitmap);
             }
 
-            if(liveNotificationObj.bigIcon != null && !liveNotificationObj.bigIcon.isEmpty()) {
-                Bitmap smallBitmap = CompressStringUtil.getBitmapFromString(
-                        CompressStringUtil.decompressString(liveNotificationObj.bigIcon));
-                if(smallBitmap != null) {
-                    liveNotiBigIcon.setImageBitmap(smallBitmap);
-                } else {
-                    liveNotiBigIcon.setVisibility(View.GONE);
-                }
+            Bitmap bigBitmap = liveNotificationObj.getBigIcon();
+            if(bigBitmap != null) {
+                liveNotiBigIcon.setImageBitmap(bigBitmap);
             } else {
                 liveNotiBigIcon.setVisibility(View.GONE);
             }
@@ -223,11 +214,11 @@ public class LiveNotificationActivity extends AppCompatActivity {
         }
     }
 
-    private void makeListView(LiveNotificationData[] liveNotificationList) {
+    private void makeListView(NotificationsData[] liveNotificationList) {
         if(liveNotificationList.length > 0) {
             int liveNotificationCount = 0;
-            for(LiveNotificationData liveNotificationObj : liveNotificationList) {
-                if(liveNotificationObj.title.isEmpty() && liveNotificationObj.message.isEmpty() && liveNotificationObj.bigIcon.isEmpty()) {
+            for(NotificationsData liveNotificationObj : liveNotificationList) {
+                if(liveNotificationObj.title.isEmpty() && liveNotificationObj.message.isEmpty() && liveNotificationObj.getBigIcon() != null) {
                     continue;
                 }
 

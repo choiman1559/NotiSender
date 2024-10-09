@@ -97,7 +97,7 @@ public class PairAcceptActivity extends AppCompatActivity {
             Log.e("Noti", "onCreate: " + e.getMessage());
         }
 
-        NotiListenerService.sendNotification(notificationBody, "pair.func", context);
+        NotiListenerService.sendNotification(notificationBody, "pair.func", context, true);
         ExitActivity.exitApplication(context);
 
         if (isAccepted) {

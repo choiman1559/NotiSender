@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.FirebaseMessageService;
 import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.mirnoti.NotificationsData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,10 +34,10 @@ public class LiveNotiProcess {
     }
 
     public interface onLiveNotificationUploadCompleteListener {
-        void onReceive(boolean isSuccess, @Nullable LiveNotificationData[] liveNotifications);
+        void onReceive(boolean isSuccess, @Nullable NotificationsData[] liveNotifications);
     }
 
-    public static void callLiveNotificationUploadCompleteListener(boolean isSuccess, @Nullable LiveNotificationData[] liveNotifications) {
+    public static void callLiveNotificationUploadCompleteListener(boolean isSuccess, @Nullable NotificationsData[] liveNotifications) {
         if(mOnLiveNotificationDownloadCompleteListener != null) {
             mOnLiveNotificationDownloadCompleteListener.onReceive(isSuccess, liveNotifications);
         }
@@ -72,7 +73,7 @@ public class LiveNotiProcess {
                 }
 
                 try {
-                    finalDataList.add(new LiveNotificationData(context, statusBarNotification).toString());
+                    finalDataList.add(new NotificationsData(context, statusBarNotification).toString());
                     keyList.add(statusBarNotification.getKey());
                 } catch (Exception e) {
                     if(BuildConfig.DEBUG) {

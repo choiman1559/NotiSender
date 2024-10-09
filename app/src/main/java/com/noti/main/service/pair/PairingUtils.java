@@ -48,7 +48,7 @@ public class PairingUtils {
             Log.e("Noti", "onCreate: " + e.getMessage() );
         }
 
-        NotiListenerService.sendNotification(notificationBody, "pair.func", context);
+        NotiListenerService.sendNotification(notificationBody, "pair.func", context, true);
         if(isShowDebugLog(context)) Log.d("sync sent","request list: " + notificationBody);
     }
 
@@ -62,7 +62,7 @@ public class PairingUtils {
             notificationBody.put("send_device_name", map.get("device_name"));
             notificationBody.put("send_device_id", map.get("device_id"));
 
-            NotiListenerService.sendNotification(notificationBody, "pair.func", context);
+            NotiListenerService.sendNotification(notificationBody, "pair.func", context, true);
             if(isShowDebugLog(context)) Log.d("sync sent","response list: " + notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );
@@ -83,7 +83,7 @@ public class PairingUtils {
             notificationBody.put("send_device_name", Device_name);
             notificationBody.put("send_device_id", Device_id);
 
-            NotiListenerService.sendNotification(notificationBody, "pair.func", context);
+            NotiListenerService.sendNotification(notificationBody, "pair.func", context, true);
             if(isShowDebugLog(context)) Log.d("sync sent","request pair: " + notificationBody);
         } catch (JSONException e) {
             Log.e("Noti", "onCreate: " + e.getMessage() );

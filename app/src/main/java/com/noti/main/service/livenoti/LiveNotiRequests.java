@@ -11,6 +11,7 @@ import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.backend.PacketConst;
 import com.noti.main.service.backend.PacketRequester;
 import com.noti.main.service.backend.ResultPacket;
+import com.noti.main.service.mirnoti.NotificationsData;
 import com.noti.main.utils.network.AESCrypto;
 
 import org.json.JSONException;
@@ -124,16 +125,16 @@ public class LiveNotiRequests {
                     ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
                     if(resultPacket.isResultOk()) {
                         String[] rawArray = new ObjectMapper().readValue(resultPacket.getExtraData(), String[].class);
-                        ArrayList<LiveNotificationData> dataArrayList = new ArrayList<>();
+                        ArrayList<NotificationsData> dataArrayList = new ArrayList<>();
                         for (String s : rawArray) {
                             try {
-                                dataArrayList.add(LiveNotificationData.parseFrom(s));
+                                dataArrayList.add(NotificationsData.parseFrom(s));
                             } catch (Exception e) {
                                 Log.d("LiveNotiProcess", "Error parsing LiveNotification => Raw data: " + s);
                             }
                         }
 
-                        LiveNotificationData[] liveNotiArray = new LiveNotificationData[dataArrayList.size()];
+                        NotificationsData[] liveNotiArray = new NotificationsData[dataArrayList.size()];
                         dataArrayList.toArray(liveNotiArray);
                         LiveNotiProcess.callLiveNotificationUploadCompleteListener(true, liveNotiArray);
                     }  else {

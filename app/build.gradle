@@ -114,6 +114,8 @@ dependencies {
     implementation 'com.github.KieronQuinn:MonetCompat:0.4.1'
     implementation 'com.joaomgcd:taskerpluginlibrary:0.4.10'
     implementation 'com.microsoft.design:fluent-system-icons:1.1.253@aar'
+
+    //noinspection DifferentStdlibGradleVersion
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.20'
 }
 
