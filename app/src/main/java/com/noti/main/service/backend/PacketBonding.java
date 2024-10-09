@@ -1,6 +1,7 @@
 package com.noti.main.service.backend;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.noti.main.BuildConfig;
@@ -23,7 +24,7 @@ import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
 
 public class PacketBonding {
 
-    protected static final long DELAY = 300; // TODO: Control delay in user interface?
+    public static final long DEFAULT_DELAY = 300;
     protected static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     protected static final CopyOnWriteArrayList<JSONObject> onWriteArrayList = new CopyOnWriteArrayList<>();
     protected static volatile ScheduledFuture<?> scheduledFuture;
@@ -36,9 +37,17 @@ public class PacketBonding {
         void onBond(JSONObject notification) throws JSONException, NoSuchAlgorithmException;
     }
 
-    public static void runBondingSchedule(Context context, JSONObject notification, OnPacketSingleBondingCallback onPacketSingleBondingCallback) {
+    public static void runBondingSchedule(Context context, JSONObject notification, OnPacketSingleBondingCallback onPacketSingleBondingCallback) throws Exception {
         if(scheduledFuture != null && !scheduledFuture.isDone()) {
             scheduledFuture.cancel(true);
+        }
+
+        SharedPreferences prefs = NotiListenerService.getPrefs();
+        final long selectedDelay = prefs.getLong("ProxyPacketBondingDelay", DEFAULT_DELAY);
+
+        if(selectedDelay <= 0) {
+            onPacketSingleBondingCallback.onBond(notification);
+            return;
         }
 
         onWriteArrayList.add(notification);
@@ -66,7 +75,7 @@ public class PacketBonding {
             } finally {
                 onWriteArrayList.clear();
             }
-        }, DELAY, TimeUnit.MILLISECONDS);
+        }, selectedDelay, TimeUnit.MILLISECONDS);
     }
 
     @SuppressWarnings("unchecked")

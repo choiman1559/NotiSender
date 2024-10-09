@@ -233,7 +233,7 @@ public class MediaPlayer {
                 e.printStackTrace();
             }
 
-            NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context);
+            NotiListenerService.sendNotification(notificationBody, context.getPackageName(), context, true);
         }
     }
 }

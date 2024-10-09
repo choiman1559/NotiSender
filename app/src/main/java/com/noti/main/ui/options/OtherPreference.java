@@ -34,6 +34,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.kieronquinn.monetcompat.core.MonetCompat;
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.service.backend.PacketBonding;
 import com.noti.main.service.mirnoti.NotificationActionProcess;
 import com.noti.main.ui.prefs.ServerPingActivity;
 import com.noti.main.ui.prefs.custom.CustomFragment;
@@ -71,6 +72,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
     Preference UseBackendProxy;
     Preference EnforceBackendProxy;
+    Preference ProxyPacketBondingDelay;
     Preference UseSplitData;
     Preference SplitInterval;
     Preference SplitAfterEncryption;
@@ -122,6 +124,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
         UseBackendProxy = findPreference("UseBackendProxy");
         EnforceBackendProxy = findPreference("EnforceBackendProxy");
+        ProxyPacketBondingDelay = findPreference("ProxyPacketBondingDelay");
         UseSplitData = findPreference("UseSplitData");
         SplitInterval = findPreference("SplitInterval");
         SplitAfterEncryption = findPreference("SplitAfterEncryption");
@@ -172,9 +175,13 @@ public class OtherPreference extends PreferenceFragmentCompat {
         });
 
         boolean useProxy = prefs.getBoolean("UseBackendProxy", true);
+        long packetBondingDelay = prefs.getLong("ProxyPacketBondingDelay", PacketBonding.DEFAULT_DELAY);
         EnforceBackendProxy.setVisible(useProxy);
+        ProxyPacketBondingDelay.setVisible(useProxy);
+        ProxyPacketBondingDelay.setSummary("Now : " + (packetBondingDelay == 300 ? "300 ms (Default)" : (packetBondingDelay < 1 ? "0 ms (Disabled)" : packetBondingDelay + " ms")));
         UseBackendProxy.setOnPreferenceChangeListener((preference, newValue) -> {
             EnforceBackendProxy.setVisible((boolean) newValue);
+            ProxyPacketBondingDelay.setVisible((boolean) newValue);
             if((boolean)(newValue)) {
                 prefs.edit().putBoolean("UseBackendProxy", false).apply();
                 ((SwitchedPreference)UseSplitData).setChecked(false);
@@ -194,6 +201,7 @@ public class OtherPreference extends PreferenceFragmentCompat {
                 ((SwitchedPreference)UseBackendProxy).setChecked(false);
                 prefs.edit().putBoolean("UseBackendProxy", false).apply();
                 EnforceBackendProxy.setVisible(false);
+                ProxyPacketBondingDelay.setVisible(false);
             }
 
             SplitInterval.setVisible((boolean) newValue);
@@ -460,6 +468,58 @@ public class OtherPreference extends PreferenceFragmentCompat {
 
             case "PingTestBackend":
                 startActivity(new Intent(mContext, ServerPingActivity.class));
+                break;
+
+            case "ProxyPacketBondingDelay":
+                dialog = new MaterialAlertDialogBuilder(new ContextThemeWrapper(mContext, R.style.Theme_App_Palette_Dialog));
+                dialog.setIcon(R.drawable.ic_fluent_edit_24_regular);
+                dialog.setCancelable(false);
+                dialog.setTitle("Bonding Threshold");
+                dialog.setMessage("""
+                        Packet Bonding is a method of bundling multiple packets into one and transmitting them at once through a proxy server when multiple transmissions are requested consecutively within a short period of time.
+                        
+                        At this time, Threshold is the time to wait for the next packet. If this value is high, it is energy efficient because a large number of requests can be processed with a single network operation, but the network delay time increases accordingly.
+                        
+                        Some real-time aware packets (e.g., pairing requests) may be excluded from these feature and processed.
+                        
+                        The interval maximum limit is 2147483647 ms and Input 0 or lower to disable this option.
+                        """);
+
+                editText = new EditText(mContext);
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                editText.setHint("Input interval value");
+                editText.setGravity(Gravity.CENTER);
+                editText.setText(String.valueOf(prefs.getLong("ProxyPacketBondingDelay", PacketBonding.DEFAULT_DELAY)));
+
+                parentLayout = new LinearLayout(mContext);
+                layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(30, 16, 30, 16);
+                editText.setLayoutParams(layoutParams);
+                parentLayout.addView(editText);
+                dialog.setView(parentLayout);
+
+                dialog.setPositiveButton("Apply", (d, w) -> {
+                    String value = editText.getText().toString();
+                    if (value.isEmpty()) {
+                        ToastHelper.show(mContext, "Please Input Value", "DISMISS",ToastHelper.LENGTH_SHORT);
+                    } else {
+                        int IntValue = Integer.parseInt(value);
+                        if (IntValue > 0x7FFFFFFF - 1) {
+                            ToastHelper.show(mContext, "Value must be lower than 2147483647", "DISMISS",ToastHelper.LENGTH_SHORT);
+                        } else {
+                            prefs.edit().putLong("ProxyPacketBondingDelay", IntValue).apply();
+                            ProxyPacketBondingDelay.setSummary("Now : " + (IntValue == 300 ? "300 ms (Default)" : (IntValue < 1 ? "0 ms (Disabled)" : IntValue + " ms")));
+                        }
+                    }
+                });
+                dialog.setNeutralButton("Reset Default", (d, w) -> {
+                    prefs.edit().putLong("ProxyPacketBondingDelay", PacketBonding.DEFAULT_DELAY).apply();
+                    ProxyPacketBondingDelay.setSummary("Now : 300 ms (Default)");
+                });
+                dialog.setNegativeButton("Cancel", (d, w) -> {});
+                dialog.show();
                 break;
 
             case "SplitInterval":

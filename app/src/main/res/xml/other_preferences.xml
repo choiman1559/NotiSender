@@ -51,6 +51,10 @@
             android:key="EnforceBackendProxy"
             android:summary="Always using a proxy server regardless of packet size"
             android:title="Enforce Proxy" />
+        <Preference
+            android:key="ProxyPacketBondingDelay"
+            android:summary="Now : 300 ms (Default)"
+            android:title="Packet Bonding Threshold" />
         <com.noti.main.utils.ui.SwitchedPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_fluent_split_vertical_24_regular"

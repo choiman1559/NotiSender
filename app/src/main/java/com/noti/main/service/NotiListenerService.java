@@ -695,7 +695,7 @@ public class NotiListenerService extends NotificationListenerService {
     }
 
     public static void sendNotification(JSONObject notification, String PackageName, Context context,
-                                        boolean useFCMOnly, boolean notUseBonding /* TODO: Add false to Real-Time needed requests (eg. Pair Request) */) {
+                                        boolean useFCMOnly, boolean notUseBonding) {
         SharedPreferences prefs = getPrefs();
         PowerUtils manager = getInstance().manager;
 
