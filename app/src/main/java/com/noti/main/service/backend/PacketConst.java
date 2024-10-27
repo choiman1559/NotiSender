@@ -4,14 +4,17 @@ package com.noti.main.service.backend;
 public class PacketConst {
 
     public final static String SERVICE_TYPE_LIVE_NOTIFICATION = "type_live_notification";
-    public final static String SERVICE_TYPE_FILE_TRANSFER = "type_file_transfer";
     public final static String SERVICE_TYPE_IMAGE_CACHE = "type_image_cache";
     public final static String SERVICE_TYPE_PACKET_PROXY = "type_packet_proxy";
+    public final static String SERVICE_TYPE_FILE_TRANSFER = "type_file_transfer";
+    public final static String SERVICE_TYPE_FILE_LIST = "type_file_list";
     public final static String SERVICE_TYPE_PACKET_BONDING = "type_packet_bonding";
     public final static String SERVICE_TYPE_PING_SERVER = "type_ping";
 
     public final static String REQUEST_POST_SHORT_TERM_DATA = "request_post_short_term_data";
     public final static String REQUEST_GET_SHORT_TERM_DATA = "request_get_short_term_data";
+    public final static String REQUEST_POST_LONG_TERM_DATA = "request_post_long_term_data";
+    public final static String REQUEST_GET_LONG_TERM_DATA = "request_get_long_term_data";
 
     public final static String STATUS_ERROR = "error";
     public final static String STATUS_OK = "ok";
@@ -23,6 +26,12 @@ public class PacketConst {
     public final static String ERROR_INTERNAL_ERROR = "server_internal_error";
     public final static String ERROR_ILLEGAL_ARGUMENT = "server_illegal_argument";
     public final static String ERROR_FORBIDDEN = "server_forbidden";
+
+    public final static String ERROR_DATA_NO_MATCHING_DATA = "No matching Data Available";
+    public final static String ERROR_DATA_DEVICE_INFO_NOT_MATCH = "Device Information is invalid comparing from stored data";
+    public final static String ERROR_DATA_DEVICE_INFO_NOT_AVAILABLE = "Device Information is not available";
+    public final static String ERROR_DATA_DB_IO_FAILED_READ = "IO Failed while reading from stored db";
+    public final static String ERROR_DATA_DB_IO_FAILED_WRITE = "IO Failed while writing to persistent db";
 
     public final static String KEY_DEVICE_ID = "device_id";
     public final static String KEY_DEVICE_NAME = "device_name";

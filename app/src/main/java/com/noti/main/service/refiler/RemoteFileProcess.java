@@ -10,15 +10,15 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
 import com.noti.main.Application;
 import com.noti.main.BuildConfig;
 import com.noti.main.receiver.plugin.PluginActions;
 import com.noti.main.receiver.plugin.PluginHostInject;
 import com.noti.main.receiver.plugin.PluginPrefs;
 import com.noti.main.service.NotiListenerService;
+import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
+import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.ui.prefs.custom.PluginFragment;
 import com.noti.main.utils.PowerUtils;
 
@@ -28,7 +28,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
@@ -182,28 +181,40 @@ public class RemoteFileProcess {
         }
         String jsonData = buffer.toString();
 
-        SharedPreferences prefs = context.getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
-        FirebaseStorage storage = FirebaseStorage.getInstance();
+        try {
+            JSONObject serverBody = new JSONObject();
+            serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_POST_LONG_TERM_DATA);
+            serverBody.put(PacketConst.KEY_DATA_KEY, NotiListenerService.getUniqueID());
+            serverBody.put(PacketConst.KEY_EXTRA_DATA, jsonData);
 
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-        StorageReference fileRef = storageRef.child(prefs.getString("UID", "") + "/deviceFileQuery/" + NotiListenerService.getUniqueID());
-        StorageMetadata metadata = new StorageMetadata.Builder().setContentType("application/json").build();
-
-        if(!jsonData.isEmpty()) {
-            fileRef.putBytes(new JSONObject(jsonData).toString().getBytes(StandardCharsets.UTF_8), metadata)
-                    .addOnSuccessListener(task -> {
+            PacketRequester.addToRequestQueue(context, PacketConst.SERVICE_TYPE_FILE_LIST, serverBody, response -> {
+                try {
+                    ResultPacket resultPacket = ResultPacket.parseFrom(response.toString());
+                    if (resultPacket.isResultOk()) {
                         for(String devices : waitingDeviceList) {
                             String[] devicesInfo = devices.split("\\|");
                             pushResponseQuery(context, devicesInfo[0], devicesInfo[1], true, null);
                         }
-                        isBusy = false;
-                    }).addOnFailureListener(e -> {
-                        for(String devices : waitingDeviceList) {
-                            String[] devicesInfo = devices.split("\\|");
-                            pushResponseQuery(context, devicesInfo[0], devicesInfo[1], false, e.getMessage());
-                        }
-                        isBusy = false;
-                    });
+                    } else {
+                        sendErrorPacket(context, resultPacket.getErrorCause());
+                    }
+                } catch (IOException e) {
+                    sendErrorPacket(context, e.getMessage());
+                    e.printStackTrace();
+                } finally {
+                    isBusy = false;
+                }
+            }, e -> sendErrorPacket(context, e.getMessage()));
+        } catch (Exception e) {
+            sendErrorPacket(context, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    protected static void sendErrorPacket(Context context, String message) {
+        for(String devices : waitingDeviceList) {
+            String[] devicesInfo = devices.split("\\|");
+            pushResponseQuery(context, devicesInfo[0], devicesInfo[1], false, message);
         }
     }
 

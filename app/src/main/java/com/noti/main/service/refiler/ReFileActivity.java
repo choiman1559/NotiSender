@@ -21,24 +21,19 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.StreamDownloadTask;
 
 import com.noti.main.Application;
 import com.noti.main.R;
+import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.backend.PacketRequester;
+import com.noti.main.service.backend.ResultPacket;
 import com.noti.main.utils.ui.ToastHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.text.CharacterIterator;
 import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
@@ -82,7 +77,7 @@ public class ReFileActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_refiler);
-        getWindow().setStatusBarColor(getResources().getColor(R.color.ui_bg_toolbar));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.ui_bg_toolbar, null));
         prefs = getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
 
         Intent intent = getIntent();
@@ -131,46 +126,46 @@ public class ReFileActivity extends AppCompatActivity {
 
     void loadQueryFromDB() {
         showProgress("Retrieving file list from database...");
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://notisender-41c1b.appspot.com");
-        StorageReference fileRef = storageRef.child(prefs.getString("UID", "") + "/deviceFileQuery/" + device_id);
-        StreamDownloadTask downloadTask = fileRef.getStream();
+        try {
+            JSONObject serverBody = new JSONObject();
+            serverBody.put(PacketConst.KEY_ACTION_TYPE, PacketConst.REQUEST_GET_LONG_TERM_DATA);
+            serverBody.put(PacketConst.KEY_SEND_DEVICE_NAME, device_name);
+            serverBody.put(PacketConst.KEY_SEND_DEVICE_ID, device_id);
+            serverBody.put(PacketConst.KEY_DATA_KEY, device_id);
 
-        downloadTask.addOnSuccessListener(taskSnapshot -> {
-            showProgress("Parsing file list...");
-            new Thread(() -> {
-                RemoteFile remoteFile = null;
-                InputStream stream = taskSnapshot.getStream();
-                StringBuilder textBuilder = new StringBuilder();
-                try (Reader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
-                    int c;
-                    while ((c = reader.read()) != -1) {
-                        textBuilder.append((char) c);
-                    }
-                } catch (IOException e) {
-                    runOnUiThread(() -> showError("An error occurred: Cannot read from stream"));
-                    e.printStackTrace();
+            PacketRequester.addToRequestQueue(ReFileActivity.this, PacketConst.SERVICE_TYPE_FILE_LIST, serverBody,
+                    normalResponse -> responseQueryFromDB(normalResponse.toString()),
+                    errorResponse -> responseQueryFromDB(new String(errorResponse.networkResponse.data)));
+        } catch (Exception e) {
+            showErrorException(e);
+        }
+    }
+
+    void responseQueryFromDB(String rawMessage) {
+        try {
+            RemoteFile remoteFile;
+            ResultPacket resultPacket = ResultPacket.parseFrom(rawMessage);
+
+            if (resultPacket.isResultOk()) {
+                remoteFile = new RemoteFile(new JSONObject(resultPacket.getExtraData()));
+                allFileList = remoteFile;
+                if(lastRemoteFile != null) {
+                    findLastMatchedFolder();
                 }
+                runOnUiThread(this::loadFileListLayout);
+            } else if(resultPacket.getErrorCause().equals(PacketConst.ERROR_DATA_NO_MATCHING_DATA)) {
+                loadFreshQuery();
+            } else {
+                runOnUiThread(() -> showError(resultPacket.getErrorCause()));
+            }
+        } catch (IOException | JSONException e) {
+            showErrorException(e);
+        }
+    }
 
-                try {
-                    remoteFile = new RemoteFile(new JSONObject(textBuilder.toString()));
-                } catch (JSONException e) {
-                    runOnUiThread(() -> showError("An error occurred: Cannot parse raw JSON"));
-                    e.printStackTrace();
-                }
-
-                if (remoteFile != null) {
-                    allFileList = remoteFile;
-                    if(lastRemoteFile != null) {
-                        findLastMatchedFolder();
-                    }
-
-                    runOnUiThread(this::loadFileListLayout);
-                }
-            }).start();
-        });
-
-        downloadTask.addOnFailureListener(e -> loadFreshQuery());
+    void showErrorException(Exception e) {
+        e.printStackTrace();
+        runOnUiThread(() -> showError(e.getMessage()));
     }
 
     void findLastMatchedFolder() {
