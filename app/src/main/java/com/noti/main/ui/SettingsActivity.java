@@ -22,6 +22,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -87,12 +88,13 @@ public class SettingsActivity extends MonetCompatActivity {
     MaterialCardView InfoPreferences;
 
     SharedPreferences.OnSharedPreferenceChangeListener prefsListener = (p, k) -> {
-        if (k.equals("serviceToggle")) {
-            ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
-        } else if (k.equals("UID")) {
-            updateProfileImage();
-        } else if (k.equals("NewCardRadius") && !Application.isTablet()) {
-            setCardViewRadius();
+        if (k != null) switch (k) {
+            case "serviceToggle" ->
+                    ServiceToggle.setChecked(prefs.getBoolean("serviceToggle", false));
+            case "UID" -> updateProfileImage();
+            case "NewCardRadius" -> {
+                if (!Application.isTablet()) setCardViewRadius();
+            }
         }
     };
 
@@ -293,7 +295,7 @@ public class SettingsActivity extends MonetCompatActivity {
             }
         }
 
-        if(!prefs.getBoolean("IsFcmTopicSubscribed", false) && !(mAuth.getUid() == null ? "" : mAuth.getUid()).isEmpty()) {
+        if (!prefs.getBoolean("IsFcmTopicSubscribed", false) && !(mAuth.getUid() == null ? "" : mAuth.getUid()).isEmpty()) {
             FirebaseMessaging.getInstance().subscribeToTopic(Objects.requireNonNull(mAuth.getUid()));
         }
 
@@ -317,6 +319,27 @@ public class SettingsActivity extends MonetCompatActivity {
         if (mBillingHelper.isSubscribed()) {
             new RegisterForPushNotificationsAsync(this).execute();
         }
+
+        showSupportDialog();
+    }
+
+    protected void showSupportDialog() {
+        long dismissTime = prefs.getLong("SupportMessageDismiss", 0);
+        if (BuildConfig.DEBUG || (dismissTime != 0 && System.currentTimeMillis() - dismissTime <= (259200000 /* 3 Days */))) {
+            return;
+        }
+
+        new MaterialAlertDialogBuilder(new ContextThemeWrapper(SettingsActivity.this, R.style.Theme_App_Palette_Dialog))
+                .setTitle("Please Support Us!")
+                .setMessage("NotiSender is currently running at a loss to maintain its servers, despite virtually no revenue." +
+                        "\nPlease help us maintain this open source project!")
+                .setPositiveButton("Support", (dialog, which) ->
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sponsors/choiman1559"))))
+                .setNegativeButton("Close", (dialog, which) -> {
+                })
+                .setNeutralButton("Do not show for 3 days", (dialog, which) -> prefs.edit().putLong("SupportMessageDismiss", System.currentTimeMillis()).apply())
+                .setCancelable(false)
+                .show();
     }
 
     public static void getAPIKeyFromCloud(Activity mContext) {
@@ -334,7 +357,7 @@ public class SettingsActivity extends MonetCompatActivity {
                                     .apply();
                         }
 
-                        if(mBillingHelper != null) mBillingHelper.Destroy();
+                        if (mBillingHelper != null) mBillingHelper.Destroy();
                         mBillingHelper = BillingHelper.initialize(mContext);
                     } else {
                         new MaterialAlertDialogBuilder(mContext)
