@@ -12,11 +12,15 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+
 import androidx.activity.OnBackPressedCallback;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.core.content.ContextCompat;
+
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -77,7 +81,7 @@ public class ReFileActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_refiler);
-        getWindow().setStatusBarColor(getResources().getColor(R.color.ui_bg_toolbar, null));
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.ui_bg_toolbar));
         prefs = getSharedPreferences(Application.PREFS_NAME, Context.MODE_PRIVATE);
 
         Intent intent = getIntent();

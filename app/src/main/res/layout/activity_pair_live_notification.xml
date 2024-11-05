@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -29,6 +29,8 @@
             android:layout_height="match_parent"
             android:background="@color/ui_bg_toolbar"
             app:layout_collapseMode="pin"
+            app:contentScrim="@color/ui_bg_toolbar"
+            app:statusBarScrim="@android:color/transparent"
             app:navigationIcon="@drawable/back_btn_selector"
             app:navigationIconTint="@color/ui_fg"
             app:title="Live Notifications" />
@@ -36,7 +38,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/liveNotiRefreshLayout"
@@ -91,4 +94,4 @@
                 android:textSize="18sp" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

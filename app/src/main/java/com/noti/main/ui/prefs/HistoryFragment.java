@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
@@ -144,7 +143,7 @@ public class HistoryFragment extends Fragment {
             LinearLayoutCompat layout = view.findViewById(R.id.noneLayout);
 
             String list_data = prefs.getString(mode == 0 ? "sendLogs" : "receivedLogs", "");
-            if (!list_data.equals("")) {
+            if (!list_data.isEmpty()) {
                 progress.setVisibility(View.VISIBLE);
                 listView.setVisibility(View.GONE);
                 layout.setVisibility(View.GONE);

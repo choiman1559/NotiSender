@@ -24,9 +24,9 @@ android {
     defaultConfig {
         applicationId "com.noti.main"
         minSdkVersion 23
-        targetSdkVersion 34
-        versionCode 1012203
-        versionName "1.22.3"
+        targetSdkVersion 35
+        versionCode 1012204
+        versionName "1.22.4"
 
         multiDexEnabled true
         ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -55,7 +55,7 @@ android {
         includeInBundle false
     }
 
-    compileSdk 34
+    compileSdk 35
     ndkVersion '25.2.9519653'
     namespace 'com.noti.main'
     buildFeatures {
@@ -82,11 +82,11 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.8.3'
     implementation 'androidx.navigation:navigation-ui-ktx:2.8.3'
     implementation "androidx.documentfile:documentfile:1.0.1"
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'androidx.palette:palette-ktx:1.0.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
     implementation "androidx.media:media:1.7.0"

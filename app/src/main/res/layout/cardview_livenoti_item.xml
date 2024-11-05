@@ -97,6 +97,13 @@
                     tools:ignore="ContentDescription" />
             </RelativeLayout>
 
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/notificationActionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:orientation="horizontal"/>
+
             <RelativeLayout
                 android:id="@+id/liveNotiActionMenuLayout"
                 android:layout_width="match_parent"

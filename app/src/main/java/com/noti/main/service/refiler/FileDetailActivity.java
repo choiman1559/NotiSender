@@ -86,10 +86,6 @@ public class FileDetailActivity extends AppCompatActivity {
                                     The maximum download file size is 100MB,
                                     increasing up to 2GB with subscription.
                                     """;
-        } else {
-            if(!remoteFile.getPath().startsWith("/storage/emulated/0")) {
-                bigFileWarning = "Warning: Downloading files from the SD card may fail.";
-            }
         }
 
         fileNameItem.setIconDrawable(intent.getIntExtra(EXTRA_FILE_ICON, R.drawable.ic_fluent_document_24_regular));

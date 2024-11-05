@@ -141,7 +141,7 @@ public class LiveNotificationActivity extends AppCompatActivity {
         ImageView liveNotiBigIcon;
 
         public LiveNotiItemHolder(Context context, NotificationsData liveNotificationObj) {
-            liveNotiItem = (CoordinatorLayout) View.inflate(context, R.layout.cardview_rilenoti_item, null);
+            liveNotiItem = (CoordinatorLayout) View.inflate(context, R.layout.cardview_livenoti_item, null);
             liveNotiItemParent = liveNotiItem.findViewById(R.id.liveNotiItemParent);
 
             liveNotiTitle = liveNotiItem.findViewById(R.id.notiTitle);
