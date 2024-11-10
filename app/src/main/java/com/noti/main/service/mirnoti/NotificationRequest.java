@@ -151,4 +151,21 @@ public class NotificationRequest {
         if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
         NotiListenerService.sendNotification(notificationBody, Package, context);
     }
+
+    public static void requestDismissAllNotifications(Context context, String DEVICE_NAME, String DEVICE_ID) {
+        JSONObject notificationBody = new JSONObject();
+        try {
+            notificationBody.put(PacketConst.KEY_ACTION_TYPE, LiveNotiProcess.REQUEST_NOTIFICATION_DISMISS_ALL);
+            notificationBody.put("type","pair|live_notification");
+            notificationBody.put("device_name", NotiListenerService.getDeviceName());
+            notificationBody.put("device_id", NotiListenerService.getUniqueID());
+            notificationBody.put("send_device_name", DEVICE_NAME);
+            notificationBody.put("send_device_id", DEVICE_ID);
+        } catch (JSONException e) {
+            Log.e("Noti", "onCreate: " + e.getMessage() );
+        }
+
+        if(BuildConfig.DEBUG) Log.d("data-receive", notificationBody.toString());
+        NotiListenerService.sendNotification(notificationBody, "NotificationRequest", context);
+    }
 }

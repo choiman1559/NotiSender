@@ -60,15 +60,7 @@ public class PacketBonding {
                     for(JSONObject o : onWriteArrayList) {
                         array.put(o);
                     }
-
-                    JSONObject finalNotification = new JSONObject();
-                    finalNotification.put("type", PacketConst.SERVICE_TYPE_PACKET_BONDING);
-                    finalNotification.put(PacketConst.KEY_PACKET_BONDING_ARRAY, array.toString());
-                    finalNotification.put(PacketConst.KEY_DEVICE_ID, NotiListenerService.getUniqueID());
-                    finalNotification.put(PacketConst.KEY_DEVICE_NAME, NotiListenerService.getDeviceName());
-
-                    if(BuildConfig.DEBUG) Log.d("PacketBonding", String.format("Sending %d bonded packets together...", array.length()));
-                    NotiListenerService.proxyToBackend(finalNotification, "PacketBonding", context, false);
+                    sendBondingArrayNow(context, array);
                 }
             } catch (JSONException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
@@ -76,6 +68,17 @@ public class PacketBonding {
                 onWriteArrayList.clear();
             }
         }, selectedDelay, TimeUnit.MILLISECONDS);
+    }
+
+    public static void sendBondingArrayNow(Context context, JSONArray array) throws JSONException, NoSuchAlgorithmException {
+        JSONObject finalNotification = new JSONObject();
+        finalNotification.put("type", PacketConst.SERVICE_TYPE_PACKET_BONDING);
+        finalNotification.put(PacketConst.KEY_PACKET_BONDING_ARRAY, array.toString());
+        finalNotification.put(PacketConst.KEY_DEVICE_ID, NotiListenerService.getUniqueID());
+        finalNotification.put(PacketConst.KEY_DEVICE_NAME, NotiListenerService.getDeviceName());
+
+        if(BuildConfig.DEBUG) Log.d("PacketBonding", String.format("Sending %d bonded packets together...", array.length()));
+        NotiListenerService.proxyToBackend(finalNotification, "PacketBonding", context, false);
     }
 
     @SuppressWarnings("unchecked")

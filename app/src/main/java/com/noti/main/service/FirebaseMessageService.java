@@ -129,6 +129,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
     }
 
     public static OnNotificationRemoveRequest removeListener;
+    public static OnNotificationRemoveRequest removeListenerAll;
     public static OnNotificationRemoveRequest removeListenerById;
 
     @Override

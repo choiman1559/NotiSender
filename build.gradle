@@ -28,3 +28,7 @@ allprojects {
         maven { url "https://jitpack.io" }
     }
 }
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}

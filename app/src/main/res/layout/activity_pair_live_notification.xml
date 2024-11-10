@@ -93,5 +93,22 @@
                 android:textColor="@color/ui_fg_secondary"
                 android:textSize="18sp" />
         </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/liveNotiDismissAllAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginVertical="32dp"
+            android:theme="@style/Theme.App.Material3"
+            android:backgroundTint="@color/ui_menu_accent"
+            android:fillColor="@color/ui_fg"
+            app:elevation="0dp"
+            app:srcCompat="@drawable/ic_fluent_dismiss_24_regular"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

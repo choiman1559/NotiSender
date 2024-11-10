@@ -77,6 +77,7 @@ public class NotiListenerService extends NotificationListenerService {
     private static final Object pastNotificationLock = new Object();
     private volatile StatusBarNotification pastNotification = null;
     private final FirebaseMessageService.OnNotificationRemoveRequest onRemoveRequestListener = this::cancelNotification;
+    private final FirebaseMessageService.OnNotificationRemoveRequest onRemoveRequestAllListener = (unused) -> cancelAllNotifications();
     private final FirebaseMessageService.OnNotificationRemoveRequest onRemoveRequestListenerById = key -> {
         StatusBarNotification[] notifications = this.getActiveNotifications();
         for (StatusBarNotification statusBarNotification : notifications) {
@@ -114,6 +115,7 @@ public class NotiListenerService extends NotificationListenerService {
         super.onCreate();
         if (instance == null) initService(this);
         FirebaseMessageService.removeListener = onRemoveRequestListener;
+        FirebaseMessageService.removeListenerAll = onRemoveRequestAllListener;
         FirebaseMessageService.removeListenerById = onRemoveRequestListenerById;
     }
 

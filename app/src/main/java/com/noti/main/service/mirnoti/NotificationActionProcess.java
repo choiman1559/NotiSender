@@ -19,6 +19,7 @@ import org.jetbrains.annotations.TestOnly;
 
 import com.noti.main.service.FirebaseMessageService;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NotificationActionProcess {
@@ -121,7 +122,7 @@ public class NotificationActionProcess {
                 return;
             }
 
-            String key = intent.getStringExtra(NotificationRequest.KEY_NOTIFICATION_KEY);
+            String key = Objects.requireNonNullElse(intent.getStringExtra(NotificationRequest.KEY_NOTIFICATION_KEY), "");
             int index = intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX, 0);
 
             if(intent.getBooleanExtra(NotificationRequest.KEY_NOTIFICATION_HAS_INPUT, false)) {
@@ -134,7 +135,7 @@ public class NotificationActionProcess {
                         intent.getStringExtra("device_name"), intent.getStringExtra("device_id"));
             }
 
-            final int uniqueCode = intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_HASHCODE, -1);
+            final int uniqueCode = intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_HASHCODE, key.hashCode());
             if(uniqueCode != -1) {
                 if(FirebaseMessageService.removeListenerById == null) {
                     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

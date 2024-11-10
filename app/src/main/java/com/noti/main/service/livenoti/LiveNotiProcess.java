@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import com.noti.main.BuildConfig;
 import com.noti.main.service.FirebaseMessageService;
 import com.noti.main.service.backend.PacketConst;
+import com.noti.main.service.mirnoti.NotificationActionProcess;
 import com.noti.main.service.mirnoti.NotificationsData;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class LiveNotiProcess {
     public static final String REQUEST_LIVE_NOTIFICATION = "request_live_notification";
     public static final String RESPONSE_LIVE_NOTIFICATION = "response_live_notification";
     public static final String REQUEST_NOTIFICATION_ACTION = "response_notification_action";
+    public static final String REQUEST_NOTIFICATION_DISMISS_ALL = "request_notification_dismiss_all";
 
     public static onLiveNotificationUploadCompleteListener mOnLiveNotificationDownloadCompleteListener;
     public static onLiveNotificationUploadCompleteListener mOnLiveNotificationUploadCompleteListener;
@@ -49,6 +51,11 @@ public class LiveNotiProcess {
                 case REQUEST_LIVE_NOTIFICATION -> LiveNotiRequests.postLiveNotificationData(context, map);
                 case RESPONSE_LIVE_NOTIFICATION -> LiveNotiRequests.getLiveNotificationData(context, map);
                 case REQUEST_NOTIFICATION_ACTION -> FirebaseMessageService.startNewRemoteActivity(context, map);
+                case REQUEST_NOTIFICATION_DISMISS_ALL -> {
+                    if(FirebaseMessageService.removeListenerAll != null) {
+                        FirebaseMessageService.removeListenerAll.onRequested(null);
+                    }
+                }
                 default -> {
                     if(BuildConfig.DEBUG) {
                         Log.e("LiveNotification", "onProcessReceive failed: Action type is not supported: " + map.get(PacketConst.KEY_ACTION_TYPE));
@@ -70,6 +77,10 @@ public class LiveNotiProcess {
                 StatusBarNotification statusBarNotification = statusBarNotifications.get(i);
                 if(keyList.contains(statusBarNotification.getKey())) {
                     continue;
+                }
+
+                if(Objects.requireNonNullElse(statusBarNotification.getNotification().actions, new Object[0]).length > 0) {
+                    NotificationActionProcess.registerAction(statusBarNotification);
                 }
 
                 try {
