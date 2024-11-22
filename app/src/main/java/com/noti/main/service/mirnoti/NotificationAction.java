@@ -6,6 +6,8 @@ import android.app.RemoteInput;
 
 import androidx.annotation.Nullable;
 
+import java.util.Objects;
+
 import me.pushy.sdk.lib.jackson.annotation.JsonProperty;
 
 public class NotificationAction {
@@ -29,7 +31,7 @@ public class NotificationAction {
         RemoteInput[] actions = action.getRemoteInputs();
         this.isInputAction = actions != null && actions.length > 0;
         if(this.isInputAction) {
-            this.inputLabel = actions[0].getLabel().toString();
+            this.inputLabel = Objects.requireNonNullElse(actions[0].getLabel(), "").toString();
             this.inputResultKey = actions[0].getResultKey();
         }
     }
