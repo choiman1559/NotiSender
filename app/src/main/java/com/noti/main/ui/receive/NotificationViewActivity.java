@@ -30,9 +30,7 @@ public class NotificationViewActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notidetail);
         setFinishOnTouchOutside(false);
-
         Intent intent = getIntent();
-        icon = BitmapIPCManager.getInstance().getBitmap(intent.getIntExtra("bitmapId", -1));
 
         MaterialButton OK = findViewById(R.id.ok);
         MaterialButton NO = findViewById(R.id.cancel);
@@ -54,6 +52,7 @@ public class NotificationViewActivity extends Activity {
             detail += "Device      : " + DEVICE_NAME + "\n";
             detail += "Posted Time : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date(notificationsData.postTime)) + "\n";
 
+            icon = notificationsData.getBigIcon();
             if(icon != null) ICON.setImageBitmap(icon);
             else ICON.setVisibility(View.GONE);
             NAME.setText(notificationsData.appName);
@@ -71,6 +70,7 @@ public class NotificationViewActivity extends Activity {
             detail += "Device      : " + DEVICE_NAME + "\n";
             detail += "Posted Time : " + DATE + "\n";
 
+            icon = BitmapIPCManager.getInstance().getBitmap(intent.getIntExtra("bitmapId", -1));
             if(icon != null) ICON.setImageBitmap(icon);
             else ICON.setVisibility(View.GONE);
             NAME.setText(APP_NAME);

@@ -819,7 +819,12 @@ public class FirebaseMessageService extends FirebaseMessagingService {
 
     protected void sendNotificationAction(Map<String, String> map) {
         String key = map.get(NotificationRequest.KEY_NOTIFICATION_KEY);
-        int actionIndex = Integer.parseInt(map.get(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX));
+        int actionIndex = Integer.parseInt(Objects.requireNonNullElse(map.get(NotificationRequest.KEY_NOTIFICATION_ACTION_INDEX), "-1"));
+
+        if(actionIndex < 0) {
+            Log.d("sendNotificationAction", "Invalid action raise-up index: " + actionIndex);
+            return;
+        }
 
         if(Objects.equals(map.get(NotificationRequest.KEY_NOTIFICATION_HAS_INPUT), "true")) {
             NotificationActionProcess.raiseActionWithInput(this, key, actionIndex,
@@ -853,7 +858,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                 notificationIntent.putExtra("device_id", deviceId);
 
                 Intent onDismissIntent = new Intent(this, BitmapIPCManager.BitmapDismissBroadcastListener.class);
-                onDismissIntent.putExtra("bitmapId", uniqueCode);
+                onDismissIntent.putExtra(NotificationRequest.KEY_NOTIFICATION_KEY, uniqueCode);
                 onDismissIntent.putExtra("device_id", deviceId);
                 onDismissIntent.putExtra("device_name", deviceName);
                 onDismissIntent.putExtra("notification_key", notificationsData.key);
@@ -909,6 +914,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                     try {
                         JSONArray array = new JSONArray(regexData);
                         String[] regexArray = new String[array.length()];
+                        Boolean[] ignoreEnabledArray = new Boolean[array.length()];
                         NotificationData[] dataArray = new NotificationData[array.length()];
 
                         for (int i = 0; i < array.length(); i++) {
@@ -916,6 +922,7 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             boolean isEnabled = object.optBoolean("enabled");
 
                             String regex = isEnabled ? object.getString("regex") : "false";
+                            ignoreEnabledArray[i] = Objects.requireNonNullElse(object.optBoolean("ignore"), false);
                             regexArray[i] = regex;
                             dataArray[i] = data;
                         }
@@ -928,6 +935,11 @@ public class FirebaseMessageService extends FirebaseMessagingService {
                             if (obj == null || obj.equals("null")) return;
                             int targetIndex = Integer.parseInt((String) obj);
                             if (targetIndex > -1) {
+                                if(ignoreEnabledArray[targetIndex]) {
+                                    //TODO: Implement ignoreEnabled Switch to regex edit activity
+                                    return;
+                                }
+
                                 try {
                                     JSONObject object = array.getJSONObject(targetIndex);
                                     if (object.has("bitmap")) bitmapUri = object.getString("bitmap");

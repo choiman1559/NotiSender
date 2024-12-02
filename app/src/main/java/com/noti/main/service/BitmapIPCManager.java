@@ -70,10 +70,18 @@ public class BitmapIPCManager {
     public static class BitmapDismissBroadcastListener extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int id = intent.getIntExtra("bitmapId", -1);
-            if(id != -1) {
-                Log.d("BitmapIPCManager", "Recycling unused bitmap Id: " + id);
-                BitmapIPCManager.getInstance().dismissBitmap(id);
+            if(intent.hasExtra(NotificationRequest.KEY_NOTIFICATION_KEY)) {
+                int id = intent.getIntExtra(NotificationRequest.KEY_NOTIFICATION_KEY, -1);
+                if(id!= -1) {
+                    Log.d("BitmapIPCManager", "Recycling unused serialize Id: " + id);
+                    BitmapIPCManager.getInstance().serializableMap.remove(id);
+                }
+            } else {
+                int id = intent.getIntExtra("bitmapId", -1);
+                if(id != -1) {
+                    Log.d("BitmapIPCManager", "Recycling unused bitmap Id: " + id);
+                    BitmapIPCManager.getInstance().dismissBitmap(id);
+                }
             }
 
             String DEVICE_NAME = intent.getStringExtra("device_name");
