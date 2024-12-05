@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 
 import com.noti.main.BuildConfig;
 import com.noti.main.service.FirebaseMessageService;
+import com.noti.main.service.NotiListenerService;
 import com.noti.main.service.backend.PacketConst;
 import com.noti.main.service.mirnoti.NotificationActionProcess;
 import com.noti.main.service.mirnoti.NotificationsData;
@@ -84,7 +85,12 @@ public class LiveNotiProcess {
                 }
 
                 try {
-                    finalDataList.add(new NotificationsData(context, statusBarNotification).toString());
+                    NotificationsData notificationsData = new NotificationsData(context, statusBarNotification);
+                    if(notificationsData.isTextEmpty() && NotiListenerService.getPrefs().getBoolean("ignoreEmptyTextNotification", true)) {
+                        continue;
+                    }
+
+                    finalDataList.add(notificationsData.toString());
                     keyList.add(statusBarNotification.getKey());
                 } catch (Exception e) {
                     if(BuildConfig.DEBUG) {

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import me.pushy.sdk.lib.jackson.annotation.JsonGetter;
+import me.pushy.sdk.lib.jackson.annotation.JsonIgnore;
 import me.pushy.sdk.lib.jackson.annotation.JsonProperty;
 import me.pushy.sdk.lib.jackson.core.JsonProcessingException;
 import me.pushy.sdk.lib.jackson.databind.ObjectMapper;
@@ -57,6 +58,9 @@ public class NotificationsData implements Serializable {
     @JsonProperty
     protected String bigPicture;
 
+    @JsonIgnore
+    boolean isTextEmpty = false;
+
     @SuppressWarnings("unused")
     public NotificationsData() {
         // Default constructor for creating instance by ObjectMapper
@@ -82,6 +86,7 @@ public class NotificationsData implements Serializable {
         String TITLE = getNonNullString(extras.getCharSequence(Notification.EXTRA_TITLE));
         String TEXT = getNonNullString(extras.getCharSequence(Notification.EXTRA_TEXT));
         String TEXT_LINES = getNonNullString(extras.getCharSequence(Notification.EXTRA_TEXT_LINES));
+        if(TITLE.isEmpty() || TEXT.isEmpty() || TEXT_LINES.isEmpty()) isTextEmpty = true;
         if (!TEXT_LINES.isEmpty() && TEXT.isEmpty()) TEXT = TEXT_LINES;
 
         SharedPreferences prefs = NotiListenerService.getPrefs();
@@ -196,6 +201,11 @@ public class NotificationsData implements Serializable {
         }
 
         return builder;
+    }
+
+    @JsonIgnore
+    public boolean isTextEmpty() {
+        return isTextEmpty;
     }
 
     @SuppressWarnings("unused")
