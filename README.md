@@ -9,6 +9,12 @@
 
 Send notifications to other android devices easily
 
+## No longer maintained (probably for the time being)
+
+The development team will no longer be able to continue development due to **active military service** starting in 2025.
+
+All types of bug fixes and feature improvements will not be provided until the **end of 2026**, but the backend server will continue to operate.
+
 ## Awards
 
 **Bronze Prize Winner of the 16th Open Software Competition in Korea**
